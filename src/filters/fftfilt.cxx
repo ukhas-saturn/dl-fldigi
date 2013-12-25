@@ -232,72 +232,27 @@ int fftfilt::run(const cmplx & in, cmplx **out)
 
 void fftfilt::rtty_filter(double f)
 {
-// Raised cosine filter designed iaw Section 1.2.6 of
-// Telecommunications Measurements, Analysis, and Instrumentation
-// by Dr. Kamilo Feher / Engineers of Hewlett-Packard
-//
-// Frequency scaling factor determined hueristically by testing various values 
-// and measuring resulting decoder CER with input s/n = - 9 dB
-//
-//    K     CER
-//   1.0   .0244
-//   1.1   .0117
-//   1.2   .0081
-//   1.3   .0062
-//   1.4   .0054
-//   1.5   .0062
-//   1.6   .0076
-    if(progdefaults.RTTY_BW <= 100){
-        f *= 1.4;
+// Raised cosine filter, adjusted to suit FFT arrangement
+	
+	double dht;
 
-        double dht;
-        for( int i = 0; i < flen2; ++i ) {
-            double x = (double)i/(double)(flen2);	
+	for( int i = 0; i < flen2; ++i ) {
+		double x = (double)i/(f * M_PI * (double)(flen2));	
 
-    // raised cosine response (changed for -1.0...+1.0 times Nyquist-f
-    // instead of books versions ranging from -1..+1 times samplerate)
+/* Literature suggests using matched filter OR raised cosine
+ * Raised cosine gives better decodes for icarus recording
+ * Matched filter has wider bandwidth, but less effective AFC tracking */
 
-            dht =
-                x <= 0 ? 1.0 :
-                x > 2.0 * f ? 0.0 :
-                cos((M_PI * x) / (f * 4.0));
+		dht = (x > 1) ? 0.0 : 1 + cos( M_PI * x );
+//		dht = sinc( x );
 
-            dht *= dht; // cos^2
+		filter[i].real() = dht*cos( (i+i+1) * -0.25 * M_PI);
+		filter[i].imag() = dht*sin( (i+i+1) * -0.25 * M_PI);
 
-    // amplitude equalized nyquist-channel response
-            dht /= sinc(2.0 * i * f);
+		filter[(flen-1-i)].real() = filter[i].real();
+		filter[(flen-1-i)].imag() =-filter[i].imag();
+	}
 
-            filter[i].real() = dht*cos((double)i* - 0.5*M_PI);
-            filter[i].imag() = dht*sin((double)i* - 0.5*M_PI);
-
-            filter[(flen-i)%flen].real() = dht*cos((double)i*+0.5*M_PI);
-            filter[(flen-i)%flen].imag() = dht*sin((double)i*+0.5*M_PI);
-        }
-    }
-    else{
-    }
-    
-// perform the reverse fft to obtain h(t)
-// for testing
-// uncomment to obtain filter characteristics
-/*
-	cmplx *revht = new cmplx[flen];
-	memcpy(revht, filter, flen * sizeof(cmplx));
-
-	fft->InverseComplexFFT(revht);
-
-	std::fstream fspec;
-	fspec.open("rtty_filter.csv", std::ios::out);
-	fspec << "i,filt.re,filt.im,filt.abs,,revimp.re,revimp.im\n";
-	for (int i = 0; i < flen; i++)
-		fspec
-			<< i << ","
-			<< filter[i].real() << "," << filter[i].imag() << "," << abs(filter[i]) 
-			<< ",," << revht[i].real() << "," << revht[i].imag()
-			<< std::endl;
-	fspec.close();
-	delete [] revht;
-*/
 // start outputs after 2 full passes are complete
 	pass = 2;
 }
