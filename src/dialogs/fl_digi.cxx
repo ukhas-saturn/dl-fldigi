@@ -7726,7 +7726,7 @@ void set_rtty_shift(int shift)
 		return;
 
 	// Static const array otherwise will be built at each call.
-	static const int shifts[] = { 23, 85, 160, 170, 182, 200, 240, 350, 425, 850 };
+	static const int shifts[] = { 23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850 };
 	size_t i;
 	for (i = 0; i < sizeof(shifts)/sizeof(*shifts); i++)
 		if (shifts[i] == shift)
