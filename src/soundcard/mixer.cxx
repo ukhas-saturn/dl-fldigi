@@ -185,13 +185,13 @@ const char * MixerOSS::MixerName( int index )
 	return szDevice;
 }
 
-void MixerOSS::setXmtLevel(double v)
+void MixerOSS::setXmtLevel(float v)
 {
 	if (mixer_fd == -1) return;
 	OutVolume(v);
 }
 
-void MixerOSS::setRcvGain(double v)
+void MixerOSS::setRcvGain(float v)
 {
 	if (mixer_fd == -1) return;
 	InputVolume(v);
@@ -230,7 +230,7 @@ int MixerOSS::initMask()
 }
 
 // returns value between 0.0 and 1.0
-double MixerOSS::ChannelVolume(int channel)
+float MixerOSS::ChannelVolume(int channel)
 {
 	if (mixer_fd == -1) return 0.0;
 	int vol;
@@ -253,14 +253,14 @@ double MixerOSS::ChannelVolume(int channel)
  Master (output) volume
 */
 
-double MixerOSS::OutVolume()
+float MixerOSS::OutVolume()
 {
 	if (mixer_fd == -1) return 0.0;
 
 	return ChannelVolume(SOUND_MIXER_VOLUME);
 }
 
-void MixerOSS::OutVolume(double volume)
+void MixerOSS::OutVolume(float volume)
 {
 	if (mixer_fd == -1) return;
 	int vol = (int)((volume * 100.0) + 0.5);
@@ -268,13 +268,13 @@ void MixerOSS::OutVolume(double volume)
 	ioctl(mixer_fd, MIXER_WRITE(SOUND_MIXER_VOLUME), &vol);
 }
 
-double MixerOSS::PCMVolume()
+float MixerOSS::PCMVolume()
 {
 	if (mixer_fd == -1) return 0.0;
 	return ChannelVolume(SOUND_MIXER_PCM);
 }
 
-void MixerOSS::PCMVolume(double volume )
+void MixerOSS::PCMVolume(float volume )
 {
 	if (mixer_fd == -1) return;
 	
@@ -296,13 +296,13 @@ const char *MixerOSS::OutputVolumeName( int i )
 	return labels[outs[i]];
 }
 
-double MixerOSS::OutputVolume( int i )
+float MixerOSS::OutputVolume( int i )
 {
 	if (mixer_fd == -1) return 0.0;
 	return ChannelVolume(outs[i]);
 }
 
-void MixerOSS::OutputVolume( int i, double volume )
+void MixerOSS::OutputVolume( int i, float volume )
 {
 	if (mixer_fd == -1) return;
 	int vol = (int)((volume * 100.0) + 0.5);
@@ -362,7 +362,7 @@ void MixerOSS::SetCurrentInputSource( int i )
  Input volume
 */
 
-double MixerOSS::InputVolume()
+float MixerOSS::InputVolume()
 {
 	if (mixer_fd == -1) return 0.0;
 //	int i = GetCurrentInputSource();
@@ -371,7 +371,7 @@ double MixerOSS::InputVolume()
 	return ChannelVolume(SOUND_MIXER_IGAIN);
 }
 
-void MixerOSS::InputVolume( double volume )
+void MixerOSS::InputVolume( float volume )
 {
 	if (mixer_fd == -1) return;
 	int vol;
@@ -381,7 +381,7 @@ void MixerOSS::InputVolume( double volume )
 }
 
 /*
-double MixerOSS::GetPlaythrough()
+float MixerOSS::GetPlaythrough()
 {
 	int i = GetCurrentInputSource();
 	if (i < 0)
@@ -389,7 +389,7 @@ double MixerOSS::GetPlaythrough()
 	return ChannelVolume(recs[i]);
 }
 
-void MixerOSS::SetPlaythrough( double volume )
+void MixerOSS::SetPlaythrough( float volume )
 {
 	if (mixer_fd == -1) return;
 	

@@ -79,10 +79,10 @@ void  mfsk::tx_init(SoundBase *sc)
 	txstate = TX_STATE_PREAMBLE;
 	bitstate = 0;
 
-	double bw2 = (numtones + 1) * samplerate / symlen / 2.0;
-	double flo = (frequency - bw2) / samplerate;
+	float bw2 = (numtones + 1) * samplerate / symlen / 2.0;
+	float flo = (frequency - bw2) / samplerate;
 	if (flo <= 0) flo = 0;
-	double fhi = (frequency + bw2) / samplerate;
+	float fhi = (frequency + bw2) / samplerate;
 	xmtfilt->init_bandpass (127, 1, flo, fhi);
 
 	videoText();
@@ -159,7 +159,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 {
 	cap |= CAP_AFC | CAP_REV;
 
-	double bw, cf, flo, fhi;
+	float bw, cf, flo, fhi;
 	mode = mfsk_mode;
 	depth = 10;
 
@@ -274,7 +274,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		break;
 	}
 
-	tonespacing = (double) samplerate / symlen;
+	tonespacing = (float) samplerate / symlen;
 	basefreq = 1.0 * samplerate * basetone / symlen;
 
 	binsfft		= new sfft (symlen, basetone, basetone + numtones );
@@ -575,7 +575,7 @@ void mfsk::decodesymbol(unsigned char symbol)
 
 void mfsk::softdecode(cmplx *bins)
 {
-	double binmag, sum=0, avg=0, b[symbits];
+	float binmag, sum=0, avg=0, b[symbits];
 	unsigned char symbols[symbits];
 	int i, j, k, CWIsymbol;
 
@@ -666,7 +666,7 @@ void mfsk::softdecode(cmplx *bins)
 	}
 }
 
-cmplx mfsk::mixer(cmplx in, double f)
+cmplx mfsk::mixer(cmplx in, float f)
 {
 	cmplx z;
 
@@ -688,7 +688,7 @@ cmplx mfsk::mixer(cmplx in, double f)
 
 int mfsk::harddecode(cmplx *in)
 {
-	double x, max = 0.0, avg = 0.0;
+	float x, max = 0.0, avg = 0.0;
 	int i, symbol = 0;
 	int burstcount = 0;
 
@@ -721,7 +721,7 @@ void mfsk::update_syncscope()
 {
 	int j;
 	int pipelen = 2 * symlen;
-	memset(scopedata, 0, 2 * symlen * sizeof(double));
+	memset(scopedata, 0, 2 * symlen * sizeof(float));
 	if (!progStatus.sqlonoff || metric >= progStatus.sldrSquelchValue)
 		for (unsigned int i = 0; i < SCOPESIZE; i++) {
 			j = (pipeptr + i * pipelen / SCOPESIZE + 1) % (pipelen);
@@ -737,8 +737,8 @@ void mfsk::update_syncscope()
 void mfsk::synchronize()
 {
 	int i, j;
-	double syn = -1;
-	double val, max = 0.0;
+	float syn = -1;
+	float val, max = 0.0;
 
 	if (currsymbol == prev1symbol)
 		return;
@@ -775,8 +775,8 @@ void mfsk::afc()
 {
 	cmplx z;
 	cmplx prevvector;
-	double f, f1;
-	double ts = tonespacing / 4;
+	float f, f1;
+	float ts = tonespacing / 4;
 
 	if (sigsearch) {
 		reset_afc();
@@ -818,7 +818,7 @@ void mfsk::eval_s2n()
 
 }
 
-int mfsk::rx_process(const double *buf, int len)
+int mfsk::rx_process(const float *buf, int len)
 {
 	cmplx z;
 	cmplx* bins = 0;
@@ -893,7 +893,7 @@ int mfsk::rx_process(const double *buf, int len)
 // transmit processing
 //=====================================================================
 
-void mfsk::transmit(double *buf, int len)
+void mfsk::transmit(float *buf, int len)
 {
 	if (xmt_filter)
 		for (int i = 0; i < len; i++) xmtfilt->Irun(buf[i], buf[i]);
@@ -904,7 +904,7 @@ void mfsk::transmit(double *buf, int len)
 
 void mfsk::sendsymbol(int sym)
 {
-	double f, phaseincr;
+	float f, phaseincr;
 
 	f = get_txfreq_woffset() - bandwidth / 2;
 
@@ -976,8 +976,8 @@ void mfsk::flushtx(int nbits)
 
 void mfsk::sendpic(unsigned char *data, int len)
 {
-	double *ptr;
-	double f;
+	float *ptr;
+	float f;
 	int i, j;
 
 	ptr = outbuf;
@@ -1005,8 +1005,8 @@ void mfsk::sendpic(unsigned char *data, int len)
 // send prologue consisting of tracepair.delay 0's
 void mfsk::flush_xmt_filter(int n)
 {
-	double f1 = get_txfreq_woffset() - bandwidth / 2.0;
-	double f2 = get_txfreq_woffset() + bandwidth / 2.0;
+	float f1 = get_txfreq_woffset() - bandwidth / 2.0;
+	float f2 = get_txfreq_woffset() + bandwidth / 2.0;
 	for (int i = 0; i < n; i++) {
 		outbuf[i] = cos(phaseacc);
 		phaseacc += TWOPI * (reverse ? f2 : f1) / samplerate;

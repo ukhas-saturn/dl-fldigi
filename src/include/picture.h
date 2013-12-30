@@ -72,7 +72,7 @@ public:
 	void	resize(int, int, int, int);
 	void    resize_height(int new_height, bool clear_img);
 	void    shift_horizontal_center(int hShift);
-	void    stretch(double the_ratio);
+	void    stretch(float the_ratio);
 	int	save_png(const char * filename, bool monochrome = false, const char * extra_comments = NULL);
 	void    set_zoom(int the_zoom);
 	void    set_binary(bool bin_mode) { binary = bin_mode ;}

@@ -185,22 +185,22 @@ extern void UI_select();
 
 extern void cb_mnuVisitURL(Fl_Widget*, void* arg);
 
-extern void put_freq(double frequency);
+extern void put_freq(float frequency);
 extern void put_Bandwidth(int bandwidth);
-extern void global_display_metric(double metric);
-extern void put_cwRcvWPM(double wpm);
+extern void global_display_metric(float metric);
+extern void put_cwRcvWPM(float wpm);
 
 extern void set_scope_mode(Digiscope::scope_mode md);
-extern void set_scope(double *data, int len, bool autoscale = true);
-extern void set_phase(double phase, double quality, bool highlight);
-extern void set_rtty(double, double, double);
-extern void set_video(double *, int, bool = true);
+extern void set_scope(float *data, int len, bool autoscale = true);
+extern void set_phase(float phase, float quality, bool highlight);
+extern void set_rtty(float, float, float);
+extern void set_video(float *, int, bool = true);
 extern void set_zdata(cmplx *, int);
 
-extern void set_scope_xaxis_1(double y1);
-extern void set_scope_xaxis_2(double y2);
-extern void set_scope_yaxis_1(double x1);
-extern void set_scope_yaxis_2(double x2);
+extern void set_scope_xaxis_1(float y1);
+extern void set_scope_xaxis_2(float y2);
+extern void set_scope_yaxis_1(float x1);
+extern void set_scope_yaxis_2(float x2);
 extern void set_scope_clear_axis();
 
 extern void set_CWwpm();
@@ -239,7 +239,7 @@ extern void txid_selection_color();
 extern void tune_selection_color();
 extern void spot_selection_color();
 
-extern void put_WARNstatus(double);
+extern void put_WARNstatus(float);
 
 extern void qsoSave_cb(Fl_Widget *b, void *);
 

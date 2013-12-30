@@ -62,7 +62,7 @@ Digiscope::~Digiscope()
 	if (vidline) delete [] vidline;
 }
 
-void Digiscope::video(double *data, int len , bool dir)
+void Digiscope::video(float *data, int len , bool dir)
 {
 	if (active_modem->HistoryON()) return;
 	
@@ -116,7 +116,7 @@ void Digiscope::zdata(cmplx *zarray, int len )
 	FL_AWAKE_D();
 }
 
-void Digiscope::data(double *data, int len, bool scale)
+void Digiscope::data(float *data, int len, bool scale)
 {
 	if (active_modem->HistoryON()) return;
 	
@@ -130,11 +130,11 @@ void Digiscope::data(double *data, int len, bool scale)
 	FL_LOCK_D();
 	if (len > MAX_LEN) _len = MAX_LEN;
 	else _len = len;
-	memcpy(_buf, data, len * sizeof(double));
+	memcpy(_buf, data, len * sizeof(float));
 
 	if (scale) {
-		double max = 1E-6;
-		double min = 1E6;
+		float max = 1E-6;
+		float min = 1E6;
 		for (int i = 0; i < _len; i++) {
 			max = MAX(max, _buf[i]);
 			min = MIN(min, _buf[i]);
@@ -148,7 +148,7 @@ void Digiscope::data(double *data, int len, bool scale)
 	FL_AWAKE_D();
 }
 
-void Digiscope::phase(double ph, double ql, bool hl)
+void Digiscope::phase(float ph, float ql, bool hl)
 {
 	if (active_modem->HistoryON()) return;
 	
@@ -161,7 +161,7 @@ void Digiscope::phase(double ph, double ql, bool hl)
 	FL_AWAKE_D();
 }
 
-void Digiscope::rtty(double flo, double fhi, double amp)
+void Digiscope::rtty(float flo, float fhi, float amp)
 {
 	if (active_modem->HistoryON()) return;
 	
@@ -187,7 +187,7 @@ void Digiscope::mode(scope_mode md)
 	int H = h() - 4;
 	FL_LOCK_D();
 	_mode = md;
-	memset(_buf, 0, MAX_LEN * sizeof(double));
+	memset(_buf, 0, MAX_LEN * sizeof(float));
 	linecnt = 0;
 	memset (vidbuf, 0, 3*W*H * sizeof (unsigned char) );
 	memset (vidline, 0, 3*W*sizeof(unsigned char) );
@@ -204,7 +204,7 @@ void Digiscope::mode(scope_mode md)
 void Digiscope::draw_phase()
 {
 	// max number of shown vectors is first dimension
-	static double pvecstack[8][2];
+	static float pvecstack[8][2];
 	static const size_t psz = sizeof(pvecstack)/sizeof(*pvecstack);
 	static unsigned pszn = 0;
 
@@ -288,7 +288,7 @@ void Digiscope::draw_scope()
 	for (int i = 0; i < npts; i++) {
 		np = i * _len / npts;
 		np = np < MAX_LEN ? np : MAX_LEN - 1;
-		fl_vertex( (double)i / npts, _buf[np] );
+		fl_vertex( (float)i / npts, _buf[np] );
 	}
 	fl_end_line();
 
@@ -402,7 +402,7 @@ void Digiscope::draw_rtty()
 	for (int i = 0; i < npts; i++) {
 		np = i * _len / npts;
 		np = np < MAX_LEN ? np : MAX_LEN - 1;
-		fl_vertex( (double)i / npts, 0.5 + 0.75 * _buf[np] );
+		fl_vertex( (float)i / npts, 0.5 + 0.75 * _buf[np] );
 	}
 	fl_end_line();
 	fl_pop_matrix();

@@ -143,13 +143,13 @@ enum {
 
 protected:
 // general
-	double phaseacc;
+	float phaseacc;
 	int symlen;
 	int symbits;
 	int numtones;
 	int basetone;
-	double tonespacing;
-	double basefreq;
+	float tonespacing;
+	float basefreq;
 	int counter;
 	int depth;
 // receive
@@ -180,19 +180,19 @@ protected:
 	int currsymbol;
 	int prev1symbol;
 	int prev2symbol;
-	double maxval;
-	double prevmaxval;
+	float maxval;
+	float prevmaxval;
 
-	double met1;
-	double met2;
-	mbuffer<double, 0, 2> scopedata;
-	double s2n;
-	double sig;
-	double noise;
-	double afcmetric;
+	float met1;
+	float met2;
+	mbuffer<float, 0, 2> scopedata;
+	float s2n;
+	float sig;
+	float noise;
+	float afcmetric;
 	bool	staticburst;
 	
-	double currfreq;
+	float currfreq;
 
 	int synccounter;
 	int AFC_COUNT;
@@ -216,7 +216,7 @@ protected:
 	int picturesize;
 	char picheader[PICHEADER];
 	cmplx prevz;
-	double picf;
+	float picf;
 	unsigned char prepost[128];
 	
 	int		row;
@@ -240,14 +240,14 @@ protected:
 // internal processes
 	void	decodesymbol(unsigned char symbol);
 	void	softdecode(cmplx *bins);
-	cmplx	mixer(cmplx in, double f);
+	cmplx	mixer(cmplx in, float f);
 	int		harddecode(cmplx *in);
 	void	update_syncscope();
 	void	synchronize();
 	void	afc();
 	void	reset_afc();
 	void	eval_s2n();
-	void	transmit(double *, int);
+	void	transmit(float *, int);
 	void 	sendsymbol(int sym);
 	void	sendbit(int bit);
 	void	sendchar(unsigned char c);
@@ -269,7 +269,7 @@ public:
 	void	rx_init();
 	void	tx_init(SoundBase *sc);
 	void	restart() {};
-	int		rx_process(const double *buf, int len);
+	int		rx_process(const float *buf, int len);
 	int		tx_process();
 	void	send_image(std::string s);
 	void	shutdown();

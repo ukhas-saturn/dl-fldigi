@@ -37,7 +37,7 @@ public:
 	void	rx_init();
 	void	restart();
 	void	tx_init(SoundBase *sc);
-	int		rx_process(const double *buf, int len);
+	int		rx_process(const float *buf, int len);
 	int		tx_process();
 
 };

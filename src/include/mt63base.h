@@ -72,7 +72,7 @@ private:
 	int	 *IntlvPatt;
 	char	*IntlvPipe;
 	int	 IntlvPtr;
-	double  *WalshBuff;
+	float  *WalshBuff;
 } ;
 
 // ==========================================================================
@@ -106,25 +106,25 @@ public:
 	~MT63decoder();
 	void	Free();
 	int	 Preset(int Carriers, int Intlv, int *Pattern, int Margin, int Integ);
-	int	 Process(double *Data);
+	int	 Process(float *Data);
 	char	Output;
-	double  SignalToNoise;
+	float  SignalToNoise;
 	int	 CarrOfs;
 
 private:
 	int	 DataCarriers;
-	double  *IntlvPipe;
+	float  *IntlvPipe;
 	int	 IntlvLen;
 	int	 IntlvSize;
 	int	 IntlvPtr;
 	int	 *IntlvPatt;
 
-	double  *WalshBuff;
+	float  *WalshBuff;
 
 	int	 ScanLen;
 	int	 ScanSize;
-	double  *DecodeSnrMid,*DecodeSnrOut;
-	double  W1, W2, W5;
+	float  *DecodeSnrMid,*DecodeSnrOut;
+	float  W1, W2, W5;
 	char	*DecodePipe;
 	int	 DecodeLen;
 	int	 DecodeSize;
@@ -146,7 +146,7 @@ How to use this class:
 	 Tx.SendChar(<char>);
    After each call to SendChar() you must read the samples
    from the Tx.Comb.Output.Data, the number of samples to read
-   is in Tx.Comb.Output.Len. They are in double floating point, so you should
+   is in Tx.Comb.Output.Len. They are in float floating point, so you should
    convert them to 16-bit integers and output them to your soundcard.
 4. If you have nothing to transmit, you must not stop, because
    you have to keep the sound going. MT63 transmits NL characters (code=0)
@@ -178,7 +178,7 @@ public:
 	MT63tx();
 	~MT63tx();
 	void	Free(void);
-	int		Preset(double freq, int BandWidth=1000, int LongInterleave=0);
+	int		Preset(float freq, int BandWidth=1000, int LongInterleave=0);
 	int		SendTune(bool twotones);
 	int		SendChar(char ch);
 	int		SendJam(void);
@@ -188,14 +188,14 @@ private:
 	int		DataCarriers;		// the number of data carriers
 	int		FirstDataCarr;		// the FFT index of the first data carrier
 	int		WindowLen;			// FFT window and symbol shape length
-	double	*TxWindow;			// The shape of the FFT window (=symbol shape)
+	float	*TxWindow;			// The shape of the FFT window (=symbol shape)
 
 	int		AliasFilterLen;		// anti-alias filter length
-	double	*AliasShapeI,
+	float	*AliasShapeI,
 			*AliasShapeQ;		// and shapes (for fixed lower freq of 500 Hz)
 	int		DecimateRatio;		// decimation/interpolation after/before filter
 	int		*InterleavePattern; // how the bits of one block are placed on data carriers
-	double	TxAmpl;				// Amplitude applied to generate a carrier (before IFFT)
+	float	TxAmpl;				// Amplitude applied to generate a carrier (before IFFT)
 	long	CarrMarkCode;
 	int		CarrMarkAmpl;
 
@@ -231,7 +231,7 @@ How to use this class:
    you should look into Rx.Output for the decoded characters.
    You can egzamin the receiver status at any time by calling:
 	 Rx.SYNC_LockStatus() => logical value 0 or 1
-	 Rx.SYNC_Confidence() => lock confidence: a double between 0.0 and 1.0
+	 Rx.SYNC_Confidence() => lock confidence: a float between 0.0 and 1.0
 	 Rx.FEC_SNR()		 => signal-to-noise seen by FEC
 	 Rx.TotalFreqOffset() => measured frequency offset in [Hz]
 				 assuming 8000 Hz sAmpling
@@ -243,21 +243,21 @@ public:
 	MT63rx();
 	~MT63rx();
 	void	Free(void);
-	int	 Preset( double freq,
+	int	 Preset( float freq,
 					int BandWidth = 1000,
 					int LongInterleave = 0,
 					int Integ = 16,
-					void (*Display)(double *Spectra, int Len) = NULL);
-	int	 Process(double_buff *Input);
+					void (*Display)(float *Spectra, int Len) = NULL);
+	int	 Process(float_buff *Input);
 	char_buff Output;		// decoded characters
 
 	int	SYNC_LockStatus(void); // 1 => locked, 0 => not locked
-	double SYNC_Confidence(void); // lock confidence <0..1>
-	double SYNC_FreqOffset(void);
-	double SYNC_FreqDevdspRMS(void);
-	double SYNC_TimeOffset(void);
-	double TotalFreqOffset();	// Total frequency offset in [Hz]
-	double FEC_SNR(void);		// signal-to-noise ratio at the FEC
+	float SYNC_Confidence(void); // lock confidence <0..1>
+	float SYNC_FreqOffset(void);
+	float SYNC_FreqDevdspRMS(void);
+	float SYNC_TimeOffset(void);
+	float TotalFreqOffset();	// Total frequency offset in [Hz]
+	float FEC_SNR(void);		// signal-to-noise ratio at the FEC
 	int	FEC_CarrOffset(void);
 
 private:
@@ -272,13 +272,13 @@ private:
 	dsp_r2FFT FFT;			// FFT engine
 	int	 WindowLen;		// FFT window length = symbol shape length
 	int	 WindowLenMask;	// WindowLen-1 for pointer wrapping
-	double  *RxWindow;		// FFT window shape = symbol shape
+	float  *RxWindow;		// FFT window shape = symbol shape
 
-	void (*SpectraDisplay)(double *Spectra, int Len);
-	double *SpectradspPower;
+	void (*SpectraDisplay)(float *Spectra, int Len);
+	float *SpectradspPower;
 
 	int	 AliasFilterLen; // anti-alias filter length
-	double  *AliasShapeI,
+	float  *AliasShapeI,
 			*AliasShapeQ;   // and shapes
 	int	 DecimateRatio;	// decimation/interpolation after/before filter
 
@@ -313,11 +313,11 @@ private:
 
 	dspCmpx *CorrelMid[4],
 			*CorrelOut[4];	// correlation integrator
-	double  *dspPowerMid,
+	float  *dspPowerMid,
 			*dspPowerOut;	// carrier dspPower integrator
 	dspCmpx *CorrelNorm[4];	// normalized correlation
-	double  W1, W2, W5;		// correlation integrator weights
-	double  W1p, W2p, W5p;	// dspPower integrator weights
+	float  W1, W2, W5;		// correlation integrator weights
+	float  W1p, W2p, W5p;	// dspPower integrator weights
 
 	dspCmpx *CorrelAver[4];	// sliding sum to fit the carrier pattern
 	int	 FitLen;
@@ -327,26 +327,26 @@ private:
 	dspCmpx *SymbFit;		// vectors to match symbol shift and confidence
 	int	 SymbFitPos;		// "smoothed" peak position
 
-	double  *FreqPipe;		// smoothing pipe for frequency offset
+	float  *FreqPipe;		// smoothing pipe for frequency offset
 	dspCmpx *SymbPipe;		// smoothing pipe for symbol shift
 	int	 TrackPipeLen;	// tracking pipe length
 	int	 TrackPipePtr;	// pipe pointer
-	double  AverFreq;		// dspAveraged frequency
+	float  AverFreq;		// dspAveraged frequency
 	dspCmpx AverSymb;	   // dspAveraged symbol dspPhase
 
-	double  SyncLockThres;  // lock confidence threshold
-	double  SyncHoldThres;  // minimal confidence to hold the lock
+	float  SyncLockThres;  // lock confidence threshold
+	float  SyncHoldThres;  // minimal confidence to hold the lock
 
 	int	 SyncLocked;	 // locked or not locked
-	double  SyncSymbConf;   // current smoothed confidence
-	double  SyncFreqOfs;	// current smoothed frequency offset
-	double  SyncFreqDev;	// frequency deviation (dspRMS)
-	double  SyncSymbShift;  // current smoothed symbol time shift
+	float  SyncSymbConf;   // current smoothed confidence
+	float  SyncFreqOfs;	// current smoothed frequency offset
+	float  SyncFreqDev;	// frequency deviation (dspRMS)
+	float  SyncSymbShift;  // current smoothed symbol time shift
 
 // here starts the data decoder
 	void	DataProcess( dspCmpx *EvenSlice,
 						 dspCmpx *OddSlice,
-						 double FreqOfs,
+						 float FreqOfs,
 						 int TimeDist);
 
 	int	 DataScanMargin; // +/- data carriers to scan for best FEC match
@@ -359,14 +359,14 @@ private:
 	int	 DataPipeLen;	// pipe length
 	int	 DataPipePtr;	// wrapping pointer
 	dspCmpx **DataPipe;	 // decoded vectors pipe
-	double  *DataPwrMid,
+	float  *DataPwrMid,
 			*DataPwrOut;	// carrier dspPower integrator
 	dspCmpx *DataSqrMid,
 			*DataSqrOut;	// carrier complex square integrator
-	double  dW1, dW2, dW5;  // integrator constants
+	float  dW1, dW2, dW5;  // integrator constants
 
-	double  *DatadspPhase;  // differential decoded dspPhases
-	double  *DatadspPhase2; // rather for debugging, not use otherwise
+	float  *DatadspPhase;  // differential decoded dspPhases
+	float  *DatadspPhase2; // rather for debugging, not use otherwise
 
 	MT63decoder Decoder;
 

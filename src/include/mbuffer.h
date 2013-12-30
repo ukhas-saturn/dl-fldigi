@@ -21,7 +21,7 @@
 // ----------------------------------------------------------------------------
 
 
-// A simple vector wrapper for fldigi's double-buffering needs.
+// A simple vector wrapper for fldigi's float-buffering needs.
 // Most vector operations are provided for mbuffers by redirecting them to the
 // current vector.
 

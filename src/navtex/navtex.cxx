@@ -62,7 +62,7 @@ class NavtexRecord
 {
 	std::string       m_country ;
 	std::string       m_country_code ;
-	double            m_frequency ;
+	float            m_frequency ;
 	char              m_origin ;
 	std::string       m_callsign ;
 	std::string       m_name ;
@@ -80,7 +80,7 @@ public:
 
 	char origin(void) const { return m_origin; };
 	const CoordinateT::Pair & coordinates() const { return m_coordinates; }
-	double frequency(void) const { return m_frequency; };
+	float frequency(void) const { return m_frequency; };
 	const std::string & country() const { return m_country; }
 	const std::string & name() const { return m_name; }
 	const std::string & callsign() const { return m_callsign; }
@@ -123,14 +123,14 @@ class NavtexCatalog : public RecordLoader< NavtexCatalog >
 	CatalogType m_catalog ;
 
 	/// Frequency more or less 1 %: 485-494 kHz, 512-523 kHz etc...
-	static bool freq_close( double freqA, double freqB )
+	static bool freq_close( float freqA, float freqB )
 	{
-		static const double freq_ratio = 1.01 ;
+		static const float freq_ratio = 1.01 ;
 		return ( freqA < freqB * freq_ratio ) || ( freqA * freq_ratio > freqB );
 	}
 
 	/// Tells if this is a reasonable Navtex frequency.
-	static bool freq_acceptable( double freq )
+	static bool freq_acceptable( float freq )
 	{
 		return	freq_close( freq, 490.0 )
 		||	freq_close( freq, 518.0 )
@@ -152,14 +152,14 @@ class NavtexCatalog : public RecordLoader< NavtexCatalog >
 	}
 
 	/// Minimal edit distance (Levenshtein) between the pattern and any token of the string.
-	static double DistToStationName( const std::string & msg, const std::string & pattern ) {
+	static float DistToStationName( const std::string & msg, const std::string & pattern ) {
 		std::stringstream strm( msg );
 		/// Any big number is OK, if bigger than any string length.
-		double currDist = 1.7976931348623157e+308; // DBL_MAX ;
+		float currDist = 1.7976931348623157e+308; // DBL_MAX ;
 		typedef std::istream_iterator<std::string> StrmIterStr ;
 		for( StrmIterStr itStrm( strm ); itStrm != StrmIterStr(); ++itStrm ) {
 			const std::string tmp = *itStrm ;
-			currDist = std::min( currDist, (double)levenshtein( tmp, pattern ) );
+			currDist = std::min( currDist, (float)levenshtein( tmp, pattern ) );
 		}
 		return currDist ;
 	}
@@ -203,11 +203,11 @@ public:
 		const CoordinateT::Pair coo( maidenhead );
 
 		/// Possible Navtex stations stored by closer first.
-		typedef std::multimap< double, CatalogType::const_iterator > SolutionType ;
+		typedef std::multimap< float, CatalogType::const_iterator > SolutionType ;
 
 		SolutionType solDistKm;
 
-		double freq = freq_ll / 1000.0 ; // As kiloHertz in the data file.
+		float freq = freq_ll / 1000.0 ; // As kiloHertz in the data file.
 
 		bool okFreq = freq_acceptable( freq );
 
@@ -224,7 +224,7 @@ public:
 			if( okFreq && ! freqClose ) continue ;
 
 			/// Solutions are stored smallest distance first.
-			double dist = coo.distance( it->coordinates() );
+			float dist = coo.distance( it->coordinates() );
 			solDistKm.insert( SolutionType::value_type( dist, it ) );
 		}
 
@@ -242,7 +242,7 @@ public:
 			strm << itSolKm->second->coordinates();
 			// LOG_INFO("Name=%s Dist=%lf %s", itSolKm->second->name().c_str(), itSolKm->first, strm.str().c_str() );
 			// The message is in uppercase anyway, so no need to convert.
-			double str_dist = DistToStationName( msg, uppercase( itSolKm->second->name() ) );
+			float str_dist = DistToStationName( msg, uppercase( itSolKm->second->name() ) );
 
 			solStrDist.insert( SolutionType::value_type( str_dist, itSolKm->second ) );
 		}
@@ -313,22 +313,22 @@ public:
 		BANDPASS, LOWPASS, HIGHPASS, NOTCH, PEAK, LOWSHELF, HIGHSHELF
 	};
 private:
-	double m_a0, m_a1, m_a2, m_b0, m_b1, m_b2;
-	double m_x1, m_x2, y, m_y1, m_y2;
-	double m_gain_abs;
+	float m_a0, m_a1, m_a2, m_b0, m_b1, m_b2;
+	float m_x1, m_x2, y, m_y1, m_y2;
+	float m_gain_abs;
 	Type   m_type;
-	double m_center_freq;
-	double m_sample_rate;
-	double m_Q;
-	double m_gainDB;
+	float m_center_freq;
+	float m_sample_rate;
+	float m_Q;
+	float m_gainDB;
 public:
 	BiQuadraticFilter() {}
 
-	BiQuadraticFilter(Type type, double center_freq, double sample_rate, double Q, double gainDB = 0.0) {
+	BiQuadraticFilter(Type type, float center_freq, float sample_rate, float Q, float gainDB = 0.0) {
 		configure(type, center_freq, sample_rate, Q, gainDB);
 	}
 
-	void configure(Type aType, double aCenter_freq, double aSample_rate, double aQ, double aGainDB = 0.0) {
+	void configure(Type aType, float aCenter_freq, float aSample_rate, float aQ, float aGainDB = 0.0) {
 		m_x1 = m_x2 = m_y1 = m_y2 = 0;
 		aQ = (aQ == 0) ? 1e-9 : aQ;
 		m_type = aType;
@@ -339,15 +339,15 @@ public:
 	}
 private:
 	/// Allows parameter change while running
-	void reconfigure(double cf) {
+	void reconfigure(float cf) {
 		m_center_freq = cf;
 		// only used for peaking and shelving filters
 		m_gain_abs = pow(10, m_gainDB / 40);
-		double omega = 2 * M_PI * cf / m_sample_rate;
-		double sn = sin(omega);
-		double cs = cos(omega);
-		double alpha = sn / (2 * m_Q);
-		double beta = sqrt(m_gain_abs + m_gain_abs);
+		float omega = 2 * M_PI * cf / m_sample_rate;
+		float sn = sin(omega);
+		float cs = cos(omega);
+		float alpha = sn / (2 * m_Q);
+		float beta = sqrt(m_gain_abs + m_gain_abs);
 		switch (m_type) {
 			case BANDPASS:
 				m_b0 = alpha;
@@ -415,7 +415,7 @@ private:
 	}
 public:
 	/// Perform one filtering step
-	double filter(double x) {
+	float filter(float x) {
 		y = m_b0 * x + m_b1 * m_x1 + m_b2 * m_x2 - m_a1 * m_y1 - m_a2 * m_y2;
 		m_x2 = m_x1;
 		m_x1 = x;
@@ -759,7 +759,7 @@ public:
 
 static const int deviation_f = 90;
 
-static const double dflt_center_freq = 1000.0 ;
+static const float dflt_center_freq = 1000.0 ;
 
 class navtex ;
 
@@ -786,7 +786,7 @@ class navtex_implementation {
 
 	static const size_t             m_tx_block_len = 1024 ;
 	/// Between -1 and 1.
-	double                          m_tx_buf[m_tx_block_len];
+	float                          m_tx_buf[m_tx_block_len];
 	size_t                          m_tx_counter ;
 
 	navtex                        * m_ptr_navtex ;
@@ -795,7 +795,7 @@ class navtex_implementation {
 	typedef std::list<std::string>  TxMsgQueueT ;
 	TxMsgQueueT                     m_tx_msg_queue ;
 
-	double                          m_metric ;
+	float                          m_metric ;
 
 	CCIR476				m_ccir476;
 	typedef std::list<int> sync_chrs_type ;
@@ -806,16 +806,16 @@ class navtex_implementation {
 	static const int                 m_zero_crossings_divisor = 4;
 	std::vector<int>                 m_zero_crossings ;
 	long                             m_zero_crossing_count;
-	double				 m_message_time ;
-	double				 m_signal_accumulator ;
-	double				 m_mark_f, m_space_f;
-	double				 m_audio_average ;
-	double				 m_audio_average_tc;
-	double				 m_audio_minimum ;
-	double				 m_time_sec;
+	float				 m_message_time ;
+	float				 m_signal_accumulator ;
+	float				 m_mark_f, m_space_f;
+	float				 m_audio_average ;
+	float				 m_audio_average_tc;
+	float				 m_audio_minimum ;
+	float				 m_time_sec;
 
-	double				 m_baud_rate ;
-	double				 m_baud_error;
+	float				 m_baud_rate ;
+	float				 m_baud_error;
 	int					m_sample_rate ;
 	bool				   m_averaged_mark_state;
 	int					m_bit_duration ;
@@ -833,11 +833,11 @@ class navtex_implementation {
 	bool				   m_pulse_edge_event;
 	int					m_error_count;
 	int					m_valid_count;
-	double				 m_sync_delta;
+	float				 m_sync_delta;
 	bool				   m_alpha_phase ;
 	bool				   m_header_found ;
 	// filter method related
-	double				 m_center_frequency_f ;
+	float				 m_center_frequency_f ;
 
 	navtex_implementation( const navtex_implementation & );
 	navtex_implementation();
@@ -865,7 +865,7 @@ public:
 		m_audio_average_tc = 1000.0 / m_sample_rate;
 		// this value must never be zero and bigger than 10.
 		m_baud_rate = 100;
-		double m_bit_duration_seconds = 1.0 / m_baud_rate;
+		float m_bit_duration_seconds = 1.0 / m_baud_rate;
 		m_bit_sample_count = (int) (m_sample_rate * m_bit_duration_seconds + 0.5);
 		m_half_bit_sample_count = m_bit_sample_count / 2;
 		m_pulse_edge_event = false;
@@ -892,17 +892,17 @@ private:
 		// carefully manage the parameters WRT the center frequency
 		// Q must change with frequency
 		// try to maintain a zero mixer output at the carrier frequency
-		double qv = m_center_frequency_f + (4.0 * 1000 / m_center_frequency_f);
+		float qv = m_center_frequency_f + (4.0 * 1000 / m_center_frequency_f);
 		m_mark_f = qv + deviation_f;
 		m_space_f = qv - deviation_f;
 	}
 
 	void configure_filters() {
-		const double mark_space_filter_q = 6 * m_center_frequency_f / 1000.0;
+		const float mark_space_filter_q = 6 * m_center_frequency_f / 1000.0;
 		m_biquad_mark.configure(BiQuadraticFilter::BANDPASS, m_mark_f, m_sample_rate, mark_space_filter_q);
 		m_biquad_space.configure(BiQuadraticFilter::BANDPASS, m_space_f, m_sample_rate, mark_space_filter_q);
-		static const double lowpass_filter_f = 140.0;
-		static const double invsqr2 = 1.0 / sqrt(2);
+		static const float lowpass_filter_f = 140.0;
+		static const float invsqr2 = 1.0 / sqrt(2);
 		m_biquad_lowpass.configure(BiQuadraticFilter::LOWPASS, lowpass_filter_f, m_sample_rate, invsqr2);
 	}
 
@@ -1057,14 +1057,14 @@ private:
 
 	void compute_metric(void)
 	{
-		static double avg_ratio = 0.0 ;
-		static const double width_f = 10.0 ;
-       		double numer_mark = wf->powerDensity(m_mark_f, width_f);
-       		double numer_space = wf->powerDensity(m_space_f, width_f);
-       		double numer_mid = wf->powerDensity(m_center_frequency_f, width_f);
-       		double denom = wf->powerDensity(m_center_frequency_f, 2 * deviation_f) + 1e-10;
+		static float avg_ratio = 0.0 ;
+		static const float width_f = 10.0 ;
+       		float numer_mark = wf->powerDensity(m_mark_f, width_f);
+       		float numer_space = wf->powerDensity(m_space_f, width_f);
+       		float numer_mid = wf->powerDensity(m_center_frequency_f, width_f);
+       		float denom = wf->powerDensity(m_center_frequency_f, 2 * deviation_f) + 1e-10;
 
-		double ratio = ( numer_space + numer_mark + numer_mid ) / denom ;
+		float ratio = ( numer_space + numer_mark + numer_mid ) / denom ;
 
 		/// The only power in this band should come from the signal.
        		m_metric = 100 * decayavg( avg_ratio, ratio, 20 );
@@ -1088,10 +1088,10 @@ private:
 		static const int bw[][2] = {
 			{ -deviation_f - 2, -deviation_f + 8 },
 			{  deviation_f - 8,  deviation_f + 2 } };
-       		double max_carrier = wf->powerDensityMaximum( 2, bw );
+       		float max_carrier = wf->powerDensityMaximum( 2, bw );
 
 		/// Do not change the frequency too quickly if an image is received.
-		double next_carr = 0.0 ;
+		float next_carr = 0.0 ;
 
 		State lingering_state ;
 		if( m_state == READ_DATA ) {
@@ -1105,9 +1105,9 @@ private:
 			} else {
 				lingering_state = m_state ;
 				/// Maybe this is the phasing signal, so we recenter.
-				double pwr_left = wf->powerDensity ( max_carrier - deviation_f, 10 );
-				double pwr_right = wf->powerDensity( max_carrier + deviation_f, 10 );
-				static const double ratio_left_right = 5.0 ;
+				float pwr_left = wf->powerDensity ( max_carrier - deviation_f, 10 );
+				float pwr_right = wf->powerDensity( max_carrier + deviation_f, 10 );
+				static const float ratio_left_right = 5.0 ;
 				if( pwr_left > ratio_left_right * pwr_right ) {
 					max_carrier -= deviation_f ;
 				} else if ( ratio_left_right * pwr_left < pwr_right ) {
@@ -1127,9 +1127,9 @@ private:
 			case READ_DATA:
 				// It will stay stable for a couple of calls.
 				if( max_carrier < m_center_frequency_f )
-					next_carr = std::max( max_carrier, m_center_frequency_f - 3.0 );
+					next_carr = std::max( max_carrier, m_center_frequency_f - 3.0f );
 				else if( max_carrier > m_center_frequency_f )
-					next_carr = std::min( max_carrier, m_center_frequency_f + 3.0 );
+					next_carr = std::min( max_carrier, m_center_frequency_f + 3.0f );
 				else next_carr = max_carrier ;
 				break;
 			default:
@@ -1138,8 +1138,8 @@ private:
 		}
 
 		LOG_DEBUG("m_center_frequency_f=%f max_carrier=%f next_carr=%f cnt_read_data=%d",
-			(double)m_center_frequency_f, max_carrier, next_carr, cnt_read_data );
-		double delta = fabs( m_center_frequency_f - next_carr );
+			(float)m_center_frequency_f, max_carrier, next_carr, cnt_read_data );
+		float delta = fabs( m_center_frequency_f - next_carr );
 		if( delta > 1.0 ) { // Hertz.
 			m_ptr_navtex->set_freq(next_carr);
 		}
@@ -1161,33 +1161,33 @@ private:
 		* 5 or more seconds of phasing signal and another message starting with "ZCZC" or
 		* an end of emission idle signal alpha for at least 2 seconds.  */
 public:
-	void process_data(const double * data, int nb_samples) {
+	void process_data(const float * data, int nb_samples) {
 		process_afc();
 		process_timeout();
 		for( int i =0; i < nb_samples; ++i ) {
 			short v = static_cast<short>(32767 * data[i]);
 
 			m_time_sec = m_sample_count / m_sample_rate ;
-			double dv = v;
+			float dv = v;
 
 			// separate mark and space by narrow filtering
-			double mark_level = m_biquad_mark.filter(dv);
-			double space_level = m_biquad_space.filter(dv);
+			float mark_level = m_biquad_mark.filter(dv);
+			float space_level = m_biquad_space.filter(dv);
 
-			double mark_abs = fabs(mark_level);
-			double space_abs = fabs(space_level);
+			float mark_abs = fabs(mark_level);
+			float space_abs = fabs(space_level);
 
 			m_audio_average += (std::max(mark_abs, space_abs) - m_audio_average) * m_audio_average_tc;
 
-			m_audio_average = std::max(.1, m_audio_average);
+			m_audio_average = std::max(0.1f, m_audio_average);
 
 			// produce difference of absolutes of mark and space
-			double diffabs = (mark_abs - space_abs);
+			float diffabs = (mark_abs - space_abs);
 
 			diffabs /= m_audio_average;
 
 			// now low-pass the resulting difference
-			double logic_level = m_biquad_lowpass.filter(diffabs);
+			float logic_level = m_biquad_lowpass.filter(diffabs);
 
 			bool mark_state = (logic_level > 0);
 			m_signal_accumulator += (mark_state) ? 1 : -1;
@@ -1237,7 +1237,7 @@ public:
 						index *= m_zero_crossings_divisor;
 						index = ((index + m_half_bit_sample_count) % m_bit_sample_count) - m_half_bit_sample_count;
 						// limit loop gain
-						double dbl_idx = (double)index / 8.0 ;
+						float dbl_idx = (float)index / 8.0 ;
 						// m_sync_delta is a temporary value that is
 						// used once, then reset to zero
 						m_sync_delta = dbl_idx;
@@ -1386,7 +1386,7 @@ private:
 
 public:
 	/// Returns a received message, by chronological order.
-	std::string get_received_message( double max_seconds )
+	std::string get_received_message( float max_seconds )
 	{
 		guard_lock g( m_sync_rx.mtxp() );
 
@@ -1446,7 +1446,7 @@ public:
 	}
 
 	/// Input value must be between -1 and 1
-	void add_sample( double sam )
+	void add_sample( float sam )
 	{
 		m_tx_buf[ m_tx_counter++ ] = sam ;
 
@@ -1455,11 +1455,11 @@ public:
 		}
 	}
 
-	void send_sine( double seconds, double freq )
+	void send_sine( float seconds, float freq )
 	{
 		int nb_samples = seconds * m_ptr_navtex->get_samplerate();
-		double max_level = 0.99 ; // Between -1.0 and 1.0
-		double ratio = 2.0 * M_PI * (double)freq / (double)m_ptr_navtex->get_samplerate() ;
+		float max_level = 0.99 ; // Between -1.0 and 1.0
+		float ratio = 2.0 * M_PI * (float)freq / (float)m_ptr_navtex->get_samplerate() ;
 		for (int i = 0; i < nb_samples ; ++i )
 		{
 			add_sample( max_level * sin( i * ratio ) );
@@ -1473,7 +1473,7 @@ public:
 
 	void send_bit( bool bit )
 	{
-		send_sine( 1.0 / (double)m_baud_rate, bit ? m_mark_f : m_space_f );
+		send_sine( 1.0 / (float)m_baud_rate, bit ? m_mark_f : m_space_f );
 	}
 
 	void send_string( const std::string & msg )
@@ -1577,7 +1577,7 @@ public:
 		transmit_message_async(msg);
 	}
 
-	void set_carrier( double freq )
+	void set_carrier( float freq )
 	{
 		m_center_frequency_f = freq;
 		set_filter_values();
@@ -1604,10 +1604,10 @@ int main(int n, const char ** v )
 	};
 
 	navtex_implementation nv(11025) ;
-	double * tmp = new double[l/2];
+	float * tmp = new float[l/2];
 	const short * shrt = (const short *)buf;
 	for( int i = 0; i < l/2; i++ )
-		tmp[i] = ( (double)shrt[i] ) / 32767.0;
+		tmp[i] = ( (float)shrt[i] ) / 32767.0;
 	nv.process_data( tmp, l / 2 );
 	return 0 ;
 }
@@ -1648,7 +1648,7 @@ void navtex::restart()
 {
 }
 
-int  navtex::rx_process(const double *buf, int len)
+int  navtex::rx_process(const float *buf, int len)
 {
 	m_impl->process_data( buf, len );
 	return 0;
@@ -1667,7 +1667,7 @@ int  navtex::tx_process()
 	return -1;
 }
 
-void navtex::set_freq( double freq )
+void navtex::set_freq( float freq )
 {
 	modem::set_freq( freq );
 	m_impl->set_carrier( freq );

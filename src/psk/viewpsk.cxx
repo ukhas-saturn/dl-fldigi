@@ -103,8 +103,8 @@ void viewpsk::restart(trx_mode pskmode)
 	if (viewmode == pskmode) return;
 	viewmode = pskmode;
 
-	double			fir1c[64];
-	double			fir2c[64];
+	float			fir1c[64];
+	float			fir2c[64];
 
 	switch (viewmode) {
 	case MODE_PSK31:
@@ -176,10 +176,10 @@ void viewpsk::rx_bit(int ch, int bit)
 void viewpsk::afc(int ch)
 {
 	if (channel[ch].dcd == true || channel[ch].acquire) {
-		double error;
-		double lower_bound = (lowfreq + ch * 100) - bandwidth;
+		float error;
+		float lower_bound = (lowfreq + ch * 100) - bandwidth;
 		if (lower_bound < bandwidth) lower_bound = bandwidth;
-		double upper_bound = lowfreq + (ch+1)*100 + bandwidth;
+		float upper_bound = lowfreq + (ch+1)*100 + bandwidth;
 
 		error = (channel[ch].phase - channel[ch].bits * M_PI / 2);
 		if (error < M_PI / 2.0) error += 2 * M_PI;
@@ -224,7 +224,7 @@ inline void viewpsk::timeout_check()
 void viewpsk::findsignals()
 {
 	if (!evalpsk) return;
-	double level = progStatus.VIEWER_psksquelch;
+	float level = progStatus.VIEWER_psksquelch;
 	int nomfreq = 0;
 	int lfreq = 0;
 	int hfreq = 0;
@@ -336,10 +336,10 @@ void viewpsk::rx_symbol(int ch, cmplx symbol)
 	}
 }
 
-int viewpsk::rx_process(const double *buf, int len)
+int viewpsk::rx_process(const float *buf, int len)
 {
-	double sum;
-	double ampsum;
+	float sum;
+	float ampsum;
 	int idx;
 	cmplx z, z2;
 

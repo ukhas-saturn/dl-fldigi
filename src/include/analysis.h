@@ -40,36 +40,36 @@
 class anal : public modem {
 private:
 
-	double		phaseacc;
-	double		anal_squelch;
+	float		phaseacc;
+	float		anal_squelch;
 
 	C_FIR_filter	*hilbert;
 	fftfilt *bpfilt;
 	Cmovavg *ffilt;
 	Cmovavg *favg;
 
-	mbuffer<double, analMaxSymLen, 2> pipe;
+	mbuffer<float, analMaxSymLen, 2> pipe;
 	int pipeptr;
 
-	double prevsymbol;
+	float prevsymbol;
 	cmplx prevsmpl;
 	int	symbollen;
 
 	int restart_count;
 
-	double		fout_1;
-	double		fout_2;
+	float		fout_1;
+	float		fout_2;
 	long		wf_freq;
 
 	struct timespec start_time;
 
-	double sum;
+	float sum;
 
 	void clear_syncscope();
 	inline cmplx mixer(cmplx in);
 	int rx(bool bit);
 
-	double nco(double freq);
+	float nco(float freq);
 	void writeFile();
 
 	std::string	analysisFilename;
@@ -81,7 +81,7 @@ public:
 	void rx_init();
 	void tx_init(SoundBase *sc);
 	void restart();
-	int rx_process(const double *buf, int len);
+	int rx_process(const float *buf, int len);
 	int tx_process();
 
 };

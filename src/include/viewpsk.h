@@ -40,22 +40,22 @@
 //=====================================================================
 
 struct CHANNEL {
-	double			phaseacc;
+	float			phaseacc;
 	cmplx			prevsymbol;
 	cmplx			quality;
 	unsigned int	shreg;
-	double			metric;
+	float			metric;
 
-	double			frequency;
-	double			freqerr;
-	double			phase;
-	double			syncbuf[16];
+	float			frequency;
+	float			freqerr;
+	float			phase;
+	float			syncbuf[16];
 
 	C_FIR_filter	*fir1;
 	C_FIR_filter	*fir2;
 	
 	int				bits;
-	double 			bitclk;
+	float 			bitclk;
 	unsigned int	dcdshreg;
 	int 			dcd;
 	int				waitcount;
@@ -70,13 +70,13 @@ private:
 	trx_mode	viewmode;
 
 	int			symbollen;
-	double		bandwidth;
+	float		bandwidth;
 	int			dcdbits;
 
 	int			fa;
 	int			fb;
 	int			ftest;
-	double		test_peak_amp;
+	float		test_peak_amp;
 	time_t		now;
 	bool		reset_all;
 	bool		tracked;
@@ -104,9 +104,9 @@ public:
 	void rx_init(){};
 	void tx_init(SoundBase *sc){};
 	void restart() {};
-	int rx_process(const double *buf, int len);
+	int rx_process(const float *buf, int len);
 	int get_freq(int n);
-	void set_freq(int n, double f) { channel[n].frequency = f; }
+	void set_freq(int n, float f) { channel[n].frequency = f; }
 	void findsignals();
 	void clearch(int n);
 	void clear();

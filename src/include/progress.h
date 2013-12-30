@@ -43,7 +43,7 @@ class Progress : public Fl_Widget
 public:
 	enum PTYPE {HORIZONTAL, VERTICAL};
 private:
-	double	value_,
+	float	value_,
 			minimum_,
 			maximum_;
 	PTYPE	direction;
@@ -58,14 +58,14 @@ public:
 
 	void	type(PTYPE direc) { direction = direc;}
 	
-	void	maximum(double v) { maximum_ = v; redraw(); }
-	double	maximum() const { return (maximum_); }
+	void	maximum(float v) { maximum_ = v; redraw(); }
+	float	maximum() const { return (maximum_); }
 
-	void	minimum(double v) { minimum_ = v; redraw(); }
-	double	minimum() const { return (minimum_); }
+	void	minimum(float v) { minimum_ = v; redraw(); }
+	float	minimum() const { return (minimum_); }
 
-	void	value(double v) { value_ = v; redraw(); }
-	double	value() const { return (value_); }
+	void	value(float v) { value_ = v; redraw(); }
+	float	value() const { return (value_); }
 };
 
 #endif // !_Progress_H_

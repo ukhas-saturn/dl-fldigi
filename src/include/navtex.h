@@ -24,9 +24,9 @@ public:
 	void rx_init();
 	void tx_init(SoundBase *sc);
 	void restart();
-	int  rx_process(const double *buf, int len);
+	int  rx_process(const float *buf, int len);
 	int  tx_process();
-	void set_freq( double );
+	void set_freq( float );
 
 	std::string get_message(int max_seconds);
 	std::string send_message(const std::string & msg);

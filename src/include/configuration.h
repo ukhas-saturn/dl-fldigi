@@ -80,7 +80,7 @@
         ELEM_(bool, noise, "NOISETEST",                                                 \
               "Noise test on/off",                                                      \
               false)                                                                    \
-        ELEM_(double, s2n, "SIGNAL2NOISE",                                              \
+        ELEM_(float, s2n, "SIGNAL2NOISE",                                              \
               "Signal to Noise ratio for test",                                         \
               +20.0)                                                                    \
         ELEM_(bool, rsidWideSearch, "RSIDWIDESEARCH",                                   \
@@ -132,10 +132,10 @@
 			 false)                                                                     \
         ELEM_(bool, changed, "", "",  false)                                            \
                                                                                         \
-        ELEM_(double, wfRefLevel, "WFREFLEVEL",                                         \
+        ELEM_(float, wfRefLevel, "WFREFLEVEL",                                         \
               "Waterfall reference level (dB)",                                         \
               -20.0)                                                                    \
-        ELEM_(double, wfAmpSpan, "WFAMPSPAN",                                           \
+        ELEM_(float, wfAmpSpan, "WFAMPSPAN",                                           \
               "Waterfall amplitude span (dB)",                                          \
               70.0)                                                                     \
         ELEM_(bool, WF_UIrev, "WF_UIREV",                                               \
@@ -177,13 +177,13 @@
         ELEM_(int,  HighFreqCutoff, "HIGHFREQCUTOFF",                                   \
               "Highest frequency shown on waterfall (Hz)",                              \
               3000)                                                                     \
-        ELEM_(double, CWsweetspot, "CWSWEETSPOT",                                       \
+        ELEM_(float, CWsweetspot, "CWSWEETSPOT",                                       \
               "Default CW tracking point (Hz)",                                         \
               1000)                                                                     \
-        ELEM_(double, RTTYsweetspot, "RTTYSWEETSPOT",                                   \
+        ELEM_(float, RTTYsweetspot, "RTTYSWEETSPOT",                                   \
               "Default RTTY tracking point (Hz)",                                       \
               1000)                                                                     \
-        ELEM_(double, PSKsweetspot, "PSKSWEETSPOT",                                     \
+        ELEM_(float, PSKsweetspot, "PSKSWEETSPOT",                                     \
               "Default tracking point for all other modems (Hz)",                       \
               1000)                                                                     \
         ELEM_(bool, StartAtSweetSpot, "STARTATSWEETSPOT",                               \
@@ -233,7 +233,7 @@
         ELEM_(int, SearchRange, "PSKSEARCHRANGE",                                       \
               "PSK signal acquisition search range (Hz)",                               \
               50)                                                                       \
-        ELEM_(double, ACQsn, "ACQSN",                                                   \
+        ELEM_(float, ACQsn, "ACQSN",                                                   \
               "PSK signal acquisition S/N (dB)",                                        \
               9.0)                                                                      \
         ELEM_(bool, Pskmails2nreport, "PSKMAILS2NREPORT",                               \
@@ -244,7 +244,7 @@
               "  0: Clear after timeout\n"                                              \
               "  1: Dim after timeout\n",                                               \
               true)                                                                     \
-        ELEM_(double, StatusTimeout, "STATUSTIMEOUT",                                   \
+        ELEM_(float, StatusTimeout, "STATUSTIMEOUT",                                   \
               "Dim or Clear timeout (seconds)",                                         \
               15.0)                                                                     \
         ELEM_(bool, PSKmailSweetSpot, "PSKMAILSWEETSPOT",                               \
@@ -259,7 +259,7 @@
         ELEM_(int, ServerAFCrange, "PSKSERVERAFCRANGE",                                 \
               "Limit AFC movement to this range (Hz)",                                  \
               25)                                                                       \
-        ELEM_(double, ServerACQsn, "PSKSERVERACGSN",                                    \
+        ELEM_(float, ServerACQsn, "PSKSERVERACGSN",                                    \
               "Acquisition S/N (dB)",                                                   \
               9.0)                                                                      \
         /* RTTY */                                                                      \
@@ -279,7 +279,7 @@
         ELEM_(int, rtty_custom_shift, "RTTYCUSTOMSHIFT",                                \
               "Custom shift (Hz)",                                                      \
               450)                                                                      \
-        ELEM_(double, RTTY_BW, "RTTYBW",                                                \
+        ELEM_(float, RTTY_BW, "RTTYBW",                                                \
               "Receive filter bandwidth (Hz)",                                          \
               68.0)                                                                     \
         ELEM_(int, rtty_cwi, "RTTYCWI",                                                 \
@@ -288,7 +288,7 @@
               "1 - mark only\n"                                                         \
               "2 - space only",                                                         \
               0)                                                                        \
-        ELEM_(double, rtty_filter, "RTTYFILTER",                                        \
+        ELEM_(float, rtty_filter, "RTTYFILTER",                                        \
               "Rtty Rx Filter shape factor, K * (t/T)\n"                                \
               "You may alter this value using a text editor\n"                          \
               "change will be effective when restarting fldigi\n"                       \
@@ -380,10 +380,10 @@
         ELEM_(int, CWbandwidth, "CWBANDWIDTH",                                          \
               "Filter bandwidth (Hz)",                                                  \
               150)                                                                      \
-        ELEM_(double, CWlower, "CWLOWER",                                               \
+        ELEM_(float, CWlower, "CWLOWER",                                               \
               "Detector hysterisis, lower threshold",                                   \
               0.4)                                                                      \
-        ELEM_(double, CWupper, "CWUPPER",                                               \
+        ELEM_(float, CWupper, "CWUPPER",                                               \
               "Detector hysterisis, upper threshold",                                   \
               0.6)                                                                      \
         ELEM_(int, CWmfiltlen, "CWMFILTLEN",                                            \
@@ -410,19 +410,19 @@
         ELEM_(int, CWupperlimit, "CWUPPERLIMIT",                                        \
               "Upper TX limit (WPM)",                                                   \
               50)                                                                       \
-        ELEM_(double, CWrisetime, "CWRISETIME",                                         \
+        ELEM_(float, CWrisetime, "CWRISETIME",                                         \
               "Leading and trailing edge rise times (milliseconds)",                    \
               4.0)                                                                      \
-        ELEM_(double, CWdash2dot, "CWDASH2DOT",                                         \
+        ELEM_(float, CWdash2dot, "CWDASH2DOT",                                         \
               "Dash to dot ratio",                                                      \
               3.0)                                                                      \
         ELEM_(bool, QSK, "QSK",                                                         \
               "Generate QSK signal on right audio channel",                             \
               false)                                                                    \
-        ELEM_(double, CWpre, "CWPRE",                                                   \
+        ELEM_(float, CWpre, "CWPRE",                                                   \
               "Pre-keydown timing (milliseconds)",                                      \
               4.0)                                                                      \
-        ELEM_(double, CWpost, "CWPOST",                                                 \
+        ELEM_(float, CWpost, "CWPOST",                                                 \
               "Post-keydown timing (milliseconds)",                                     \
               4.0)                                                                      \
         ELEM_(bool, CWid, "CWID",                                                       \
@@ -455,14 +455,14 @@
               "CW prosigns BT AA AS AR SK KN INT HM VE",                                \
               "=~<>%+&{}")                                                              \
         /* FELD HELL */                                                                 \
-        ELEM_(double, HELL_BW, "HELL_BW0", "Feld Hell working bandwidth",  245.0)       \
-        ELEM_(double, HELL_BW_FH, "HELL_BW1", "FH bandwidth",  245.0)                   \
-        ELEM_(double, HELL_BW_SH, "HELL_BW2", "Slow Hell bandwidth",  30.0)             \
-        ELEM_(double, HELL_BW_X5, "HELL_BW3", "X5 Hell bandwidth",  1225.)              \
-        ELEM_(double, HELL_BW_X9, "HELL_BW4", "X9 Hell bandwidth",  2205.0)             \
-        ELEM_(double, HELL_BW_FSK, "HELL_BW5", "FSK Hell bandwidth",  180.0)            \
-        ELEM_(double, HELL_BW_FSK105, "HELL_BW6", "FSK105 Hell bandwidth",  100.0)      \
-        ELEM_(double, HELL_BW_HELL80, "HELL_BW7", "HELL80 bandwidth",  450.0)           \
+        ELEM_(float, HELL_BW, "HELL_BW0", "Feld Hell working bandwidth",  245.0)       \
+        ELEM_(float, HELL_BW_FH, "HELL_BW1", "FH bandwidth",  245.0)                   \
+        ELEM_(float, HELL_BW_SH, "HELL_BW2", "Slow Hell bandwidth",  30.0)             \
+        ELEM_(float, HELL_BW_X5, "HELL_BW3", "X5 Hell bandwidth",  1225.)              \
+        ELEM_(float, HELL_BW_X9, "HELL_BW4", "X9 Hell bandwidth",  2205.0)             \
+        ELEM_(float, HELL_BW_FSK, "HELL_BW5", "FSK Hell bandwidth",  180.0)            \
+        ELEM_(float, HELL_BW_FSK105, "HELL_BW6", "FSK105 Hell bandwidth",  100.0)      \
+        ELEM_(float, HELL_BW_HELL80, "HELL_BW7", "HELL80 bandwidth",  450.0)           \
         ELEM_(bool, HellRcvWidth, "HELLRCVWIDTH",                                       \
               "Halve receive width (compress RX in time)",                              \
               false)                                                                    \
@@ -522,7 +522,7 @@
 		      "Force Integration (FEC) depth to be reset when new BW/Tones selected",   \
 			  false)                                                                    \
         /* THOR */                                                                      \
-        ELEM_(double, THOR_BW, "THORBW",                                                \
+        ELEM_(float, THOR_BW, "THORBW",                                                \
               "Filter bandwidth factor (bandwidth relative to signal width)",           \
               2.0)                                                                      \
         ELEM_(bool, THOR_FILTER, "THORFILTER",                                          \
@@ -534,7 +534,7 @@
         ELEM_(int, THOR_PATHS, "THORPATHS",                                             \
               "This setting is currently unused",                                       \
               5)                                                                        \
-        ELEM_(double, ThorCWI, "THORCWI",                                               \
+        ELEM_(float, ThorCWI, "THORCWI",                                               \
               "CWI threshold (CWI detection and suppression)",                          \
               0.0)                                                                      \
         ELEM_(bool, THOR_PREAMBLE, "THORPREAMBLE",                                      \
@@ -551,16 +551,16 @@
               "Packet baud rate. Values are as follows:\n"                              \
               "  0: 1200 (V/UHF); 1: 300 (HF); 2: 2400 (V/UHF)",                        \
               0)   /* 1200 baud (V/UHF) default. */                                     \
-        ELEM_(double, PKT_LOSIG_RXGAIN, "LOSIGRXGAIN",                                  \
+        ELEM_(float, PKT_LOSIG_RXGAIN, "LOSIGRXGAIN",                                  \
               "Signal gain for lower frequency (Mark) tone (in dB)",                    \
               0.0)                                                                      \
-        ELEM_(double, PKT_HISIG_RXGAIN, "HISIGRXGAIN",                                  \
+        ELEM_(float, PKT_HISIG_RXGAIN, "HISIGRXGAIN",                                  \
               "Signal gain for higher frequency (Space) tone (in dB)",                  \
               0.0)                                                                      \
-        ELEM_(double, PKT_LOSIG_TXGAIN, "LOSIGTXGAIN",                                  \
+        ELEM_(float, PKT_LOSIG_TXGAIN, "LOSIGTXGAIN",                                  \
               "Signal gain for Mark (lower frequency) tone (in dB)",                    \
               0.0)                                                                      \
-        ELEM_(double, PKT_HISIG_TXGAIN, "HISIGTXGAIN",                                  \
+        ELEM_(float, PKT_HISIG_TXGAIN, "HISIGTXGAIN",                                  \
               "Signal gain for Space (higher frequency) tone (in dB)",                  \
               0.0)                                                                      \
         ELEM_(bool, PKT_PreferXhairScope, "PKTPREFERXHAIRSCOPE",                        \
@@ -590,10 +590,10 @@
               "display decoded data in English units",                                  \
               false)                                                                    \
         /* DOMINOEX */                                                                  \
-        ELEM_(double, DOMINOEX_BW, "DOMINOEXBW",                                        \
+        ELEM_(float, DOMINOEX_BW, "DOMINOEXBW",                                        \
               "Filter bandwidth factor (bandwidth relative to signal width)",           \
               2.0)                                                                      \
-        ELEM_(double, DOMINOEX_ADJ, "DOMINOEXADJ",                                      \
+        ELEM_(float, DOMINOEX_ADJ, "DOMINOEXADJ",                                      \
               "Adjust tone-spacing",                                                    \
               0.0)                                                                      \
         ELEM_(std::string, secText, "SECONDARYTEXT",                                    \
@@ -608,7 +608,7 @@
         ELEM_(int, DOMINOEX_PATHS, "DOMINOEXPATHS",                                     \
               "This setting is currently unused",                                       \
               5)                                                                        \
-        ELEM_(double, DomCWI, "DOMCWI",                                                 \
+        ELEM_(float, DomCWI, "DOMCWI",                                                 \
               "CWI threshold (CWI detection and suppression)",                          \
               0.0)                                                                      \
         /* MT63 */                                                                      \
@@ -696,7 +696,7 @@
         ELEM_(std::string, strTextid, "STRTEXTID",                                      \
               "Video ID text for SENDTEXTID (keep short!)",                             \
               "CQ")                                                                     \
-        ELEM_(double, pretone, "PRETONE",                                               \
+        ELEM_(float, pretone, "PRETONE",                                               \
               "Single tone at center of modem BW, carrier detect for amplifiers",       \
               0.0)                                                                      \
         ELEM_(bool, macroCWid, "", "",  false)                                          \
@@ -780,7 +780,7 @@
         ELEM_(std::string, flmsg_pathname, "FLMSG_PATHNAME",                            \
               "Full pathname to the flmsg executable",                                  \
               "")                                                                       \
-        ELEM_(double, extract_timeout, "EXTRACT_TIMEOUT",                               \
+        ELEM_(float, extract_timeout, "EXTRACT_TIMEOUT",                               \
               "Abort message extraction after nn.n seconds of inactivity",              \
               2.0)                                                                      \
         ELEM_(std::string, cty_dat_pathname, "CTYDAT_PATHNAME",                         \
@@ -1172,16 +1172,16 @@
         ELEM_(bool, EnableMixer, "ENABLEMIXER",                                         \
               "Enable mixer controls",                                                  \
               false)                                                                    \
-        ELEM_(double, PCMvolume, "PCMVOLUME",                                           \
+        ELEM_(float, PCMvolume, "PCMVOLUME",                                           \
               "PCM channel level",                                                      \
               0.8)                                                                      \
-        ELEM_(double, txlevel, "TXATTEN",                                               \
+        ELEM_(float, txlevel, "TXATTEN",                                               \
               "TX attenuator (db) -30 .. 0",                                            \
               -3.0)                                                                     \
         ELEM_(bool, MuteInput, "MUTEINPUT",                                             \
               "This setting is currently unused",                                       \
               true)                                                                     \
-        ELEM_(double, TxMonitorLevel, "TXMONITORLEVEL",                                 \
+        ELEM_(float, TxMonitorLevel, "TXMONITORLEVEL",                                 \
               "Level for monitored (on waterfall) transmit signal",                     \
               0.5)                                                                      \
         /* Waterfall palette */                                                         \
@@ -1524,7 +1524,7 @@
                 "Password for remote URL", "")                                          \
                                                                                         \
        /* WEFAX configuration items */                                                  \
-       ELEM_(double, wefax_slant, "WEFAXSLANT",                                         \
+       ELEM_(float, wefax_slant, "WEFAXSLANT",                                         \
              "Slant correction for wefax Rx",                                           \
              0.0)                                                                       \
        ELEM_(std::string, wefax_save_dir, "WEFAXSAVEDIR",                               \

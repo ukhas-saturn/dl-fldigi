@@ -33,41 +33,41 @@
 class contestia : public modem {
 private:
 
-	MFSK_Transmitter < double >*Tx;
-	MFSK_Receiver < double >*Rx;
+	MFSK_Transmitter<float>*Tx;
+	MFSK_Receiver<float>*Rx;
 
-	double		*txfbuffer;
+	float		*txfbuffer;
 	int 		txbufferlen;
 
-	double		phaseacc;
+	float		phaseacc;
 	cmplx		prevsymbol;
 	int			preamble;
 	unsigned int	shreg;
 
-	double		np;
-	double		sp;
-	double		sigpwr;
-	double		noisepwr;
+	float		np;
+	float		sp;
+	float		sigpwr;
+	float		noisepwr;
 	
 	int			escape;
 	int			smargin;
 	int			sinteg;
 	int			tones;
 	int			bw;
-	double		tone_bw;
+	float		tone_bw;
 
 	int			preamblesent;
 	int			postamblesent;
-	double		preamblephase;
+	float		preamblephase;
 
-	double		txbasefreq;
-	double		tone_midfreq;
-	double		lastfreq;
+	float		txbasefreq;
+	float		tone_midfreq;
+	float		lastfreq;
 
-	double		ampshape[SR4];
-	double		tonebuff[TONE_DURATION];
+	float		ampshape[SR4];
+	float		tonebuff[TONE_DURATION];
 
-	double		nco(double freq);
+	float		nco(float freq);
 	void		send_tones();
 	
 public:
@@ -78,7 +78,7 @@ public:
 	void rx_flush();
 	void tx_init(SoundBase *sc);
 	void restart();
-	int rx_process(const double *buf, int len);
+	int rx_process(const float *buf, int len);
 	int tx_process();
 	int unescape(int c);
 };

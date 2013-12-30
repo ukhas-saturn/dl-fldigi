@@ -63,6 +63,6 @@ extern  bool bHighSpeed;
 			trx_wait_state();	\
 	} while (0)
 
-void trx_xmit_wfall_queue(int samplerate, const double* buf, size_t len);
+void trx_xmit_wfall_queue(int samplerate, const float* buf, size_t len);
 
 #endif

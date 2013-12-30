@@ -26,7 +26,7 @@ const int SymbolSepar=200;      // the distance in samples between symbols on a 
 const int DataCarrSepar=4;      // carriers must be spaced by 4 FFT bins
                                 // (complex FFT length equals to SymbolLen)
 
-double SymbolShape[SymbolLen] = {
+float SymbolShape[SymbolLen] = {
      -0.00000000 , //   0
      +0.00000665 , //   1
      +0.00002657 , //   2

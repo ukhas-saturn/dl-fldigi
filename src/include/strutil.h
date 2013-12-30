@@ -189,8 +189,8 @@ bool read_until_delim( char delim, std::istream & istrm );
 /// Reads a char followed by the delimiter.
 bool read_until_delim( char delim, std::istream & istrm, char & ref, const char dflt );
 
-/// Reads a double up to the given delimiter.
-inline bool read_until_delim( char delim, std::istream & istrm, double & ref )
+/// Reads a float up to the given delimiter.
+inline bool read_until_delim( char delim, std::istream & istrm, float & ref )
 {
 	istrm >> ref ;
 	if( ! istrm ) return false ;

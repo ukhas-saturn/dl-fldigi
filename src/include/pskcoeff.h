@@ -3,11 +3,11 @@
 
 #define	FIRLEN	64
 
-extern double gmfir1c[FIRLEN];
-extern double gmfir2c[FIRLEN];
-extern double syncfilt[16];
+extern float gmfir1c[FIRLEN];
+extern float gmfir2c[FIRLEN];
+extern float syncfilt[16];
 
-extern void raisedcosfilt(double *);
-extern void wsincfilt(double *, double fc, bool blackman);
+extern void raisedcosfilt(float *);
+extern void wsincfilt(float *, float fc, bool blackman);
 
 #endif

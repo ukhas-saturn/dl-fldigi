@@ -80,7 +80,7 @@ template <class Type>
 
    // preset tables for given (maximum) processing size
    int Preset(int MaxSize)
-     { size_t idx,ridx,mask,rmask; double phase; size_t Size4;
+     { size_t idx,ridx,mask,rmask; float phase; size_t Size4;
        if(MaxSize<4) goto Error;  
        Size=MaxSize;
        while((MaxSize&1)==0) MaxSize>>=1;
@@ -286,7 +286,7 @@ template <class Type>
      { free(Shape); Shape=0; free(Output); Output=0; Tap.Free(); Len=0; Step=0; }
 
    int Preset(size_t WindowLen, size_t WindowStep=0,
-              int WindowShape=2, double WindowScale=1.0)
+              int WindowShape=2, float WindowScale=1.0)
      { size_t Idx;
        Len=WindowLen;
        if(WindowStep==0)            // find default "Step"
@@ -298,11 +298,11 @@ template <class Type>
        { if(ReallocArray(&Shape,Len)<0) goto Error;
          if(WindowShape==1)         // like Hamming but zero at the edges
          { for(Idx=0; Idx<Len; Idx++)
-             Shape[Idx]=WindowScale*sin(M_PI*(double)Idx/Len);
+             Shape[Idx]=WindowScale*sin(M_PI*(float)Idx/Len);
          } else if(WindowShape==2)  // Hanning
          { WindowScale*=0.5;
            for(Idx=0; Idx<Len; Idx++)
-             Shape[Idx]=WindowScale*(1.0-cos(2*M_PI*(double)Idx/Len));
+             Shape[Idx]=WindowScale*(1.0-cos(2*M_PI*(float)Idx/Len));
          } else                     // user-defined, so we just put a square window
          { for(Idx=0; Idx<Len; Idx++)
              Shape[Idx]=WindowScale;
@@ -355,7 +355,7 @@ template <class Type>
    SampleBuffer<Type> Tap;
    size_t  Len;
    size_t  Step;
-   double *Shape;
+   float *Shape;
    Type   *Output;
    int     OutputValid;
 } ;
@@ -375,7 +375,7 @@ template <class Type>
      { free(Shape); Shape=0; Len=0; Step=0; Output.Free(); }
 
    int Preset(size_t WindowLen, size_t WindowStep=0,
-              int WindowShape=2, double WindowScale=1.0)
+              int WindowShape=2, float WindowScale=1.0)
      { size_t Idx;
        Len=WindowLen;
        if(WindowStep==0)            // find default "Step"
@@ -387,11 +387,11 @@ template <class Type>
        { if(ReallocArray(&Shape,Len)<0) goto Error;
          if(WindowShape==1)         // like Hamming but zero at the edges
          { for(Idx=0; Idx<Len; Idx++)
-             Shape[Idx]=WindowScale*sin(M_PI*(double)Idx/Len);
+             Shape[Idx]=WindowScale*sin(M_PI*(float)Idx/Len);
          } else if(WindowShape==2)  // Hanning
          { WindowScale*=0.5;
            for(Idx=0; Idx<Len; Idx++)
-             Shape[Idx]=WindowScale*(1.0-cos(2*M_PI*(double)Idx/Len));
+             Shape[Idx]=WindowScale*(1.0-cos(2*M_PI*(float)Idx/Len));
          } else                     // user-defined, so we just put a square window
          { for(Idx=0; Idx<Len; Idx++)
              Shape[Idx]=WindowScale;
@@ -465,7 +465,7 @@ template <class Type>
   public:
    size_t  Len;
    size_t  Step;
-   double *Shape;
+   float *Shape;
    SampleBuffer<Type> Output;
 } ;
 

@@ -29,7 +29,7 @@
 
 const int Alias_1k_Len=64;
 
-double Alias_1k_I[Alias_1k_Len] = {
+float Alias_1k_I[Alias_1k_Len] = {
    +0.00003605 , //   0
    +0.00001835 , //   1
    -0.00022227 , //   2
@@ -96,7 +96,7 @@ double Alias_1k_I[Alias_1k_Len] = {
    +0.00001835   //  63
 } ;
 
-double Alias_1k_Q[Alias_1k_Len] = {
+float Alias_1k_Q[Alias_1k_Len] = {
    -0.00000000 , //   0
    -0.00009527 , //   1
    -0.00023082 , //   2

@@ -20,8 +20,8 @@
 
 class modem {
 public:
-	static double	frequency;
-	static double	tx_frequency;
+	static float	frequency;
+	static float	tx_frequency;
 	static bool	freqlock;
 protected:
 	cMorse	morse;
@@ -34,28 +34,28 @@ protected:
 	bool	reverse;
 	int		sigsearch;
 
-	double	bandwidth;
-	double	freqerr;
-	double	rx_corr;
-	double	tx_corr;
-	double  PTTphaseacc;
-	double  PTTchannel[OUTBUFSIZE];
+	float	bandwidth;
+	float	freqerr;
+	float	rx_corr;
+	float	tx_corr;
+	float  PTTphaseacc;
+	float  PTTchannel[OUTBUFSIZE];
 
 // for CW modem use only
 	bool	cwTrack;
 	bool	cwLock;
-	double	cwRcvWPM;
-	double	cwXmtWPM;
+	float	cwRcvWPM;
+	float	cwXmtWPM;
 
-	double 	squelch;
-	double	metric;
-	double	syncpos;
+	float 	squelch;
+	float	metric;
+	float	syncpos;
 
 	int	backspaces;
 	unsigned char *txstr;
 	unsigned char *txptr;
 
-	double outbuf[OUTBUFSIZE];
+	float outbuf[OUTBUFSIZE];
 
 	bool	historyON;
 	Digiscope::scope_mode scopemode;
@@ -63,12 +63,12 @@ protected:
 	int scptr;
 
 	// extended s/n reporting
-	double s2n_ncount, s2n_sum, s2n_sum2, s2n_metric;
+	float s2n_ncount, s2n_sum, s2n_sum2, s2n_metric;
 	bool s2n_valid;
 
 	unsigned cap;
 
-	double track_freq(double freq);
+	float track_freq(float freq);
 
 public:
 	modem();
@@ -81,7 +81,7 @@ public:
 	virtual void restart () = 0;
 	virtual void rx_flush() {};
 	virtual int  tx_process () = 0;
-	virtual int  rx_process (const double *, int len) = 0;
+	virtual int  rx_process (const float *, int len) = 0;
 	virtual void shutdown(){};
 	virtual void set1(int, int){};
 	virtual void set2(int, int){};
@@ -96,7 +96,7 @@ public:
 	/// Inlined const getters are faster and smaller.
 	trx_mode	get_mode() const { return mode; };
 	const char	*get_mode_name() const { return mode_info[get_mode()].sname;}
-	virtual void	set_freq(double);
+	virtual void	set_freq(float);
 	/// Inlining small formulas is still faster and shorter.
 	int		get_freq() const { return (int)( frequency + 0.5 ); }
 	void		init_freqlock();
@@ -104,21 +104,21 @@ public:
 	void		set_sigsearch(int n) { sigsearch = n; freqerr = 0.0;};
 	bool		freqlocked() const { return freqlock;}
 	/// Getters are semantically const.
-	double		get_txfreq() const;
-	double		get_txfreq_woffset() const;
-	void		set_metric(double);
-	void		display_metric(double);
-	double		get_metric() const { return metric;}
+	float		get_txfreq() const;
+	float		get_txfreq_woffset() const;
+	void		set_metric(float);
+	void		display_metric(float);
+	float		get_metric() const { return metric;}
 	void		set_reverse(bool on);
 	bool		get_reverse() const { return reverse;}
-	double		get_bandwidth() const { return bandwidth;}
-	void		set_bandwidth(double);
+	float		get_bandwidth() const { return bandwidth;}
+	void		set_bandwidth(float);
 	int		get_samplerate() const { return samplerate;}
 	void		set_samplerate(int);
 	void		init_queues();
 
-	void		ModulateXmtr(double *, int);
-	void		ModulateStereo(double *, double *, int);
+	void		ModulateXmtr(float *, int);
+	void		ModulateStereo(float *, float *, int);
 
 	void		videoText();
 	void		pretone();
@@ -141,9 +141,9 @@ public:
 	void		set_cwTrack(bool);
 	bool		get_cwLock();
 	void		set_cwLock(bool);
-	double		get_cwXmtWPM();
-	void		set_cwXmtWPM(double);
-	double		get_cwRcvWPM();
+	float		get_cwXmtWPM();
+	void		set_cwXmtWPM(float);
+	float		get_cwRcvWPM();
 	virtual	void		incWPM() {};
 	virtual void		decWPM() {};
 	virtual void		toggleWPM() {};
@@ -154,8 +154,8 @@ public:
 // for waterfall id transmission
 private:
 
-	static  double		wfid_w[];
-	static  double		wfid_outbuf[];
+	static  float		wfid_w[];
+	static  float		wfid_outbuf[];
 	int		vidwidth;
 
 	void	wfid_make_tones(int numchars);
@@ -163,21 +163,21 @@ private:
 
 	void	wfid_sendchars(std::string s);
 
-	double  PTTnco();
+	float  PTTnco();
 
 public:
 	void	wfid_text(const std::string& s);
 
 // for CW ID transmission
 private:
-	double	cwid_keyshape[128];
-	double	cwid_phaseacc;
+	float	cwid_keyshape[128];
+	float	cwid_phaseacc;
 	int		RT;
 	int		cwid_symbollen;
 	int		cwid_lastsym;
 public:
 	void	cwid_makeshape();
-	double	cwid_nco(double freq);
+	float	cwid_nco(float freq);
 	void	cwid_send_symbol(int bits);
 	void	cwid_send_ch(int ch);
 	void	cwid_sendtext (const std::string& s);
@@ -185,9 +185,9 @@ public:
 
 // for noise tests
 private:
-	void	add_noise(double *, int);
-	double	sigmaN (double es_ovr_n0);
-	double	gauss(double sigma);
+	void	add_noise(float *, int);
+	float	sigmaN (float es_ovr_n0);
+	float	gauss(float sigma);
 
 protected:
 	virtual void s2nreport(void);

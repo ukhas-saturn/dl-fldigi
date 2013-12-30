@@ -33,18 +33,18 @@
 
 class pskeval {
 private:
-	double	sigpwr[FFT_LEN];
-	double	sigmin;
-	double	bw;
+	float	sigpwr[FFT_LEN];
+	float	sigmin;
+	float	bw;
 public:
 	pskeval();
 	~pskeval();
 	void	clear();
-	void	setbw(double w) { bw = w;}
+	void	setbw(float w) { bw = w;}
 	void	sigdensity();
-	double	sigpeak(int &f, int f1, int f2);
-	double	peak(int &f, int f1, int f2, double level);
-	double	power(int f1, int f2);
+	float	sigpeak(int &f, int f1, int f2);
+	float	peak(int &f, int f1, int f2, float level);
+	float	power(int f1, int f2);
 };
 
 #endif

@@ -48,16 +48,16 @@
 
 class wwv : public modem {
 protected:
-	double			phaseacc;
-	double			phaseincr;
+	float			phaseacc;
+	float			phaseincr;
 	int				smpl_ctr;		// sample counter for timing wwv rx 
-	double			agc;			// threshold for tick detection 
+	float			agc;			// threshold for tick detection 
 
 	C_FIR_filter	*hilbert;
 	C_FIR_filter	*lpfilter;
 	Cmovavg			*vidfilter;
 
-	mbuffer<double, 1000, 2>	buffer;	// storage for 1000 samples/sec video
+	mbuffer<float, 1000, 2>	buffer;	// storage for 1000 samples/sec video
 	unsigned int	buffptr;
 	int				sync;
 	int				sync0;
@@ -69,12 +69,12 @@ protected:
 	bool			calc;
 	bool			zoom;
 
-	double	keyshape[32]; // 4 msec rise and fall time for pulse
-	double	audio[400];
-	double	quiet[400];
-	double	play[400];
+	float	keyshape[32]; // 4 msec rise and fall time for pulse
+	float	audio[400];
+	float	quiet[400];
+	float	play[400];
 
-	double nco(double freq);
+	float nco(float freq);
 	void makeshape();
 	void makeaudio();
 
@@ -85,7 +85,7 @@ public:
 	void	rx_init();
 	void	tx_init(SoundBase *sc);
 	void 	restart() {};
-	int		rx_process(const double *buf, int len);
+	int		rx_process(const float *buf, int len);
 	int		tx_process();
 	void	update_syncscope();
 	void	set1(int x, int y);

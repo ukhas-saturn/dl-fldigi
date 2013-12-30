@@ -324,7 +324,7 @@ dominoex::dominoex(trx_mode md)
 cmplx dominoex::mixer(int n, cmplx in)
 {
 	cmplx z;
-	double f;
+	float f;
 
 // first IF mixer (n == 0) plus
 // MAXFFTS mixers are supported each separated by tonespacing/paths
@@ -411,11 +411,11 @@ void dominoex::decodesymbol()
 
 int dominoex::harddecode()
 {
-	double x, max = 0.0;
+	float x, max = 0.0;
 	int symbol = 0;
-	double avg = 0.0;
+	float avg = 0.0;
 	bool cwi[paths * numbins];
-	double cwmag;
+	float cwmag;
 
 	for (int i = 0; i < paths * numbins; i++)
 		avg += abs(pipe[pipeptr].vector[i]);
@@ -456,7 +456,7 @@ int dominoex::harddecode()
 void dominoex::update_syncscope()
 {
 
-	double max = 0, min = 1e6, range, mag;
+	float max = 0, min = 1e6, range, mag;
 
 // dom waterfall
 	memset(videodata, 0, (paths * numbins) * sizeof(double));
@@ -498,8 +498,8 @@ void dominoex::update_syncscope()
 void dominoex::synchronize()
 {
 //	int syn = -1;
-	double syn = -1;
-	double val, max = 0.0;
+	float syn = -1;
+	float val, max = 0.0;
 
 	if (staticburst == true) return;
 
@@ -526,8 +526,8 @@ void dominoex::synchronize()
 
 void dominoex::eval_s2n()
 {
-	double s = abs(pipe[pipeptr].vector[currsymbol]);
-	double n = (NUMTONES - 1 ) * abs(pipe[(pipeptr + symlen) % twosym].vector[currsymbol]);
+	float s = abs(pipe[pipeptr].vector[currsymbol]);
+	float n = (NUMTONES - 1 ) * abs(pipe[(pipeptr + symlen) % twosym].vector[currsymbol]);
 
 	sig = decayavg( sig, s, abs( s - sig) > 4 ? 4 : 32);
 	noise = decayavg( noise, n, 64);
@@ -551,7 +551,7 @@ void dominoex::eval_s2n()
 	put_Status1(dommsg);
 }
 
-int dominoex::rx_process(const double *buf, int len)
+int dominoex::rx_process(const float *buf, int len)
 {
 	cmplx zref,  z, *zp;
 	cmplx zarray[1];
@@ -626,7 +626,7 @@ int dominoex::get_secondary_char()
 
 void dominoex::sendtone(int tone, int duration)
 {
-	double f, phaseincr;
+	float f, phaseincr;
 	f = (tone + 0.5) * tonespacing + get_txfreq_woffset() - bandwidth / 2.0;
 	phaseincr = TWOPI * f / samplerate;
 	for (int j = 0; j < duration; j++) {

@@ -79,9 +79,9 @@ int dspcnt = 0;
 static char msg1[20];
 
 /* Terminating 0 at the end of the list for dl_fldigi/flights.cxx */
-const double rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850, 0};
-const double rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
-const int    rtty::BITS[]  = {5, 7, 8};
+const float rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850, 0};
+const float rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
+const int   rtty::BITS[]  = {5, 7, 8};
 
 void rtty::tx_init(SoundBase *sc)
 {
@@ -193,7 +193,7 @@ rtty::~rtty()
 
 void rtty::reset_filters()
 {
-    printf("reseting Filter for Baud %f, %f\n", rtty_baud, samplerate);  // print dot length
+    printf("reseting Filter for Baud %f, %i\n", rtty_baud, samplerate);  // print dot length
 	int filter_length = 1024;
 
     
@@ -214,7 +214,7 @@ void rtty::reset_filters()
 
 void rtty::restart()
 {
-	double stl;
+	float stl;
 
 	rtty_shift = shift = (progdefaults.rtty_shift >= 0 ?
 				  SHIFT[progdefaults.rtty_shift] : progdefaults.rtty_custom_shift);
@@ -239,9 +239,8 @@ void rtty::restart()
 	set_bandwidth(shift);
 
     
-    rtty_BW = progdefaults.RTTY_BW;
-
-    //rtty_BW = progdefaults.RTTY_BW = rtty_baud * 2;
+	//rtty_BW = progdefaults.RTTY_BW;
+	rtty_BW = progdefaults.RTTY_BW = rtty_baud;
 
 	wf->redraw_marker();
 
@@ -319,8 +318,8 @@ rtty::rtty(trx_mode tty_mode)
 
 	bits = (Cmovavg *)0;
 
-	pipe = new double[MAXPIPE];
-	dsppipe = new double [MAXPIPE];
+	pipe = new float[MAXPIPE];
+	dsppipe = new float[MAXPIPE];
 
 	::rttyviewer = new view_rtty(mode);
 
@@ -350,7 +349,7 @@ void rtty::Clear_syncscope()
 	set_scope(0, 0, false);
 }
 
-cmplx rtty::mixer(double &phase, double f, cmplx in)
+cmplx rtty::mixer(float &phase, float f, cmplx in)
 {
 	cmplx z = cmplx( cos(phase), sin(phase)) * in;
 
@@ -533,12 +532,12 @@ bool rtty::rx(bool bit) // original modified for probability test
 char snrmsg[80];
 void rtty::Metric()
 {
-	double delta = rtty_baud/8.0;
-	double np = wf->powerDensity(frequency, delta) * 3000 / delta;
-	double sp =
+	float delta = rtty_baud/8.0;
+	float np = wf->powerDensity(frequency, delta) * 3000 / delta;
+	float sp =
 		wf->powerDensity(frequency - shift/2, delta) +
 		wf->powerDensity(frequency + shift/2, delta) + 1e-10;
-	double snr = 0;
+	float snr = 0;
 
 	sigpwr = decayavg( sigpwr, sp, sp > sigpwr ? 2 : 8);
 	noisepwr = decayavg( noisepwr, np, 16 );
@@ -552,9 +551,9 @@ void rtty::Metric()
 
 void rtty::searchDown()
 {
-	double srchfreq = frequency - shift -100;
-	double minfreq = shift * 2 + 100;
-	double spwrlo, spwrhi, npwr;
+	float srchfreq = frequency - shift -100;
+	float minfreq = shift * 2 + 100;
+	float spwrlo, spwrhi, npwr;
 	while (srchfreq > minfreq) {
 		spwrlo = wf->powerDensity(srchfreq - shift/2, 2*rtty_baud);
 		spwrhi = wf->powerDensity(srchfreq + shift/2, 2*rtty_baud);
@@ -571,9 +570,9 @@ void rtty::searchDown()
 
 void rtty::searchUp()
 {
-	double srchfreq = frequency + shift +100;
-	double maxfreq = IMAGE_WIDTH - shift * 2 - 100;
-	double spwrhi, spwrlo, npwr;
+	float srchfreq = frequency + shift +100;
+	float maxfreq = IMAGE_WIDTH - shift * 2 - 100;
+	float spwrhi, spwrlo, npwr;
 	while (srchfreq < maxfreq) {
 		spwrlo = wf->powerDensity(srchfreq - shift/2, 2*rtty_baud);
 		spwrhi = wf->powerDensity(srchfreq + shift/2, 2*rtty_baud);
@@ -601,9 +600,9 @@ int mnum = 0;
 std::fstream ook_signal("ook_signal.csv", std::ios::out );
 #endif
 
-int rtty::rx_process(const double *buf, int len)
+int rtty::rx_process(const float *buf, int len)
 {
-	const double *buffer = buf;
+	const float *buffer = buf;
 	int length = len;
 	static int showxy = symbollen;
 
@@ -623,7 +622,7 @@ int rtty::rx_process(const double *buf, int len)
 
 	Metric();
 #if FILTER_DEBUG == 1
-double value;
+float value;
 #endif
 	while (length-- > 0) {
 
@@ -682,7 +681,7 @@ if (mnum < 2 * filter_length)
 			noise_floor = min(space_noise, mark_noise);
 
 // clipped if clipped decoder selected
-			double mclipped = 0, sclipped = 0;
+			float mclipped = 0, sclipped = 0;
 			mclipped = mark_mag > mark_env ? mark_env : mark_mag;
 			sclipped = space_mag > space_env ? space_env : space_mag;
 			if (mclipped < noise_floor) mclipped = noise_floor;
@@ -697,8 +696,8 @@ if (mnum < 2 * filter_length)
 				default : ;
 			}
 
-//			double v0, v1, v2, v3, v4, v5;
-			double v3;
+//			float v0, v1, v2, v3, v4, v5;
+			float v3;
 // no ATC
 //			v0 = mark_mag - space_mag;
 // Linear ATC
@@ -766,7 +765,7 @@ if (mnum < 2 * filter_length)
 				}
 
 // now normalize the scope
-				double const norm = 1.3*(abs(zp_mark [i]) + abs(zp_space[i]));
+				float const norm = 1.3*(abs(zp_mark [i]) + abs(zp_space[i]));
 				xy /= norm;
 
 			} else {
@@ -779,13 +778,13 @@ if (mnum < 2 * filter_length)
 				else
 					xy = cmplx( mark_noise * cos(xy_phase) / 2.0, space_mag * sin(xy_phase));
 // now normalize the scope
-				double const norm = (mark_env + space_env);
+				float const norm = (mark_env + space_env);
 				xy /= norm;
 			}
 
 // Rotate the scope x-y iaw frequency error.  Old scopes were not capable
 // of this, but it should be very handy, so... who cares of realism anyways?
-			double const rotate = 8 * TWOPI * freqerr / rtty_shift;
+			float const rotate = 8 * TWOPI * freqerr / rtty_shift;
 			xy = xy * cmplx(cos(rotate), sin(rotate));
 
 			QI[inp_ptr] = xy;
@@ -820,7 +819,7 @@ if (mnum < 2 * filter_length)
 				int mp1 = mp0 + 1;
 				if (mp0 < 0) mp0 += MAXPIPE;
 				if (mp1 < 0) mp1 += MAXPIPE;
-				double ferr = (TWOPI * samplerate / rtty_baud) *
+				float ferr = (TWOPI * samplerate / rtty_baud) *
 						(!reverse ?
 							arg(conj(mark_history[mp1]) * mark_history[mp0]) :
 							arg(conj(space_history[mp1]) * space_history[mp0]));
@@ -854,11 +853,11 @@ if (mnum < 2 * filter_length)
 //=====================================================================
 // RTTY transmit
 //=====================================================================
-//double freq1;
-double minamp = 100;
-double maxamp = -100;
+//float freq1;
+float minamp = 100;
+float maxamp = -100;
 
-double rtty::nco(double freq)
+float rtty::nco(float freq)
 {
 	phaseacc += TWOPI * freq / samplerate;
 
@@ -868,7 +867,7 @@ double rtty::nco(double freq)
 	return cos(phaseacc);
 }
 
-double rtty::FSKnco()
+float rtty::FSKnco()
 {
 	FSKphaseacc += TWOPI * 1000 / samplerate;
 
@@ -884,7 +883,7 @@ double rtty::FSKnco()
 void rtty::send_symbol(int symbol, int len)
 {
 #if 0
-	double freq;
+	float freq;
 
 	if (reverse)
 		symbol = !symbol;
@@ -904,9 +903,9 @@ void rtty::send_symbol(int symbol, int len)
 
 #else
 
-	double const freq1 = get_txfreq_woffset() + shift / 2.0;
-	double const freq2 = get_txfreq_woffset() - shift / 2.0;
-	double mark = 0, space = 0;
+	float const freq1 = get_txfreq_woffset() + shift / 2.0;
+	float const freq2 = get_txfreq_woffset() - shift / 2.0;
+	float mark = 0, space = 0;
 
 	if (reverse)
 		symbol = !symbol;
@@ -933,7 +932,7 @@ void rtty::send_symbol(int symbol, int len)
 void rtty::send_stop()
 {
 #if 0
-	double freq;
+	float freq;
 	bool invert = reverse;
 
 	if (invert)
@@ -950,9 +949,9 @@ void rtty::send_stop()
 	}
 #else
 
-	double const freq1 = get_txfreq_woffset() + shift / 2.0;
-	double const freq2 = get_txfreq_woffset() - shift / 2.0;
-	double mark = 0, space = 0;
+	float const freq1 = get_txfreq_woffset() + shift / 2.0;
+	float const freq2 = get_txfreq_woffset() - shift / 2.0;
+	float mark = 0, space = 0;
 
 	bool symbol = true;
 
@@ -979,9 +978,9 @@ void rtty::send_stop()
 
 void rtty::flush_stream()
 {
-	double const freq1 = get_txfreq_woffset() + shift / 2.0;
-	double const freq2 = get_txfreq_woffset() - shift / 2.0;
-	double mark = 0, space = 0;
+	float const freq1 = get_txfreq_woffset() + shift / 2.0;
+	float const freq2 = get_txfreq_woffset() - shift / 2.0;
+	float mark = 0, space = 0;
 
 	for( int i = 0; i < symbollen * 6; ++i ) {
 		mark  = m_SymShaper1->Update(0)*m_Osc1->Update( freq1 );
@@ -1211,21 +1210,21 @@ char rtty::baudot_dec(unsigned char data)
 // methods for class Oscillator and class SymbolShaper
 //======================================================================
 
-Oscillator::Oscillator( double samplerate )
+Oscillator::Oscillator( float samplerate )
 {
 	m_phase = 0;
 	m_samplerate = samplerate;
 	std::cerr << "samplerate for Oscillator:"<<m_samplerate<<"\n";
 }
 
-double Oscillator::Update( double frequency )
+float Oscillator::Update( float frequency )
 {
 	m_phase += frequency/m_samplerate * TWOPI;
 	if ( m_phase > M_PI ) m_phase -= TWOPI;
 	return ( sin( m_phase ) );
 }
 
-SymbolShaper::SymbolShaper(double baud, double sr)
+SymbolShaper::SymbolShaper(float baud, float sr)
 {
 	m_sinc_table = 0;
 	Preset( baud, sr );
@@ -1249,10 +1248,10 @@ void SymbolShaper::reset()
 	m_Factor5 = 0.0;
 }
 
-void SymbolShaper::Preset(double baud, double sr)
+void SymbolShaper::Preset(float baud, float sr)
 {
-    double baud_rate = baud;
-    double sample_rate = sr;
+    float baud_rate = baud;
+    float sample_rate = sr;
 
     LOG_INFO("Shaper::reset( %f, %f )",  baud_rate, sample_rate);
 
@@ -1264,16 +1263,17 @@ void SymbolShaper::Preset(double baud, double sr)
 // kill old sinc-table and get memory for the new one -----------------
 
     delete [] m_sinc_table;
-    m_sinc_table = new double[m_table_size];
+    m_sinc_table = new float[m_table_size];
 
 // set up the new sinc-table based on the new parameters --------------
 
-    long double sum = 0.0;
+    //long double sum = 0.0;
+    float sum = 0.0;
 
     for( int x=0; x<m_table_size; ++x ) {
         int const offset = m_table_size/2;
-        double const T = sample_rate / (baud_rate*2.0); // symbol-length in samples
-        double const t = (x-offset); // symbol-time relative to zero
+        float const T = sample_rate / (baud_rate*2.0); // symbol-length in samples
+        float const t = (x-offset); // symbol-time relative to zero
        
         m_sinc_table[x] = rcos( t, T, 1.0 );
    
@@ -1292,7 +1292,7 @@ void SymbolShaper::Preset(double baud, double sr)
     reset();
 }
 
-double SymbolShaper::Update( bool state )
+float SymbolShaper::Update( bool state )
 {
 	if( m_State != state ) {
 		m_State = state;

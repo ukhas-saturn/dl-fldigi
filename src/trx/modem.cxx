@@ -177,8 +177,8 @@ modem *wwv_modem = 0;
 modem *anal_modem = 0;
 modem *ssb_modem = 0;
 
-double modem::frequency = 1000;
-double modem::tx_frequency = 1000;
+float modem::frequency = 1000;
+float modem::tx_frequency = 1000;
 bool   modem::freqlock = false;
 
 modem::modem()
@@ -227,7 +227,7 @@ void modem::init()
 		set_freq(wf->Carrier());
 }
 
-double modem::track_freq(double freq)
+float modem::track_freq(float freq)
 {
 	if(track_freq_lock) return(freq);
 	
@@ -235,8 +235,8 @@ double modem::track_freq(double freq)
 	   freq <= progdefaults.track_freq_max)
 		return(freq);
 	
-	double rf = wf->rfcarrier();
-	double cf = (progdefaults.track_freq_max + progdefaults.track_freq_min) / 2;
+	float rf = wf->rfcarrier();
+	float cf = (progdefaults.track_freq_max + progdefaults.track_freq_min) / 2;
 	
 	if(rf <= 0) return(freq);
 	
@@ -248,7 +248,7 @@ double modem::track_freq(double freq)
 	return(cf);
 }
 
-void modem::set_freq(double freq)
+void modem::set_freq(float freq)
 {
 	if(progdefaults.track_freq)
 		freq = track_freq(freq);
@@ -269,7 +269,7 @@ void modem::set_freqlock(bool on)
 }
 
 
-double modem::get_txfreq(void) const
+float modem::get_txfreq(void) const
 {
 	if (unlikely(!(cap & CAP_TX)))
 		return 0;
@@ -278,14 +278,14 @@ double modem::get_txfreq(void) const
 	return tx_frequency;
 }
 
-double modem::get_txfreq_woffset(void) const
+float modem::get_txfreq_woffset(void) const
 {
 	if (mailserver && progdefaults.PSKmailSweetSpot)
 		return (progdefaults.PSKsweetspot - progdefaults.TxOffset);
 	return (tx_frequency - progdefaults.TxOffset);
 }
 
-void modem::set_bandwidth(double bw)
+void modem::set_bandwidth(float bw)
 {
 	bandwidth = bw;
 	put_Bandwidth((int)bandwidth);
@@ -299,12 +299,12 @@ void modem::set_reverse(bool on)
 		reverse = false;
 }
 
-void modem::set_metric(double m)
+void modem::set_metric(float m)
 {
 	metric = m;
 }
 
-void modem::display_metric(double m)
+void modem::display_metric(float m)
 {
 	set_metric(m);
 	::global_display_metric(m);
@@ -330,17 +330,17 @@ void modem::set_cwLock(bool b)
 	cwLock = b;
 }
 
-double modem::get_cwRcvWPM()
+float modem::get_cwRcvWPM()
 {
 	return cwRcvWPM;
 }
 
-double modem::get_cwXmtWPM()
+float modem::get_cwXmtWPM()
 {
 	return cwXmtWPM;
 }
 
-void modem::set_cwXmtWPM(double wpm)
+void modem::set_cwXmtWPM(float wpm)
 {
 	cwXmtWPM = wpm;
 }
@@ -350,7 +350,7 @@ void modem::set_samplerate(int smprate)
 	samplerate = smprate;
 }
 
-double modem::PTTnco()
+float modem::PTTnco()
 {
 	PTTphaseacc += TWOPI * 1000 / samplerate;
 	if (PTTphaseacc > M_PI)
@@ -358,10 +358,10 @@ double modem::PTTnco()
 	return sin(PTTphaseacc);
 }
 
-double modem::sigmaN (double es_ovr_n0)
+float modem::sigmaN (float es_ovr_n0)
 {
-	double sn_ratio, sigma;
-	double mode_factor = 0.707;
+	float sn_ratio, sigma;
+	float mode_factor = 0.707;
 	switch (mode) {
 	case MODE_CW:
 		mode_factor /= 0.44;
@@ -413,8 +413,8 @@ double modem::sigmaN (double es_ovr_n0)
 // where theta is a uniformly distributed variable in the interval
 // 0 to 2 * Pi.
 
-double modem::gauss(double sigma) {
-	double u, r;
+float modem::gauss(float sigma) {
+	float u, r;
 	u = 1.0 * rand() / RAND_MAX;
 	r = sigma * sqrt( 2.0 * log( 1.0 / (1.0 - u) ) );
 	u = 1.0 * rand() / RAND_MAX;
@@ -427,10 +427,10 @@ double modem::gauss(double sigma) {
 // simulating the noise that is added to the signal.
 // return signal + noise, limiting value to +/- 1.0
 
-void modem::add_noise(double *buffer, int len)
+void modem::add_noise(float *buffer, int len)
 {
-	double sigma = sigmaN(progdefaults.s2n);
-	double sn = 0;
+	float sigma = sigmaN(progdefaults.s2n);
+	float sn = 0;
 	for (int n = 0; n < len; n++) {
 		sn = (buffer[n] + gauss(sigma)) / (1.0 + 3.0 * sigma);
 		buffer[n] = clamp(sn, -1.0, 1.0);
@@ -439,13 +439,13 @@ void modem::add_noise(double *buffer, int len)
 
 void modem::s2nreport(void)
 {
-	double s2n_avg = s2n_sum / s2n_ncount;
-	double s2n_stddev = sqrt((s2n_sum2 / s2n_ncount) - (s2n_avg * s2n_avg));
+	float s2n_avg = s2n_sum / s2n_ncount;
+	float s2n_stddev = sqrt((s2n_sum2 / s2n_ncount) - (s2n_avg * s2n_avg));
 
 	pskmail_notify_s2n(s2n_ncount, s2n_avg, s2n_stddev);
 }
 
-void modem::ModulateXmtr(double *buffer, int len)
+void modem::ModulateXmtr(float *buffer, int len)
 {
 	if (unlikely(!scard)) return;
 
@@ -461,7 +461,7 @@ void modem::ModulateXmtr(double *buffer, int len)
 
 	if (withnoise && progdefaults.noise) add_noise(buffer, len);
 
-	double mult = pow(10, progdefaults.txlevel / 20.0);
+	float mult = pow(10, progdefaults.txlevel / 20.0);
 	for (int i = 0; i < len; i++) buffer[i] *= mult;
 
 	try {
@@ -482,7 +482,7 @@ void modem::ModulateXmtr(double *buffer, int len)
 
 #include <iostream>
 using namespace std;
-void modem::ModulateStereo(double *left, double *right, int len)
+void modem::ModulateStereo(float *left, float *right, int len)
 {
 	if (unlikely(!scard)) return;
 
@@ -491,7 +491,7 @@ void modem::ModulateStereo(double *left, double *right, int len)
 
 	if (withnoise && progdefaults.noise) add_noise(left, len);
 
-	double mult = pow(10, progdefaults.txlevel / 20.0);
+	float mult = pow(10, progdefaults.txlevel / 20.0);
 	for (int i = 0; i < len; i++) left[i] *= mult;
 
 	try {
@@ -577,7 +577,7 @@ void modem::cwid_makeshape()
 		cwid_keyshape[i] = 0.5 * (1.0 - cos (M_PI * i / RT));
 }
 
-double modem::cwid_nco(double freq)
+float modem::cwid_nco(float freq)
 {
 	cwid_phaseacc += 2.0 * M_PI * freq / samplerate;
 
@@ -598,7 +598,7 @@ double modem::cwid_nco(double freq)
 
 void modem::cwid_send_symbol(int bits)
 {
-	double freq;
+	float freq;
 	int i,
 		keydown,
 		keyup,
@@ -728,7 +728,7 @@ static C_FIR_filter vidfilt;
 
 void modem::wfid_make_tones(int numchars)
 {
-	double f, flo, fhi;
+	float f, flo, fhi;
 	int vwidth = (numchars*NUMCOLS + (numchars-1)*CHARSPACE - 1);
 	f = frequency + TONESPACING * vwidth/2.0;
 	fhi = f + TONESPACING;
@@ -746,7 +746,7 @@ void modem::wfid_send(int numchars)
 {
 	int i, j, k;
 	int sym;
-	double val;
+	float val;
 
 	for (i = 0; i < IDSYMLEN; i++) {
 		val = 0.0;
@@ -801,9 +801,9 @@ void modem::pretone()
 {
 	int sr = get_samplerate();
 	int symlen = sr / 10;
-	double phaseincr = 2.0 * M_PI * get_txfreq() / sr;
-	double phase = 0.0;
-	double outbuf[symlen];
+	float phaseincr = 2.0 * M_PI * get_txfreq() / sr;
+	float phase = 0.0;
+	float outbuf[symlen];
 
 	for (int j = 0; j < symlen; j++) {
 		outbuf[j] = (0.5 * (1.0 - cos (M_PI * j / symlen)))*sin(phase);
@@ -886,8 +886,8 @@ void modem::wfid_text(const string& s)
 	put_status("");
 }
 
-double	modem::wfid_outbuf[MAXIDSYMLEN];
-double  modem::wfid_w[MAXTONES];
+float	modem::wfid_outbuf[MAXIDSYMLEN];
+float  modem::wfid_w[MAXTONES];
 
 mfntchr idch1[] = {
 { ' ', { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, }, },

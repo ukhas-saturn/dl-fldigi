@@ -83,7 +83,7 @@ struct fir_coeffs
 {
 	const char * _name ;
 	int          _size ;
-	const double _coefs[MAX_FILT_SIZE];
+	const float _coefs[MAX_FILT_SIZE];
 };
 
 // Narrow, middle and wide fir low pass filter from ACfax
@@ -192,10 +192,10 @@ public:
 		{
 			// Same filter for real and imaginary.
 			const fir_coeffs * ptr_filt = input_filters + ix_filt ;
-			// init() should take const double pointers.
+			// init() should take const float pointers.
 			operator[]( ix_filt ).init( ptr_filt->_size, 1,
-					const_cast< double * >( ptr_filt->_coefs ),
-					const_cast< double * >( ptr_filt->_coefs ) );
+					const_cast< float * >( ptr_filt->_coefs ),
+					const_cast< float * >( ptr_filt->_coefs ) );
 		}
 	}
 }; // fir_filter_pair_set
@@ -320,8 +320,8 @@ class fax_implementation {
 	int m_phase_lines;
 	int m_num_phase_lines;
 	int m_phasing_calls_nb;// Number of calls to decode_phasing for the current image.
-	double m_lpm_img;      // Lines per minute.
-	double m_lpm_sum_rx;   // Sum of the latest LPM values, when RXPHASING.
+	float m_lpm_img;      // Lines per minute.
+	float m_lpm_sum_rx;   // Sum of the latest LPM values, when RXPHASING.
 	int m_default_lpm;     // 120 for WEFAX_576, 60 for WEFAX_288.
 	int m_img_width;       // Calculated with IOC=576 or 288.
 	int m_img_sample;      // Current received samples number when in RXIMAGE.
@@ -342,7 +342,7 @@ class fax_implementation {
 	bool m_manual_mode ;   // Tells whether everything is read, or apt+phasing detection.
 
 	/// The number of samples sent for one line. The LPM is given by the GUI. Typically 5512.
-	double m_smpl_per_lin ;// Recalculated each time m_lpm_img is updated.
+	float m_smpl_per_lin ;// Recalculated each time m_lpm_img is updated.
 
 	int m_ix_filt ;        // Index of the current reception filter.
 
@@ -355,13 +355,13 @@ class fax_implementation {
 	static fir_filter_pair_set m_rx_filters ;
 
 	/// These are used for transmission.
-	lookup_table<double> m_dbl_sine;
-	lookup_table<double> m_dbl_cosine;
-	lookup_table<double> m_dbl_arc_sine;
+	lookup_table<float> m_dbl_sine;
+	lookup_table<float> m_dbl_cosine;
+	lookup_table<float> m_dbl_arc_sine;
 
 	/// Stores a result based on the previous received sample.
-	double m_i_fir_old;
-	double m_q_fir_old;
+	float m_i_fir_old;
+	float m_q_fir_old;
 
 	void decode(const int* buf, int nb_samples);
 
@@ -374,8 +374,8 @@ class fax_implementation {
 	{
 		static const size_t m_sz = 256 ;
 		int m_hist[m_sz];
-		mutable double m_avg ;
-		mutable double m_dev ;
+		mutable float m_avg ;
+		mutable float m_dev ;
 	public:
 		void add_bw( int pix_val ) {
 			pix_val = pix_val < 0 ? 0 : pix_val > 255 ? 255 : pix_val ;
@@ -397,16 +397,16 @@ class fax_implementation {
 			}
 			m_avg = sum_vals / sum ;
 
-			double sum_dlt_pwr2 = 0.0 ;
+			float sum_dlt_pwr2 = 0.0 ;
 			for( size_t i = 0; i < m_sz; ++ i ) {
 				int weight = m_hist[i];
-				double val = i - m_avg ;
+				float val = i - m_avg ;
 				sum_dlt_pwr2 += val * val * weight ;
 			}
 			m_dev = sqrt( sum_dlt_pwr2 / sum );
 		}
-		double average() const { return m_avg; }
-		double stddev() const { return m_dev; };
+		float average() const { return m_avg; }
+		float stddev() const { return m_dev; };
 		void reset() {
 			std::fill( m_hist, m_hist + m_sz, 0 );
 		}
@@ -461,9 +461,9 @@ public:
 	void skip_phasing_to_image(bool auto_center);
 	void skip_phasing_rx(bool auto_center);
 	void end_rx(void);
-	void rx_new_samples(const double* audio_ptr, int audio_sz);
+	void rx_new_samples(const float* audio_ptr, int audio_sz);
         void init_tx(int the_smpl_rate);
-	void modulate(const double* buffer, int n);
+	void modulate(const float* buffer, int n);
 	void tx_params_set(
 		int the_lpm,
 		const unsigned char * xmtpic_buffer,
@@ -473,13 +473,13 @@ public:
 	bool trx_do_next(void);
 	void tx_apt_stop(void);
 
-	double carrier(void) const
+	float carrier(void) const
 	{
 		return m_carrier ;
 	}
 
 	/// The trigo tables have an increment which depends on the carrier frequency.
-	void set_carrier(double freq)
+	void set_carrier(float freq)
 	{
 		m_carrier = freq ;
 		reset_increments();
@@ -538,22 +538,22 @@ public:
 
 private:
 	/// Centered around the frequency.
-	double power_usb_noise(void) const
+	float power_usb_noise(void) const
 	{
-		static double avg_pwr = 0.0 ;
-       		double pwr = wf->powerDensity(m_carrier, 2 * fm_deviation) + 1e-10;
+		static float avg_pwr = 0.0 ;
+       		float pwr = wf->powerDensity(m_carrier, 2 * fm_deviation) + 1e-10;
 
        		return decayavg( avg_pwr, pwr, 10 );
 	}
 
 	/// This evaluates the power signal when APT start frequency. This frequency pattern
 	/// can be observed on the waterfall.
-	double power_usb_apt_start(void) const
+	float power_usb_apt_start(void) const
 	{
-		static double avg_pwr = 0.0 ;
+		static float avg_pwr = 0.0 ;
 		/// Value approximated by watching the waterfall.
 		static const int bandwidth_apt_start = 10 ;
-       		double pwr
+       		float pwr
 			= wf->powerDensity(m_carrier - 2 * m_apt_start_freq, bandwidth_apt_start)
 			+ wf->powerDensity(m_carrier -     m_apt_start_freq, bandwidth_apt_start)
 			+ wf->powerDensity(m_carrier                       , bandwidth_apt_start)
@@ -564,23 +564,23 @@ private:
 	}
 
 	/// Estimates the signal power when the phasing signal is received.
-	double power_usb_phasing(void) const
+	float power_usb_phasing(void) const
 	{
-		static double avg_pwr = 0.0 ;
+		static float avg_pwr = 0.0 ;
 		/// Rough estimate based on waterfall observation.
 		static const int bandwidth_phasing = 1 ;
-       		double pwr = wf->powerDensity(m_carrier - fm_deviation, bandwidth_phasing);
+       		float pwr = wf->powerDensity(m_carrier - fm_deviation, bandwidth_phasing);
 
        		return decayavg( avg_pwr, pwr, 10 );
 	}
 
 	/// There is some power at m_carrier + fm_deviation but this is neglictible.
-	double power_usb_image(void) const
+	float power_usb_image(void) const
 	{
-		static double avg_pwr = 0.0 ;
+		static float avg_pwr = 0.0 ;
 		/// This value is obtained by watching the waterfall.
 		static const int bandwidth_image = 100 ;
-       		double pwr = wf->powerDensity(m_carrier + fm_deviation, bandwidth_image);
+       		float pwr = wf->powerDensity(m_carrier + fm_deviation, bandwidth_image);
 
        		return decayavg( avg_pwr, pwr, 10 );
 	}
@@ -590,23 +590,23 @@ private:
 	/// If this is a real image, bith powers will be close.
 	/// If not, the image is very important, but not the black.
 	/// TODO: Consider removing this, because it is not used.
-	double power_usb_black(void) const
+	float power_usb_black(void) const
 	{
-		static double avg_pwr = 0.0 ;
+		static float avg_pwr = 0.0 ;
 		/// This value is obtained by watching the waterfall.
 		static const int bandwidth_black = 20 ;
-       		double pwr = wf->powerDensity(m_carrier - fm_deviation, bandwidth_black);
+       		float pwr = wf->powerDensity(m_carrier - fm_deviation, bandwidth_black);
 
        		return decayavg( avg_pwr, pwr, 10 );
 	}
 
 	/// Evaluates the signal power for APT stop frequency.
-	double power_usb_apt_stop(void) const
+	float power_usb_apt_stop(void) const
 	{
-		static double avg_pwr = 0.0 ;
+		static float avg_pwr = 0.0 ;
 		/// This value is obtained by watching the waterfall.
 		static const int bandwidth_apt_stop = 50 ;
-       		double pwr = wf->powerDensity(m_carrier - m_apt_stop_freq, bandwidth_apt_stop);
+       		float pwr = wf->powerDensity(m_carrier - m_apt_stop_freq, bandwidth_apt_stop);
 
        		return decayavg( avg_pwr, pwr, 10 );
 	}
@@ -616,11 +616,11 @@ private:
 		const fax_implementation * _ptr_fax ;
 		int                        _cnt ; /// The value can be reused a couple of times.
 
-		double                     _apt_start ;
-		double                     _phasing ;
-		double                     _image ;
-		double                     _black ;
-		double                     _apt_stop ;
+		float                     _apt_start ;
+		float                     _phasing ;
+		float                     _image ;
+		float                     _black ;
+		float                     _apt_stop ;
 
 		fax_state                  _state ; /// Deduction made based on signal power.
 		const char *               _text;
@@ -707,10 +707,10 @@ private:
 		void recalc(void)
 		{
 			/// Adds a small value to avoid division by zero.
-			double noise = _ptr_fax->power_usb_noise() + 1e-10 ;
+			float noise = _ptr_fax->power_usb_noise() + 1e-10 ;
 
 			/// Multiplications are faster than divisions.
-			double inv_noise = 1.0 / noise ;
+			float inv_noise = 1.0 / noise ;
 
 			_apt_start = _ptr_fax->power_usb_apt_start() * inv_noise ;
 			_phasing   = _ptr_fax->power_usb_phasing()   * inv_noise ;
@@ -747,7 +747,7 @@ private:
 		const char * signal_text(void) const { return _text; };
 		const char * signal_stop_code(void) const { return _stop_code; }
 
-		double image_noise_ratio(void) const { return _image ; }
+		float image_noise_ratio(void) const { return _image ; }
 
 		/// This updates a Fl_Chart widget.
 		void display(void) const
@@ -845,7 +845,7 @@ private:
 	sent_files_type m_sent_files ;
 public:
 	/// If the delay is exceeded, returns with an error message.
-	std::string send_file( const std::string & filnam, double max_seconds )
+	std::string send_file( const std::string & filnam, float max_seconds )
 	{
 		LOG_INFO("%s rf_carried=%d carrier=%d", filnam.c_str(), 
 				static_cast<int>(wf->rfcarrier()), m_carrier );
@@ -881,7 +881,7 @@ public:
 	}
 
 	/// Called when loading a file from the GUI, or indirectly from XML-RPC.
-	bool transmit_lock_acquire(const std::string & filnam, double delay = wefax::max_delay )
+	bool transmit_lock_acquire(const std::string & filnam, float delay = wefax::max_delay )
 	{
 		LOG_INFO("Sending %s delay=%f tid=%d", filnam.c_str(), delay, (int)GET_THREAD_ID() );
 		guard_lock g( m_sync_tx_fil.mtxp() );
@@ -926,14 +926,14 @@ public:
 		}
 	};
 	mutable corr_buffer_t m_correlation_buffer ;
-	mutable double m_curr_corr_avg ; // Average line-to-line correlation for the last m_min_corr_lines sampled lines.
-	mutable double m_imag_corr_max ; // Max line-to-line correlation for the current image.
-	mutable double m_imag_corr_min ; // Min line-to-line correlation for the current image.
+	mutable float m_curr_corr_avg ; // Average line-to-line correlation for the last m_min_corr_lines sampled lines.
+	mutable float m_imag_corr_max ; // Max line-to-line correlation for the current image.
+	mutable float m_imag_corr_min ; // Min line-to-line correlation for the current image.
 	mutable int m_corr_calls_nb;
 	static const int m_min_corr_lines = 15 ;
 
 	/// Evaluates the correlation between two lines separated by line_offset pixels.
-	double correlation_from_index(size_t line_length, size_t line_offset) const {
+	float correlation_from_index(size_t line_length, size_t line_offset) const {
                 /// This is a ring buffer.
 		size_t line_length_plus_img_sample = line_length + m_img_sample ;
 
@@ -958,7 +958,7 @@ public:
 			denom_pred += delta_pred * delta_pred ;
 			denom_curr += delta_curr * delta_curr ;
 		}
-		double denominator = sqrt( (double)denom_pred * (double)denom_curr );
+		float denominator = sqrt( (float)denom_pred * (float)denom_curr );
 		if( denominator == 0.0 ) {
 			return 0.0 ;
 		} else {
@@ -997,15 +997,15 @@ public:
 			is_init = true ;
 		}
 
-		double tmpCorrPrev = correlation_from_index(corr_smpl_lin, 0 );
-//		double tmpCorrMax = 0.0 ;
+		float tmpCorrPrev = correlation_from_index(corr_smpl_lin, 0 );
+//		float tmpCorrMax = 0.0 ;
 		size_t local_max = 0 ;
 		bool is_growing = false ;
 
 		/// We could even start the loop later because we are not interested by small shifts.
 		for( size_t i = 1 ; i < max_space_echo; i++ )
 		{
-			double tmpCorr = correlation_from_index(corr_smpl_lin, i );
+			float tmpCorr = correlation_from_index(corr_smpl_lin, i );
 			bool is_growing_next = tmpCorr > tmpCorrPrev ;
 			if( is_growing && ( ! is_growing_next  ) ) {
 				local_max = i - 1 ;
@@ -1046,7 +1046,7 @@ public:
 		++m_corr_calls_nb;
 		/// We should in fact take the smallest one, 60.
 		size_t corr_smpl_lin = lpm_to_samples( m_default_lpm );
-		double current_corr = correlation_from_index(corr_smpl_lin, corr_smpl_lin);
+		float current_corr = correlation_from_index(corr_smpl_lin, corr_smpl_lin);
 
 		/// This never happened, but who knows (Inaccuracy etc...)?
 		if( current_corr > 1.0 ) {
@@ -1073,7 +1073,7 @@ public:
 				current_corr, m_curr_corr_avg, m_imag_corr_max, 
 				m_corr_calls_nb, m_min_corr_lines, state_rx_str(), m_lpm_img );
 		}
-		double metric = m_curr_corr_avg * 100.0 ;
+		float metric = m_curr_corr_avg * 100.0 ;
 		m_ptr_wefax->display_metric(metric);
 
 		static const bool calc_corr_shift = false ;
@@ -1106,7 +1106,7 @@ public:
 			// of 300 lignes. This is a rule of thumb. The bad consequence is that the image
 			// would be a bit too high. This an approximate row number.
 			// On the other hand, if we read very few lines, we assume this is just noise.
-			const double low_corr
+			const float low_corr
 				= ( crr_row < 600 ) ? 0.01   // Short images containing text.
 				: ( crr_row < 1300 ) ? 0.02  // Most of images.
 				: 0.05 ;                     // Deutsche Wetterdienst sometimes 1900 pixels high.
@@ -1152,7 +1152,7 @@ public:
 		/// Message for first detection.
 		if( (stable_state == IDLE) && (m_corr_calls_nb == m_min_corr_lines) ) {
 			// Do not display twice the same value.
-			static double last_corr_avg = 0.0 ;
+			static float last_corr_avg = 0.0 ;
 			if( m_curr_corr_avg != last_corr_avg ) {
 				LOG_INFO("Correlation average %lf m_imag_corr_max=%f: Detected %s",
 					m_curr_corr_avg, m_imag_corr_max, state_to_str(stable_state) );
@@ -1197,7 +1197,7 @@ public:
 		static int stable_carrier = 0 ;
 
 		static const int max_median_freqs = 20 ;
-		static double median_freqs[ max_median_freqs ];
+		static float median_freqs[ max_median_freqs ];
 		static int nb_median_freqs = 0 ;
 
 
@@ -1222,7 +1222,7 @@ public:
 
 		/// The LPM might have changed, but this is very improbable.
 		/// We do not know the LPM so we assume the default.
-		double smpl_per_lin = lpm_to_samples( m_default_lpm );
+		float smpl_per_lin = lpm_to_samples( m_default_lpm );
 		int crr_row = m_img_sample / smpl_per_lin ;
 
 		// Actually executed once for each line of samples.
@@ -1293,15 +1293,15 @@ public:
 		static const int bw_dual[][2] = {
 			{ -fm_deviation - 50, -fm_deviation + 50 },
 			{  fm_deviation - 50,  fm_deviation + 50 } };
-       		double max_carrier_dual = wf->powerDensityMaximum( 2, bw_dual );
+       		float max_carrier_dual = wf->powerDensityMaximum( 2, bw_dual );
 
 		static const int bw_right[][2] = {
 			{  fm_deviation - 50,  fm_deviation + 50 } };
-       		double max_carrier_right = wf->powerDensityMaximum( 1, bw_right );
+       		float max_carrier_right = wf->powerDensityMaximum( 1, bw_right );
 
 		// This might have to be adjusted because DWD has all the energy on the right
 		// band, but Northwood has some on the left.
-		double max_carrier = 0.0 ;
+		float max_carrier = 0.0 ;
 
 		/// Maybe there is not enough room on the left.
 		if( max_carrier_dual < 0.0 ) {
@@ -1351,11 +1351,11 @@ public:
 			std::sort( median_freqs, median_freqs + max_median_freqs );
 			max_carrier = median_freqs[ max_median_freqs / 2 ];
 		}
-		double delta = fabs( m_carrier - max_carrier );
+		float delta = fabs( m_carrier - max_carrier );
 		if( delta > 5.0 ) { // Hertz.
 			/// Do not change the frequency too quickly if an image is received.
-			double next_carr = max_carrier ;
-			LOG_DEBUG("m_carrier=%f max_carrier=%f next_carr=%f", (double)m_carrier, max_carrier, next_carr );
+			float next_carr = max_carrier ;
+			LOG_DEBUG("m_carrier=%f max_carrier=%f next_carr=%f", (float)m_carrier, max_carrier, next_carr );
 			m_ptr_wefax->set_freq(next_carr);
 		}
 
@@ -1369,7 +1369,7 @@ fir_filter_pair_set fax_implementation::m_rx_filters ;
 
 // http://www.newearth.demon.co.uk/radio/hfwefax1.htm
 // "...the total offset is 1900Hz, so to tune a fax station on 4610kHz, tune to 4608.1kHz USB."
-static const double wefax_default_carrier = 1900;
+static const float wefax_default_carrier = 1900;
 
 fax_implementation::fax_implementation( int fax_mode, wefax * ptr_wefax  )
 	: m_ptr_wefax( ptr_wefax )
@@ -1534,7 +1534,7 @@ void fax_implementation::decode_apt(int x, const fax_signal & the_signal )
 		curr_freq=m_sample_rate*m_apt_trans/m_apt_count;
 
 		/// This writes the S/R level on the status bar.
-		double tmp_snr = the_signal.image_noise_ratio();
+		float tmp_snr = the_signal.image_noise_ratio();
 		char snr_buffer[64];
         	snprintf(snr_buffer, sizeof(snr_buffer), "s/n %3.0f dB", 20.0 * log10(tmp_snr));
 		put_Status1(snr_buffer);
@@ -1705,8 +1705,8 @@ void fax_implementation::save_automatic(
 
 	/// These criteria used by rules-of-thumb to eliminate blank images.
 	m_statistics.calc();
-	double avg = m_statistics.average();
-	double stddev = m_statistics.stddev();
+	float avg = m_statistics.average();
+	float stddev = m_statistics.stddev();
 	int current_row = m_img_sample / m_smpl_per_lin ;
 
 	/* Sometimes the AFC leaves the right frequency (Because no signal) and it produces
@@ -1727,7 +1727,7 @@ void fax_implementation::save_automatic(
 		goto cleanup_rx ;
 	}
 
-	static const double min_max_correlation = 0.20 ;
+	static const float min_max_correlation = 0.20 ;
 	if( m_imag_corr_max < min_max_correlation ) {
 		LOG_INFO(_("Do not save image with correlation < less than %f"), min_max_correlation );
 		goto cleanup_rx ;
@@ -1851,7 +1851,7 @@ void fax_implementation::decode_phasing(int x, const fax_signal & the_signal )
 		   m_curr_phase_len <= 1.1  * m_sample_rate &&
 		   m_curr_phase_len >= 0.15 * m_sample_rate)
 		{
-			double tmp_lpm = 60.0 * m_sample_rate / m_curr_phase_len;
+			float tmp_lpm = 60.0 * m_sample_rate / m_curr_phase_len;
 
 			m_lpm_sum_rx += tmp_lpm;
 			++m_phase_lines;
@@ -1884,7 +1884,7 @@ void fax_implementation::decode_phasing(int x, const fax_signal & the_signal )
 				/// Half of the band of the phasing line.
 				m_img_sample=static_cast<int>(1.025 * m_smpl_per_lin );
 
-				double tmp_pos=std::fmod(m_img_sample,m_smpl_per_lin) / m_smpl_per_lin;
+				float tmp_pos=std::fmod(m_img_sample,m_smpl_per_lin) / m_smpl_per_lin;
 				m_last_col=static_cast<int>(tmp_pos*m_img_width);
 
 				/// Now the image will start at the right column offset.
@@ -1916,7 +1916,7 @@ void fax_implementation::decode_phasing(int x, const fax_signal & the_signal )
 		/// We do not know the LPM so we assume the default.
 		/// TODO: We could take the one given by the GUI. Apparently; problem for Japanese faxes when lpm=60:
 		// http://forums.radioreference.com/digital-signals-decoding/228802-problems-decoding-wefax.html
-		double smpl_per_lin = lpm_to_samples( m_default_lpm );
+		float smpl_per_lin = lpm_to_samples( m_default_lpm );
 		int smpl_per_lin_int = smpl_per_lin ;
 		int nb_tested_phasing_lines = m_phasing_calls_nb / smpl_per_lin ;
 
@@ -1948,7 +1948,7 @@ void fax_implementation::decode_phasing(int x, const fax_signal & the_signal )
 
 bool fax_implementation::decode_image(int x)
 {
-	double current_row_dbl = m_img_sample / m_smpl_per_lin ;
+	float current_row_dbl = m_img_sample / m_smpl_per_lin ;
 	int current_row = current_row_dbl ;
 	int curr_col= m_img_width * (current_row_dbl - current_row) ;
 
@@ -2091,19 +2091,19 @@ void fax_implementation::end_rx(void)
 }
 
 /// Receives data from the soundcard.
-void fax_implementation::rx_new_samples(const double* audio_ptr, int audio_sz)
+void fax_implementation::rx_new_samples(const float* audio_ptr, int audio_sz)
 {
 	int demod[audio_sz];
-	static const double half_255 = (double)range_sample * 0.5 ;
-	const double ratio_sam_devi = half_255 * static_cast<double>(m_sample_rate)/fm_deviation;
+	static const float half_255 = (float)range_sample * 0.5 ;
+	const float ratio_sam_devi = half_255 * static_cast<float>(m_sample_rate)/fm_deviation;
 
 	/// The reception filter may have been changed by the GUI.
 	C_FIR_filter & ref_fir_filt_pair = m_rx_filters[ m_ix_filt ];
 
-	const double half_arc_sine_size = m_dbl_arc_sine.size() / 2.0 ;
+	const float half_arc_sine_size = m_dbl_arc_sine.size() / 2.0 ;
 
 	for(int i=0; i<audio_sz; i++) {
-		double idx_aux = audio_ptr[i] ;
+		float idx_aux = audio_ptr[i] ;
 
 		cmplx firin( idx_aux*m_dbl_cosine.next_value(), idx_aux*m_dbl_sine.next_value() );
 		cmplx firout ;
@@ -2111,12 +2111,12 @@ void fax_implementation::rx_new_samples(const double* audio_ptr, int audio_sz)
 		/// This returns zero if the filter is not yet stable.
 		/* int run_status = */ ref_fir_filt_pair.run( firin, firout );
 
-		double ifirout = firout.real();
-		double qfirout = firout.imag();
+		float ifirout = firout.real();
+		float qfirout = firout.imag();
 
 		if(m_freq_mod ) {
 			/// Normalize values.
-			double abs=std::sqrt(qfirout*qfirout+ifirout*ifirout);
+			float abs=std::sqrt(qfirout*qfirout+ifirout*ifirout);
 			/// cosine(a)
 			ifirout/=abs;
 			/// sine(a)
@@ -2129,7 +2129,7 @@ void fax_implementation::rx_new_samples(const double* audio_ptr, int audio_sz)
 				/// It makes something like sine(a-b).
 				/// Maybe the derivative of the phase, that is,
 				/// the instantaneous frequency ?
-				double y = m_q_fir_old * ifirout - m_i_fir_old * qfirout ;
+				float y = m_q_fir_old * ifirout - m_i_fir_old * qfirout ;
 
 				/// Mapped to the interval [0 .. size]
 				/// m_dbl_arc_sine[i] = asin(2*i/m_dbl_arc_sine.size-1)/2/Pi.
@@ -2137,7 +2137,7 @@ void fax_implementation::rx_new_samples(const double* audio_ptr, int audio_sz)
 				y = ( y + 1.0 ) * half_arc_sine_size;
 
 				/// TODO: y might be rounded with more accuracy: (int)(Y+0.5)
-				double x = ratio_sam_devi * m_dbl_arc_sine[static_cast<size_t>(y)];
+				float x = ratio_sam_devi * m_dbl_arc_sine[static_cast<size_t>(y)];
 
 				int scaled_x = x + half_255 ;
 				if(scaled_x < 0) {
@@ -2165,12 +2165,12 @@ void fax_implementation::rx_new_samples(const double* audio_ptr, int audio_sz)
 #ifdef WEFAX_DISPLAY_SCOPE
 	/// Nothing really meaningful to display.
 	/// Beware that some pixels are lost if too many things are displayed
-	double scope_demod[ audio_sz ];
+	float scope_demod[ audio_sz ];
 	/// TODO: Do this in the loop, it will avoid conversions.
 	for( int i = 0 ; i < audio_sz ; ++i ) {
 		scope_demod[ i ] = demod[i];
 	}
-	set_scope( (double *)scope_demod, audio_sz , true );
+	set_scope( (float *)scope_demod, audio_sz , true );
 #endif // WEFAX_DISPLAY_SCOPE
 }
 
@@ -2185,15 +2185,15 @@ void fax_implementation::init_tx(int the_smpl_rat)
 }
 
 /// Elements of buffer are between 0.0 and 1.0
-void fax_implementation::modulate(const double* buffer, int number)
+void fax_implementation::modulate(const float* buffer, int number)
 {
 	/// TODO: This should be in m_short_sine
-	static const double dbl_max_short_invert = 1.0 / 32768.0 ;
+	static const float dbl_max_short_invert = 1.0 / 32768.0 ;
 
-	double stack_xmt_buf[number] ;
+	float stack_xmt_buf[number] ;
 	if( m_freq_mod ) {
 		for(int i = 0; i < number; i++) {
-			double tmp_freq = m_carrier + 2. * ( buffer[i] - 0.5 ) * fm_deviation ;
+			float tmp_freq = m_carrier + 2. * ( buffer[i] - 0.5 ) * fm_deviation ;
 			m_short_sine.set_increment(m_short_sine.size() * tmp_freq / m_sample_rate);
 			stack_xmt_buf[i] = m_short_sine.next_value() * dbl_max_short_invert ;
 		}
@@ -2231,7 +2231,7 @@ bool fax_implementation::trx_do_next(void)
 
 	/// Should not be too big because it is allocated on the stack, gcc feature.
 	static const int block_len = 256 ;
-	double buf[block_len];
+	float buf[block_len];
 
 	bool end_of_loop = false ;
 	bool tx_completed = true ;
@@ -2268,7 +2268,7 @@ bool fax_implementation::trx_do_next(void)
 		if(m_tx_state==TXPHASING) {
 			nb_samples_to_send = smpl_per_lin * m_tx_phasing_lin ;
 			if( curr_sample_idx < nb_samples_to_send ) {
-				double pos= (double)(curr_sample_idx % smpl_per_lin) / (double)smpl_per_lin;
+				float pos= (float)(curr_sample_idx % smpl_per_lin) / (float)smpl_per_lin;
 				buf[num_bytes_to_write] = (pos<0.025||pos>=0.975 )
 					? (m_phase_inverted?0.0:1.0) 
 					: (m_phase_inverted?1.0:0.0);
@@ -2293,14 +2293,14 @@ bool fax_implementation::trx_do_next(void)
 			/// which cannot change because because it depends on the LPM.
 			/// Accordingly the height is stretched.
 			/// For LPM=120 and sample rate=11025 Hz, smpl_per_lin=5512.
-			double ratio_img_to_fax = (double)m_img_width / m_img_tx_cols ;
-			double samples_per_pix =  smpl_per_lin / (double)m_img_width ;
-			double ratio_pow = ratio_img_to_fax * ratio_img_to_fax * samples_per_pix ;
+			float ratio_img_to_fax = (float)m_img_width / m_img_tx_cols ;
+			float samples_per_pix =  smpl_per_lin / (float)m_img_width ;
+			float ratio_pow = ratio_img_to_fax * ratio_img_to_fax * samples_per_pix ;
 			nb_samples_to_send = m_img_tx_cols * m_img_tx_rows * ratio_pow ;
 			if( curr_sample_idx < nb_samples_to_send ) {
-				int tmp_col = (double)( curr_sample_idx % smpl_per_lin ) * (double)m_img_tx_cols / smpl_per_lin;
+				int tmp_col = (float)( curr_sample_idx % smpl_per_lin ) * (float)m_img_tx_cols / smpl_per_lin;
 
-				int tmp_row = (double)( curr_sample_idx / smpl_per_lin ) * (double)m_img_tx_cols / m_img_width;
+				int tmp_row = (float)( curr_sample_idx / smpl_per_lin ) * (float)m_img_tx_cols / m_img_width;
 				if( tmp_row >= m_img_tx_rows ) {
 					LOG_ERROR( "Inconsistent tmp_row=%d m_img_tx_rows=%d "
 						"curr_sample_idx=%d smpl_per_lin=%d "
@@ -2315,7 +2315,7 @@ bool fax_implementation::trx_do_next(void)
 				unsigned char temp_pix = m_xmt_pic_buf[ byte_offset ];
 				curr_sample_idx++;
 				REQ( wefax_pic::set_tx_pic, temp_pix, tmp_col, tmp_row, m_img_color );
-				buf[num_bytes_to_write]= (double)temp_pix / 256.0 ;
+				buf[num_bytes_to_write]= (float)temp_pix / 256.0 ;
 
 				if( ( curr_sample_idx % 5000 ) == 0 ) {
 					LOG_INFO(
@@ -2498,7 +2498,7 @@ wefax::wefax(trx_mode wefax_mode) : modem()
 #if defined(__WIN32__) || defined(__APPLE__)
 #include <ctime>
 /// This is much less accurate.
-static double current_time(void)
+static float current_time(void)
 {
 	clock_t clks = clock();
 
@@ -2509,7 +2509,7 @@ static double current_time(void)
 
 #include <sys/time.h>
 
-static double current_time(void)
+static float current_time(void)
 {
 //  DJV/AB3NR
 // Replace call to deprecated ftime() function with call to
@@ -2524,7 +2524,7 @@ static double current_time(void)
 //  DJV/AB3NR
 
 	struct timespec ts;
-	double curtime;
+	float curtime;
 
 // Do not know if CLOCK_MONOTONIC or CLOCK_REALTIME is appropriate. DJV
 
@@ -2532,7 +2532,7 @@ static double current_time(void)
                 LOG_PERROR("clock_gettime");
                 abort();
         }
-	curtime= ts.tv_nsec*1e-09 + (double)ts.tv_sec;
+	curtime= ts.tv_nsec*1e-09 + (float)ts.tv_sec;
 	return curtime;
 }
 #else
@@ -2540,7 +2540,7 @@ static double current_time(void)
 // This is much less accurate.
 // Add compile time warning  DJV/AB3NR
 #warning imprecise clock() call in function current_time in wefax.cxx
-static double current_time(void)
+static float current_time(void)
 {
 	clock_t clks = clock();
 
@@ -2550,7 +2550,7 @@ static double current_time(void)
 #endif //__WIN32__
 
 /// Callback continuously called by fldigi modem class.
-int wefax::rx_process(const double *buf, int len)
+int wefax::rx_process(const float *buf, int len)
 {
 	if( len == 0 )
 	{
@@ -2561,7 +2561,7 @@ int wefax::rx_process(const double *buf, int len)
 
 	static int idx = 0 ;
 
-	static double buf_tim[avg_buf_size];
+	static float buf_tim[avg_buf_size];
 	static int    buf_len[avg_buf_size];
 
 	int idx_mod = idx % avg_buf_size ;
@@ -2578,14 +2578,14 @@ int wefax::rx_process(const double *buf, int len)
 			LOG_INFO( _("Starting samples loss control avg_buf_size=%d"), avg_buf_size);
 		}
 		int idx_mod_first = idx % avg_buf_size ;
-		double total_tim = buf_tim[idx_mod] - buf_tim[idx_mod_first];
+		float total_tim = buf_tim[idx_mod] - buf_tim[idx_mod_first];
 		int total_len = 0 ;
 		for( int ix = 0 ; ix < avg_buf_size ; ++ix ) {
 			total_len += buf_len[ix] ;
 		}
 
 		/// Estimate the real sample rate.
-		double estim_smpl_rate = (double)total_len / total_tim ;
+		float estim_smpl_rate = (double)total_len / total_tim ;
 
 		/// If too far from what it should be, it means that pixels were lost.
 		if( estim_smpl_rate < 0.95 * modem::samplerate ) {
@@ -2694,7 +2694,7 @@ void wefax::set_lpm( int the_lpm )
 /// Transmission time in seconds. Factor 3 if b/w image.
 int wefax::tx_time( int nb_bytes ) const
 {
-	return (double)nb_bytes / modem::samplerate ;
+	return (float)nb_bytes / modem::samplerate ;
 }
 
 /// This prints a message about the progress of image sending,
@@ -2702,7 +2702,7 @@ int wefax::tx_time( int nb_bytes ) const
 bool wefax::is_tx_finished( int ix_sample, int nb_sample, const char * msg ) const
 {
 	static char wefaxmsg[256];
-	double fraction_done = nb_sample ? 100.0 * (double)ix_sample / nb_sample : 0.0 ;
+	float fraction_done = nb_sample ? 100.0 * (float)ix_sample / nb_sample : 0.0 ;
 	int tm_left = tx_time( nb_sample - ix_sample );
 	snprintf(
 			wefaxmsg, sizeof(wefaxmsg),
@@ -2791,7 +2791,7 @@ void wefax::qso_rec_save(void)
 }
 
 /// Called when changing the carrier in the GUI, and by class modem with 1000Hz, when initializing.
-void wefax::set_freq(double freq)
+void wefax::set_freq(float freq)
 {
 	modem::set_freq(freq);
 	/// This must recompute the increments of the trigonometric tables.
@@ -2816,13 +2816,13 @@ std::string wefax::get_received_file( int max_seconds )
 	return m_impl->get_received_file( max_seconds );
 }
 
-std::string wefax::send_file( const std::string & filnam, double max_seconds )
+std::string wefax::send_file( const std::string & filnam, float max_seconds )
 {
 	return m_impl->send_file( filnam, max_seconds );
 }
 
 /// Transmitting files is done in exclusive mode.
-bool wefax::transmit_lock_acquire(const std::string & filnam, double max_seconds )
+bool wefax::transmit_lock_acquire(const std::string & filnam, float max_seconds )
 {
 	return m_impl->transmit_lock_acquire( filnam, max_seconds );
 }

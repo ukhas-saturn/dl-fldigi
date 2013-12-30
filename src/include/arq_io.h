@@ -10,7 +10,7 @@ extern void WriteARQsocket(unsigned char* data, size_t len);
 extern bool Socket_arqRx();
 extern void AbortARQ();
 extern void pskmail_notify_rsid(trx_mode mode);
-extern void pskmail_notify_s2n(double s2n_count, double s2n_avg, double s2n_stddev);
+extern void pskmail_notify_s2n(float s2n_count, float s2n_avg, float s2n_stddev);
 
 class ARQ_SOCKET_Server
 {

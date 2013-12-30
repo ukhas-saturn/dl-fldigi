@@ -70,7 +70,7 @@ enum {
 	RSID_BANDWIDTH_WIDE,
 };
 
-typedef double rs_fft_type;
+typedef float rs_fft_type;
 typedef std::complex<rs_fft_type> rs_cpx_type;
 
 struct RSIDs { unsigned short rs; trx_mode mode; const char* name; };
@@ -130,7 +130,7 @@ private:
 	static long	src_callback(void* cb_data, float** data);
 
 // transmit
-	double	*outbuf;
+	float	*outbuf;
 	size_t  symlen;
 	unsigned short rmode;
 	unsigned short rmode2;

@@ -32,14 +32,14 @@
 // Code has been tested for types
 //    g_fft<float>
 //    g_fft<float_t>
-//    g_fft<double>
-//    g_fft<double_t>
+//    g_fft<float>
+//    g_fft<float_t>
 // where the xxx types perform better than the xxx_t types
 // typical performance for 8192 point fft on an Intel(R) Pentium(R) Dual
 // CPU  E2180  @ 2.00GHz
 //      type      complex_fwd  real_fwd  
-//      double    0.407 ms     0.203 ms
-//      double_t  1.269 ms     0.593 ms
+//      float    0.407 ms     0.203 ms
+//      float_t  1.269 ms     0.593 ms
 //      float     0.385 ms     0.193 ms
 //      float_t   1.160 ms     0.627 ms
 //==============================================================================
@@ -155,7 +155,7 @@ void g_fft<FFT_TYPE>::fftCosInit(int M, FFT_TYPE *Utbl)
 
 	Utbl[0] = FFT_TYPE(1.0);
 	for (i1 = 1; i1 < fftN/4; i1++)
-	  Utbl[i1] = (FFT_TYPE)cos((2.0 * FFT_PI * (double)i1) / (double)fftN);
+	  Utbl[i1] = (FFT_TYPE)cos((2.0 * FFT_PI * (float)i1) / (float)fftN);
 	Utbl[fftN/4] = FFT_TYPE(0.0);
 }
 
@@ -3186,7 +3186,7 @@ void g_fft<FFT_TYPE>::riffts1(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, short *BRL
 	int StageCnt;
 	int NDiffU;
 
-	scale = (FFT_TYPE)(1.0 / (double)((int)POW2(M)));
+	scale = (FFT_TYPE)(1.0 / (float)((int)POW2(M)));
 	M = M - 1;
 	switch (M) {
 	case -1:

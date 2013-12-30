@@ -13,17 +13,17 @@ private:
 #define NUMTONES 8
 
 private:
-	double power[NUMTONES];
-	double thresh;
-	double maxpower;
-	double minpower;
-	double data[350];
+	float power[NUMTONES];
+	float thresh;
+	float maxpower;
+	float minpower;
+	float data[350];
 
 	goertzel *filt[NUMTONES];
 
 	int framesize;
 
-	static double coef[];
+	static float coef[];
 	static int k[];
 	static const char *dtran[];
 
@@ -31,8 +31,8 @@ private:
 	static int col[];
 	static const char rc[];
 
-	double outbuf[16384];
-	double shape[128];
+	float outbuf[16384];
+	float shape[128];
 	int RT;
 	int duration;
 	int silence_time;

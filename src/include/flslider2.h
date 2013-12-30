@@ -161,7 +161,7 @@ class FL_EXPORT My_Counter : public Fl_Valuator {
   Fl_Fontsize textsize_;
   Fl_Color textcolor_;
   Fl_Color bkcolor_;
-  double lstep_;
+  float lstep_;
   uchar mouseobj;
   static void repeat_callback(void *);
   int calc_mouseobj();
@@ -183,24 +183,24 @@ public:
     The default value is 1.0.
     \param[in] a large step increment.
   */
-  void lstep(double a) {lstep_ = a;}
+  void lstep(float a) {lstep_ = a;}
 
   /**
     Sets the increments for the normal and large step buttons.
     \param[in] a, b normal and large step increments.
   */
-  void step(double a,double b) {Fl_Valuator::step(a); lstep_ = b;}
+  void step(float a,float b) {Fl_Valuator::step(a); lstep_ = b;}
 
   /**
     Sets the increment for the normal step buttons.
     \param[in] a normal step increment.
   */
-  void step(double a) {Fl_Valuator::step(a);}
+  void step(float a) {Fl_Valuator::step(a);}
 
   /**
     Returns the increment for normal step buttons.
    */
-  double step() const {return Fl_Valuator::step();}
+  float step() const {return Fl_Valuator::step();}
 
   /** Gets the text font */
   Fl_Font textfont() const {return textfont_;}

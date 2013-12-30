@@ -68,7 +68,7 @@ wwv::~wwv() {
 
 wwv::wwv() : modem()
 {
-	double lp;
+	float lp;
 	mode = MODE_WWV;
 	frequency = 1000;
 	bandwidth = 200;
@@ -98,7 +98,7 @@ wwv::wwv() : modem()
 //
 void wwv::update_syncscope()
 {
-	double max = 0, min = 1e6, range;
+	float max = 0, min = 1e6, range;
 	for (int i = 0; i < 1000; i++ ) {
 		if (max < buffer[i]) max = buffer[i];
 		if (min > buffer[i]) min = buffer[i];
@@ -121,7 +121,7 @@ void wwv::update_syncscope()
 // Nominal sound card sampling rate is set to 8000 Hz
 //=======================================================================
 
-int wwv::rx_process(const double *buf, int len)
+int wwv::rx_process(const float *buf, int len)
 {
 	cmplx z, znco;
 
@@ -175,7 +175,7 @@ void wwv::makeshape()
 		keyshape[i] = 0.5 * (1.0 - cos (M_PI * i / 32));
 }
 
-double wwv::nco(double freq)
+float wwv::nco(float freq)
 {
 	phaseacc += 2.0 * M_PI * freq / samplerate;
 
@@ -209,7 +209,7 @@ int wwv::tx_process()
 		return -1;
 	}
 	if (--cycle == 0) {
-		memcpy(play, audio, 400 * sizeof(double));
+		memcpy(play, audio, 400 * sizeof(float));
 		ModulateXmtr(play, 400);
 		cycle = 4;
 	} else

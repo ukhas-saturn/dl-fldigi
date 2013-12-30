@@ -46,7 +46,7 @@
 C_FIR_filter::C_FIR_filter () {
 	pointer = counter = length = 0;
 	decimateratio = 0;
-	ifilter = qfilter = (double *)0;
+	ifilter = qfilter = (float *)0;
 	ffreq = 0.0;
 }
 
@@ -55,27 +55,27 @@ C_FIR_filter::~C_FIR_filter() {
 	if (qfilter) delete [] qfilter;
 }
 
-void C_FIR_filter::init(int len, int dec, double *itaps, double *qtaps) {
+void C_FIR_filter::init(int len, int dec, float *itaps, float *qtaps) {
 	length = len;
 	decimateratio = dec;
 	if (ifilter) {
 		delete [] ifilter;
-		ifilter = (double *)0;
+		ifilter = (float *)0;
 	}
 	if (qfilter) {
 		delete [] qfilter;
-		qfilter = (double *)0;
+		qfilter = (float *)0;
 	}
 
 	for (int i = 0; i < FIRBufferLen; i++)
 		ibuffer[i] = qbuffer[i] = 0.0;
 	
 	if (itaps) {
-            ifilter = new double[len];
+            ifilter = new float[len];
 		for (int i = 0; i < len; i++) ifilter[i] = itaps[i];
 	}
 	if (qtaps) {
-		qfilter = new double[len];
+		qfilter = new float[len];
 		for (int i = 0; i < len; i++) qfilter[i] = qtaps[i];
 	}
 
@@ -89,12 +89,12 @@ void C_FIR_filter::init(int len, int dec, double *itaps, double *qtaps) {
 // of 'f1' and 'f2'. (0 <= f1 < f2 <= 0.5)
 //=====================================================================
 
-double * C_FIR_filter::bp_FIR(int len, int hilbert, double f1, double f2)
+float * C_FIR_filter::bp_FIR(int len, int hilbert, float f1, float f2)
 {
-	double *fir;
-	double t, h, x;
+	float *fir;
+	float t, h, x;
 
-	fir = new double[len];
+	fir = new float[len];
 
 	for (int i = 0; i < len; i++) {
 		t = i - (len - 1.0) / 2.0;
@@ -125,8 +125,8 @@ double * C_FIR_filter::bp_FIR(int len, int hilbert, double f1, double f2)
 // 0.5 frequency point = freq
 //=====================================================================
 
-void C_FIR_filter::init_lowpass (int len, int dec, double freq) {
-	double *fi = bp_FIR(len, 0, 0.0, freq);
+void C_FIR_filter::init_lowpass (int len, int dec, float freq) {
+	float *fi = bp_FIR(len, 0, 0.0, freq);
 	ffreq = freq;
 	init (len, dec, fi, fi);
 	delete [] fi;
@@ -139,8 +139,8 @@ void C_FIR_filter::init_lowpass (int len, int dec, double freq) {
 // 0.5 frequency points of f1 (low) and f2 (high)
 //=====================================================================
 
-void C_FIR_filter::init_bandpass (int len, int dec, double f1, double f2) {
-	double *fi = bp_FIR (len, 0, f1, f2);
+void C_FIR_filter::init_bandpass (int len, int dec, float f1, float f2) {
+	float *fi = bp_FIR (len, 0, f1, f2);
 	init (len, dec, fi, fi);
 	delete [] fi;
 }
@@ -150,8 +150,8 @@ void C_FIR_filter::init_bandpass (int len, int dec, double f1, double f2) {
 //=====================================================================
 
 void C_FIR_filter::init_hilbert (int len, int dec) {
-	double *fi = bp_FIR(len, 0, 0.05, 0.45);
-	double *fq = bp_FIR(len, 1, 0.05, 0.45);
+	float *fi = bp_FIR(len, 0, 0.05, 0.45);
+	float *fq = bp_FIR(len, 1, 0.05, 0.45);
 	init (len, dec, fi, fq);
 	delete [] fi;
 	delete [] fq;
@@ -175,8 +175,8 @@ int C_FIR_filter::run (const cmplx &in, cmplx &out) {
 	pointer++;
 	if (pointer == FIRBufferLen) {
 		/// memmove is necessary if length >= FIRBufferLen/2 , theoretically possible.
-		memmove (ibuffer, ibuffer + FIRBufferLen - length, length * sizeof (double) );
-		memmove (qbuffer, qbuffer + FIRBufferLen - length, length * sizeof (double) );
+		memmove (ibuffer, ibuffer + FIRBufferLen - length, length * sizeof (float) );
+		memmove (qbuffer, qbuffer + FIRBufferLen - length, length * sizeof (float) );
 		pointer = length;
 	}
 	if (counter == decimateratio) {
@@ -190,8 +190,8 @@ int C_FIR_filter::run (const cmplx &in, cmplx &out) {
 // Run the filter for the Real part of the cmplx variable
 //=====================================================================
 
-int C_FIR_filter::Irun (const double &in, double &out) {
-	double *iptr = ibuffer + pointer;
+int C_FIR_filter::Irun (const float &in, float &out) {
+	float *iptr = ibuffer + pointer;
 
 	pointer++;
 	counter++;
@@ -220,8 +220,8 @@ int C_FIR_filter::Irun (const double &in, double &out) {
 // Run the filter for the Imaginary part of the cmplx variable
 //=====================================================================
 
-int C_FIR_filter::Qrun (const double &in, double &out) {
-	double *qptr = ibuffer + pointer;
+int C_FIR_filter::Qrun (const float &in, float &out) {
+	float *qptr = ibuffer + pointer;
 
 	pointer++;
 	counter++;
@@ -261,7 +261,7 @@ int C_FIR_filter::Qrun (const double &in, double &out) {
 Cmovavg::Cmovavg (int filtlen)
 {
 	len = filtlen;
-	in = new double[len];
+	in = new float[len];
 	empty = true;
 }
 
@@ -270,7 +270,7 @@ Cmovavg::~Cmovavg()
 	if (in) delete [] in;
 }
 
-double Cmovavg::run(double a)
+float Cmovavg::run(float a)
 {
 	if (!in) {
 		return a;
@@ -294,7 +294,7 @@ void Cmovavg::setLength(int filtlen)
 {
 	if (filtlen > len) {
 		if (in) delete [] in;
-		in = new double[filtlen];
+		in = new float[filtlen];
 	}
 	len = filtlen;
 	empty = true;
@@ -480,9 +480,9 @@ void sfft::run(const cmplx& input, cmplx * __restrict__ result, int stride )
 // mag = Q1*Q1 + Q2*Q2 - Q1*Q2*k1
 // ============================================================================
 
-goertzel::goertzel(int n, double freq, double sr)
+goertzel::goertzel(int n, float freq, float sr)
 {
-	double w;
+	float w;
 	w = 2 * M_PI * freq / sr;
 	k1 = cos(w);
 	k2 = sin(w);
@@ -502,9 +502,9 @@ void goertzel::reset()
 	isvalid = false;
 }
 
-void goertzel::reset(int n, double freq, double sr)
+void goertzel::reset(int n, float freq, float sr)
 {
-	double w;
+	float w;
 	w = 2 * M_PI * freq / sr;
 	k1 = cos(w);
 	k2 = sin(w);
@@ -514,7 +514,7 @@ void goertzel::reset(int n, double freq, double sr)
 	isvalid = false;
 }
 
-bool goertzel::run(double sample)
+bool goertzel::run(float sample)
 {
     Q0 = sample + k3*Q1 - Q2;
     Q2 = Q1;
@@ -526,17 +526,17 @@ bool goertzel::run(double sample)
     return false;
 }
 
-double goertzel::real()
+float goertzel::real()
 {
     return ((0.5*k3*Q1 - Q2)/N);
 }
 
-double goertzel::imag()
+float goertzel::imag()
 {
     return ((k2*Q1)/N);
 }
 
-double goertzel::mag()
+float goertzel::mag()
 {
     return (Q2*Q2 + Q1*Q1 - k3*Q2*Q1);
 }

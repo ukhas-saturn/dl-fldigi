@@ -456,7 +456,7 @@ extern Fl_Input_Choice *menuMix;
 extern Fl_Light_Button *btnMicIn;
 extern void setMixerInput(int);
 extern Fl_Light_Button *btnLineIn;
-extern void setPCMvolume(double);
+extern void setPCMvolume(float);
 extern Fl_Value_Slider2 *valPCMvolume;
 extern Fl_Group *tabAudioRightChannel;
 extern Fl_Check_Button *chkForceMono;

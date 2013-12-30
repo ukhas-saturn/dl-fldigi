@@ -71,55 +71,55 @@ enum RTTY_PARITY {
 class Oscillator
 {
 public:
-	Oscillator( double samplerate );
+	Oscillator( float samplerate );
 	~Oscillator() {}
-	double Update( double frequency );
+	float Update( float frequency );
 
 private:
-	double m_phase;
-	double m_samplerate;
+	float m_phase;
+	float m_samplerate;
 };
 
 class SymbolShaper
 {
 public:
-	SymbolShaper(double baud = 45.45, double sr = 8000.0);
+	SymbolShaper(float baud = 50, float sr = 8000.0);
 	~SymbolShaper() {}
 	void reset();
-	void Preset(double baud, double sr);
+	void Preset(float baud, float sr);
 	void print_sinc_table();
-	double Update( bool state );
+	float Update( bool state );
 
 private:
 	int		 m_table_size;
-	double*	 m_sinc_table;
+	float*	 m_sinc_table;
 
 	bool		m_State;
-	double		m_Accumulator;
+	float		m_Accumulator;
 	long		m_Counter0;
 	long		m_Counter1;
 	long		m_Counter2;
 	long		m_Counter3;
 	long		m_Counter4;
 	long		m_Counter5;
-	double		m_Factor0;
-	double		m_Factor1;
-	double		m_Factor2;
-	double		m_Factor3;
-	double		m_Factor4;
-	double		m_Factor5;
-	double		m_SincTable[1024];
+	float		m_Factor0;
+	float		m_Factor1;
+	float		m_Factor2;
+	float		m_Factor3;
+	float		m_Factor4;
+	float		m_Factor5;
+	float		m_SincTable[1024];
 
-	double		baudrate;
-	double		samplerate;
+	float		baudrate;
+	float		samplerate;
 };
 
 //enum TTY_MODE { LETTERS, FIGURES };
 
 class rtty : public modem {
 public:
-	static const double SHIFT[];
-	static const double BAUD[];
+	static const float SHIFT[];
+	static const float BAUD[];
 	static const int	BITS[];
 
 private:
@@ -129,7 +129,7 @@ private:
 	SymbolShaper	*m_SymShaper1;
 	SymbolShaper	*m_SymShaper2;
 
-	double shift;
+	float shift;
 	int symbollen;
 	int bytelen;
 	int nbits;
@@ -137,31 +137,31 @@ private:
 	int msb;
 	bool useFSK;
 
-	double		phaseacc;
-	double		rtty_squelch;
-	double		rtty_shift;
-	double		rtty_BW;
-	double		rtty_baud;
+	float		phaseacc;
+	float		rtty_squelch;
+	float		rtty_shift;
+	float		rtty_BW;
+	float		rtty_baud;
 	int 		rtty_bits;
 	RTTY_PARITY	rtty_parity;
 	int			rtty_stop;
 	bool		rtty_msbfirst;
 
-	double		mark_noise;
-	double		space_noise;
+	float		mark_noise;
+	float		space_noise;
 	Cmovavg		*bits;
 	bool		nubit;
 	bool		bit;
 
 	bool		bit_buf[MAXBITS];
 
-	double mark_phase;
-	double space_phase;
+	float mark_phase;
+	float space_phase;
 	fftfilt *mark_filt;
 	fftfilt *space_filt;
 
-	double *pipe;
-	double *dsppipe;
+	float *pipe;
+	float *dsppipe;
 	int pipeptr;
 
 	cmplx mark_history[MAXPIPE];
@@ -172,20 +172,20 @@ private:
 	int counter;
 	int bitcntr;
 	int rxdata;
-	double cfreq; // center frequency between MARK/SPACE tones
-	double shift_offset; // 1/2 rtty_shift
+	float cfreq; // center frequency between MARK/SPACE tones
+	float shift_offset; // 1/2 rtty_shift
     //For SSDV
-    double posfreq, negfreq;
-    double freqerrhi, freqerrlo;
-    double poserr, negerr;
+    float posfreq, negfreq;
+    float freqerrhi, freqerrlo;
+    float poserr, negerr;
     int poscnt, negcnt;
     int lost;
 
-	double prevsymbol;
+	float prevsymbol;
 	cmplx prevsmpl;
 
-	double xy_phase;
-	double rotate;
+	float xy_phase;
+	float rotate;
 
 	cmplx QI[MAXPIPE];
 	int inp_ptr;
@@ -193,19 +193,19 @@ private:
 	cmplx xy;
 
 	bool   clear_zdata;
-	double sigpwr;
-	double noisepwr;
-	double avgsig;
+	float sigpwr;
+	float noisepwr;
+	float avgsig;
 
-	double mark_mag;
-	double space_mag;
-	double mark_env;
-	double space_env;
-	double	noise_floor;
+	float mark_mag;
+	float space_mag;
+	float mark_env;
+	float space_env;
+	float	noise_floor;
 
-	double FSKbuf[OUTBUFSIZE];		// signal array for qrq drive
-	double FSKphaseacc;
-	double FSKnco();
+	float FSKbuf[OUTBUFSIZE];		// signal array for qrq drive
+	float FSKphaseacc;
+	float FSKnco();
 
 	unsigned char lastchar;
 
@@ -216,15 +216,15 @@ private:
 	void Clear_syncscope();
 	void Update_syncscope();
 
-	double IF_freq;
-	inline cmplx mixer(double &phase, double f, cmplx in);
+	float IF_freq;
+	inline cmplx mixer(float &phase, float f, cmplx in);
 
 	unsigned char Bit_reverse(unsigned char in, int n);
 	int decode_char();
 	int rttyparity(unsigned int);
 	bool rx(bool bit);
 // transmit
-	double nco(double freq);
+	float nco(float freq);
 	void send_symbol(int symbol, int len);
 	void send_stop();
 	void send_char(int c);
@@ -245,7 +245,7 @@ public:
 	void tx_init(SoundBase *sc);
 	void restart();
 	void reset_filters();
-	int rx_process(const double *buf, int len);
+	int rx_process(const float *buf, int len);
 	int tx_process();
 	void flush_stream();
 

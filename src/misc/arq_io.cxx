@@ -922,7 +922,7 @@ void pskmail_notify_rsid(trx_mode mode)
 // format "<DC2><s2n: CC, A.a, D.d>"
 // where CC = count, A.a = average s/n, D.d = Std dev of s/n
 //======================================================================
-void pskmail_notify_s2n(double s2n_ncount, double s2n_avg, double s2n_stddev)
+void pskmail_notify_s2n(float s2n_ncount, float s2n_avg, float s2n_stddev)
 {
 	static char buf[64];
 	memset(buf, 0, sizeof(buf));

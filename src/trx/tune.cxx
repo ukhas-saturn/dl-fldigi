@@ -30,7 +30,7 @@ namespace xmttune {
 #define KNUM 32
 // keydown wave shape
 
-double kdshape[KNUM] = {
+float kdshape[KNUM] = {
 	0.00240750255310301, 0.00960708477768751,
 	0.02152941088003600, 0.03805966253618680,
 	0.05903864465505320, 0.08426431851158830, 
@@ -50,7 +50,7 @@ double kdshape[KNUM] = {
 };
 
 // keyup wave shape
-double kushape[KNUM] = {
+float kushape[KNUM] = {
 	0.99999999999295900, 0.99759210729604500, 
 	0.99039213868324900, 0.97846943367117300,
 	0.96193881423287900, 0.94095947900139100, 
@@ -70,13 +70,13 @@ double kushape[KNUM] = {
 };
 
 #define BUFLEN 512
-double phaseacc = 0.0;
-double phaseincr = 0.0;
-double outbuf[BUFLEN];
+float phaseacc = 0.0;
+float phaseincr = 0.0;
+float outbuf[BUFLEN];
 
 //===========================================================================
 
-inline double nco()
+inline float nco()
 {
 	phaseacc += phaseincr;
 	if (phaseacc > M_PI)
@@ -89,7 +89,7 @@ inline double nco()
 
 //=====================================================================
 
-void keydown(double freq, SoundBase *scard)
+void keydown(float freq, SoundBase *scard)
 {
 	int i;
 	phaseincr = 2.0 * M_PI * freq / active_modem->get_samplerate();
@@ -102,7 +102,7 @@ void keydown(double freq, SoundBase *scard)
 
 //=====================================================================
 
-void keyup(double freq, SoundBase *scard)
+void keyup(float freq, SoundBase *scard)
 {
 	int i;
 	phaseincr = 2.0 * M_PI * freq / active_modem->get_samplerate();
@@ -115,7 +115,7 @@ void keyup(double freq, SoundBase *scard)
 
 //=====================================================================
 
-void tune(double freq, SoundBase *scard)
+void tune(float freq, SoundBase *scard)
 {
 	int i;
 	phaseincr = 2.0 * M_PI * freq / active_modem->get_samplerate();

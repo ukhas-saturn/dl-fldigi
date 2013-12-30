@@ -1176,10 +1176,10 @@ static void doMODEM(std::string s)
 	}
 
 	// parse arguments
-	vector<double> args;
+	vector<float> args;
 	args.reserve(8);
 	char* end;
-	double d;
+	float d;
 	for (const char* p = s.c_str() + o[2].rm_so + 1; *p; p++) {
 		errno = 0;
 		d = strtod(p, &end);
@@ -1288,10 +1288,10 @@ static void pMODEM(std::string &s, size_t &i, size_t endbracket)
 	}
 
 	// parse arguments
-	vector<double> args;
+	vector<float> args;
 	args.reserve(8);
 	char* end;
-	double d;
+	float d;
 	for (const char* p = s.c_str() + o[2].rm_so + 1; *p; p++) {
 		errno = 0;
 		d = strtod(p, &end);

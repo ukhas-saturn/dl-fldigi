@@ -72,7 +72,7 @@ protected:
 	// for interface to the samplerate resampling library
 	SRC_STATE	*tx_src_state;
 	SRC_STATE	*rx_src_state;
-	double		*wrt_buffer;
+	float		*wrt_buffer;
 
 #if USE_SNDFILE
 
@@ -99,7 +99,6 @@ protected:
 
 	sf_count_t  read_file(SNDFILE* file, float* buf, size_t count);
 	void         write_file(SNDFILE* file, float* buf, size_t count);
-	void         write_file(SNDFILE* file, double* buf, size_t count);
 
 	bool	 format_supported(int format);
 	void	 tag_file(SNDFILE *sndfile, const char *title);
@@ -116,8 +115,8 @@ public:
 	virtual int	Open(int mode, int freq = 8000) = 0;
 	virtual void    Close(unsigned dir = UINT_MAX) = 0;
 	virtual void    Abort(unsigned dir = UINT_MAX) = 0;
-	virtual size_t	Write(double *, size_t) = 0;
-	virtual size_t	Write_stereo(double *, double *, size_t) = 0;
+	virtual size_t	Write(float *, size_t) = 0;
+	virtual size_t	Write_stereo(float *, float *, size_t) = 0;
 	virtual size_t	Read(float *, size_t) = 0;
 	virtual void    flush(unsigned dir = UINT_MAX) = 0;
 	virtual bool	must_close(int dir = 0) = 0;
@@ -167,8 +166,8 @@ public:
 	int		Open(int mode, int freq = 8000);
 	void	Close(unsigned dir = UINT_MAX);
 	void	Abort(unsigned dir = UINT_MAX) { Close(dir); }
-	size_t		Write(double *, size_t);
-	size_t		Write_stereo(double *, double *, size_t);
+	size_t		Write(float *, size_t);
+	size_t		Write_stereo(float *, float *, size_t);
 	size_t		Read(float *, size_t);
 	bool		must_close(int dir = 0) { return true; }
 	void		flush(unsigned dir = UINT_MAX) { wait_till_finished(); }
@@ -202,7 +201,7 @@ public:
         static void	terminate(void);
         static const std::vector<const PaDeviceInfo*>& devices(void);
         static void devices_info(std::string& in, std::string& out);
-	static const std::vector<double>& get_supported_rates(const std::string& name, unsigned dir);
+	static const std::vector<float>& get_supported_rates(const std::string& name, unsigned dir);
 
 public:
         SoundPort(const char *in_dev, const char *out_dev);
@@ -210,8 +209,8 @@ public:
 	int 		Open(int mode, int freq = 8000);
 	void 		Close(unsigned dir = UINT_MAX);
 	void 		Abort(unsigned dir = UINT_MAX);
-	size_t 		Write(double *buf, size_t count);
-	size_t		Write_stereo(double *bufleft, double *bufright, size_t count);
+	size_t 		Write(float *buf, size_t count);
+	size_t		Write_stereo(float *bufleft, float *bufright, size_t count);
 	size_t 		Read(float *buf, size_t count);
 	bool		must_close(int dir = 0);
 	void		flush(unsigned dir = UINT_MAX);
@@ -226,7 +225,7 @@ private:
         void 		pause_stream(unsigned dir);
         bool		stream_active(unsigned dir);
         bool		full_duplex_device(const PaDeviceInfo* dev);
-        double		find_srate(unsigned dir);
+        float		find_srate(unsigned dir);
 	static void	probe_supported_rates(const device_iterator& idev);
         void		pa_perror(int err, const char* str = 0);
         static void	init_hostapi_ext(void);
@@ -236,7 +235,7 @@ private:
 private:
         static bool                             pa_init;
 	static std::vector<const PaDeviceInfo*> devs;
-        double	 				req_sample_rate;
+        float	 				req_sample_rate;
         float* 					fbuf;
 	float*					src_buffer;
 	SRC_DATA	*tx_src_data;
@@ -253,8 +252,8 @@ private:
                 PaStreamParameters params;
 
                 unsigned frames_per_buffer;
-                double dev_sample_rate;
-                double src_ratio;
+                float dev_sample_rate;
+                float src_ratio;
 
                 sem_t* rwsem;
 		pthread_mutex_t* cmutex;
@@ -294,8 +293,8 @@ public:
 	int	Open(int mode, int freq = 8000);
 	void    Close(unsigned dir = UINT_MAX);
 	void    Abort(unsigned dir = UINT_MAX);
-	size_t	Write(double* buf, size_t count);
-	size_t	Write_stereo(double* bufleft, double* bufright, size_t count);
+	size_t	Write(float* buf, size_t count);
+	size_t	Write_stereo(float* bufleft, float* bufright, size_t count);
 	size_t	Read(float *buf, size_t count);
 	bool	must_close(int dir = 0) { return false; }
 	void	flush(unsigned dir = UINT_MAX);
@@ -311,7 +310,7 @@ private:
 		pa_sample_spec	stream_params;
 		pa_buffer_attr  buffer_attrs;
 		pa_stream_direction_t dir;
-		double		src_ratio;
+		float		src_ratio;
 		size_t		blocksize;
 	} sd[2];
 
@@ -341,8 +340,8 @@ public:
 	int	Open(int mode, int freq = 8000) { sample_frequency = freq; return 0; }
 	void    Close(unsigned) { }
 	void    Abort(unsigned) { }
-	size_t	Write(double* buf, size_t count);
-	size_t	Write_stereo(double* bufleft, double* bufright, size_t count);
+	size_t	Write(float* buf, size_t count);
+	size_t	Write_stereo(float* bufleft, float* bufright, size_t count);
 	size_t	Read(float *buf, size_t count);
 	bool	must_close(int dir = 0) { return false; }
 	void	flush(unsigned) { }

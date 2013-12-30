@@ -16,7 +16,7 @@ class wefax_pic
 	static void create_tx_viewer(int wid_x, int wid_y,int wid_win, int hei_win);
 public:
 	static void set_tx_pic(unsigned char data, int col, int row, bool is_color );
-	static int  normalize_lpm( double the_lpm_value );
+	static int  normalize_lpm( float the_lpm_value );
 	static void update_rx_lpm(int lpm);
 	static int update_rx_pic_col(unsigned char data, int pos);
 	static void update_rx_pic_bw(unsigned char data, int pos);
@@ -34,7 +34,7 @@ public:
 	static void cb_mnu_pic_viewer_tx(Fl_Menu_ *, void *);
 	static void setpicture_link(wefax *me);
 	static void save_image(const std::string & fil_name, const std::string & extra_comments);
-	static void power( double start, double phase, double image, double black, double stop );
+	static void power( float start, float phase, float image, float black, float stop );
 	static void send_image( const std::string & fil_name );
 	static void set_manual( bool manual_mode );
 	static void update_auto_center( bool is_auto_center );

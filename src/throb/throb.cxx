@@ -124,8 +124,8 @@ throb::throb(trx_mode throb_mode) : modem()
 {
 	cap |= CAP_AFC | CAP_REV;
 
-	double bw;
-	double *fp = 0;
+	float bw;
+	float *fp = 0;
 
 	mode = throb_mode;
 
@@ -210,7 +210,7 @@ throb::throb(trx_mode throb_mode) : modem()
                 break;
 	}
 
-	outbuf = new double[symlen];
+	outbuf = new float[symlen];
 
 	rxsymlen = symlen / DOWN_SAMPLE;
 
@@ -234,7 +234,7 @@ throb::throb(trx_mode throb_mode) : modem()
 	bandwidth = freqs[num_tones - 1] - freqs[0];
 	syncpos = 0.5;
 
-	scope_data	= new double [SCOPE_DATA_LEN];
+	scope_data	= new float [SCOPE_DATA_LEN];
 
 	phaseacc = 0.0;
 	metric = 0.0;
@@ -252,10 +252,10 @@ throb::throb(trx_mode throb_mode) : modem()
 
 // Make a 32 times down sampled cmplx prototype tone for rx.
 
-cmplx *throb::mk_rxtone(double freq, double *pulse, int len)
+cmplx *throb::mk_rxtone(float freq, float *pulse, int len)
 {
 	cmplx *tone;
-	double x;
+	float x;
 	int i;
 
 	tone = new cmplx [len / DOWN_SAMPLE];
@@ -271,7 +271,7 @@ cmplx *throb::mk_rxtone(double freq, double *pulse, int len)
 
 cmplx throb::mixer(cmplx in)
 {
-	double f;
+	float f;
 	cmplx z (cos(phaseacc), sin(phaseacc));
 
 	z = z * in;
@@ -290,7 +290,7 @@ cmplx throb::mixer(cmplx in)
 
 int throb::findtones(cmplx *word, int &tone1, int &tone2)
 {
-	double max1, max2;
+	float max1, max2;
 	int maxtone, i;
 
 	max1 = 0;
@@ -440,7 +440,7 @@ void throb::rx(cmplx in)
 
 	if (progStatus.afconoff == true && (metric >= progStatus.sldrSquelchValue || progStatus.sqlonoff == false)) {
 		cmplx z1, z2;
-		double f;
+		float f;
 
 		z1 = rxword[maxtone];
 		z2 = cmac(rxtone[maxtone], symbol, symptr + 2, rxsymlen);
@@ -464,8 +464,8 @@ void throb::rx(cmplx in)
 
 void throb::sync(cmplx in)
 {
-	double f, maxval = 0;
-	double mag;
+	float f, maxval = 0;
+	float mag;
 	int i, maxpos = 0;
 
 	/* "rectify", filter and store input */
@@ -501,7 +501,7 @@ void throb::sync(cmplx in)
 	dispbuf.next(); // change buffers
 }
 
-int throb::rx_process(const double *buf, int len)
+int throb::rx_process(const float *buf, int len)
 {
 	cmplx z, *zp;
 	int i, n;
@@ -538,12 +538,12 @@ int throb::rx_process(const double *buf, int len)
 // transmit processing
 //=====================================================================
 
-double *throb::mk_semi_pulse(int len)
+float *throb::mk_semi_pulse(int len)
 {
-	double *pulse, x;
+	float *pulse, x;
 	int i, j;
 
-	pulse = new double [len];
+	pulse = new float [len];
 
 	for (i = 0; i < len; i++) {
 		if (i < len / 5) {
@@ -564,12 +564,12 @@ double *throb::mk_semi_pulse(int len)
 	return pulse;
 }
 
-double *throb::mk_full_pulse(int len)
+float *throb::mk_full_pulse(int len)
 {
-	double *pulse;
+	float *pulse;
 	int i;
 
-	pulse = new double [len];
+	pulse = new float [len];
 
 	for (i = 0; i < len; i++)
 		pulse[i] = 0.5 * (1 - cos(2 * M_PI * i / len));
@@ -581,7 +581,7 @@ double *throb::mk_full_pulse(int len)
 void throb::send(int symbol)
 {
 	int tone1, tone2;
-	double w1, w2;
+	float w1, w2;
 	int i;
 
 	if (symbol < 0 || symbol >= num_chars)
@@ -936,7 +936,7 @@ unsigned char throb::ThrobXCharSet[55] = {
 	'\n'
 };
 
-double throb::ThrobToneFreqsNar[9] = {-32, -24, -16,  -8,  0,  8, 16, 24, 32};
-double throb::ThrobToneFreqsWid[9] = {-64, -48, -32, -16,  0, 16, 32, 48, 64};
-double throb::ThrobXToneFreqsNar[11] = {-39.0625, -31.25, -23.4375, -15.625, -7.8125, 0, 7.8125, 15.625, 23.4375, 31.25, 39.0625};
-double throb::ThrobXToneFreqsWid[11] = {-78.125, -62.5, -46.875, -31.25, -15.625, 0, 15.625, 31.25, 46.875, 62.5, 78.125};
+float throb::ThrobToneFreqsNar[9] = {-32, -24, -16,  -8,  0,  8, 16, 24, 32};
+float throb::ThrobToneFreqsWid[9] = {-64, -48, -32, -16,  0, 16, 32, 48, 64};
+float throb::ThrobXToneFreqsNar[11] = {-39.0625, -31.25, -23.4375, -15.625, -7.8125, 0, 7.8125, 15.625, 23.4375, 31.25, 39.0625};
+float throb::ThrobXToneFreqsWid[11] = {-78.125, -62.5, -46.875, -31.25, -15.625, 0, 15.625, 31.25, 46.875, 62.5, 78.125};

@@ -40,61 +40,61 @@ extern unsigned char graydecode(unsigned char data);
 extern unsigned char grayencode(unsigned char data);
 extern void MilliSleep(long msecs);
 
-inline double sinc(double x)
+inline float sinc(float x)
 {
 	return (fabs(x) < 1e-10) ? 1.0 : (sin(M_PI * x) / (M_PI * x));
 }
 
-inline double cosc(double x)
+inline float cosc(float x)
 {
 	return (fabs(x) < 1e-10) ? 0.0 : ((1.0 - cos(M_PI * x)) / (M_PI * x));
 }
 
-inline double clamp(double x, double min, double max)
+inline float clamp(float x, float min, float max)
 {
 	return (x < min) ? min : ((x > max) ? max : x);
 }
 
 /// This is always called with an int weight
-inline double decayavg(double average, double input, int weight)
+inline float decayavg(float average, float input, int weight)
 {
 	if (weight <= 1) return input;
-	return ( ( input - average ) / (double)weight ) + average ;
+	return ( ( input - average ) / (float)weight ) + average ;
 }
 
 // following are defined inline to provide best performance
-inline double blackman(double x)
+inline float blackman(float x)
 {
 	return (0.42 - 0.50 * cos(2 * M_PI * x) + 0.08 * cos(4 * M_PI * x));
 }
 
-inline double hamming(double x)
+inline float hamming(float x)
 {
 	return 0.54 - 0.46 * cos(2 * M_PI * x);
 }
 
-inline double hanning(double x)
+inline float hanning(float x)
 {
 	return 0.5 - 0.5 * cos(2 * M_PI * x);
 }
 
-inline double rcos( double t, double T, double alpha=1.0 )
+inline float rcos( float t, float T, float alpha=1.0 )
 {
     if( t == 0 ) return 1.0;
-    double taT = T / (2.0 * alpha);
+    float taT = T / (2.0 * alpha);
     if( fabs(t) == taT ) return ((alpha/2.0) * sin(M_PI/(2.0*alpha)));
     return (sin(M_PI*t/T)/(M_PI*t/T))*cos(alpha*M_PI*t/T)/(1.0-(t/taT)*(t/taT));
 }
 
 // Rectangular - no pre filtering of data array
-void RectWindow(double *array, int n);
+void RectWindow(float *array, int n);
 // Hamming - used by gmfsk
-void HammingWindow(double *array, int n);
+void HammingWindow(float *array, int n);
 // Hanning - used by winpsk
-void HanningWindow(double *array, int n);
+void HanningWindow(float *array, int n);
 // Best lob suppression - least in band ripple
-void BlackmanWindow(double *array, int n);
+void BlackmanWindow(float *array, int n);
 // Simple about effective as Hamming or Hanning
-void TriangularWindow(double *array, int n);
+void TriangularWindow(float *array, int n);
 
 #endif

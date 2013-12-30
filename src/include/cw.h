@@ -107,20 +107,20 @@ struct SOM_TABLE {
 protected:
 	int			symbollen;		// length of a dot in sound samples (tx)
 	int			fsymlen;        	// length of extra interelement space (farnsworth)
-	double		phaseacc;		// used by NCO for rx/tx tones
-	double		FFTphase;
-	double		FIRphase;
-	double		FFTvalue;
-	double		FIRvalue;
+	float		phaseacc;		// used by NCO for rx/tx tones
+	float		FFTphase;
+	float		FIRphase;
+	float		FFTvalue;
+	float		FIRvalue;
 	unsigned int	smpl_ctr;		// sample counter for timing cw rx
-	double		agc_peak;		// threshold for tone detection 
+	float		agc_peak;		// threshold for tone detection 
 
 	int			FilterFFTLen;
 	bool		use_matched_filter;
 	bool		use_fft_filter;
 
-	double		upper_threshold;
-	double		lower_threshold;
+	float		upper_threshold;
+	float		lower_threshold;
 
 	C_FIR_filter	*hilbert;   // Hilbert filter precedes sinc filter
 	fftfilt			*cw_FFT_filter; // sinc / matched filter
@@ -135,9 +135,9 @@ protected:
 	CW_RX_STATE		old_cw_receive_state;
 	CW_EVENT		cw_event;			// functions used by cw process routine 
 	 
-	double pipe[MAX_PIPE_SIZE+1];			// storage for sync scope data
-	double clearpipe[MAX_PIPE_SIZE+1];
-	mbuffer<double, MAX_PIPE_SIZE + 1, 4> scopedata;
+	float pipe[MAX_PIPE_SIZE+1];			// storage for sync scope data
+	float clearpipe[MAX_PIPE_SIZE+1];
+	mbuffer<float, MAX_PIPE_SIZE + 1, 4> scopedata;
 	int pipeptr;
 	int pipesize;
 	bool scope_clear;
@@ -160,14 +160,14 @@ protected:
 	long int cw_send_dot_length;			// Length of a send Dot, in Usec 
 	long int cw_send_dash_length;			// Length of a send Dash, in Usec
 	int lastsym;					// last symbol sent
-	double risetime;			    	// leading/trailing edge rise time (msec)
+	float risetime;			    	// leading/trailing edge rise time (msec)
 	int knum;					// number of samples on edges
 	int QSKshape;                   		// leading/trailing edge shape factor
-	double qskbuf[OUTBUFSIZE];			// signal array for qsk drive
-	double qskphase;				//
+	float qskbuf[OUTBUFSIZE];			// signal array for qsk drive
+	float qskphase;				//
 	bool firstelement;
 	
-//	double *keyshape;				// array defining leading edge
+//	float *keyshape;				// array defining leading edge
 	
 // Receiving parameters: 
 	long int cw_receive_dot_length;		// Length of a receive Dot, in Usec 
@@ -184,11 +184,11 @@ protected:
 	int in_replay; 					//AG1LE: if we have replay even, set to 1 otherwise = 0 ; 
 
 // Receive adaptive speed tracking.
-	double dot_tracking;
-	double dash_tracking;
+	float dot_tracking;
+	float dash_tracking;
 	
-	inline double nco(double freq);
-	inline double qsknco();
+	inline float nco(float freq);
+	inline float qsknco();
 	void	update_syncscope();
 	void    clear_syncscope();
 	void	update_Status();
@@ -221,10 +221,10 @@ public:
 	void	tx_init(SoundBase *sc);
 	void	restart() {};
 
-	int		rx_process(const double *buf, int len);
-	void	rx_FFTprocess(const double *buf, int len);
-	void	rx_FIRprocess(const double *buf, int len);
-	void	decode_stream(double);
+	int		rx_process(const float *buf, int len);
+	void	rx_FFTprocess(const float *buf, int len);
+	void	rx_FIRprocess(const float *buf, int len);
+	void	decode_stream(float);
 
 	int		tx_process();
 	void	incWPM();

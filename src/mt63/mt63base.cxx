@@ -7,8 +7,8 @@
  *	base class for use by fldigi
  *	modified from original
  *	excluded CW_ID which is a part of the base modem class for fldigi
- *	changed all floats to double and removed all float functions/methods
- *	changed from int* to double* for all sound card buffer transfers
+ *	changed all floats to float and removed all float functions/methods
+ *	changed from int* to float* for all sound card buffer transfers
  *
  *	Modified base class for rx and tx to allow variable center frequency
  *	for baseband signal
@@ -84,15 +84,15 @@ void MT63tx::Free(void)
 
 // W1HKJ
 // added freq paramter to Preset
-int MT63tx::Preset(double freq, int BandWidth, int LongInterleave)
+int MT63tx::Preset(float freq, int BandWidth, int LongInterleave)
 {
 	int i, p, step, incr, mask;
 
 // W1HKJ
 // values used to computer the blackman3 passband filter shape
-	double hbw = 1.5*BandWidth / 2;
-	double omega_low = (freq - hbw);
-	double omega_high = (freq + hbw);
+	float hbw = 1.5*BandWidth / 2;
+	float omega_low = (freq - hbw);
+	float omega_high = (freq + hbw);
 	if (omega_low < 100) omega_low = 100;
 	if (omega_high > 4000) omega_high = 4000;
 	omega_low *= (M_PI / 4000);
@@ -194,7 +194,7 @@ Error:
 int MT63tx::SendTune(bool twotones)
 {
 	int i, c, r, mask;
-	double Ampl;
+	float Ampl;
 
 	mask = FFT.Size - 1;
 	Ampl = TxAmpl * sqrt(DataCarriers / 2);
@@ -518,10 +518,10 @@ Error:
 	return -1;
 }
 
-int MT63decoder::Process(double *data)
+int MT63decoder::Process(float *data)
 {
 	int s, i, k;
-	double  Min, Max, Sig, Noise, SNR;
+	float  Min, Max, Sig, Noise, SNR;
 	int MinPos,MaxPos,code;
 
 	dspCopyArray(IntlvPipe + IntlvPtr, data, ScanSize);
@@ -740,16 +740,16 @@ void MT63rx::Free(void)
 }
 
 // added freq parameter to Preset
-int MT63rx::Preset(double freq, int BandWidth, int LongInterleave, int Integ,
-		   void (*Display)(double *Spectra, int Len))
+int MT63rx::Preset(float freq, int BandWidth, int LongInterleave, int Integ,
+		   void (*Display)(float *Spectra, int Len))
 {
 	int err,s,i,c;
 
 // W1HKJ
 // variables used for generating the anti-alias filter
-	double hbw = 1.5*BandWidth / 2;
-	double omega_low = (freq - hbw);
-	double omega_high = (freq + hbw);
+	float hbw = 1.5*BandWidth / 2;
+	float omega_low = (freq - hbw);
+	float omega_high = (freq + hbw);
 	if (omega_low < 100) omega_low = 100;
 	if (omega_high > 4000) omega_high = 4000;
 	omega_low *= (M_PI / 4000);
@@ -941,7 +941,7 @@ Error:
 	return -1;
 }
 
-int MT63rx::Process(double_buff *Input)
+int MT63rx::Process(float_buff *Input)
 {
 	int s1,s2;
 
@@ -1018,17 +1018,17 @@ void MT63rx::DoCorrelSum(dspCmpx *Correl1, dspCmpx *Correl2, dspCmpx *Aver)
 void MT63rx::SyncProcess(dspCmpx *Slice)
 {
 	int i, j, k, r, s, s2;
-	double pI, pQ;
+	float pI, pQ;
 	dspCmpx Correl;
 	dspCmpx *PrevSlice;
-	double I, Q;
-	double dI, dQ;
-	double P,A;
-	double w0, w1;
-	double Fl, F0, Fu;
+	float I, Q;
+	float dI, dQ;
+	float P,A;
+	float w0, w1;
+	float Fl, F0, Fu;
 	dspCmpx SymbTime;
-	double SymbConf, SymbShift, FreqOfs;
-	double dspRMS;
+	float SymbConf, SymbShift, FreqOfs;
+	float dspRMS;
 //	int Loops;
 	int Incl;
 
@@ -1244,7 +1244,7 @@ void MT63rx::SyncProcess(dspCmpx *Slice)
 //		Loops = 
 		dspSelFitAver( SymbPipe,
 							   TrackPipeLen,
-							   (double)3.0,
+							   (float)3.0,
 							   4,
 							   AverSymb,
 							   dspRMS,
@@ -1255,7 +1255,7 @@ void MT63rx::SyncProcess(dspCmpx *Slice)
 //		Loops = 
 		dspSelFitAver( FreqPipe,
 							   TrackPipeLen,
-							   (double)2.5,
+							   (float)2.5,
 							   4,
 							   AverFreq,
 							   dspRMS,
@@ -1295,16 +1295,16 @@ void MT63rx::SyncProcess(dspCmpx *Slice)
 
 }
 
-void MT63rx::DataProcess(dspCmpx *EvenSlice, dspCmpx *OddSlice, double FreqOfs, int TimeDist)
+void MT63rx::DataProcess(dspCmpx *EvenSlice, dspCmpx *OddSlice, float FreqOfs, int TimeDist)
 {
 	int i, c, r;
 	dspCmpx Freq, Phas;
 	int incr, p;
-	double I, Q, P;
+	float I, Q, P;
 	dspCmpx Dtmp;
 	dspCmpx Ftmp;
 
-//  double Aver,dspRMS; int Loops,Incl;
+//  float Aver,dspRMS; int Loops,Incl;
 
 // Here we pickup a symbol in the data history. The time/freq. synchronizer
 // told us where it is in time and at which frequency offset (FreqOfs)
@@ -1441,7 +1441,7 @@ void MT63rx::DataProcess(dspCmpx *EvenSlice, dspCmpx *OddSlice, double FreqOfs, 
 	  printf(" %6.3f",dspAmpl(DataSqrOut[i])/DataPwrOut[i]);
 	printf("\n");
   }
-  Loops=dspSelFitAver(DatadspPhase2,DataScanLen,(double)2.5,4,Aver,dspRMS,Incl);
+  Loops=dspSelFitAver(DatadspPhase2,DataScanLen,(float)2.5,4,Aver,dspRMS,Incl);
   printf("Aver=%5.2f, dspRMS=%5.2f, Incl=%d\n",Aver,dspRMS,Incl);
 */
 }
@@ -1450,23 +1450,23 @@ int MT63rx::SYNC_LockStatus(void) {
 	return SyncLocked;
 }
 
-double MT63rx::SYNC_Confidence(void) {
+float MT63rx::SYNC_Confidence(void) {
 	return SyncSymbConf <= 1.0 ? SyncSymbConf : 1.0;
 }
 
-double MT63rx::SYNC_FreqOffset(void) {
+float MT63rx::SYNC_FreqOffset(void) {
 	return SyncFreqOfs / DataCarrSepar;
 }
 
-double MT63rx::SYNC_FreqDevdspRMS(void) {
+float MT63rx::SYNC_FreqDevdspRMS(void) {
 	return SyncFreqDev / DataCarrSepar;
 }
 
-double MT63rx::SYNC_TimeOffset(void) {
+float MT63rx::SYNC_TimeOffset(void) {
 	return SyncSymbShift / SymbolSepar;
 }
 
-double MT63rx::FEC_SNR(void) {
+float MT63rx::FEC_SNR(void) {
 	return Decoder.SignalToNoise;
 }
 
@@ -1474,7 +1474,7 @@ int MT63rx::FEC_CarrOffset(void) {
 	return Decoder.CarrOfs;
 }
 
-double MT63rx::TotalFreqOffset(void) {
+float MT63rx::TotalFreqOffset(void) {
 	return ( SyncFreqOfs + DataCarrSepar * Decoder.CarrOfs) *
 		   (8000.0 / DecimateRatio) / WindowLen;
 }

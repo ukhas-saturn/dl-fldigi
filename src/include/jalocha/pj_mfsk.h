@@ -33,7 +33,7 @@ static inline size_t Log2(uint32_t X) {
 // =====================================================================
 
 // the symbol shape described in frequency domain
-static const double MFSK_SymbolFreqShape[] =
+static const float MFSK_SymbolFreqShape[] =
  { 1.0, 1.0 } ; // use raised cosine shape - experimental
 // from gMFSK
 // {	+1.0000000000, 
@@ -51,7 +51,7 @@ static const double MFSK_SymbolFreqShape[] =
 //};
 
 static const size_t MFSK_SymbolFreqShapeLen = 
-	sizeof(MFSK_SymbolFreqShape) / sizeof(double);
+	sizeof(MFSK_SymbolFreqShape) / sizeof(float);
 
 // =====================================================================
 
@@ -127,14 +127,14 @@ public:
 		if (ReallocArray(&SymbolShape, SymbolLen) < 0) goto Error;
 
 		{	size_t Time;
-			double Ampl = MFSK_SymbolFreqShape[0];
+			float Ampl = MFSK_SymbolFreqShape[0];
 			for (Time = 0; Time < SymbolLen; Time++)
 				SymbolShape[Time] = Ampl;
 		}
 		size_t Freq;
 		for (Freq = 1; Freq < MFSK_SymbolFreqShapeLen; Freq++) {
 			size_t Time;
-			double Ampl = MFSK_SymbolFreqShape[Freq];
+			float Ampl = MFSK_SymbolFreqShape[Freq];
 			if (Freq & 1) Ampl = (-Ampl);
 			size_t Phase = 0;
 			for (Time = 0; Time < SymbolLen; Time++) {
@@ -144,7 +144,7 @@ public:
 			}
 		}
 		{	size_t Time;
-			double Scale = 1.0/4;
+			float Scale = 1.0/4;
 			for (Time = 0; Time < SymbolLen; Time++)
 			SymbolShape[Time] *= Scale;
 		}
@@ -239,7 +239,7 @@ private:
 
 // =====================================================================
 
-template <class TapType = float, class OutType = double>
+template <class TapType = float, class OutType = float>
 class BoxFilter
 {
 public:
@@ -807,14 +807,14 @@ template <class Type=float>
 		if (ReallocArray(&SymbolShape,SymbolLen)<0) goto Error;
 
 		{ size_t Time;
-			double Ampl=MFSK_SymbolFreqShape[0];
+			float Ampl=MFSK_SymbolFreqShape[0];
 			for (Time=0; Time<SymbolLen; Time++)
 				SymbolShape[Time]=Ampl;
 		}
 		size_t Freq;
 		for (Freq=1; Freq<MFSK_SymbolFreqShapeLen; Freq++)
 		{ size_t Time;
-			double Ampl=MFSK_SymbolFreqShape[Freq];
+			float Ampl=MFSK_SymbolFreqShape[Freq];
 			if (Freq&1) Ampl=(-Ampl);
 			size_t Phase=0;
 			for (Time=0; Time<SymbolLen; Time++)
@@ -1805,12 +1805,12 @@ public:
 				return 0;
 	}
 
-	double GetSymbolPhase(void) {
+	float GetSymbolPhase(void) {
 			return Modulator.SymbolPhase;
 	}
 
 // get out the transmitter output (audio)
-	int Output(double *Buffer) {
+	int Output(float *Buffer) {
 			if (SymbolPtr == 0) {
 				if ((State&State_StopReq) && Input.Empty()) {
 					State=0;
@@ -1836,12 +1836,12 @@ public:
 			int ConvLen = Converter.Process(ModulatorOutput, ModLen, ConverterOutput);
 			if (ConvLen < 0) return ConvLen;
 		
-			double maxval = 0, tempnum;
+			float maxval = 0, tempnum;
 			for (int Idx = 0; Idx < ConvLen; Idx++)
 				if ((tempnum = fabs(ConverterOutput[Idx])) > maxval)
 					maxval = tempnum;
 			for (int Idx = 0; Idx < ConvLen; Idx++)
-				Buffer[Idx] = (double) ConverterOutput[Idx] / maxval;
+				Buffer[Idx] = (float) ConverterOutput[Idx] / maxval;
 
 			return ConvLen; 
 	}
@@ -2446,13 +2446,13 @@ public:
 			NoiseEnergy /= Carriers;
 
 			size_t Idx;
-			double UniformNoise = 0;
+			float UniformNoise = 0;
 			for (Idx = 0; Idx < Carriers; Idx++) {
-				UniformNoise = ((double)rand()+1.0)/((double)RAND_MAX+1.0);
+				UniformNoise = ((float)rand()+1.0)/((float)RAND_MAX+1.0);
 				Energy[Idx] = NoiseEnergy * (-log(UniformNoise));
 			}
 
-			double Phase = 2 * M_PI * ((double)rand()+1.0)/((double)RAND_MAX+1.0);
+			float Phase = 2 * M_PI * ((float)rand()+1.0)/((float)RAND_MAX+1.0);
 			Type NoiseAmpl = sqrt(Energy[Code]);
 			Signal += cos(Phase) * NoiseAmpl;
 			NoiseAmpl *= sin(Phase);

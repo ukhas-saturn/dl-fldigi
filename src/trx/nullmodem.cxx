@@ -75,7 +75,7 @@ void NULLMODEM::restart()
 // receive processing
 //=====================================================================
 
-int NULLMODEM::rx_process(const double *buf, int len)
+int NULLMODEM::rx_process(const float *buf, int len)
 {
 	return 0;
 }

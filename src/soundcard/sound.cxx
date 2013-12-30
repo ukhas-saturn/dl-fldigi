@@ -90,7 +90,7 @@ SoundBase::SoundBase()
 		: sample_frequency(0),
 	  txppm(progdefaults.TX_corr), rxppm(progdefaults.RX_corr),
 		  tx_src_state(0), rx_src_state(0),
-		  wrt_buffer(new double[SND_BUF_LEN]),
+		  wrt_buffer(new float[SND_BUF_LEN]),
 #if USE_SNDFILE
 		  ofCapture(0), ifPlayback(0), ofGenerate(0),
 #endif
@@ -406,7 +406,8 @@ void SoundBase::write_file(SNDFILE* file, float* buf, size_t count)
 
 }
 
-void SoundBase::write_file(SNDFILE* file, double* buf, size_t count)
+/*
+void SoundBase::write_file(SNDFILE* file, float* buf, size_t count)
 {
 	float *outbuf = new float[count];
 	for (size_t i = 0; i < count; i++)
@@ -415,6 +416,7 @@ void SoundBase::write_file(SNDFILE* file, double* buf, size_t count)
 	delete [] outbuf;
 	return;
 }
+*/
 
 bool SoundBase::format_supported(int format)
 {
@@ -528,8 +530,8 @@ void SoundOSS::setfragsize()
 {
 	int sndparam;
 // Try to get ~100ms worth of samples per fragment
-	sndparam = (int)log2(sample_frequency * 0.1);
-// double since we are using 16 bit samples
+	sndparam = (int)log2(sample_frequency * 0.1f);
+// float since we are only using 16 bit samples
 	sndparam += 1;
 // Unlimited amount of buffers for RX, four for TX
 	if (mode == O_RDONLY)
@@ -731,7 +733,7 @@ size_t SoundOSS::Read(float *buffer, size_t buffersize)
 
 }
 
-size_t SoundOSS::Write(double *buf, size_t count)
+size_t SoundOSS::Write(float *buf, size_t count)
 {
 	int retval;
 	short int *wbuff;
@@ -795,7 +797,7 @@ size_t SoundOSS::Write(double *buf, size_t count)
 	return retval;
 }
 
-size_t SoundOSS::Write_stereo(double *bufleft, double *bufright, size_t count)
+size_t SoundOSS::Write_stereo(float *bufleft, float *bufright, size_t count)
 {
 	int retval;
 	short int *wbuff;
@@ -879,7 +881,7 @@ size_t SoundOSS::Write_stereo(double *bufleft, double *bufright, size_t count)
 bool SoundPort::pa_init = false;
 std::vector<const PaDeviceInfo*> SoundPort::devs;
 static ostringstream device_text[2];
-map<string, vector<double> > supported_rates[2];
+map<string, vector<float> > supported_rates[2];
 void SoundPort::initialize(void)
 {
 		if (pa_init)
@@ -922,7 +924,7 @@ void SoundPort::devices_info(string& in, string& out)
 	in = device_text[0].str();
 	out = device_text[1].str();
 }
-const vector<double>& SoundPort::get_supported_rates(const string& name, unsigned dir)
+const vector<float>& SoundPort::get_supported_rates(const string& name, unsigned dir)
 {
 	return supported_rates[dir][name];
 }
@@ -1234,7 +1236,7 @@ size_t SoundPort::Read(float *buf, size_t count)
 		return count;
 }
 
-size_t SoundPort::Write(double *buf, size_t count)
+size_t SoundPort::Write(float *buf, size_t count)
 {
 #if USE_SNDFILE
 	if (generate)
@@ -1260,7 +1262,7 @@ size_t SoundPort::Write(double *buf, size_t count)
 	return resample_write(fbuf, count);
 }
 
-size_t SoundPort::Write_stereo(double *bufleft, double *bufright, size_t count)
+size_t SoundPort::Write_stereo(float *bufleft, float *bufright, size_t count)
 {
 	if (sd[1].params.channelCount != 2)
 		return Write(bufleft, count);
@@ -1500,12 +1502,12 @@ void SoundPort::init_stream(unsigned dir)
 		sd[1].params.hostApiSpecificStreamInfo = NULL;
 	}
 
-	const vector<double>& rates = supported_rates[dir][(*sd[dir].idev)->name];
+	const vector<float>& rates = supported_rates[dir][(*sd[dir].idev)->name];
 	if (rates.size() <= 1)
 		probe_supported_rates(sd[dir].idev);
 	ostringstream ss;
 	if (rates.size() > 1)
-		copy(rates.begin() + 1, rates.end(), ostream_iterator<double>(ss, " "));
+		copy(rates.begin() + 1, rates.end(), ostream_iterator<float>(ss, " "));
 	else
 		ss << "Unknown";
 
@@ -1669,7 +1671,7 @@ bool SoundPort::must_close(int dir)
 // Determine the sample rate that we will use. We try the modem's rate
 // first and fall back to the device's default rate. If there is a user
 // setting we just return that without making any checks.
-double SoundPort::find_srate(unsigned dir)
+float SoundPort::find_srate(unsigned dir)
 {
 	int sr = (dir == 0 ? progdefaults.in_sample_rate : progdefaults.out_sample_rate);
 		switch (sr) {
@@ -1681,8 +1683,8 @@ double SoundPort::find_srate(unsigned dir)
 				return sr;
 		}
 
-	const vector<double>& rates = supported_rates[dir][(*sd[dir].idev)->name];
-	for (vector<double>::const_iterator i = rates.begin(); i != rates.end(); i++)
+	const vector<float>& rates = supported_rates[dir][(*sd[dir].idev)->name];
+	for (vector<float>::const_iterator i = rates.begin(); i != rates.end(); i++)
 		if (req_sample_rate == *i || (*sd[dir].idev)->defaultSampleRate == *i)
 			return *i;
 
@@ -1705,8 +1707,8 @@ void SoundPort::probe_supported_rates(const device_iterator& idev)
 	supported_rates[1][(*idev)->name].clear();
 	supported_rates[0][(*idev)->name].push_back((*idev)->defaultSampleRate);
 	supported_rates[1][(*idev)->name].push_back((*idev)->defaultSampleRate);
-	extern double std_sample_rates[];
-	for (const double* r = std_sample_rates; *r > 0.0; r++) {
+	extern float std_sample_rates[];
+	for (const float* r = std_sample_rates; *r > 0.0; r++) {
 		if (Pa_IsFormatSupported(&params[0], NULL, *r) == paFormatIsSupported)
 			supported_rates[0][(*idev)->name].push_back(*r);
 		if (Pa_IsFormatSupported(NULL, &params[1], *r) == paFormatIsSupported)
@@ -1888,7 +1890,7 @@ void SoundPulse::flush(unsigned dir)
 	}
 }
 
-size_t SoundPulse::Write(double* buf, size_t count)
+size_t SoundPulse::Write(float* buf, size_t count)
 {
 #if USE_SNDFILE
 	if (generate)
@@ -1914,7 +1916,7 @@ size_t SoundPulse::Write(double* buf, size_t count)
 	return resample_write(fbuf, count);
 }
 
-size_t SoundPulse::Write_stereo(double* bufleft, double* bufright, size_t count)
+size_t SoundPulse::Write_stereo(float* bufleft, float* bufright, size_t count)
 {
 	if (sd[1].stream_params.channels != 2)
 		return Write(bufleft, count);
@@ -2054,7 +2056,7 @@ void SoundPulse::src_data_reset(int mode)
 #endif // USE_PULSEAUDIO
 
 
-size_t SoundNull::Write(double* buf, size_t count)
+size_t SoundNull::Write(float* buf, size_t count)
 {
 #if USE_SNDFILE
 	if (generate)
@@ -2066,7 +2068,7 @@ size_t SoundNull::Write(double* buf, size_t count)
 	return count;
 }
 
-size_t SoundNull::Write_stereo(double* bufleft, double* bufright, size_t count)
+size_t SoundNull::Write_stereo(float* bufleft, float* bufright, size_t count)
 {
 #if USE_SNDFILE
 	if (generate)

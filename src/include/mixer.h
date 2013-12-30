@@ -64,11 +64,11 @@ public:
 	virtual void	openMixer(const char* dev = "/dev/mixer") { };
 	virtual void	closeMixer(void) { };
 
-	virtual void	setXmtLevel(double v) { };
-	virtual void	setRcvGain(double v) { };
+	virtual void	setXmtLevel(float v) { };
+	virtual void	setRcvGain(float v) { };
 
-	virtual double	PCMVolume(void) { return 0; };
-	virtual void	PCMVolume(double volume) { };
+	virtual float	PCMVolume(void) { return 0; };
+	virtual void	PCMVolume(float volume) { };
 
 	virtual int	InputSourceNbr(const char *source) { return 0; };
 
@@ -96,13 +96,13 @@ private:
 
 // values on init for restoration	
 	int		inpsrc0;
-	double	linelevel0;
-//	double	lineplaythrough0;
-	double	miclevel0;
-//	double	micplaythrough0;
-	double	pcmlevel0;
-	double	vollevel0;
-//	double	playthrough0;
+	float	linelevel0;
+//	float	lineplaythrough0;
+	float	miclevel0;
+//	float	micplaythrough0;
+	float	pcmlevel0;
+	float	vollevel0;
+//	float	playthrough0;
 
 	int		NumMixers;
 	int		NumDevice;
@@ -111,7 +111,7 @@ private:
 
 	int		initMask();
 	void	findNumMixers();
-	double	ChannelVolume(int);
+	float	ChannelVolume(int);
 
 	void	initValues();
 	void	restoreValues();
@@ -122,33 +122,33 @@ public:
 	void		openMixer(const char *dev = "/dev/mixer");
 	void		closeMixer();
 	
-	void		setXmtLevel(double v);
-	void		setRcvGain(double v);
+	void		setXmtLevel(float v);
+	void		setRcvGain(float v);
 	
-	double		PCMVolume();
-	void		PCMVolume(double volume );
+	float		PCMVolume();
+	void		PCMVolume(float volume );
 	int		InputSourceNbr(const char *source);
 	void		SetCurrentInputSource( int i );
-//	double		GetPlaythrough();
-//	void		SetPlaythrough( double volume );
+//	float		GetPlaythrough();
+//	void		SetPlaythrough( float volume );
 //	void		SetMuteInput(bool);
 
 protected:
 	int		numMixers() { return NumMixers;}
 	int		MixerNum(int i) { return Devices[i];}
 	const char *	MixerName( int index );
-	double		OutVolume();
-	void		OutVolume(double vol);
+	float		OutVolume();
+	void		OutVolume(float vol);
 
 	int		NumOutputVolumes();
-	double		OutputVolume( int i );
-	void		OutputVolume( int i, double volume );
+	float		OutputVolume( int i );
+	void		OutputVolume( int i, float volume );
 	const char *	OutputVolumeName( int i );
 	int				GetNumInputSources();
 	const char *	GetInputSourceName( int i);
 
-	double		InputVolume();
-	void		InputVolume( double volume );
+	float		InputVolume();
+	void		InputVolume( float volume );
 	int		GetCurrentInputSource();
 };
 

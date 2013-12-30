@@ -326,7 +326,7 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 
 cmplx thor::mixer(int n, const cmplx& in)
 {
-	double f;
+	float f;
 // first IF mixer (n == 0) plus
 // THORMAXFFTS mixers are supported each separated by 1/THORMAXFFTS bin size
 // n == 1, 2, 3, 4 ... THORMAXFFTS
@@ -335,7 +335,7 @@ cmplx thor::mixer(int n, const cmplx& in)
 	else
 		f = THORFIRSTIF - THORBASEFREQ - bandwidth*0.5 + (samplerate / symlen) * ( (double)n / paths);
 
-	double phase_n = phase[n];
+	float phase_n = phase[n];
 	cmplx z( cos(phase_n), sin(phase_n) );
 	z *= in;
 	phase_n -= TWOPI * f / samplerate;
@@ -420,7 +420,7 @@ void thor::decodePairs(unsigned char symbol)
 void thor::decodesymbol()
 {
 	int c;
-	double fdiff;//, softmag;
+	float fdiff;//, softmag;
 	unsigned char symbols[4];
 	bool outofrange = false;
 
@@ -469,7 +469,7 @@ void thor::softdecodesymbol()
 	unsigned char lastsymbols[4];
 	bool outofrange=false;
 
-	double fdiff = currsymbol - prev1symbol;
+	float fdiff = currsymbol - prev1symbol;
 	if (reverse) fdiff = -fdiff;
 	fdiff /= paths;
 	fdiff /= doublespaced;
@@ -586,11 +586,11 @@ void thor::softdecodesymbol()
 
 int thor::harddecode()
 {
-	double x, max = 0.0;
+	float x, max = 0.0;
 	int symbol = 0;
-	double avg = 0.0;
+	float avg = 0.0;
 	static bool cwi[MAXPATHS]; //[paths * numbins];
-	double cwmag;
+	float cwmag;
 
 	for (int i = 0; i < MAXPATHS; i++) cwi[i] = false;
 
@@ -636,7 +636,7 @@ int thor::softdecode()
 	static bool nextCWI[MAXPATHS] = {false};
 	static const int SoftBailout=6; // Max number of attempts to get a valid symbol
 
-	double x, max = 0.0, avg = 0.0;
+	float x, max = 0.0, avg = 0.0;
 	int symbol = 0;
 	int avgcount = 0;
 	int soft_symbol_trycount=0;
@@ -752,7 +752,7 @@ LOG_INFO("%s", "softflushrx()");
 void thor::update_syncscope()
 {
 
-	double max = 0, min = 1e6, range, mag;
+	float max = 0, min = 1e6, range, mag;
 
 	memset(videodata, 0, paths * numbins * sizeof(double));
 //LOG_INFO("%s", "cleared videodata");
@@ -819,8 +819,8 @@ void thor::synchronize()
 
 void thor::eval_s2n()
 {
-	double s = abs(pipe[pipeptr].vector[currsymbol]);
-	double n = (THORNUMTONES - 1) * 
+	float s = abs(pipe[pipeptr].vector[currsymbol]);
+	float n = (THORNUMTONES - 1) * 
 				abs( pipe[(pipeptr + symlen) % twosym].vector[currsymbol]);
 
 	sig = decayavg( sig, s, s - sig > 0 ? 4 : 20);
@@ -861,7 +861,7 @@ void thor::eval_s2n()
 	put_Status2(confidence);
 }
 
-int thor::rx_process(const double *buf, int len)
+int thor::rx_process(const float *buf, int len)
 {
 	cmplx zref, *zp;
 	cmplx zarray[1];

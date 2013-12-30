@@ -49,10 +49,10 @@
 
 class throb : public modem {
 	
-static double ThrobToneFreqsNar[];
-static double ThrobToneFreqsWid[];
-static double ThrobXToneFreqsNar[];
-static double ThrobXToneFreqsWid[];
+static float ThrobToneFreqsNar[];
+static float ThrobToneFreqsWid[];
+static float ThrobXToneFreqsNar[];
+static float ThrobXToneFreqsWid[];
 static unsigned char ThrobCharSet[];
 static unsigned char ThrobXCharSet[];
 static int  ThrobTonePairs[][2];
@@ -66,8 +66,8 @@ protected:
 	int			spacesym;
 	char			lastchar;
 
-	double			phaseacc;
-	double			phaseincr;
+	float			phaseacc;
+	float			phaseincr;
 
 	fftfilt			*fftfilter;
 	C_FIR_filter	*syncfilt;
@@ -75,21 +75,21 @@ protected:
 	Cmovavg			*snfilter;
 
 	int				symlen;
-	double 			freqs[55];
+	float 			freqs[55];
 
 // receive
-	double			*scope_data;
+	float			*scope_data;
 	cmplx 		*rxtone[55];
 	cmplx 		symbol[MAX_RX_SYMLEN];
 
-	double			syncbuf[MAX_RX_SYMLEN];
-	mbuffer<double, MAX_RX_SYMLEN, 2> dispbuf;
+	float			syncbuf[MAX_RX_SYMLEN];
+	mbuffer<float, MAX_RX_SYMLEN, 2> dispbuf;
 
-	double			rxcntr;
-	double			signal;
-	double			noise;
+	float			rxcntr;
+	float			signal;
+	float			noise;
 	
-	double			s2n;
+	float			s2n;
 
 	int rxsymlen;
 	int symptr;
@@ -102,7 +102,7 @@ protected:
 	void			rx(cmplx in);
 	void			decodechar(int tone1, int tone2);
 	int				findtones(cmplx *word, int &tone1, int &tone2);
-	cmplx			*mk_rxtone(double freq, double *pulse, int len);
+	cmplx			*mk_rxtone(float freq, float *pulse, int len);
 	void			show_char(int);
 	void			flip_syms();
 	void			reset_syms();
@@ -112,13 +112,13 @@ protected:
 	int txstate;
 
 	int				preamble;
-	double			*txpulse;
+	float			*txpulse;
 
-	double			*outbuf;
+	float			*outbuf;
 	unsigned int	buffptr;
 	
-	double			*mk_semi_pulse(int len);
-	double			*mk_full_pulse(int len);
+	float			*mk_semi_pulse(int len);
+	float			*mk_full_pulse(int len);
 	void			send(int);
 
 public:
@@ -128,7 +128,7 @@ public:
 	void	rx_init();
 	void	tx_init(SoundBase *sc);
 	void 	restart() {};
-	int		rx_process(const double *buf, int len);
+	int		rx_process(const float *buf, int len);
 	int		tx_process();
 	void	update_syncscope();
 

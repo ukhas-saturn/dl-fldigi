@@ -58,30 +58,30 @@ private:
 	int				symbollen;
 	bool			_qpsk;
 	bool			_pskr;
-	double			phaseacc[MAX_CARRIERS];
+	float			phaseacc[MAX_CARRIERS];
 	cmplx			prevsymbol[MAX_CARRIERS];
 	unsigned int		shreg;
 	//FEC: 2nd stream
 	unsigned int		shreg2;
 	int			numinterleavers; //interleaver size (speed dependant)
-	double 			numcarriers; //Number of parallel carriers for M CAR PSK and PSKR and QPSKR
-	double 			inter_carrier; // Frequency gap betweeb carriers
+	float 			numcarriers; //Number of parallel carriers for M CAR PSK and PSKR and QPSKR
+	float 			inter_carrier; // Frequency gap betweeb carriers
 
 // rx variables & functions
 	C_FIR_filter		*fir1[MAX_CARRIERS];
 	C_FIR_filter		*fir2[MAX_CARRIERS];
 //	C_FIR_filter		*fir3;
-	double			*fir1c;
-	double			*fir2c;
+	float			*fir1c;
+	float			*fir2c;
 	Cmovavg			*snfilt;
 	Cmovavg			*imdfilt;
 
-	double			I1[NUM_FILTERS];
-	double			I2[NUM_FILTERS];
-	double			Q1[NUM_FILTERS];
-	double			Q2[NUM_FILTERS];
-	double			COEF[NUM_FILTERS];
-	double			m_Energy[NUM_FILTERS];
+	float			I1[NUM_FILTERS];
+	float			I2[NUM_FILTERS];
+	float			Q1[NUM_FILTERS];
+	float			Q2[NUM_FILTERS];
+	float			COEF[NUM_FILTERS];
+	float			m_Energy[NUM_FILTERS];
 	int				m_NCount;
 	bool			imdValid;
 
@@ -96,15 +96,15 @@ private:
 	int 			rxbitstate;
 	//PSKR modes - Soft decoding
 	unsigned char		symbolpair[2];
-	double			fecmet;
-	double			fecmet2;
+	float			fecmet;
+	float			fecmet2;
 
-	double			phase;
-	double			freqerr;
+	float			phase;
+	float			freqerr;
 	int				bits;
-	double 			bitclk;
-	double 			syncbuf[16];
-	double 			scope_pipe[2*PipeLen];//[PipeLen];
+	float 			bitclk;
+	float 			syncbuf[16];
+	float 			scope_pipe[2*PipeLen];//[PipeLen];
 	unsigned int 	pipeptr;
 	unsigned int	dcdshreg;
 	//PSKR modes - 2nd stream
@@ -123,20 +123,20 @@ private:
 	void 			rx_bit2(int bit);
 	void			rx_qpsk(int bits);
 	void			rx_pskr(unsigned char symbol);
-	double 			scopedata[16];
+	float 			scopedata[16];
 // IMD & s/n variables
-	double			k0, k1, k2;
-	double			I11, I12, I21, I22, I31, I32;
-	double			snratio, s2n, imdratio, imd;
-	double			E1, E2, E3;
-	double			afcmetric;
+	float			k0, k1, k2;
+	float			I11, I12, I21, I22, I31, I32;
+	float			snratio, s2n, imdratio, imd;
+	float			E1, E2, E3;
+	float			afcmetric;
 
 //PSKR modes
 	bool			firstbit;
 	bool			startpreamble;
 
 //MULTI-CARRIER
-	double			sc_bw; // single carrier bandwidth
+	float			sc_bw; // single carrier bandwidth
 
 	
 //	cmplx thirdorder;
@@ -144,7 +144,7 @@ private:
 	int			accumulated_bits; //JD for multiple carriers
 	int			txsymbols[MAX_CARRIERS];
 
-	double			*tx_shape;
+	float			*tx_shape;
 	int 			preamble;
 	void 			tx_symbol(int sym);
 	void			tx_bit(int bit);
@@ -173,7 +173,7 @@ public:
 	void rx_init();
 	void tx_init(SoundBase *sc);
 	void restart();
-	int rx_process(const double *buf, int len);
+	int rx_process(const float *buf, int len);
 	int tx_process();
 	void searchDown();
 	void searchUp();

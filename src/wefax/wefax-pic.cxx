@@ -142,16 +142,16 @@ static int rx_last_filtered_row = 0 ;
 static bool noise_removal = false ;
 
 /// Alters the slanting of the image based on LPM adjustments.
-static volatile double rx_slant_ratio = 0.0 ;
+static volatile float rx_slant_ratio = 0.0 ;
 
 /// This transforms the user slant ratio (Small number around 0.0)
 /// into a ratio used to stretch the image (Very very small mantissa added to 1.0).
-static double slant_factor_default(void)
+static float slant_factor_default(void)
 {
 	return 100.0 / ( rx_slant_ratio + 100.0 );
 }
 
-static double slant_factor_with_ratio( double ratio_percent )
+static float slant_factor_with_ratio( float ratio_percent )
 {
 	return ( ratio_percent + 100.0 ) / ( rx_slant_ratio + 100.0 );
 }
@@ -289,7 +289,7 @@ static Fl_Choice * make_lpm_choice( int width_offset, int y_btn, int width_btn, 
 }
 
 /// Sometimes the LPM can be calculated to 122.0 when it should be 120.0.
-int wefax_pic::normalize_lpm( double the_lpm )
+int wefax_pic::normalize_lpm( float the_lpm )
 {
 	for( int ix_lpm = 0 ; ix_lpm < nb_lpm_values ; ++ix_lpm ) {
 		int curr_lpm = all_lpm_values[ ix_lpm ].m_value ;
@@ -475,7 +475,7 @@ void wefax_pic::update_rx_pic_bw(unsigned char data, int pix_pos )
 	}
 
 	/// Maybe there is a slant.
-	pix_pos = ( double )pix_pos * slant_factor_default() + 0.5 ;
+	pix_pos = ( float )pix_pos * slant_factor_default() + 0.5 ;
 
 	/// Must be a multiple of the number of bytes per pixel.
 	pix_pos = ( pix_pos / bytes_per_pix ) * bytes_per_pix ;
@@ -845,8 +845,8 @@ static void wefax_cb_pic_ratio( Fl_Widget *, void * )
 {
 	if (wefax_serviceme != active_modem) return;
 	ENSURE_THREAD(FLMAIN_TID);
-	double ratio_percent = wefax_cnt_rx_ratio->value();
-	double current_ratio = slant_factor_with_ratio( ratio_percent );
+	float ratio_percent = wefax_cnt_rx_ratio->value();
+	float current_ratio = slant_factor_with_ratio( ratio_percent );
 	wefax_pic_rx_picture->stretch( current_ratio );
 	rx_slant_ratio = ratio_percent ;
 
@@ -960,7 +960,7 @@ void wefax_pic::abort_rx_viewer(void)
 }
 
 /// This must be called within REQ or REQ_SYNC to avoid a segfault.
-void wefax_pic::power( double start, double phase, double image, double black, double stop )
+void wefax_pic::power( float start, float phase, float image, float black, float stop )
 {
 	if (wefax_serviceme != active_modem) return;
 	ENSURE_THREAD(FLMAIN_TID);
@@ -1309,7 +1309,7 @@ void wefax_pic::resize_rx_viewer(int wid_img)
 	wefax_out_rx_width->value(buffer_width);
 
 	/// This is a number of pixels.
-	double range_rx_center = wid_img / 2.0 ;
+	float range_rx_center = wid_img / 2.0 ;
 	wefax_slider_rx_center->range(-range_rx_center, range_rx_center);
 
 	wefax_pic_rx_win->redraw();

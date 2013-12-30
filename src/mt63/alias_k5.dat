@@ -29,7 +29,7 @@
 
 const int Alias_k5_Len=128;
 
-double Alias_k5_I[Alias_k5_Len] = {
+float Alias_k5_I[Alias_k5_Len] = {
    +0.00006549 , //   0
    +0.00007616 , //   1
    +0.00006321 , //   2
@@ -160,7 +160,7 @@ double Alias_k5_I[Alias_k5_Len] = {
    +0.00007616   // 127
 } ;
 
-double Alias_k5_Q[Alias_k5_Len] = {
+float Alias_k5_Q[Alias_k5_Len] = {
    -0.00000000 , //   0
    -0.00005367 , //   1
    -0.00016555 , //   2

@@ -57,8 +57,8 @@ static char figures[32] = {
 	'9',	'?',	'&',	' ',	'.',	'/',	';',	' '
 };
 
-const double view_rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850};
-const double view_rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200};
+const float view_rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850, 1000};
+const float view_rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 500, 1000};
 const int    view_rtty::BITS[]  = {5, 7, 8};
 
 void view_rtty::rx_init()
@@ -123,7 +123,7 @@ void view_rtty::reset_filters(int ch)
 
 void view_rtty::restart()
 {
-	double stl;
+	float stl;
 
 	rtty_shift = shift = (progdefaults.rtty_shift >= 0 ?
 			      SHIFT[progdefaults.rtty_shift] : progdefaults.rtty_custom_shift);
@@ -216,7 +216,7 @@ view_rtty::view_rtty(trx_mode tty_mode)
 	restart();
 }
 
-cmplx view_rtty::mixer(double &phase, double f, cmplx in)
+cmplx view_rtty::mixer(float &phase, float f, cmplx in)
 {
 	cmplx z = cmplx( cos(phase), sin(phase)) * in;;
 
@@ -368,9 +368,9 @@ bool view_rtty::rx(int ch, bool bit)
 
 void view_rtty::Metric(int ch)
 {
-	double delta = rtty_baud/2.0;
-	double np = wf->powerDensity(channel[ch].frequency, delta) * 3000 / delta;
-	double sp =
+	float delta = rtty_baud/2.0;
+	float np = wf->powerDensity(channel[ch].frequency, delta) * 3000 / delta;
+	float sp =
 		wf->powerDensity(channel[ch].frequency - shift/2, delta) +
 		wf->powerDensity(channel[ch].frequency + shift/2, delta) + 1e-10;
 
@@ -400,13 +400,13 @@ void view_rtty::Metric(int ch)
 
 void view_rtty::find_signals()
 {
-	double spwrhi = 0.0, spwrlo = 0.0, npwr = 0.0;
+	float spwrhi = 0.0, spwrlo = 0.0, npwr = 0.0;
 	double rtty_squelch = pow(10, progStatus.VIEWER_rttysquelch / 10.0);
 	for (int i = 0; i < progdefaults.VIEWERchannels; i++) {
 		if (channel[i].state != IDLE) continue;
 		int cf = progdefaults.LowFreqCutoff + 100 * i;
 		if (cf < shift) cf = shift;
-		double delta = rtty_baud / 8;
+		float delta = rtty_baud / 8;
 		for (int chf = cf; chf < cf + 100 - rtty_baud / 4; chf += 5) {
 			spwrlo = wf->powerDensity(chf - shift/2, delta);
 			spwrhi = wf->powerDensity(chf + shift/2, delta);
@@ -453,7 +453,7 @@ void view_rtty::clear()
 	}
 }
 
-int view_rtty::rx_process(const double *buf, int buflen)
+int view_rtty::rx_process(const float *buf, int buflen)
 {
 	cmplx z, zmark, zspace, *zp_mark, *zp_space;
 	static bool bit = true;
@@ -498,7 +498,7 @@ int view_rtty::rx_process(const double *buf, int buflen)
 				channel[ch].noise_floor = min(channel[ch].space_noise, channel[ch].mark_noise);
 
 // clipped if clipped decoder selected
-				double mclipped = 0, sclipped = 0;
+				float mclipped = 0, sclipped = 0;
 				mclipped = channel[ch].mark_mag > channel[ch].mark_env ? 
 							channel[ch].mark_env : channel[ch].mark_mag;
 				sclipped = channel[ch].space_mag > channel[ch].space_env ? 
@@ -527,7 +527,7 @@ int view_rtty::rx_process(const double *buf, int buflen)
 					int mp1 = mp0 + 1;
 					if (mp0 < 0) mp0 += MAXPIPE;
 					if (mp1 < 0) mp1 += MAXPIPE;
-					double ferr = (TWOPI * samplerate / rtty_baud) *
+					float ferr = (TWOPI * samplerate / rtty_baud) *
 						(!reverse ? 
 						arg(conj(channel[ch].mark_history[mp1]) * channel[ch].mark_history[mp0]) :
 						arg(conj(channel[ch].space_history[mp1]) * channel[ch].space_history[mp0]));

@@ -43,7 +43,7 @@ LOG_FILE_SOURCE(debug::LOG_MODEM);
 
 using namespace std;
 
-double olivia::nco(double freq)
+float olivia::nco(float freq)
 {
     preamblephase += 2.0 * M_PI * freq / samplerate;
 
@@ -67,7 +67,7 @@ void olivia::tx_init(SoundBase *sc)
 
 	rx_flush();
 
-	double fc_offset = Tx->Bandwidth*(1.0 - 0.5/Tx->Tones)/2.0;
+	float fc_offset = Tx->Bandwidth*(1.0 - 0.5/Tx->Tones)/2.0;
 	if (reverse) { 
 		Tx->FirstCarrierMultiplier = (txbasefreq + fc_offset)/500.0; 
 		Tx->Reverse = 1; 
@@ -95,7 +95,7 @@ void olivia::rx_flush()
 
 void olivia::send_tones()
 {
-	double freqa, freqb;
+	float freqa, freqb;
 	tone_bw = bandwidth;
 	tone_midfreq = txbasefreq;
 
@@ -211,11 +211,11 @@ int olivia::tx_process()
 }
 
 
-int olivia::rx_process(const double *buf, int len)
+int olivia::rx_process(const float *buf, int len)
 {
 	int c;
 	unsigned char ch = 0;
-	static double snr = 1e-3;
+	static float snr = 1e-3;
 	static char msg1[20];
 	static char msg2[20];
 
@@ -311,7 +311,7 @@ void olivia::restart()
 	txbufferlen = Tx->MaxOutputLen;
 	
 	if (txfbuffer) delete [] txfbuffer;
-	txfbuffer = new double[txbufferlen];
+	txfbuffer = new float[txbufferlen];
 
 	Rx->Tones = Tx->Tones;
 	Rx->Bandwidth = bandwidth;
@@ -419,8 +419,8 @@ olivia::olivia(trx_mode omode)
 			break;
 	}
 
-	Tx = new MFSK_Transmitter< double >;
-	Rx = new MFSK_Receiver< double >;
+	Tx = new MFSK_Transmitter< float >;
+	Rx = new MFSK_Receiver< float >;
 
 	lastfreq = 0;
 

@@ -28,7 +28,7 @@
 #include <cmath>
 #include <complex>
 
-typedef std::complex<double> cmplx;
+typedef std::complex<float> cmplx;
 
 inline cmplx cmac (const cmplx *a, const cmplx *b, int ptr, int len) {
 	cmplx z;

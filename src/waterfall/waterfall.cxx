@@ -133,13 +133,13 @@ WFdisp::WFdisp (int x0, int y0, int w0, int h0, char *lbl) :
 	pwr				= new wf_fft_type[IMAGE_WIDTH];
 	fft_db			= new short int[image_area];
 	tmp_fft_db		= new short int[image_area];
-	circbuff		= new double[FFT_LEN];
+	circbuff		= new float[FFT_LEN];
 	wfbuf			= new wf_cpx_type[FFT_LEN];
 	wfft			= new g_fft<wf_fft_type>(FFT_LEN);
-	fftwindow		= new double[FFT_LEN];
+	fftwindow		= new float[FFT_LEN];
 	setPrefilter(progdefaults.wfPreFilter);
 
-	memset(circbuff, 0, FFT_LEN * sizeof(double));
+	memset(circbuff, 0, FFT_LEN * sizeof(float));
 
 	mag = 1;
 	step = 4;
@@ -158,7 +158,7 @@ WFdisp::WFdisp (int x0, int y0, int w0, int h0, char *lbl) :
 	mode = WATERFALL;
 	centercarrier = false;
 	overload = false;
-	peakaudio = 0.0;
+	peakaudio = 0.0f;
 	rfc = 0L;
 	usb = true;
 	wfspeed = NORMAL;
@@ -275,7 +275,7 @@ void WFdisp::makeMarker()
 	clrMin = markerimage + scale_width;
 	clrMax = clrMin + (WFMARKER - 2) * scale_width;
 	memset(clrMin, 0, RGBwidth * (WFMARKER - 2));
-	clrM = clrMin + (int)((double)carrierfreq + 0.5);
+	clrM = clrMin + (int)((float)carrierfreq + 0.5);
 
 	int marker_width = bandwidth;
 	int mode = active_modem->get_mode();
@@ -299,7 +299,7 @@ void WFdisp::makeMarker()
 		adjust_color_inv(RGBmarker.R, RGBmarker.G, RGBmarker.B, FL_BLACK, FL_RED);
 		makeMarker_( static_cast<int>(bandwidth / 2.0 + 1),
 					 &RGBmarker, txfreq,
-					 clrMin, clrMin + (int)((double)txfreq + 0.5), clrMax);
+					 clrMin, clrMin + (int)((float)txfreq + 0.5), clrMax);
 	}
 
 	if (!wantcursor) return;
@@ -312,7 +312,7 @@ void WFdisp::makeMarker()
 		cursorpos = (progdefaults.LowFreqCutoff + bandwidth / 2) / step;
 
 // Create the cursor marker
-	double xp = offset + step * cursorpos;
+	float xp = offset + step * cursorpos;
 	if (xp < bandwidth / 2.0 || xp > (progdefaults.HighFreqCutoff - bandwidth / 2.0))
 		return;
 	clrM = markerimage + scale_width + (int)(xp + 0.5);
@@ -373,10 +373,10 @@ void WFdisp::makeScale() {
 }
 
 void WFdisp::setcolors() {
-	double di;
+	float di;
 	int r, g, b;
 	for (int i = 0; i < 256; i++) {
-		di = sqrt((double)i / 256.0);
+		di = sqrt((float)i / 256.0);
 		mag2RGBI[i].I = (uchar)(200*di);
 	}
 	for (int n = 0; n < 8; n++) {
@@ -409,7 +409,7 @@ void WFdisp::initmaps() {
 
 int WFdisp::peakFreq(int f0, int delta)
 {
-	double threshold = 0.0;
+	float threshold = 0.0;
 	int f1, fmin =	(int)((f0 - delta)),
 		f2, fmax =	(int)((f0 + delta));
 	f1 = fmin; f2 = fmax;
@@ -428,9 +428,9 @@ int WFdisp::peakFreq(int f0, int delta)
 	return (f1 + f2) / 2;
 }
 
-double WFdisp::powerDensity(double f0, double bw)
+float WFdisp::powerDensity(float f0, float bw)
 {
-	double pwrdensity = 0.0;
+	float pwrdensity = 0.0;
 	int flower = (int)((f0 - bw/2)),
 		fupper = (int)((f0 + bw/2));
 	if (flower < 0 || fupper > IMAGE_WIDTH)
@@ -441,9 +441,9 @@ double WFdisp::powerDensity(double f0, double bw)
 }
 
 // Frequency of the maximum power for a given bandwidth. Used for AFC.
-double WFdisp::powerDensityMaximum(int bw_nb, const int (*bw)[2]) const
+float WFdisp::powerDensityMaximum(int bw_nb, const int (*bw)[2]) const
 {
-	double max_pwr = 0 ;
+	float max_pwr = 0 ;
 	int f_lowest = bw[0][0];
 	int f_highest = bw[bw_nb-1][1];
 	if( f_lowest > f_highest ) abort();
@@ -458,7 +458,7 @@ double WFdisp::powerDensityMaximum(int bw_nb, const int (*bw)[2]) const
 		}
 	}
 
-	double curr_pwr = max_pwr ;
+	float curr_pwr = max_pwr ;
 	int max_idx = -1 ;
 	// Single pass to compute the maximum on this bandwidth.
 	for( int f = -f_lowest ; f < IMAGE_WIDTH - f_highest; ++f )
@@ -491,7 +491,7 @@ void WFdisp::setPrefilter(int v)
 
 int WFdisp::log2disp(int v)
 {
-	double val = 255.0 * (reflevel- v) / ampspan;
+	float val = 255.0 * (reflevel- v) / ampspan;
 	if (val < 0) return 255;
 	if (val > 255 ) return 0;
 	return (int)(255 - val);
@@ -505,7 +505,7 @@ void WFdisp::processFFT() {
 
 	if (--dispcnt == 0) {
 		static const int log2disp100 = log2disp(-100);
-		double vscale = 2.0 / FFT_LEN;
+		float vscale = 2.0 / FFT_LEN;
 
 		memset(wfbuf, 0, FFT_LEN * sizeof(*wfbuf));
 		void *pv = static_cast<void*>(wfbuf);
@@ -592,7 +592,7 @@ void WFdisp::redrawCursor()
 //	cursormoved = true;
 }
 
-void WFdisp::sig_data( double *sig, int len, int sr )
+void WFdisp::sig_data( float *sig, int len, int sr )
 {
 	if (wfspeed == PAUSE)
 		goto update_freq;
@@ -609,16 +609,16 @@ void WFdisp::sig_data( double *sig, int len, int sr )
 			(size_t)((FFT_LEN - len)*sizeof(wf_fft_type)));
 	memcpy((void*)&circbuff[FFT_LEN-len], 
 			(void*)sig,
-			(size_t)(len)*sizeof(double));
+			(size_t)(len)*sizeof(float));
 
 	{
 		overload = false;
-		double overval, peak = 0.0;
+		float overval, peak = 0.0f;
 		for (int i = 0; i < len; i++) {
 			overval = fabs(sig[i]);
 			if (overval > peak) peak = overval;
 		}
-		peakaudio = 0.1 * peak + 0.9 * peakaudio;
+		peakaudio = 0.1f * peak + 0.9f * peakaudio;
 	}
 
 	if (mode == SCOPE)
@@ -757,7 +757,7 @@ int WFdisp::wfmag() {
 void WFdisp::drawScale() {
 	int fw = 60, xoff;
 	static char szFreq[20];
-	double fr;
+	float fr;
 	uchar *pixmap;
 
 	if (progdefaults.wf_audioscale)
@@ -1358,7 +1358,7 @@ void mode_cb(Fl_Widget* w, void*)
 void reflevel_cb(Fl_Widget *w, void *v) {
 	FL_LOCK_D();
 	waterfall *wf = (waterfall *)w->parent();
-	double val = wf->wfRefLevel->value();
+	float val = wf->wfRefLevel->value();
 	FL_UNLOCK_D();
 	wf->wfdisp->Reflevel(val);
 	progdefaults.wfRefLevel = val;
@@ -1368,7 +1368,7 @@ void reflevel_cb(Fl_Widget *w, void *v) {
 void ampspan_cb(Fl_Widget *w, void *v) {
 	FL_LOCK_D();
 	waterfall *wf = (waterfall *)w->parent();
-	double val = wf->wfAmpSpan->value();
+	float val = wf->wfAmpSpan->value();
 	FL_UNLOCK_D();
 	wf->wfdisp->Ampspan(val);
 	progdefaults.wfAmpSpan = val;
@@ -2188,9 +2188,9 @@ void waterfall::handle_mouse_wheel(int what, int d)
 	bool changed_save = progdefaults.changed;
 	val->do_callback();
 	progdefaults.changed = changed_save;
-	if (val == cntServerOffset || val == cntSearchRange)
+	if (val == cntServerOffset || val == cntSearchRange) {
 		if (active_modem) active_modem->set_sigsearch(SIGSEARCH);
-	else if (val == sldrSquelch) // sldrSquelch gives focus to TransmitText
+	} else if (val == sldrSquelch) // sldrSquelch gives focus to TransmitText
 		take_focus();
 
 	if (msg_fmt) {

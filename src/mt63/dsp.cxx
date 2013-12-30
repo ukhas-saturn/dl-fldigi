@@ -36,25 +36,25 @@
 
 // ----------------------------------------------------------------------------
 
-double dspPower(double *X, int Len)
+float dspPower(float *X, int Len)
 {
-	double Sum;
+	float Sum;
 	for(Sum = 0.0; Len; Len--,X++)
 		Sum += (*X)*(*X);
 	return Sum;
 }
 
-double dspPower(double *I, double *Q, int Len)
+float dspPower(float *I, float *Q, int Len)
 {
-	double Sum;
+	float Sum;
 	for(Sum = 0.0; Len; Len--,I++,Q++)
 		Sum += (*I)*(*I) + (*Q)*(*Q);
 	return Sum;
 }
 
-double dspPower(dspCmpx *X, int Len)
+float dspPower(dspCmpx *X, int Len)
 {
-	double Sum;
+	float Sum;
 	for(Sum = 0.0; Len; Len--,X++)
 		Sum += (X->re)*(X->re) + (X->im)*(X->im);
 	return Sum;
@@ -63,17 +63,17 @@ double dspPower(dspCmpx *X, int Len)
 // ----------------------------------------------------------------------------
 // dspAverage, extremes, fitting
 
-double dspAverage(double *Data, int Len)
+float dspAverage(float *Data, int Len)
 {
-	double Sum; int i;
+	float Sum; int i;
 	for(Sum = 0.0,i = 0; i < Len; i++) Sum += Data[i];
 	return Sum/Len;
 }
 
-int dspCountInRange(double *Data, int Len, double Low, double Upp)
+int dspCountInRange(float *Data, int Len, float Low, float Upp)
 {
 	int count, i;
-	double D;
+	float D;
 	for(count = i = 0; i<Len; i++) {
 		D = Data[i];
 		count += ((Low<=D)&&(D<=Upp));
@@ -81,9 +81,9 @@ int dspCountInRange(double *Data, int Len, double Low, double Upp)
 	return count;
 }
 
-double dspFindMaxdspPower(dspCmpx *Data, int Len)
+float dspFindMaxdspPower(dspCmpx *Data, int Len)
 {
-	double Max, Pwr;
+	float Max, Pwr;
 	int i;
 	Max = dspPower(Data[0]);
 	for(i = 1; i < Len; i++) {
@@ -93,9 +93,9 @@ double dspFindMaxdspPower(dspCmpx *Data, int Len)
 	return Max;
 }
 
-double dspFindMaxdspPower(dspCmpx *Data, int Len, int &MaxPos)
+float dspFindMaxdspPower(dspCmpx *Data, int Len, int &MaxPos)
 {
-	double Max,	Pwr;
+	float Max,	Pwr;
 	int i, pos;
 	Max = dspPower(Data[0]);
 	pos = 0;
@@ -110,9 +110,9 @@ double dspFindMaxdspPower(dspCmpx *Data, int Len, int &MaxPos)
 	return Max;
 }
 
-double dspFitPoly1(double *Data, int Len, double &A, double &B)
+float dspFitPoly1(float *Data, int Len, float &A, float &B)
 {
-	double Sum;
+	float Sum;
 	int i;
 	A = (Data[Len-1] - Data[0])/(Len - 1);
 	for (Sum = 0.0,i = 0; i < Len; i++)
@@ -123,9 +123,9 @@ double dspFitPoly1(double *Data, int Len, double &A, double &B)
 	return sqrt(Sum/Len);
 }
 
-double dspFitPoly2(double *Data, int Len, double &A, double &B, double &C)
+float dspFitPoly2(float *Data, int Len, float &A, float &B, float &C)
 {
-	double Sum;
+	float Sum;
 	int i;
 	A = ((Data[Len - 1] - Data[Len - 2]) - (Data[1] - Data[0]))/(Len - 2)/2;
 	B = (Data[Len - 1] - A*(Len - 1)*(Len - 1) - Data[0])/(Len - 1);
@@ -137,7 +137,7 @@ double dspFitPoly2(double *Data, int Len, double &A, double &B, double &C)
 	return sqrt(Sum/Len);
 }
 
-void dspFitPoly2(double Data[3], double &A, double &B, double &C)
+void dspFitPoly2(float Data[3], float &A, float &B, float &C)
 {
 	C = Data[0];
 	A = (Data[0]- 2*Data[1] + Data[2])/2;
@@ -150,22 +150,22 @@ void dspFitPoly2(double Data[3], double &A, double &B, double &C)
 // between -PI and +PI. Most (or even all) will return zero for input
 // euqal -PI or +PI.
 
-double WindowHamming(double dspPhase)
+float WindowHamming(float dspPhase)
 {
 	return cos(dspPhase/2);
 } // not exactly ...
 
-double dspWindowHanning(double dspPhase)
+float dspWindowHanning(float dspPhase)
 {
 	return (1.0 + cos(dspPhase))/2;
 }
 
-double WindowBlackman2(double dspPhase) // from Freq 5.1 FFT analyzer
+float WindowBlackman2(float dspPhase) // from Freq 5.1 FFT analyzer
 {
 	return 0.42 + 0.5*cos(dspPhase) + 0.08*cos(2*dspPhase);
 }
 
-double dspWindowBlackman3(double dspPhase) // from the Motorola BBS
+float dspWindowBlackman3(float dspPhase) // from the Motorola BBS
 {
 	return 0.35875 + 0.48829*cos(dspPhase) + 0.14128*cos(2*dspPhase) + 0.01168*cos(3*dspPhase);
 }
@@ -174,14 +174,14 @@ double dspWindowBlackman3(double dspPhase) // from the Motorola BBS
 // FIR shape calculation for a flat response from FreqLow to FreqUpp
 
 void dspWinFirI(
-		double LowOmega, double UppOmega,
-		double *Shape, int Len, double (*Window)(double), double shift)
+		float LowOmega, float UppOmega,
+		float *Shape, int Len, float (*Window)(float), float shift)
 {
 	int i;
-	double time, dspPhase, shape;
+	float time, dspPhase, shape;
 // printf("dspWinFirI: %5.3f %5.3f %d\n",LowOmega,UppOmega,Len);
 	for (i = 0; i < Len; i++) {
-		time = i + (1.0 - shift) - (double)Len/2;
+		time = i + (1.0 - shift) - (float)Len/2;
 		dspPhase = 2*M_PI*time/Len;
 		if (time == 0)
 			shape = UppOmega - LowOmega;
@@ -192,14 +192,14 @@ void dspWinFirI(
 }
 
 void WinFirQ(
-		double LowOmega, double UppOmega,
-		double *Shape, int Len, double (*Window)(double), double shift)
+		float LowOmega, float UppOmega,
+		float *Shape, int Len, float (*Window)(float), float shift)
 {
 	int i;
-	double time, dspPhase, shape;
+	float time, dspPhase, shape;
 // printf("WinFirQ: %5.3f %5.3f %d\n",LowOmega,UppOmega,Len);
 	for (i = 0; i < Len; i++) {
-		time = i + (1.0 - shift) - (double)Len/2;
+		time = i + (1.0 - shift) - (float)Len/2;
 		dspPhase = 2*M_PI*time/Len;
 		if (time == 0)
 			shape=0.0;
@@ -212,26 +212,26 @@ void WinFirQ(
   // in reverse order for simpler indexing
 
 // ----------------------------------------------------------------------------
-// convert 16-bit signed or 8-bit unsigned into doubles
+// convert 16-bit signed or 8-bit unsigned into floats
 
-void dspConvS16todouble(dspS16 *dspS16, double *dble, int Len, double Gain)
+void dspConvS16tofloat(dspS16 *dspS16, float *dble, int Len, float Gain)
 {
 	for (; Len; Len--)
 		(*dble++) = (*dspS16++)*Gain;
 }
 
-int dspConvS16todouble(short int *dspS16, double_buff *dble, int Len, double Gain)
+int dspConvS16tofloat(short int *dspS16, float_buff *dble, int Len, float Gain)
 {
 	int err = dble->EnsureSpace(Len);
 	if (err) return -1;
-	dspConvS16todouble(dspS16, dble->Data, Len, Gain);
+	dspConvS16tofloat(dspS16, dble->Data, Len, Gain);
 	dble->Len = Len;
 	return 0;
 }
 
-void dspConvdoubleTodspS16(double *dble, dspS16 *dspS16, int Len, double Gain)
+void dspConvfloatTodspS16(float *dble, dspS16 *dspS16, int Len, float Gain)
 {
-	double out;
+	float out;
 	for (; Len; Len--) {
 		out = (*dble++)*Gain;
 		if (out > 32767.0)
@@ -242,17 +242,17 @@ void dspConvdoubleTodspS16(double *dble, dspS16 *dspS16, int Len, double Gain)
 	}
 } // we could count the over/underflows ?
 
-void dspConvU8todouble(unsigned char *U8, double *dble, int Len, double Gain)
+void dspConvU8tofloat(unsigned char *U8, float *dble, int Len, float Gain)
 {
 	for (; Len; Len--)
 		(*dble++) = ((int)(*U8++) - 128)*Gain;
 }
 
-int  dspConvU8todouble(unsigned char *U8, double_buff *dble, int Len, double Gain)
+int  dspConvU8tofloat(unsigned char *U8, float_buff *dble, int Len, float Gain)
 {
 	int err = dble->EnsureSpace(Len);
 	if (err) return -1;
-	dspConvU8todouble(U8, dble->Data, Len, Gain);
+	dspConvU8tofloat(U8, dble->Data, Len, Gain);
 	dble->Len = Len;
 	return 0;
 }
@@ -260,13 +260,13 @@ int  dspConvU8todouble(unsigned char *U8, double_buff *dble, int Len, double Gai
 // ----------------------------------------------------------------------------
 // other converts
 
-void dspConvCmpxTodspPower(dspCmpx *Inp, int Len, double *Out)
+void dspConvCmpxTodspPower(dspCmpx *Inp, int Len, float *Out)
 {
 	for (; Len; Len--)
 		(*Out++) = dspPower(*Inp++);
 }
 
-int dspConvCmpxTodspPower(dspCmpx_buff *Input, double_buff *Output)
+int dspConvCmpxTodspPower(dspCmpx_buff *Input, float_buff *Output)
 {
 	int err = Output->EnsureSpace(Input->Len);
 	if (err) return err;
@@ -275,13 +275,13 @@ int dspConvCmpxTodspPower(dspCmpx_buff *Input, double_buff *Output)
 	return 0;
 }
 
-void dspConvCmpxTodspAmpl(dspCmpx *Inp, int Len, double *Out)
+void dspConvCmpxTodspAmpl(dspCmpx *Inp, int Len, float *Out)
 {
 	for (; Len; Len--)
 		(*Out++) = sqrt(dspPower(*Inp++));
 }
 
-int dspConvCmpxTodspAmpl(dspCmpx_buff *Input, double_buff *Output)
+int dspConvCmpxTodspAmpl(dspCmpx_buff *Input, float_buff *Output)
 {
 	int err = Output->EnsureSpace(Input->Len);
 	if(err) return err;
@@ -290,13 +290,13 @@ int dspConvCmpxTodspAmpl(dspCmpx_buff *Input, double_buff *Output)
 	return 0;
 }
 
-void dspConvCmpxTodspPhase(dspCmpx *Inp, int Len, double *Out)
+void dspConvCmpxTodspPhase(dspCmpx *Inp, int Len, float *Out)
 {
 	for (; Len; Len--)
 		(*Out++) = dspPhase(*Inp++);
 }
 
-int dspConvCmpxTodspPhase(dspCmpx_buff *Input, double_buff *Output)
+int dspConvCmpxTodspPhase(dspCmpx_buff *Input, float_buff *Output)
 {
 	int err = Output->EnsureSpace(Input->Len);
 	if(err) return err;
@@ -324,7 +324,7 @@ void dspPulseLimiter::Free(void)
 	Tap = NULL;
 }
 
-int dspPulseLimiter::Preset(int TapLen, double LimitThres)
+int dspPulseLimiter::Preset(int TapLen, float LimitThres)
 {
 	Len = TapLen;
 	Thres = LimitThres*LimitThres;
@@ -335,10 +335,10 @@ int dspPulseLimiter::Preset(int TapLen, double LimitThres)
 	return 0;
 }
 
-int dspPulseLimiter::Process(double *Inp, int InpLen, double *Out)
+int dspPulseLimiter::Process(float *Inp, int InpLen, float *Out)
 {
 	int i, o;
-	double Lim;
+	float Lim;
 	for (i = 0; i < InpLen; i++) {
 		PwrSum -= Tap[Ptr]*Tap[Ptr];
 		Tap[Ptr++] = Inp[i];
@@ -362,7 +362,7 @@ int dspPulseLimiter::Process(double *Inp, int InpLen, double *Out)
 	return 0;
 }
 
-int dspPulseLimiter::Process(double_buff *Input)
+int dspPulseLimiter::Process(float_buff *Input)
 {
 	int err = Output.EnsureSpace(Input->Len);
 	if (err) return -1;
@@ -380,7 +380,7 @@ dspLevelMonitor::dspLevelMonitor()
 dspLevelMonitor::~dspLevelMonitor()
 { }
 
-int dspLevelMonitor::Preset(double Integ, double Range)
+int dspLevelMonitor::Preset(float Integ, float Range)
 {
 	dspLowPass2Coeff(Integ, W1, W2, W5);
 	MaxSqr = Range*Range;
@@ -392,17 +392,17 @@ int dspLevelMonitor::Preset(double Integ, double Range)
 	return 0;
 }
 
-int dspLevelMonitor::Process(double *Inp, int Len)
+int dspLevelMonitor::Process(float *Inp, int Len)
 {
 	int i, Out;
-	double Sqr, Sum;
+	float Sqr, Sum;
 	if (Len <= 0) return 0;
 	for (Sum = 0.0, Out = 0,i = 0; i < Len; i++) {
 		Sum += Sqr = Inp[i]*Inp[i];
 		Out += (Sqr > MaxSqr);
 	}
 	dspLowPass2(Sum/Len, PwrMid, PwrOut, W1, W2, W5);
-	dspLowPass2((double)Out/Len, OutOfRangeMid, OutOfRange, W1, W2, W5);
+	dspLowPass2((float)Out/Len, OutOfRangeMid, OutOfRange, W1, W2, W5);
 	if (OutOfRange < 0.0)
 		OutOfRange = 0.0;
 	if (PwrOut <= 0.0)
@@ -412,7 +412,7 @@ int dspLevelMonitor::Process(double *Inp, int Len)
 	return 0;
 }
 
-int dspLevelMonitor::Process(double_buff *Input)
+int dspLevelMonitor::Process(float_buff *Input)
 { return Process(Input->Data,Input->Len); }
 
 // ----------------------------------------------------------------------------
@@ -433,10 +433,10 @@ dspMixerAutoLevel::dspMixerAutoLevel()
 	AvedspRMS = 0.0;
 }
 
-int dspMixerAutoLevel::Process(double *Inp, int InpLen)
+int dspMixerAutoLevel::Process(float *Inp, int InpLen)
 {
-	double MS = dspPower(Inp, InpLen) / IntegLen;
-	double W = 1.0 - ((double)InpLen) / IntegLen;
+	float MS = dspPower(Inp, InpLen) / IntegLen;
+	float W = 1.0 - ((float)InpLen) / IntegLen;
 
 	AvedspRMS = AvedspRMS*W + MS;
 	Hold += InpLen;
@@ -465,9 +465,9 @@ int dspMixerAutoLevel::Process(double *Inp, int InpLen)
 
 // ----------------------------------------------------------------------------
 
-void dspLowPass2(dspCmpx *Inp, dspCmpx *Mid, dspCmpx *Out, double W1, double W2, double W5)
+void dspLowPass2(dspCmpx *Inp, dspCmpx *Mid, dspCmpx *Out, float W1, float W2, float W5)
 {
-	double Sum, Diff;
+	float Sum, Diff;
 //  printf("\n[dspLowPass2] %6.3f %6.3f %6.3f",Inp->re,Mid->re,Out->re);
 	Sum = Mid->re + Out->re;
 	Diff = Mid->re - Out->re;
@@ -504,7 +504,7 @@ void dspPeriodLowPass2::Free(void)
 	TapOut = NULL;
 }
 
-int dspPeriodLowPass2::Preset(int Period, double IntegLen)
+int dspPeriodLowPass2::Preset(int Period, float IntegLen)
 {
 	int i;
 	Len = Period;
@@ -522,7 +522,7 @@ Error:
 	return -1;
 }
 
-int dspPeriodLowPass2::Process(double Inp, double &Out)
+int dspPeriodLowPass2::Process(float Inp, float &Out)
 {
 	dspLowPass2(Inp, TapMid[TapPtr], TapOut[TapPtr], W1, W2, W5);
 	Out = TapOut[TapPtr++];
@@ -531,7 +531,7 @@ int dspPeriodLowPass2::Process(double Inp, double &Out)
 	return 0;
 }
 
-int dspPeriodLowPass2::Process(double *Inp, int InpLen, double *Out)
+int dspPeriodLowPass2::Process(float *Inp, int InpLen, float *Out)
 {
 	int i, batch;
 	for (i = 0; i < InpLen; ) {
@@ -545,7 +545,7 @@ int dspPeriodLowPass2::Process(double *Inp, int InpLen, double *Out)
 	return 0;
 }
 
-int dspPeriodLowPass2::Process(double_buff *Input)
+int dspPeriodLowPass2::Process(float_buff *Input)
 {
 	int err = Output.EnsureSpace(Input->Len);
 	if (err) return -1;
@@ -588,7 +588,7 @@ int dspBoxFilter::Preset(int BoxLen)
 	return 0;
 }
 
-int dspBoxFilter::Process(double *Inp, int InpLen, double *Out)
+int dspBoxFilter::Process(float *Inp, int InpLen, float *Out)
 {
 	int i, batch;
 	for (i = 0; i < InpLen; ) {
@@ -611,7 +611,7 @@ void dspBoxFilter::Recalibrate()
 		Sum += Tap[i];
 }
 
-int dspBoxFilter::Process(double_buff *Input)
+int dspBoxFilter::Process(float_buff *Input)
 {
 	int err = Output.EnsureSpace(Input->Len);
 	if (err) return err;
@@ -717,7 +717,7 @@ void dspFirFilter::Free(void)
 	Output.Free();
 }
 
-int dspFirFilter::Preset(int FilterLen, double *FilterShape)
+int dspFirFilter::Preset(int FilterLen, float *FilterShape)
 {
 	int i;
 	if (dspRedspAllocArray(&Tap, FilterLen)) return -1;
@@ -732,8 +732,8 @@ int dspFirFilter::Preset(int FilterLen, double *FilterShape)
 }
 
 int dspFirFilter::ComputeShape(
-		double LowOmega, double UppOmega,
-		double (*Window)(double))
+		float LowOmega, float UppOmega,
+		float (*Window)(float))
 {
 	if (ExternShape) {
 		Shape = NULL;
@@ -744,10 +744,10 @@ int dspFirFilter::ComputeShape(
 		return 0;
 }
 
-int dspFirFilter::Process(double *Inp, int InpLen, double *Out)
+int dspFirFilter::Process(float *Inp, int InpLen, float *Out)
 {
 	int i, s, t;
-	double Sum;
+	float Sum;
 	if(InpLen<Len) {
 		for (i = 0; i < InpLen; i++) {
 			for (Sum = 0.0, t = 0, s = i; s < Len; s++)
@@ -756,8 +756,8 @@ int dspFirFilter::Process(double *Inp, int InpLen, double *Out)
 				Sum += Inp[s]*Shape[t++];
 			Out[i] = Sum;
 		}
-		memmove(Tap, Tap + InpLen, (Len - InpLen)*sizeof(double));
-		memcpy(Tap + (Len - InpLen), Inp, InpLen*sizeof(double));
+		memmove(Tap, Tap + InpLen, (Len - InpLen)*sizeof(float));
+		memcpy(Tap + (Len - InpLen), Inp, InpLen*sizeof(float));
 	} else {
 		for (i = 0; i < Len; i++) {
 			for (Sum = 0.0, t = 0, s = i; s < Len; s++)
@@ -771,12 +771,12 @@ int dspFirFilter::Process(double *Inp, int InpLen, double *Out)
 				Sum += Inp[s]*Shape[t++];
 			Out[i] = Sum;
 		}
-		memcpy(Tap, Inp + (InpLen - Len), Len*sizeof(double));
+		memcpy(Tap, Inp + (InpLen - Len), Len*sizeof(float));
 	}
 	return InpLen;
 }
 
-int dspFirFilter::Process(double_buff *Input)
+int dspFirFilter::Process(float_buff *Input)
 {
 	int err = Output.EnsureSpace(Input->Len);
 	if(err) return err;
@@ -816,7 +816,7 @@ void dspQuadrSplit::Free(void)
 
 int dspQuadrSplit::Preset(
 				int FilterLen,
-				double *FilterShape_I, double *FilterShape_Q,
+				float *FilterShape_I, float *FilterShape_Q,
 				int DecimateRate)
 {
 	Len = FilterLen;
@@ -834,8 +834,8 @@ int dspQuadrSplit::Preset(
 	return 0;
 }
 
-int dspQuadrSplit::ComputeShape(double LowOmega,double UppOmega,
-			 double (*Window)(double))
+int dspQuadrSplit::ComputeShape(float LowOmega,float UppOmega,
+			 float (*Window)(float))
 {
 	if (ExternShape) {
 		ShapeI = NULL;
@@ -849,11 +849,11 @@ int dspQuadrSplit::ComputeShape(double LowOmega,double UppOmega,
 	return 0;
 }
 
-int dspQuadrSplit::Process(double_buff *Input)
+int dspQuadrSplit::Process(float_buff *Input)
 {
 	int err, i, s, t, o, l;
-	double SumI, SumQ;
-	double *Inp;
+	float SumI, SumQ;
+	float *Inp;
 	dspCmpx *Out;
 	int InpLen;
 
@@ -917,7 +917,7 @@ void dspQuadrComb::Free(void)
 
 int dspQuadrComb::Preset(
 			int FilterLen,
-			double *FilterShape_I, double *FilterShape_Q,
+			float *FilterShape_I, float *FilterShape_Q,
 			int DecimateRate)
 {
 	int i;
@@ -938,8 +938,8 @@ int dspQuadrComb::Preset(
 }
 
 int dspQuadrComb::ComputeShape(
-			double LowOmega,double UppOmega,
-			double (*Window)(double))
+			float LowOmega,float UppOmega,
+			float (*Window)(float))
 {
 	if (ExternShape) {
 		ShapeI = NULL;
@@ -958,9 +958,9 @@ int dspQuadrComb::Process(dspCmpx_buff *Input)
 {
 	int err, i, o, r, t, len;
 	dspCmpx *Inp;
-	double *Out;
+	float *Out;
 	int InpLen;
-	double I, Q;
+	float I, Q;
 	InpLen = Input->Len;
 	err = Output.EnsureSpace(InpLen*Rate);
 	if (err) return err;
@@ -1009,7 +1009,7 @@ void dspCmpxMixer::Free(void)
 	Output.Free();
 }
 
-int dspCmpxMixer::Preset(double CarrierOmega)
+int dspCmpxMixer::Preset(float CarrierOmega)
 {
 	Omega = CarrierOmega;
 	return 0;
@@ -1018,7 +1018,7 @@ int dspCmpxMixer::Preset(double CarrierOmega)
 int dspCmpxMixer::Process(dspCmpx *Inp, int InpLen, dspCmpx *Out)
 {
 	int i;
-	double I, Q;
+	float I, Q;
 	for (i = 0; i < InpLen; i++) {
 		I = cos(dspPhase);
 		Q = sin(dspPhase);
@@ -1034,7 +1034,7 @@ int dspCmpxMixer::Process(dspCmpx *Inp, int InpLen, dspCmpx *Out)
 int dspCmpxMixer::ProcessFast(dspCmpx *Inp, int InpLen, dspCmpx *Out)
 {
 	int i;
-	double dI, dQ, I, Q, nI, nQ, N;
+	float dI, dQ, I, Q, nI, nQ, N;
 	dI = cos(Omega);
 	dQ = sin(Omega);
 	I = cos(dspPhase);
@@ -1080,16 +1080,16 @@ dspFMdemod::dspFMdemod()
 	RefOmega = 0.0;
 }
 
-int dspFMdemod::Preset(double CenterOmega)
+int dspFMdemod::Preset(float CenterOmega)
 {
 	RefOmega = CenterOmega;
 	return 0;
 }
 
-int dspFMdemod::Process(double *InpI, double *InpQ, int InpLen, double *Out)
+int dspFMdemod::Process(float *InpI, float *InpQ, int InpLen, float *Out)
 {
 	int i;
-	double dspPhase, dspPhaseDiff;
+	float dspPhase, dspPhaseDiff;
 	for (i = 0; i < InpLen; i++) {
 		if ((InpI[i] == 0.0) && (InpQ[i] == 0.0))
 			dspPhase = 0;
@@ -1106,10 +1106,10 @@ int dspFMdemod::Process(double *InpI, double *InpQ, int InpLen, double *Out)
 	return InpLen;
 }
 
-int dspFMdemod::Process(dspCmpx *Inp, int InpLen, double *Out)
+int dspFMdemod::Process(dspCmpx *Inp, int InpLen, float *Out)
 {
 	int i;
-	double dspPhase, dspPhaseDiff;
+	float dspPhase, dspPhaseDiff;
 	for (i = 0; i < InpLen; i++) {
 		if ((Inp[i].re == 0.0) && (Inp[i].im == 0.0))
 			dspPhase = PrevdspPhase;
@@ -1151,20 +1151,20 @@ dspRateConvLin::dspRateConvLin()
 	OutStep = 1.0;
 }
 
-void dspRateConvLin::SetOutVsInp(double OutVsInp)
+void dspRateConvLin::SetOutVsInp(float OutVsInp)
 {
 	OutStep = 1.0 / OutVsInp;
 }
 
-void dspRateConvLin::SetInpVsOut(double InpVsOut)
+void dspRateConvLin::SetInpVsOut(float InpVsOut)
 {
 	OutStep = InpVsOut;
 }
 
-int dspRateConvLin::Process(double_buff *Input)
+int dspRateConvLin::Process(float_buff *Input)
 {
 	int err, i, o;
-	double *Inp, *Out;
+	float *Inp, *Out;
 	int InpLen;
 	Inp = Input->Data;
 	InpLen = Input->Len;
@@ -1204,22 +1204,22 @@ dspRateConvQuadr::dspRateConvQuadr()
 	TapPtr = 0;
 }
 
-void dspRateConvQuadr::SetOutVsInp(double OutVsInp)
+void dspRateConvQuadr::SetOutVsInp(float OutVsInp)
 {
 	OutStep = 1.0 / OutVsInp;
 }
 
-void dspRateConvQuadr::SetInpVsOut(double InpVsOut)
+void dspRateConvQuadr::SetInpVsOut(float InpVsOut)
 {
 	OutStep = InpVsOut;
 }
 
 int dspRateConvQuadr::Process(
-		double *Inp, int InpLen,
-		double *Out, int MaxOutLen, int *OutLen)
+		float *Inp, int InpLen,
+		float *Out, int MaxOutLen, int *OutLen)
 {
 	int i, o, t;
-	double Ref0, Ref1, Diff0, Diff1;
+	float Ref0, Ref1, Diff0, Diff1;
 	for (o = i = 0; (i < InpLen) && (o < MaxOutLen); ) {
 		if (OutdspPhase >= 1.0) {
 			Tap[TapPtr] = (*Inp++);
@@ -1243,11 +1243,11 @@ int dspRateConvQuadr::Process(
 	return i;
 }
 
-int dspRateConvQuadr::Process(double_buff *Input)
+int dspRateConvQuadr::Process(float_buff *Input)
 {
 	int err, i, o, t;
-	double Ref0, Ref1, Diff0, Diff1;
-	double *Inp,*Out;
+	float Ref0, Ref1, Diff0, Diff1;
+	float *Inp,*Out;
 	int InpLen;
 	Inp = Input->Data;
 	InpLen = Input->Len;
@@ -1307,7 +1307,7 @@ void dspRateConvBL::Free(void)
 	}
 }
 
-int dspRateConvBL::Preset(int FilterLen, double **FilterShape, int FilterShapeNum)
+int dspRateConvBL::Preset(int FilterLen, float **FilterShape, int FilterShapeNum)
 {
 	int i;
 	Free();
@@ -1324,7 +1324,7 @@ int dspRateConvBL::Preset(int FilterLen, double **FilterShape, int FilterShapeNu
 	return 0;
 }
 
-int dspRateConvBL::ComputeShape(double LowOmega, double UppOmega, double (*Window)(double))
+int dspRateConvBL::ComputeShape(float LowOmega, float UppOmega, float (*Window)(float))
 {
 	int idx;
 	if (ExternShape) {
@@ -1335,26 +1335,26 @@ int dspRateConvBL::ComputeShape(double LowOmega, double UppOmega, double (*Windo
 		ExternShape = 0;
 	}
 	for (idx = 0; idx < ShapeNum; idx++)
-		dspWinFirI(LowOmega, UppOmega, Shape[idx], Len, Window, (double)idx/ShapeNum);
+		dspWinFirI(LowOmega, UppOmega, Shape[idx], Len, Window, (float)idx/ShapeNum);
 	return 0;
 }
 
-void dspRateConvBL::SetOutVsInp(double OutVsInp)
+void dspRateConvBL::SetOutVsInp(float OutVsInp)
 {
 	OutStep = 1.0 / OutVsInp;
 }
 
-void dspRateConvBL::SetInpVsOut(double InpVsOut)
+void dspRateConvBL::SetInpVsOut(float InpVsOut)
 {
 	OutStep = InpVsOut;
 }
 
-int dspRateConvBL::Process(double_buff *Input)
+int dspRateConvBL::Process(float_buff *Input)
 {
 	int i, o, idx, t, err;
-	double *shape;
-	double Sum;
-	double *Inp, *Out;
+	float *shape;
+	float Sum;
+	float *Inp, *Out;
 	int InpLen;
 	Inp = Input->Data;
 	InpLen = Input->Len;
@@ -1362,11 +1362,11 @@ int dspRateConvBL::Process(double_buff *Input)
 	if (err) return err;
 	Out = Output.Data;
 	if ((Len + InpLen) > TapSize) {
-		Tap = (double*)realloc(Tap, (Len+InpLen)*sizeof(double));
+		Tap = (float*)realloc(Tap, (Len+InpLen)*sizeof(float));
 		if (Tap == NULL) return -1;
 		TapSize = Len + InpLen;
 	}
-	memcpy(Tap + Len, Inp, InpLen*sizeof(double));
+	memcpy(Tap + Len, Inp, InpLen*sizeof(float));
 	for(o=i=0; i<InpLen; ) {
 		if (OutdspPhase >= 1.0) {
 			OutdspPhase -= 1.0;
@@ -1381,29 +1381,29 @@ int dspRateConvBL::Process(double_buff *Input)
 		}
 	}
 	Output.Len = o;
-	memmove(Tap, Tap + InpLen, Len*sizeof(double));
+	memmove(Tap, Tap + InpLen, Len*sizeof(float));
 	return 0;
 }
 
-int dspRateConvBL::ProcessLinI(double_buff *Input)
+int dspRateConvBL::ProcessLinI(float_buff *Input)
 {
 	int i, o, idx, t, err;
-	double *Inp, *Out;
+	float *Inp, *Out;
 	int InpLen;
-	double Sum0, Sum1;
-	double *shape;
-	double d;
+	float Sum0, Sum1;
+	float *shape;
+	float d;
 	Inp = Input->Data;
 	InpLen = Input->Len;
 	err = Output.EnsureSpace((int)ceil(InpLen/OutStep)+2);
 	if (err) return err;
 	Out = Output.Data;
 	if ((Len + InpLen) > TapSize) {
-		Tap = (double*)realloc(Tap, (Len + InpLen)*sizeof(double));
+		Tap = (float*)realloc(Tap, (Len + InpLen)*sizeof(float));
 		if (Tap == NULL) return -1;
 		TapSize = Len + InpLen;
 	}
-	memcpy(Tap + Len, Inp, InpLen*sizeof(double));
+	memcpy(Tap + Len, Inp, InpLen*sizeof(float));
 	for (o = i = 0; i < InpLen; ) {
 		if (OutdspPhase >= 1.0) {
 			OutdspPhase -= 1.0;
@@ -1428,7 +1428,7 @@ int dspRateConvBL::ProcessLinI(double_buff *Input)
 		}
 	}
 	Output.Len = o;
-	memmove(Tap, Tap + InpLen, Len*sizeof(double));
+	memmove(Tap, Tap + InpLen, Len*sizeof(float));
 	return 0;
 }
 
@@ -1458,7 +1458,7 @@ void dspCmpxSlideWindow::Free(void)
 	Window = NULL;
 }
 
-int dspCmpxSlideWindow::Preset(int WindowLen, int SlideDist, double *WindowShape)
+int dspCmpxSlideWindow::Preset(int WindowLen, int SlideDist, float *WindowShape)
 {
 	int i;
 	if (SlideDist > WindowLen) return -1;
@@ -1475,7 +1475,7 @@ int dspCmpxSlideWindow::Preset(int WindowLen, int SlideDist, double *WindowShape
 	return 0;
 }
 
-int dspCmpxSlideWindow::SetWindow(double (*NewWindow)(double dspPhase), double Scale)
+int dspCmpxSlideWindow::SetWindow(float (*NewWindow)(float dspPhase), float Scale)
 {
 	int idx;
 	if (NewWindow == NULL) {
@@ -1550,7 +1550,7 @@ void dspCmpxOverlapWindow::Free(void)
 	Window = NULL;
 }
 
-int dspCmpxOverlapWindow::Preset(int WindowLen, int SlideDist, double *WindowShape)
+int dspCmpxOverlapWindow::Preset(int WindowLen, int SlideDist, float *WindowShape)
 {
 	int i;
 	if (SlideDist > WindowLen) return -1;
@@ -1566,7 +1566,7 @@ int dspCmpxOverlapWindow::Preset(int WindowLen, int SlideDist, double *WindowSha
 	return 0;
 }
 
-int dspCmpxOverlapWindow::SetWindow(double (*NewWindow)(double dspPhase), double Scale)
+int dspCmpxOverlapWindow::SetWindow(float (*NewWindow)(float dspPhase), float Scale)
 {
 	int idx;
 	if (NewWindow == NULL) {
@@ -1676,7 +1676,7 @@ void dspFFT_TimeShift::Free(void)
 int dspFFT_TimeShift::Preset(int FFTlen, int Backwards)
 {
 	int i;
-	double p;
+	float p;
 	dspPhase = 0;
 	Len = FFTlen;
 	LenMask = FFTlen - 1;
@@ -1693,7 +1693,7 @@ int dspFFT_TimeShift::Preset(int FFTlen, int Backwards)
 
 int dspFFT_TimeShift::Process(dspCmpx *Data, int Time)
 {
-	double nI, nQ;
+	float nI, nQ;
 	int i, p;
 	dspPhase = (dspPhase + Time) & LenMask;
 	for (p = i = 0; i < Len; i++) {
@@ -1714,7 +1714,7 @@ dspDiffBitSync4::dspDiffBitSync4(int IntegBits)
 	int i;
 	IntegLen = IntegBits;
 	InpTapLen = 4*IntegLen + 8;
-	InpTap = (double*)malloc(InpTapLen*sizeof(double));
+	InpTap = (float*)malloc(InpTapLen*sizeof(float));
 	for (i = 0; i < InpTapLen; i++)
 		InpTap[i] = 0;
 	InpTapPtr = 0;
@@ -1726,7 +1726,7 @@ dspDiffBitSync4::dspDiffBitSync4(int IntegBits)
 	SyncdspPhase = 0.0;
 	SyncDrift = SyncDrift0 = 0;
 	SyncConfid = 0.0;
-	dspLowPass2Coeff((double)IntegLen*2, W1, W2, W5);
+	dspLowPass2Coeff((float)IntegLen*2, W1, W2, W5);
 }
 
 dspDiffBitSync4::~dspDiffBitSync4()
@@ -1737,13 +1737,13 @@ dspDiffBitSync4::~dspDiffBitSync4()
 void dspDiffBitSync4::Free() { free(InpTap); InpTap=NULL; }
 
 int dspDiffBitSync4::Process(
-		double *Inp, int InpLen,
-		double *BitOut, double *IbitOut,
+		float *Inp, int InpLen,
+		float *BitOut, float *IbitOut,
 		int MaxOutLen, int *OutLen)
 {
 	int i, o, t, step;
-	double diff;
-	double Sum, SumI, SumQ, dspPhase;
+	float diff;
+	float Sum, SumI, SumQ, dspPhase;
 	for (step = 0,o = i = 0; (i < InpLen) && (o < MaxOutLen); i++) {
 		diff = (-InpTap[InpTapPtr++]);
 		if (InpTapPtr >= InpTapLen)
@@ -1775,7 +1775,7 @@ int dspDiffBitSync4::Process(
 				SyncdspPhase += 1.0;
 			} else
 				step = 0;
-			double Samp[5], bit, ibit, dx;
+			float Samp[5], bit, ibit, dx;
 			int p;
 			p = InpTapPtr - 4*IntegLen - 2;
 			if (p < 0)
@@ -1802,12 +1802,12 @@ int dspDiffBitSync4::Process(
 	return i;
 }
 
-double dspDiffBitSync4::GetSyncConfid()
+float dspDiffBitSync4::GetSyncConfid()
 {
 	return 4*SyncConfid;
 }
 
-double dspDiffBitSync4::GetSyncDriftRate()
+float dspDiffBitSync4::GetSyncDriftRate()
 {
 	return SyncDrift/4;
 }
@@ -1819,7 +1819,7 @@ dspBitSlicer::dspBitSlicer(int IntegBits)
 {
 	int i;
 	TapLen = IntegLen = IntegBits;
-	Tap = (double *)malloc(TapLen*sizeof(double));
+	Tap = (float *)malloc(TapLen*sizeof(float));
 	for (i = 0; i < TapLen; i++)
 		Tap[i] = 0;
 	TapPtr = 0;
@@ -1830,7 +1830,7 @@ dspBitSlicer::dspBitSlicer(int IntegBits)
 		dspAmplAsym = dspAmplAsym0 = 0.0;
 		Noise[i] = 0;
 	}
-	dspLowPass2Coeff((double)IntegLen*2, W1, W2, W5);
+	dspLowPass2Coeff((float)IntegLen*2, W1, W2, W5);
 	PrevBit = PrevIBit = 0.0;
 	OptimThres = 0.0;
 }
@@ -1840,10 +1840,10 @@ dspBitSlicer::~dspBitSlicer()
 	free(Tap);
 }
 
-int dspBitSlicer::Process(double *Bits, double *IBits, int InpLen, double *OutBits)
+int dspBitSlicer::Process(float *Bits, float *IBits, int InpLen, float *OutBits)
 {
 	int i, l;
-	double Bit, soft;
+	float Bit, soft;
 	for (i = 0; i < InpLen; i++) {
 		Bit = Bits[i];
 		l = Bit > 0;
@@ -1872,14 +1872,14 @@ int dspBitSlicer::Process(double *Bits, double *IBits, int InpLen, double *OutBi
 	return InpLen;
 }
 
-double dspBitSlicer::GetSigToNoise()
+float dspBitSlicer::GetSigToNoise()
 { return Noise[1]>0 ? (Sum[1]-OptimThres)/Noise[1] : 0.0; }
 
-double dspBitSlicer::GetdspAmplAsym()
-{ double Sweep=Sum[1]-Sum[0]; return Sweep>0 ? 2*dspAmplAsym/Sweep : 0.0; }
+float dspBitSlicer::GetdspAmplAsym()
+{ float Sweep=Sum[1]-Sum[0]; return Sweep>0 ? 2*dspAmplAsym/Sweep : 0.0; }
 
-double dspBitSlicer::GetTimeAsym()
-{ double Sweep=Sum[1]-Sum[0]; return Sweep>0 ? 2*TimeAsym/Sweep : 0.0; }
+float dspBitSlicer::GetTimeAsym()
+{ float Sweep=Sum[1]-Sum[0]; return Sweep>0 ? 2*TimeAsym/Sweep : 0.0; }
 
 // ----------------------------------------------------------------------------
 // The decoder for the HDLC frames,
@@ -1911,7 +1911,7 @@ dspHDLCdecoder::~dspHDLCdecoder()
 	free(Buff);
 }
 
-int dspHDLCdecoder::Process(double *Inp, int InpLen)
+int dspHDLCdecoder::Process(float *Inp, int InpLen)
 {
 	int i, lev, bit, Flag;
 
@@ -2092,7 +2092,7 @@ void dsp_r2FFT::Scramble(dspCmpx x[])
 int dsp_r2FFT::Preset(int size)
 {
 	int err, idx, ridx, mask, rmask;
-	double dspPhase;
+	float dspPhase;
 
 	if (!dspPowerOf2(size)) goto Error;
 	Size = size;
@@ -2229,7 +2229,7 @@ void dspSlideWinFFT::Free(void)
 	Output.Free();
 }
 
-int dspSlideWinFFT::Preset(int size, int step, double *window)
+int dspSlideWinFFT::Preset(int size, int step, float *window)
 {
 	int err,i;
 
@@ -2263,7 +2263,7 @@ Error:
 	return -1;
 }
 
-int dspSlideWinFFT::SetWindow(double (*NewWindow)(double dspPhase), double Scale)
+int dspSlideWinFFT::SetWindow(float (*NewWindow)(float dspPhase), float Scale)
 {
 	int idx, err;
 	if (NewWindow == NULL) {
@@ -2286,10 +2286,10 @@ int dspSlideWinFFT::SetWindow(double (*NewWindow)(double dspPhase), double Scale
 
 int dspSlideWinFFT::Preset(
 		int size, int step,
-		double (*NewWindow)(double dspPhase), double Scale)
+		float (*NewWindow)(float dspPhase), float Scale)
 {
 	int err;
-	err = Preset(size, step, (double *)NULL);
+	err = Preset(size, step, (float *)NULL);
 	if (err) return -1;
 	err = SetWindow(NewWindow, Scale);
 	if (err) {
@@ -2299,7 +2299,7 @@ int dspSlideWinFFT::Preset(
 	return 0;
 }
 
-int dspSlideWinFFT::SetWindow(double *window)
+int dspSlideWinFFT::SetWindow(float *window)
 {
 	if (!ExternWindow) {
 		free(Window);
@@ -2309,11 +2309,11 @@ int dspSlideWinFFT::SetWindow(double *window)
 	return 0;
 }
 
-int dspSlideWinFFT::Process(double_buff *Input)
+int dspSlideWinFFT::Process(float_buff *Input)
 {
 	int err, len, i, t;
 	int InpLen;
-	double *Inp;
+	float *Inp;
 	Inp = Input->Data;
 	InpLen = Input->Len;
 	Output.Len = 0;
@@ -2408,7 +2408,7 @@ void dspSlideWinFFTproc::Free(void)
 
 int dspSlideWinFFTproc::Preset(
 		int size, int step,
-		void (*proc)(dspCmpx *Spectra, int Len), double *window)
+		void (*proc)(dspCmpx *Spectra, int Len), float *window)
 {
 	int err, i;
 
@@ -2457,10 +2457,10 @@ Error:
 
 int dspSlideWinFFTproc::Preset(int size, int step,
 		void (*proc)(dspCmpx *Spectra, int Len),
-		double (*NewWindow)(double dspPhase), double Scale)
+		float (*NewWindow)(float dspPhase), float Scale)
 {
 	int err;
-	err = Preset(size, step, proc, (double *)NULL);
+	err = Preset(size, step, proc, (float *)NULL);
 	if (err) return -1;
 
 	err = SetWindow(NewWindow, Scale);
@@ -2471,7 +2471,7 @@ int dspSlideWinFFTproc::Preset(int size, int step,
 	return 0;
 }
 
-int dspSlideWinFFTproc::SetWindow(double *window)
+int dspSlideWinFFTproc::SetWindow(float *window)
 {
 	if (!ExternWindow) {
 		free(Window);
@@ -2481,7 +2481,7 @@ int dspSlideWinFFTproc::SetWindow(double *window)
 	return 0;
 }
 
-int dspSlideWinFFTproc::SetWindow(double (*NewWindow)(double dspPhase), double Scale)
+int dspSlideWinFFTproc::SetWindow(float (*NewWindow)(float dspPhase), float Scale)
 {
 	int idx, err;
 	if (NewWindow == NULL) {
@@ -2506,11 +2506,11 @@ int dspSlideWinFFTproc::SetWindow(double (*NewWindow)(double dspPhase), double S
 	return 0;
 }
 
-int dspSlideWinFFTproc::Process(double_buff *Input)
+int dspSlideWinFFTproc::Process(float_buff *Input)
 {
 	int err, len, i, t;
 	int InpLen;
-	double *Inp, *Out;
+	float *Inp, *Out;
 	Inp = Input->Data;
 	InpLen = Input->Len;
 	Output.Len = 0;
@@ -2586,10 +2586,10 @@ int dspSlideWinFFTproc::Process(double_buff *Input)
 // ----------------------------------------------------------------------------
 // Walsh (Hadamard ?) transform.
 
-void dspWalshTrans(double *Data, int Len)  // Len must be 2^N
+void dspWalshTrans(float *Data, int Len)  // Len must be 2^N
 {
 	int step, ptr, ptr2;
-	double bit1, bit2;
+	float bit1, bit2;
 	for (step = 1; step < Len; step *= 2) {
 		for (ptr = 0; ptr < Len; ptr += 2*step) {
 			for (ptr2 = ptr; (ptr2 - ptr) < step; ptr2 += 1) {
@@ -2603,10 +2603,10 @@ void dspWalshTrans(double *Data, int Len)  // Len must be 2^N
 	}
 }
 
-void dspWalshInvTrans(double *Data, int Len)  // Len must be 2^N
+void dspWalshInvTrans(float *Data, int Len)  // Len must be 2^N
 {
 	int step, ptr, ptr2;
-	double bit1, bit2;
+	float bit1, bit2;
 	for (step = Len/2; step; step /= 2) {
 		for (ptr = 0; ptr < Len; ptr += 2*step) {
 			for (ptr2 = ptr; (ptr2 - ptr) < step; ptr2 += 1) {

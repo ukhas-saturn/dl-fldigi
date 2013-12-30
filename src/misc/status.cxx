@@ -98,19 +98,19 @@ status progStatus = {
 	50,					// uint	VIEWERypos
 	200,				// uint VIEWERwidth
 	400,				// uint VIEDWERheight
-	3.0,				// double VIEWER_psksquelch
-	-6.0,				// double VIEWER_rttysquelch
+	3.0,				// float VIEWER_psksquelch
+	-6.0,				// float VIEWER_rttysquelch
 	false,				// bool VIEWERvisible
 	100,				// int		tile_x
 	200,				// int		tile_w;
 	50,					// int		tile_y;
 	100,				// int		tile_h;
 	false,				// bool LOGenabled
-	5.0,				// double sldrSquelchValue
+	5.0,				// float sldrSquelchValue
 	true,				// bool afconoff
 	true,				// bool sqlonoff
-	1.0,				// double	RcvMixer;
-	1.0,				// double	XmtMixer;
+	1.0,				// float	RcvMixer;
+	1.0,				// float	XmtMixer;
 	50,					// int	scopeX;
 	50,					// int	scopeY;
 	false,				// bool	scopeVisible;

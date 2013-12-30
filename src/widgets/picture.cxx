@@ -163,7 +163,7 @@ void picture::resize_height(int new_height, bool clear_img)
 	redraw();
 }
 
-void picture::stretch(double the_ratio)
+void picture::stretch(float the_ratio)
 {
 
 	/// We do not change the width but the height

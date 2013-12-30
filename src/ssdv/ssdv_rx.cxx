@@ -513,6 +513,7 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 		if(p[0] != 0x55) { image_lost_packets++; continue; }
 		image_received_packets++;
 		r = ssdv_dec_feed(&dec, p);
+		if (SSDV_ERROR == r) image_lost_packets++;
 	}
 	
 	/* Store the last decoded MCU, for the progress bar */

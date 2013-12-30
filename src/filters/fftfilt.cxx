@@ -56,7 +56,7 @@
 void fftfilt::init_filter()
 {
 	flen2 = flen >> 1;
-	fft			= new g_fft<double>(flen);
+	fft			= new g_fft<float>(flen);
 
 	filter		= new cmplx[flen];
 	timedata	= new cmplx[flen];
@@ -82,7 +82,7 @@ void fftfilt::init_filter()
 // f1 == 0 ==> low pass filter
 // f2 == 0 ==> high pass filter
 //------------------------------------------------------------------------------
-fftfilt::fftfilt(double f1, double f2, int len)
+fftfilt::fftfilt(float f1, float f2, int len)
 {
 	flen	= len;
 	init_filter();
@@ -92,7 +92,7 @@ fftfilt::fftfilt(double f1, double f2, int len)
 //------------------------------------------------------------------------------
 // low pass filter
 //------------------------------------------------------------------------------
-fftfilt::fftfilt(double f, int len)
+fftfilt::fftfilt(float f, int len)
 {
 	flen	= len;
 	init_filter();
@@ -111,7 +111,7 @@ fftfilt::~fftfilt()
 	if (ht) delete [] ht;
 }
 
-void fftfilt::create_filter(double f1, double f2)
+void fftfilt::create_filter(float f1, float f2)
 {
 // initialize the filter to zero
 	memset(ht, 0, flen * sizeof(cmplx));
@@ -148,7 +148,7 @@ void fftfilt::create_filter(double f1, double f2)
 //	fft->transform(ht, filter);
 
 // normalize the output filter for unity gain
-	double scale = 0, mag;
+	float scale = 0, mag;
 	for (int i = 0; i < flen2; i++) {
 		mag = abs(filter[i]);
 		if (mag > scale) scale = mag;
@@ -230,14 +230,14 @@ int fftfilt::run(const cmplx & in, cmplx **out)
 
 //bool print_filter = true; // flag to inhibit printing multiple copies
 
-void fftfilt::rtty_filter(double f)
+void fftfilt::rtty_filter(float f)
 {
 // Raised cosine filter, adjusted to suit FFT arrangement
 	
-	double dht;
+	float dht;
 
 	for( int i = 0; i < flen2; ++i ) {
-		double x = (double)i/(f * M_PI * (double)(flen2));	
+		float x = (float)i/(f * M_PI * (float)(flen2));	
 
 /* Literature suggests using matched filter OR raised cosine
  * Raised cosine gives better decodes for icarus recording

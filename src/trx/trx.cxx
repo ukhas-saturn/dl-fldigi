@@ -78,11 +78,11 @@ static int	_trx_tune;
 // Ringbuffer for the audio "history". A pointer into this buffer
 // is also passed to the waterfall signal drawing routines.
 #define NUMMEMBUFS 1024
-static ringbuffer<double> trxrb(ceil2(NUMMEMBUFS * SCBLOCKSIZE));
+static ringbuffer<float> trxrb(ceil2(NUMMEMBUFS * SCBLOCKSIZE));
 static float fbuf[SCBLOCKSIZE];
 bool    bHistory = false;
 bool    bHighSpeed = false;
-static  double hsbuff[SCBLOCKSIZE];
+static  float hsbuff[SCBLOCKSIZE];
 
 static bool trxrunning = false;
 
@@ -95,7 +95,7 @@ static void trx_xmit_wfall_draw(int samplerate)
 {
 	ENSURE_THREAD(FLMAIN_TID);
 
-	ringbuffer<double>::vector_type rv[2];
+	ringbuffer<float>::vector_type rv[2];
 	rv[0].buf = 0;
 	rv[1].buf = 0;
 
@@ -119,7 +119,7 @@ static void trx_xmit_wfall_draw(int samplerate)
 	// read non-contiguous data into tmp buffer so that we can
 	// still draw it one block at a time
 	if (unlikely(trxrb.read_space() >= WFBLOCKSIZE)) {
-		double buf[WFBLOCKSIZE];
+		float buf[WFBLOCKSIZE];
 		do {
 			trxrb.read(buf, WFBLOCKSIZE);
 			wf->sig_data(buf, WFBLOCKSIZE, samplerate);
@@ -138,7 +138,7 @@ static void trx_xmit_wfall_end(int samplerate)
 	if (pad == WFBLOCKSIZE) // rb empty or multiple of WFBLOCKSIZE
 		return;
 
-	ringbuffer<double>::vector_type wv[2];
+	ringbuffer<float>::vector_type wv[2];
 	wv[0].buf = wv[1].buf = 0;
 
 	trxrb.get_wv(wv, pad);
@@ -159,10 +159,10 @@ static void trx_xmit_wfall_end(int samplerate)
 
 // Copy buf to the ringbuffer if it has enough space. Queue a waterfall
 // request whenever there are at least WFBLOCKSIZE samples to draw.
-void trx_xmit_wfall_queue(int samplerate, const double* buf, size_t len)
+void trx_xmit_wfall_queue(int samplerate, const float* buf, size_t len)
 {
 	ENSURE_THREAD(TRX_TID);
-	ringbuffer<double>::vector_type wv[2];
+	ringbuffer<float>::vector_type wv[2];
 	wv[0].buf = wv[1].buf = 0;
 
 	trxrb.get_wv(wv, len);
@@ -229,7 +229,7 @@ void trx_trx_receive_loop()
 	}
 	active_modem->rx_init();
 
-	ringbuffer<double>::vector_type rbvec[2];
+	ringbuffer<float>::vector_type rbvec[2];
 	rbvec[0].buf = rbvec[1].buf = 0;
 
 	while (1) {
@@ -244,7 +244,7 @@ void trx_trx_receive_loop()
 				if (trxrb.write_space() == 0) // discard some old data
 					trxrb.read_advance(SCBLOCKSIZE);
 				trxrb.get_wv(rbvec);
-			// convert to double and write to rb
+			// convert to float and write to rb
 				for (size_t i = 0; i < numread; i++)
 					rbvec[0].buf[i] = fbuf[i];
 			}

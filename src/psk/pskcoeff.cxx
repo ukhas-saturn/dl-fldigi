@@ -17,7 +17,7 @@
 //  u[n] = (1.0 - cos(2PI * n / 64))/128.0
 // used in gmfsk, twpsk etc.
 
-double gmfir1c[64] = {
+float gmfir1c[64] = {
 	0.000000, //0
 	0.000038, //1
 	0.000150, //2
@@ -88,7 +88,7 @@ double gmfir1c[64] = {
 // Designed by G3PLX
 //
 
-double gmfir2c[64] = {
+float gmfir2c[64] = {
 	0.000625000,
 	0.000820912,
 	0.001374651,
@@ -160,7 +160,7 @@ double gmfir2c[64] = {
 // weighting for sync samples
 // sum of all weights = 1.0
 
-double syncfilt[16] = {
+float syncfilt[16] = {
 	-0.097545161,
 	-0.093796555,
 	-0.086443400,
@@ -181,15 +181,15 @@ double syncfilt[16] = {
 
 // experimental filters (higher precision)
 // identical to the G0TJZ filter but with double precision
-void raisedcosfilt(double *firc)
+void raisedcosfilt(float *firc)
 {
 	for (int i = 0; i < 64; i++)
 		firc[i] = (1.0 - cos(M_PI * i / 32.0))/128.0;
 }
 
-void wsincfilt(double *firc, double fc, bool blackman)
+void wsincfilt(float *firc, float fc, bool blackman)
 {
-	double normalize = 0;
+	float normalize = 0;
 // sin(x-tau)/(x-tau)	
 	for (int i = 0; i < 64; i++)
 		if (i == 32)

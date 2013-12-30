@@ -48,19 +48,19 @@ class feld : public modem {
 enum FELD_STATE {PREAMBLE, POSTAMBLE, DATA};
 protected:
 //rx
-	double rxphacc;
-	double rxdelta;
-	double rxcounter;
-	double agc;
-	double peakval;
-	double peakhold;
-	double minhold;
+	float rxphacc;
+	float rxdelta;
+	float rxcounter;
+	float agc;
+	float peakval;
+	float peakhold;
+	float minhold;
 	
-	double rxpixrate;
-	double txpixrate;
-	double downsampleinc;
-	double upsampleinc;
-	double phi2freq;
+	float rxpixrate;
+	float txpixrate;
+	float downsampleinc;
+	float upsampleinc;
+	float phi2freq;
 
 	C_FIR_filter	*hilbert;
 	fftfilt			*bpfilt;
@@ -69,32 +69,32 @@ protected:
 	Cmovavg			*average;
 //tx
 	FELD_STATE	tx_state;
-	double txphacc;
-	double txcounter;
-	double hell_bandwidth;
-	double filter_bandwidth;
+	float txphacc;
+	float txcounter;
+	float hell_bandwidth;
+	float filter_bandwidth;
 	
 	int depth;
 	int dxmode;
 	int halfwidth;
 	bool blackboard;
 	bool hardkeying;
-	double feldcolumnrate;
+	float feldcolumnrate;
 
 	int preamble;
 	int postamble;
 	int prevsymb;
 	cmplx prev;
 	
-	double OnShape[MAXLEN];
-	double OffShape[MAXLEN];
+	float OnShape[MAXLEN];
+	float OffShape[MAXLEN];
 	
 	mbuffer<int, 2*RxColumnLen> col_data;
 	int col_pointer;
 	int fntnbr;
 	
 	cmplx mixer(cmplx);
-	double nco(double);
+	float nco(float);
 	void	rx(cmplx);
 	void	FSKHELL_rx(cmplx);
 	void	send_symbol(int currsymbol, int nextsymbol);
@@ -108,7 +108,7 @@ public:
 	void	rx_init();
 	void	tx_init(SoundBase *sc);
 	void 	restart();
-	int		rx_process(const double *buf, int len);
+	int		rx_process(const float *buf, int len);
 	int		tx_process();
 	int		get_font_data(unsigned char c, int col);
 };

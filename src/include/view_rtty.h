@@ -46,7 +46,7 @@ struct RTTY_CHANNEL {
 
 	int				state;
 
-	double			phaseacc;
+	float			phaseacc;
 
 	fftfilt *mark_filt;
 	fftfilt *space_filt;
@@ -57,40 +57,40 @@ struct RTTY_CHANNEL {
 
 	bool		bit_buf[MAXBITS];
 
-	double mark_phase;
-	double space_phase;
+	float mark_phase;
+	float space_phase;
 
-	double		metric;
+	float		metric;
 
 	int			rxmode;
 	RTTY_RX_STATE	rxstate;
 
-	double		frequency;
-	double		freqerr;
-	double		phase;
-	double		posfreq;
-	double		negfreq;
-	double		freqerrhi;
-	double		freqerrlo;
-	double		poserr;
-	double		negerr;
+	float		frequency;
+	float		freqerr;
+	float		phase;
+	float		posfreq;
+	float		negfreq;
+	float		freqerrhi;
+	float		freqerrlo;
+	float		poserr;
+	float		negerr;
 	int			poscnt;
 	int			negcnt;
 	int			timeout;
 
-	double		mark_mag;
-	double		space_mag;
-	double		mark_env;
-	double		space_env;
-	double		noise_floor;
-	double		mark_noise;
-	double		space_noise;
+	float		mark_mag;
+	float		space_mag;
+	float		mark_env;
+	float		space_env;
+	float		noise_floor;
+	float		mark_noise;
+	float		space_noise;
 
-	double		sigpwr;
-	double		noisepwr;
-	double		avgsig;
+	float		sigpwr;
+	float		noisepwr;
+	float		avgsig;
 
-	double		prevsymbol;
+	float		prevsymbol;
 	cmplx		prevsmpl;
 	int			counter;
 	int			bitcntr;
@@ -106,13 +106,13 @@ struct RTTY_CHANNEL {
 
 class view_rtty : public modem {
 public:
-	static const double SHIFT[];
-	static const double BAUD[];
+	static const float SHIFT[];
+	static const float BAUD[];
 	static const int    BITS[];
 
 private:
 
-	double shift;
+	float shift;
 	int symbollen;
 	int nbits;
 	int stoplen;
@@ -121,25 +121,25 @@ private:
 
 	RTTY_CHANNEL	channel[MAX_CHANNELS];
 
-	double		rtty_squelch;
-	double		rtty_shift;
-	double      rtty_BW;
-	double		rtty_baud;
+	float		rtty_squelch;
+	float		rtty_shift;
+	float      rtty_BW;
+	float		rtty_baud;
 	int 		rtty_bits;
 	RTTY_PARITY	rtty_parity;
 	int			rtty_stop;
 	bool		rtty_msbfirst;
 
 	int bflen;
-	double bp_filt_lo;
-	double bp_filt_hi;
+	float bp_filt_lo;
+	float bp_filt_hi;
 
 	int txmode;
 	int preamble;
 
 	void clear_syncscope();
 	void update_syncscope();
-	cmplx mixer(double &phase, double f, cmplx in);
+	cmplx mixer(float &phase, float f, cmplx in);
 
 	unsigned char bitreverse(unsigned char in, int n);
 	int decode_char(int ch);
@@ -157,7 +157,7 @@ public:
 	void tx_init(SoundBase *sc){}
 	void restart();
 	void reset_filters(int ch);
-	int rx_process(const double *buf, int len);
+	int rx_process(const float *buf, int len);
 	int tx_process();
 
 	void find_signals();

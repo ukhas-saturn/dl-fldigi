@@ -54,7 +54,7 @@ public:
 
 private:
 	scope_mode _mode;
-	double _buf[MAX_LEN];
+	float _buf[MAX_LEN];
 	cmplx _zdata[MAX_ZLEN];
 	int _zlen;
 	int _zptr;
@@ -62,10 +62,10 @@ private:
 	unsigned char *vidline;
 	int _len;
 	int linecnt;
-	double _phase;
-	double _quality;
-	double _flo, _fhi, _amp;
-	double _x1, _x2, _y1, _y2;
+	float _phase;
+	float _quality;
+	float _flo, _fhi, _amp;
+	float _x1, _x2, _y1, _y2;
 	bool _highlight;
 	scope_mode phase_mode;
 
@@ -80,17 +80,17 @@ public:
 	void draw_rtty();
 	void draw_xy();
 	void draw_video();
-	void data(double *data, int len, bool scale = true);
-	void phase(double ph, double ql, bool hl);
-	void video(double *data, int len, bool dir );
+	void data(float *data, int len, bool scale = true);
+	void phase(float ph, float ql, bool hl);
+	void video(float *data, int len, bool dir );
 	void zdata(cmplx *z, int len);
-	void rtty(double flo, double fhi, double amp);
+	void rtty(float flo, float fhi, float amp);
 	void mode(scope_mode md);
 	scope_mode mode() { return _mode;};
-	void xaxis_1(double y1) { _y1 = y1; }
-	void xaxis_2(double y2) { _y2 = y2; }
-	void yaxis_1(double x1) { _x1 = x1; }
-	void yaxis_2(double x2) { _x2 = x2; }
+	void xaxis_1(float y1) { _y1 = y1; }
+	void xaxis_2(float y2) { _y2 = y2; }
+	void yaxis_1(float x1) { _x1 = x1; }
+	void yaxis_2(float x2) { _x2 = x2; }
 	void clear_axis() { _x1 = _x2 = _y1 = _y2 = 0; }
 };
 

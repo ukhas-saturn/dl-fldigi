@@ -145,61 +145,61 @@ unsigned char graydecode(unsigned char data)
 // ----------------------------------------------------------------------------
 
 // Rectangular - no pre filtering of data array
-void RectWindow(double *array, int n) {
+void RectWindow(float *array, int n) {
 	for (int i = 0; i < n; i++)
 		array[i] = 1.0;
 }
 
 // Hamming - used by gmfsk
-void HammingWindow(double *array, int n) {
-	double pwr = 0.0;
-	double inv_n = 1.0 / (double)n;
+void HammingWindow(float *array, int n) {
+	float pwr = 0.0;
+	float inv_n = 1.0f / (float)n;
 	for (int i = 0; i < n; i++) {
-		array[i] = hamming((double)i * inv_n);
+		array[i] = hamming((float)i * inv_n);
 		pwr += array[i] * array[i];
 	}
-	pwr = sqrt((double)n/pwr);
+	pwr = sqrt((float)n/pwr);
 	for (int i = 0; i < n; i++)
 		array[i] *= pwr;
 }
 
 // Hanning - used by winpsk
-void HanningWindow(double *array, int n) {
-	double pwr = 0.0;
-	double inv_n = 1.0 / (double)n;
+void HanningWindow(float *array, int n) {
+	float pwr = 0.0;
+	float inv_n = 1.0f / (float)n;
 	for (int i = 0; i < n; i++) {
-		array[i] = hanning((double)i * inv_n);
+		array[i] = hanning((float)i * inv_n);
 		pwr += array[i] * array[i];
 	}
-	pwr = sqrt((double)n/pwr);
+	pwr = sqrt((float)n/pwr);
 	for (int i = 0; i < n; i++)
 		array[i] *= pwr;
 }
 
 // Best lob suppression - least in band ripple
-void BlackmanWindow(double *array, int n) {
-	double pwr = 0.0;
-	double inv_n = 1.0 / (double)n;
+void BlackmanWindow(float *array, int n) {
+	float pwr = 0.0;
+	float inv_n = 1.0f / (float)n;
 	for (int i = 0; i < n; i++) {
-		array[i] = blackman((double)i * inv_n);
+		array[i] = blackman((float)i * inv_n);
 		pwr += array[i] * array[i];
 	}
-	pwr = sqrt((double)n/pwr);
+	pwr = sqrt((float)n/pwr);
 	for (int i = 0; i < n; i++)
 		array[i] *= pwr;
 }
 
 // Simple about effective as Hamming or Hanning
-void TriangularWindow(double *array, int n) {
-	double pwr = 0.0;
+void TriangularWindow(float *array, int n) {
+	float pwr = 0.0;
 	for (int i = 0; i < n; i++) array[i] = 1.0;
-	double inv_n = 1.0 / (double)n;
+	float inv_n = 1.0f / (float)n;
 	for (int i = 0; i < n / 4; i++) {
-			array[i] = 4.0 * (double)i * inv_n ;
+			array[i] = 4.0 * (float)i * inv_n ;
 			array[n-i] = array[i];
 	}
 	for (int i = 0; i < n; i++)	pwr += array[i] * array[i];
-	pwr = sqrt((double)n/pwr);
+	pwr = sqrt((float)n/pwr);
 	for (int i = 0; i < n; i++)
 		array[i] *= pwr;
 }

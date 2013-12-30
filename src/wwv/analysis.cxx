@@ -72,8 +72,8 @@ anal::~anal()
 
 void anal::restart()
 {
-	double fhi = anal_BW * 1.1 / samplerate;
-	double flo = 0.0;
+	float fhi = anal_BW * 1.1 / samplerate;
+	float flo = 0.0f;
 	if (bpfilt)
 		bpfilt->create_filter(flo, fhi);
 	else
@@ -184,10 +184,10 @@ void anal::writeFile()
 	fclose(out);
 }
 
-int anal::rx_process(const double *buf, int len)
+int anal::rx_process(const float *buf, int len)
 {
 	cmplx z, *zp;
-	double fin;
+	float fin;
 	int n;
 	static int dspcnt = symbollen;
 

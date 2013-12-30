@@ -99,7 +99,7 @@ feld::~feld()
 
 feld::feld(trx_mode m)
 {
-	double lp;
+	float lp;
 	mode = m;
 	samplerate = FeldSampleRate;
 
@@ -229,9 +229,7 @@ cmplx feld::mixer(cmplx in)
 
 void feld::FSKHELL_rx(cmplx z)
 {
-	double f;
-	double vid;
-	double avg;
+	float f, vid, avg;
 
 	f = arg(conj(prev) * z) * phi2freq;
 	prev = z;
@@ -321,7 +319,7 @@ void feld::rx(cmplx z)
 	}
 }
 
-int feld::rx_process(const double *buf, int len)
+int feld::rx_process(const float *buf, int len)
 {
 
 	cmplx z, *zp;
@@ -331,7 +329,7 @@ int feld::rx_process(const double *buf, int len)
 	blackboard = progdefaults.HellBlackboard;
 
 	if (progdefaults.HELL_BW != filter_bandwidth) {
-		double lp;
+		float lp;
 		filter_bandwidth = progdefaults.HELL_BW;
 		switch (mode) {
 			case MODE_FELDHELL:
@@ -442,9 +440,9 @@ int feld::get_font_data(unsigned char c, int col)
 	return bits;
 }
 
-double feld::nco(double freq)
+float feld::nco(float freq)
 {
-	double x = sin(txphacc);
+	float x = sin(txphacc);
 
 	txphacc += 2.0 * M_PI * freq / samplerate;
 
@@ -456,10 +454,10 @@ double feld::nco(double freq)
 
 void feld::send_symbol(int currsymb, int nextsymb)
 {
-	double tone = get_txfreq_woffset();
-	double tone2 = 0;
-	double Amp = 1.0;
-	double ncoval = 0;
+	float tone = get_txfreq_woffset();
+	float tone2 = 0;
+	float Amp = 1.0;
+	float ncoval = 0;
 	int outlen = 0;
 
 	if (mode >= MODE_FSKHELL && mode <= MODE_HELL80) {

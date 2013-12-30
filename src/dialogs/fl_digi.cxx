@@ -6197,7 +6197,7 @@ void create_fl_digi_main_dl_fldigi() {
 	int freqwidth = (int)fl_width("999999999") + 10;
 	fl_font(fnt, fsize);
 
-	int Htext = progStatus.mainH - Hwfall - Hmenu - Hstatus - Hmacros - Hqsoframe - 4;
+//	int Htext = progStatus.mainH - Hwfall - Hmenu - Hstatus - Hmacros - Hqsoframe - 4;
 	int minRxHeight = 100;
 	int TopFrameHABheight = 120;
 
@@ -6657,7 +6657,7 @@ void create_fl_digi_main(int argc, char** argv)
 			0, bWF_only ? WF_only_height : 0);
 }
 
-void put_freq(double frequency)
+void put_freq(float frequency)
 {
 	wf->carrier((int)floor(frequency + 0.5));
 }
@@ -6667,7 +6667,7 @@ void put_Bandwidth(int bandwidth)
 	wf->Bandwidth ((int)bandwidth);
 }
 
-static void callback_set_metric(double metric)
+static void callback_set_metric(float metric)
 {
 	pgrsSquelch->value(metric);
 	if (!progStatus.sqlonoff)
@@ -6679,7 +6679,7 @@ static void callback_set_metric(double metric)
 	btnSQL->redraw_label();
 }
 
-void global_display_metric(double metric)
+void global_display_metric(float metric)
 {
 	FL_LOCK_D();
 	REQ_DROP(callback_set_metric, metric);
@@ -6687,11 +6687,11 @@ void global_display_metric(double metric)
 	FL_AWAKE_D();
 }
 
-void put_cwRcvWPM(double wpm)
+void put_cwRcvWPM(float wpm)
 {
 	int U = progdefaults.CWupperlimit;
 	int L = progdefaults.CWlowerlimit;
-	double dWPM = 100.0*(wpm - L)/(U - L);
+	float dWPM = 100.0*(wpm - L)/(U - L);
 	FL_LOCK_D();
 	REQ_DROP(static_cast<void (Fl_Progress::*)(float)>(&Fl_Progress::value), prgsCWrcvWPM, dWPM);
 	REQ_DROP(static_cast<int (Fl_Value_Output::*)(double)>(&Fl_Value_Output::value), valCWrcvWPM, (int)wpm);
@@ -6710,28 +6710,28 @@ void set_scope_mode(Digiscope::scope_mode md)
 	if (md == Digiscope::SCOPE) set_scope_clear_axis();
 }
 
-void set_scope(double *data, int len, bool autoscale)
+void set_scope(float *data, int len, bool autoscale)
 {
 	if (digiscope)
 		digiscope->data(data, len, autoscale);
 	wf->wfscope->data(data, len, autoscale);
 }
 
-void set_phase(double phase, double quality, bool highlight)
+void set_phase(float phase, float quality, bool highlight)
 {
 	if (digiscope)
 		digiscope->phase(phase, quality, highlight);
 	wf->wfscope->phase(phase, quality, highlight);
 }
 
-void set_rtty(double flo, double fhi, double amp)
+void set_rtty(float flo, float fhi, float amp)
 {
 	if (digiscope)
 		digiscope->rtty(flo, fhi, amp);
 	wf->wfscope->rtty(flo, fhi, amp);
 }
 
-void set_video(double *data, int len, bool dir)
+void set_video(float *data, int len, bool dir)
 {
 	if (digiscope)
 		digiscope->video(data, len, dir);
@@ -6745,28 +6745,28 @@ void set_zdata(cmplx *zarray, int len)
 	wf->wfscope->zdata(zarray, len);
 }
 
-void set_scope_xaxis_1(double y1)
+void set_scope_xaxis_1(float y1)
 {
 	if (digiscope)
 		digiscope->xaxis_1(y1);
 	wf->wfscope->xaxis_1(y1);
 }
 
-void set_scope_xaxis_2(double y2)
+void set_scope_xaxis_2(float y2)
 {
 	if (digiscope)
 		digiscope->xaxis_2(y2);
 	wf->wfscope->xaxis_2(y2);
 }
 
-void set_scope_yaxis_1(double x1)
+void set_scope_yaxis_1(float x1)
 {
 	if (digiscope)
 		digiscope->yaxis_1(x1);
 	wf->wfscope->yaxis_1(x1);
 }
 
-void set_scope_yaxis_2(double x2)
+void set_scope_yaxis_2(float x2)
 {
 	if (digiscope)
 		digiscope->yaxis_2(x2);
@@ -7089,7 +7089,7 @@ void put_Status1(const char *msg, double timeout, status_timeout action)
 }
 
 
-void put_WARNstatus(double val)
+void put_WARNstatus(float val)
 {
 	FL_LOCK_D();
 	if (val < 0.05)

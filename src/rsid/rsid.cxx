@@ -227,7 +227,7 @@ void cRsId::receive(const float* buf, size_t len)
 	if (len == 0) return;
 
 	int srclen = static_cast<int>(len);
-	double src_ratio = RSID_SAMPLE_RATE / active_modem->get_samplerate();
+	float src_ratio = RSID_SAMPLE_RATE / active_modem->get_samplerate();
 
 	if (rsid_secondary_time_out > 0) {
 		rsid_secondary_time_out -= (int)(len / src_ratio);
@@ -301,7 +301,7 @@ void cRsId::search(void)
 
 	memset(aFFTAmpl, 0, sizeof(aFFTAmpl));
 
-	static const double pscale = 4.0 / (RSID_FFT_SIZE * RSID_FFT_SIZE);
+	static const float pscale = 4.0 / (RSID_FFT_SIZE * RSID_FFT_SIZE);
 
 	if (unlikely(bReverse)) {
 		for (int i = 0; i < RSID_FFT_SIZE; i++)
@@ -585,7 +585,7 @@ void cRsId::apply(int iBin, int iSymbol, int extended)
 {
 	ENSURE_THREAD(TRX_TID);
 
-	double rsidfreq = 0, currfreq = 0;
+	float rsidfreq = 0, currfreq = 0;
 	int n, mbin = NUM_MODES;
 
 	int tblsize;
@@ -926,12 +926,12 @@ void cRsId::send(bool preRSID)
 	if (!assigned(mode)) return;
 
 	unsigned char rsid[RSID_NSYMBOLS];
-	double sr;
+	float sr;
 	size_t len;
 	int iTone;
-	double freq, phaseincr;
-	double fr;
-	double phase;
+	float freq, phaseincr;
+	float fr;
+	float phase;
 
 	Encode(rmode, rsid);
 	sr = active_modem->get_samplerate();
@@ -939,7 +939,7 @@ void cRsId::send(bool preRSID)
 	if (unlikely(len != symlen)) {
 		symlen = len;
 		delete [] outbuf;
-		outbuf = new double[symlen];
+		outbuf = new float[symlen];
 	}
 
 // transmit 5 symbol periods of silence at beginning of rsid
@@ -978,7 +978,7 @@ void cRsId::send(bool preRSID)
 		if (unlikely(len != symlen)) {
 			symlen = len;
 			delete [] outbuf;
-			outbuf = new double[symlen];
+			outbuf = new float[symlen];
 		}
 // transmit sequence of 15 symbols (tones)
 		fr = 1.0 * active_modem->get_txfreq() - (RSID_SAMPLE_RATE * 7 / 1024);

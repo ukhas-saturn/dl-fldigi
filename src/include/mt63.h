@@ -41,11 +41,11 @@ private:
 	MT63rx  *Rx;
 
 	dspLevelMonitor *InpLevel;
-	double_buff     *InpBuff;
-	double_buff     *emptyBuff;
+	float_buff     *InpBuff;
+	float_buff     *emptyBuff;
 	bool            flushbuffer;
-	double          FEC_offset;
-	double          FEC_snr;
+	float          FEC_offset;
+	float          FEC_snr;
 
 public:
 	mt63(trx_mode mode);
@@ -54,11 +54,11 @@ public:
 	void    rx_init();
 	void    tx_init(SoundBase*);
 	void    restart();
-	int     rx_process(const double *buf, int len);
+	int     rx_process(const float *buf, int len);
 	int     tx_process();
 
 	void    rx_flush();
-	void	set_freq(double);
+	void	set_freq(float);
 };
 
 

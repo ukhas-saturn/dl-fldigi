@@ -33,7 +33,7 @@ public:
 	void rx_init();
 	void tx_init(SoundBase *sc);
 	void restart() {};
-	int  rx_process(const double *buf, int len);
+	int  rx_process(const float *buf, int len);
 	int  tx_process();
 	void shutdown();
 	int  tx_time( int nb_bytes ) const ;
@@ -84,7 +84,7 @@ public:
 	/// Called when transmitting/receiving is finished.
 	void qso_rec_save(void);
 
-	void set_freq(double);
+	void set_freq(float);
 
 	/// Helper string indicating the internal state of the wefax engine.
 	std::string state_string(void) const;
@@ -99,10 +99,10 @@ public:
 	std::string get_received_file(int max_seconds=max_delay);
 
 	/// Called by XML-RPC to send a file which resides on the machine where fldigi runs.
-	std::string send_file( const std::string & filnam, double max_seconds=max_delay);
+	std::string send_file( const std::string & filnam, float max_seconds=max_delay);
 
 	/// Called before sending a file. Transmitting is an exclusive process.
-	bool transmit_lock_acquire( const std::string & filnam, double max_seconds=max_delay);
+	bool transmit_lock_acquire( const std::string & filnam, float max_seconds=max_delay);
 
 	/// Called after sending a file so another sending can take place.
 	void transmit_lock_release( const std::string & err_msg );

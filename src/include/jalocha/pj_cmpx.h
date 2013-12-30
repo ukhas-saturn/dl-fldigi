@@ -9,7 +9,7 @@
 #include <math.h>
 
 // ----------------------------------------------------------------------------
-// float/double/other-complex type
+// float/float/other-complex type
 
 template <class Type>
 class Cmpx
@@ -28,15 +28,15 @@ class Cmpx
     void Set(Type2 NewRe, Type2 NewIm=0) { Re=NewRe; Im=NewIm; }
    template <class Type2>
     void Set(Cmpx<Type2> New) { Re=New.Re; Im=New.Im; }
-   void SetPhase(double Phase, double Mag=1.0) { Re=Mag*cos(Phase); Im=Mag*sin(Phase); }
+   void SetPhase(float Phase, float Mag=1.0) { Re=Mag*cos(Phase); Im=Mag*sin(Phase); }
    void Conugate(void) { Im=(-Im); }
    void Negate(void) { Re=(-Re); Im=(-Im); }
    void QuarterTurnLeft(void) { Type OldIm=Im; Im=Re; Re=(-OldIm); }
    void QuarterTurnRight(void) { Type OldIm=Im; Im=(-Re); Re=OldIm; }
-   double Energy(void) { return Re*Re+Im*Im; }
-   double Mag2(void) { return Re*Re+Im*Im; }
-   double Mag(void) { return sqrt(Re*Re+Im*Im); }
-   double Phase(void) { return atan2(Im,Re); }
+   float Energy(void) { return Re*Re+Im*Im; }
+   float Mag2(void) { return Re*Re+Im*Im; }
+   float Mag(void) { return sqrt(Re*Re+Im*Im); }
+   float Phase(void) { return atan2(Im,Re); }
    int Zero(void) { return (Re==0)&&(Im==0); }
    int NotZero(void) { return (Re!=0)||(Im!=0); }
    // template <class Type2>
@@ -46,13 +46,13 @@ class Cmpx
    // void operator /= (const Type2 Mult)
    // { Re*=Mult; Im*=Mult; }
    template <class Type2>
-    double VectDotProd(Cmpx<Type2> X)  { return Re*X.Re+Im*X.Im; }
+    float VectDotProd(Cmpx<Type2> X)  { return Re*X.Re+Im*X.Im; }
    void Print(char *Form="%+6.3f")
    { printf("["); printf(Form,Re); printf(","); printf(Form,Im); printf("]"); }
 } ;
 
 typedef Cmpx<float> fcmpx;
-typedef Cmpx<double> dcmpx;
+typedef Cmpx<float> dcmpx;
 
 // Some complex operators:
 // at least with the BC++ they carry some overhead because
@@ -105,18 +105,18 @@ template <class type, class num> // division by a scalar
 { Dst.Re/=Src; Dst.Im/=Src; }
 
 template <class type> // scalar multiplication
- inline double operator *(Cmpx<type> &Left, Cmpx<type> &Right)
+ inline float operator *(Cmpx<type> &Left, Cmpx<type> &Right)
 { return Left.Re*Right.Re+Left.Im*Right.Im; }
 
 // some arithmetic functions:
 
 // scalar product of two vectors
 template <class typeA, class typeB>
- inline double ScalProd(Cmpx<typeA> &A, Cmpx<typeB> &B)
+ inline float ScalProd(Cmpx<typeA> &A, Cmpx<typeB> &B)
 { return A.Re*B.Re+A.Im*B.Im; }
 
 template <class typeA, class typeB>
- inline double ScalProd(typeA Ia, typeA Qa, Cmpx<typeB> &B)
+ inline float ScalProd(typeA Ia, typeA Qa, Cmpx<typeB> &B)
 { return Ia*B.Re+Qa*B.Im; }
 
 // complex multiply

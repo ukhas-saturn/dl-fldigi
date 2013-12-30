@@ -81,11 +81,11 @@ public:
 	};
 protected:
 // common variables
-	double	phase[THORMAXFFTS + 1];
-	double	txphase;
+	float	phase[THORMAXFFTS + 1];
+	float	txphase;
 	int		symlen;
 	int		doublespaced;
-	double	tonespacing;
+	float	tonespacing;
 	int		counter;
 	unsigned int	twosym;
 	int		paths;
@@ -106,8 +106,8 @@ protected:
 	THORrxpipe		*pipe;
 	unsigned int	pipeptr;
 	unsigned int	datashreg;
-	mbuffer<double, 0, 2>	scopedata;
-	mbuffer<double, 0, 2>	videodata;
+	mbuffer<float, 0, 2>	scopedata;
+	mbuffer<float, 0, 2>	videodata;
 
 	cmplx currvector;
 
@@ -115,15 +115,15 @@ protected:
 	int prev1symbol;
 	int prev2symbol;
 	
-	double currmag;
-	double prev1mag;
-	double prev2mag;
+	float currmag;
+	float prev1mag;
+	float prev2mag;
 
-	double met1;
-	double met2;
-	double sig;
-	double noise;
-	double s2n;
+	float met1;
+	float met2;
+	float sig;
+	float noise;
+	float s2n;
 
 	int synccounter;
 
@@ -192,7 +192,7 @@ public:
 	void	rx_init();
 	void	tx_init(SoundBase *sc);
 	void	restart();
-	int		rx_process(const double *buf, int len);
+	int		rx_process(const float *buf, int len);
 	int		tx_process();
 };
 

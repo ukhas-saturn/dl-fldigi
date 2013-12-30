@@ -49,19 +49,19 @@ void mt63::rx_init()
 	escape = 0;
 }
 
-double peak = 0.0;
+float peak = 0.0;
 
 int mt63::tx_process()
 {
 	int c;
-	double maxval = 0;
+	float maxval = 0;
 
 	rx_flush();
 
     if (startflag == true) {
         startflag = false;
         if (progdefaults.mt63_usetones) {
-            double maxval = 0.0;
+            float maxval = 0.0;
             for (int i = 0; i < (bandwidth * progdefaults.mt63_tone_duration / 96); i++) {
                 Tx->SendTune( progdefaults.mt63_twotones );
                 for (int i = 0; i < Tx->Comb.Output.Len; i++)
@@ -136,9 +136,9 @@ int mt63::tx_process()
 	return 0;
 }
 
-int mt63::rx_process(const double *buf, int len)
+int mt63::rx_process(const float *buf, int len)
 {
-	double snr;
+	float snr;
 	unsigned int c;
 	int i;
 	static char msg1[20];
@@ -179,7 +179,7 @@ int mt63::rx_process(const double *buf, int len)
 		snr = 99.9;
 	display_metric(snr);
 
-	double s2n = 10.0*log10( snr == 0 ? 0.001 : snr);
+	float s2n = 10.0*log10( snr == 0 ? 0.001 : snr);
 	snprintf(msg1, sizeof(msg1), "s/n %2d dB", (int)(floor(s2n)));
     put_Status1(msg1);
 
@@ -329,8 +329,8 @@ mt63::mt63 (trx_mode mt63_mode) : modem()
 	Rx = new MT63rx;
 
 	InpLevel = new dspLevelMonitor;
-	InpBuff = new double_buff;
-	emptyBuff = new double_buff;
+	InpBuff = new float_buff;
+	emptyBuff = new float_buff;
 
 	samplerate = 8000;
 	fragmentsize = 1024;
@@ -349,7 +349,7 @@ mt63::~mt63()
 // W1HKJ
 // user can select manual or fixed positioning of the MT63 encoder/decoder
 // progdefaults.mt63_at500 TRUE ==> fixed position
-void mt63::set_freq(double f)
+void mt63::set_freq(float f)
 {
 	if (progdefaults.mt63_at500)
 		frequency = 500 + bandwidth / 2;

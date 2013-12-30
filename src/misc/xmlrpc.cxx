@@ -108,7 +108,7 @@ namespace xmlrpc_c
 	typedef XmlRpcValue value_struct ;
 	typedef XmlRpcValue value_nil ;
 	typedef XmlRpcValue value_array ;
-	typedef XmlRpcValue value_double ;
+	typedef XmlRpcValue value_float ;
 	typedef XmlRpcValue value_int ;
 	typedef XmlRpcValue value_boolean ;
 
@@ -188,7 +188,7 @@ struct XmlRpcImpl : public XmlRpcServer
 	}
 	void run()
 	{
-		double milli_secs = -1.0 ;
+		float milli_secs = -1.0 ;
 		// Tell our server to wait indefinately for messages
 		work(milli_secs);
 	}
@@ -313,7 +313,7 @@ static void set_button(Fl_Button* button, bool value)
 	button->value(value);
 	button->do_callback();
 }
-static void set_valuator(Fl_Valuator* valuator, double value)
+static void set_valuator(Fl_Valuator* valuator, float value)
 {
 	valuator->value(value);
 	valuator->do_callback();
@@ -812,7 +812,7 @@ public:
 	}
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
-		*retval = xmlrpc_c::value_double(pgrsSquelch->value());
+		*retval = xmlrpc_c::value_float(pgrsSquelch->value());
 	}
 };
 
@@ -1055,8 +1055,8 @@ public:
 	}
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
-        double rfc = wf->rfcarrier();
-		*retval = xmlrpc_c::value_double(rfc);
+        float rfc = wf->rfcarrier();
+		*retval = xmlrpc_c::value_float(rfc);
 	}
 };
 
@@ -1078,9 +1078,9 @@ public:
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
 		XMLRPC_LOCK;
-		double rfc = wf->rfcarrier();
+		float rfc = wf->rfcarrier();
 		qsy((long long int)params.getDouble(0, 0.0));
-		*retval = xmlrpc_c::value_double(rfc);
+		*retval = xmlrpc_c::value_float(rfc);
 	}
 };
 
@@ -1095,9 +1095,9 @@ public:
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
 		XMLRPC_LOCK;
-		double rfc = wf->rfcarrier() + params.getDouble(0);
+		float rfc = wf->rfcarrier() + params.getDouble(0);
 		qsy((long long int)rfc);
-		*retval = xmlrpc_c::value_double(rfc);
+		*retval = xmlrpc_c::value_float(rfc);
 	}
 };
 
@@ -1213,7 +1213,7 @@ public:
 	}
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
-		*retval = xmlrpc_c::value_double(sldrSquelch->value());
+		*retval = xmlrpc_c::value_float(sldrSquelch->value());
 	}
 };
 
@@ -1228,9 +1228,9 @@ public:
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
 		XMLRPC_LOCK;
-		double v = sldrSquelch->value();
+		float v = sldrSquelch->value();
 		REQ(set_valuator, sldrSquelch, params.getDouble(0, sldrSquelch->maximum(), sldrSquelch->minimum()));
-		*retval = xmlrpc_c::value_double(v);
+		*retval = xmlrpc_c::value_float(v);
 	}
 };
 
@@ -1245,9 +1245,9 @@ public:
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
 		XMLRPC_LOCK;
-		double v = sldrSquelch->value();
+		float v = sldrSquelch->value();
 		REQ(set_valuator, sldrSquelch, v + params.getDouble(0)); // FIXME: check range
-		*retval = xmlrpc_c::value_double(sldrSquelch->value());
+		*retval = xmlrpc_c::value_float(sldrSquelch->value());
 	}
 };
 
@@ -1615,9 +1615,9 @@ public:
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
         {
 		XMLRPC_LOCK;
-		double rfc = wf->rfcarrier();
+		float rfc = wf->rfcarrier();
 		REQ(set_frequency, (long long int)params.getDouble(0, 0.0));
-		*retval = xmlrpc_c::value_double(rfc);
+		*retval = xmlrpc_c::value_float(rfc);
 	}
 };
 

@@ -60,7 +60,7 @@ struct RGBI {
 // you can change the basic fft processing type by a simple change in the
 // following typedef.  change to float if you need to skimp on cpu cycles.
 
-typedef double wf_fft_type;
+typedef float wf_fft_type;
 typedef std::complex<wf_fft_type> wf_cpx_type;
 
 extern	RGBI	mag2RGBI[256];
@@ -100,16 +100,16 @@ public:
 	int cursorFreq(int xpos) {
 		return (offset + step * xpos);
 	}
-	void Ampspan(double AmpSpn) {
+	void Ampspan(float AmpSpn) {
 		ampspan = (int)AmpSpn;
 	}
-	double Ampspan() {
+	float Ampspan() {
 		return ampspan;
 	}
-	void Reflevel(double RefLev) {
+	void Reflevel(float RefLev) {
 		reflevel = (int)RefLev;
 	}
-	double Reflevel() {
+	float Reflevel() {
 		return reflevel;
 	}
 	void Bandwidth (int bw) {
@@ -124,7 +124,7 @@ public:
 		overload = ovr;
 	}
 
-    double AudioPeak() { return peakaudio; }
+    float AudioPeak() { return peakaudio; }
 
 	WFspeed Speed() { return wfspeed;}
 	void Speed(WFspeed rate) { wfspeed = rate;}
@@ -149,7 +149,7 @@ public:
 	void makeMarker();
 	void process_analog(wf_fft_type *sig, int len);
 	void processFFT();
-	void sig_data( double *sig, int len, int sr );
+	void sig_data( float *sig, int len, int sr );
 	void rfcarrier(long long f) {
 		rfc = f;
 	}
@@ -162,12 +162,12 @@ public:
 	void updateMarker() {
 		drawMarker();};
 	int peakFreq(int f0, int delta);
-	double powerDensity(double f0, double bw);
-	double powerDensityMaximum(int bw_nb, const int (*bw)[2]) const ;
+	float powerDensity(float f0, float bw);
+	float powerDensityMaximum(int bw_nb, const int (*bw)[2]) const ;
 
 	void setPrefilter(int v);
 	void setcolors();
-	double dFreq() {return dfreq;}
+	float dFreq() {return dfreq;}
 	void redrawCursor();
 	void defaultColors();
 
@@ -194,9 +194,9 @@ private:
 	int		wfspdcnt;
 	int		dispcnt;
 	int 	ampspan;
-    double  peakaudio;
+    float  peakaudio;
 	int 	reflevel;
-	double	dfreq;
+	float	dfreq;
 	bool	centercarrier;
 	bool	cursormoved;
 	WFspeed	wfspeed;
@@ -206,7 +206,7 @@ private:
 	RGB		RGBmarker;
 	RGB		RGBcursor;
 	RGBI		RGBInotch;
-    double  *fftwindow;
+    float  *fftwindow;
 	uchar	*scaleimage;
 	uchar	*fft_sig_img;
 	uchar	*sig_img;
@@ -216,7 +216,7 @@ private:
 
 	short int	*fft_db;
 	int			ptrFFTbuff;
-	double		*circbuff;
+	float		*circbuff;
 	int			ptrCB;
 	wf_fft_type	*pwr;
 	g_fft<wf_fft_type> *wfft;
@@ -245,7 +245,7 @@ public:
 	int	newcarrier;
 	int	oldcarrier;
 	bool	tmp_carrier;
-	double Pwr(int i) {
+	float Pwr(int i) {
 		if ( i > 0 && i < IMAGE_WIDTH) return pwr[i];
 		return 0.0;
 	}
@@ -268,7 +268,7 @@ public:
 	~waterfall(){};
 	void show_scope(bool on);
 	void opmode();
-	void sig_data(double *sig, int len, int sr){
+	void sig_data(float *sig, int len, int sr){
 		wfdisp->sig_data(sig, len, sr);
 	}
 	void Overload(bool ovr) {
@@ -299,12 +299,12 @@ public:
 	{
 		return (wfdisp->peakFreq(f0, delta));
 	}
-	double powerDensity(double f0, double bw)
+	float powerDensity(float f0, float bw)
 	{
 		return (wfdisp->powerDensity(f0,bw));
 	}
 
-	double powerDensityMaximum(int bw_nb, const int (*bw)[2]) const
+	float powerDensityMaximum(int bw_nb, const int (*bw)[2]) const
 	{
 		return (wfdisp->powerDensityMaximum(bw_nb,bw));
 	}
@@ -325,7 +325,7 @@ public:
 	void setcolors() { wfdisp->setcolors(); }
 	void setRefLevel();
 	void setAmpSpan();
-	double dFreq() { return wfdisp->dFreq();}
+	float dFreq() { return wfdisp->dFreq();}
 
 	void setQSY(bool on) {
 		if (on)
@@ -333,7 +333,7 @@ public:
 		else
 			qsy->deactivate();
 	}
-	double Pwr(int i) { return wfdisp->Pwr(i); }
+	float Pwr(int i) { return wfdisp->Pwr(i); }
 
 	int handle(int event);
 

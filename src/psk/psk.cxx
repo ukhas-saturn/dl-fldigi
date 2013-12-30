@@ -573,8 +573,8 @@ psk::psk(trx_mode pskmode) : modem()
 
 
 	// create impulse response for experimental FIR filters
-	double fir1c[64];
-	double fir2c[64];
+	float fir1c[64];
+	float fir2c[64];
 
 	for (int i = 0; i < MAX_CARRIERS; i++) {
 		if (i < numcarriers) {
@@ -671,7 +671,7 @@ psk::psk(trx_mode pskmode) : modem()
 		startpreamble = true;
 	}
 
-	tx_shape = new double[symbollen];
+	tx_shape = new float[symbollen];
 
 	// raised cosine shape for the transmitter
 	for ( int i = 0; i < symbollen; i++)
@@ -882,9 +882,9 @@ void psk::rx_pskr(unsigned char symbol)
 
 void psk::searchDown()
 {
-	double srchfreq = frequency - sc_bw * 2;
-	double minfreq = sc_bw * 2;
-	double spwr, npwr;
+	float srchfreq = frequency - sc_bw * 2;
+	float minfreq = sc_bw * 2;
+	float spwr, npwr;
 	while (srchfreq > minfreq) {
 		spwr = wf->powerDensity(srchfreq, sc_bw);
 		npwr = wf->powerDensity(srchfreq + sc_bw, sc_bw/2) + 1e-10;
@@ -900,9 +900,9 @@ void psk::searchDown()
 
 void psk::searchUp()
 {
-	double srchfreq = frequency + sc_bw * 2;
-	double maxfreq = IMAGE_WIDTH - sc_bw * 2;
-	double spwr, npwr;
+	float srchfreq = frequency + sc_bw * 2;
+	float maxfreq = IMAGE_WIDTH - sc_bw * 2;
+	float spwr, npwr;
 	while (srchfreq < maxfreq) {
 		spwr = wf->powerDensity(srchfreq, sc_bw/2);
 		npwr = wf->powerDensity(srchfreq - sc_bw, sc_bw/2) + 1e-10;
@@ -973,7 +973,7 @@ void psk::findsignal()
 //    therefore use other strategies for frequency alignment like RSID
 void psk::phaseafc()
 {
-	double error;
+	float error;
 	if (afcmetric < 0.05 || 
 		mode == MODE_PSK500 ||
 		mode == MODE_QPSK500 ||
@@ -1009,11 +1009,11 @@ void psk::rx_symbol(cmplx symbol, int car)
 {
 	int n;
 	unsigned char softbit = 0;
-	double softangle;
-	double softamp;
-	double sigamp = norm(symbol);
+	float softangle;
+	float softamp;
+	float sigamp = norm(symbol);
 
-static double averageamp;
+static float averageamp;
 
 	phase = arg ( conj(prevsymbol[car]) * symbol );
 	prevsymbol[car] = symbol;
@@ -1038,9 +1038,9 @@ static double averageamp;
 		}
 		// Compute values between -128 and +127 for phase value only
 		if (phase > M_PI) {
-			softangle = (127 - (((2 * M_PI - phase) / M_PI) * (double) 255));
+			softangle = (127 - (((2 * M_PI - phase) / M_PI) * (float) 255));
 		} else {
-			softangle = (127 - ((phase / M_PI) * (double) 255));
+			softangle = (127 - ((phase / M_PI) * (float) 255));
 		}
 		// Then apply impact of amplitude. Fanally, re-centre on 127-128
 		// as the decoder needs values between 0-255
@@ -1175,9 +1175,9 @@ void psk::update_syncscope()
 
 char bitstatus[100];
 
-int psk::rx_process(const double *buf, int len)
+int psk::rx_process(const float *buf, int len)
 {
-	double delta[MAX_CARRIERS], frequencies[MAX_CARRIERS];
+	float delta[MAX_CARRIERS], frequencies[MAX_CARRIERS];
 	cmplx z, z2[MAX_CARRIERS];
 	bool can_rx_symbol = false;
 
@@ -1234,8 +1234,8 @@ int psk::rx_process(const double *buf, int len)
 */                         
 
 			int idx = (int) bitclk;
-			double sum = 0.0;
-			double ampsum = 0.0;
+			float sum = 0.0;
+			float ampsum = 0.0;
 			for (int ii = 0; ii < numcarriers; ii++) {
 				sum += abs(z2[ii])/numcarriers;
 			}
@@ -1250,8 +1250,8 @@ int psk::rx_process(const double *buf, int len)
 				ampsum += (syncbuf[i] + syncbuf[i+8]);
 			}
 */
-//			double bitsteps = (symbollen >= 16 ? 16 : 8);
-			double bitsteps = (symbollen >= 16 ? 16 : symbollen);
+//			float bitsteps = (symbollen >= 16 ? 16 : 8);
+			float bitsteps = (symbollen >= 16 ? 16 : symbollen);
 			int symsteps = (int) (bitsteps / 2);
 
 /**
@@ -1374,10 +1374,10 @@ int psk::rx_process(const double *buf, int len)
 
 void psk::tx_symbol(int sym)
 {
-	double delta[MAX_CARRIERS];
-	double	ival, qval, shapeA, shapeB;
+	float delta[MAX_CARRIERS];
+	float	ival, qval, shapeA, shapeB;
 	cmplx symbol;
-	double	frequencies[MAX_CARRIERS];
+	float	frequencies[MAX_CARRIERS];
 
 	txsymbols[accumulated_bits] = sym;
 
@@ -1394,7 +1394,7 @@ void psk::tx_symbol(int sym)
 			delta[car] = TWOPI * frequencies[car] / samplerate;
 	}
 
-double maxamp = 0;
+float maxamp = 0;
 	for (int car = 0; car < numcarriers; car++) {
 		sym = txsymbols[car];
 
@@ -1635,7 +1635,7 @@ void psk::resetSN_IMD()
 void psk::calcSN_IMD(cmplx z)
 {
 	int i;
-	double tempI = 0, tempQ = 0;
+	float tempI = 0, tempQ = 0;
 
 	for(i = 0; i < NUM_FILTERS; i++) {
 		tempI = I1[i];

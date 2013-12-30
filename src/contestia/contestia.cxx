@@ -42,7 +42,7 @@ LOG_FILE_SOURCE(debug::LOG_MODEM);
 
 using namespace std;
 
-double contestia::nco(double freq)
+float contestia::nco(float freq)
 {
     preamblephase += 2.0 * M_PI * freq / samplerate;
 
@@ -91,7 +91,7 @@ void contestia::rx_flush()
 
 void contestia::send_tones()
 {
-	double freqa, freqb;
+	float freqa, freqb;
 	tone_bw = bandwidth;
 	tone_midfreq = txbasefreq;
 
@@ -203,11 +203,11 @@ int contestia::tx_process()
 }
 
 
-int contestia::rx_process(const double *buf, int len)
+int contestia::rx_process(const float *buf, int len)
 {
 	int c;
 	unsigned char ch = 0;
-	static double snr = 1e-3;
+	static float snr = 1e-3;
 	static char msg1[20];
 	static char msg2[20];
 
@@ -297,7 +297,7 @@ void contestia::restart()
 	txbufferlen = Tx->MaxOutputLen;
 	
 	if (txfbuffer) delete [] txfbuffer;
-	txfbuffer = new double[txbufferlen];
+	txfbuffer = new float[txbufferlen];
 
 	Rx->Tones = Tx->Tones;
 	Rx->Bandwidth = bandwidth;
@@ -346,8 +346,8 @@ contestia::contestia()
 	txfbuffer = 0;
 	samplerate = 8000;
 
-	Tx = new MFSK_Transmitter< double >;
-	Rx = new MFSK_Receiver< double >;
+	Tx = new MFSK_Transmitter<float>;
+	Rx = new MFSK_Receiver<float>;
 
 	Tx->bContestia = true;
 	Rx->bContestia = true;

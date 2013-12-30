@@ -65,7 +65,7 @@ ssb::ssb()
 }
 
 // dummy process
-int ssb::rx_process(const double *buf, int len)
+int ssb::rx_process(const float *buf, int len)
 {
 	return 0;
 }

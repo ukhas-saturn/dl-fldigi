@@ -538,7 +538,7 @@ cmplx cw::mixer(cmplx in)
 //
 //======================================================================
 
-void cw::decode_stream(double value)
+void cw::decode_stream(float value)
 {
 	const char *c, *somc;
 	char *cptr;
@@ -597,7 +597,7 @@ void cw::decode_stream(double value)
 	}
 }
 
-void cw::rx_FFTprocess(const double *buf, int len)
+void cw::rx_FFTprocess(const float *buf, int len)
 {
 	cmplx z, *zp;
 	int n;
@@ -634,7 +634,7 @@ void cw::rx_FFTprocess(const double *buf, int len)
 	} //while (len-- > 0)
 }
 
-void cw::rx_FIRprocess(const double *buf, int len)
+void cw::rx_FIRprocess(const float *buf, int len)
 {
 	cmplx z;
 
@@ -663,7 +663,7 @@ void cw::rx_FIRprocess(const double *buf, int len)
 
 static bool cwprocessing = false;
 
-int cw::rx_process(const double *buf, int len)
+int cw::rx_process(const float *buf, int len)
 {
 	if (cwprocessing) return 0;
 	cwprocessing = true;
@@ -694,7 +694,7 @@ int cw::usec_diff(unsigned int earlier, unsigned int later)
 	if (earlier >= later) {
 		return 0;
 	} else
-		return (int) (((double) (later - earlier) * USECS_PER_SEC) / samplerate);
+		return (int) (((float) (later - earlier) * USECS_PER_SEC) / samplerate);
 }
 
 
@@ -874,7 +874,7 @@ int cw::handle_event(int cw_event, const char **c)
 // this is 1/2 cycle of a raised cosine
 //===========================================================================
 
-double keyshape[KNUM];
+float keyshape[KNUM];
 
 void cw::makeshape()
 {
@@ -899,7 +899,7 @@ void cw::makeshape()
 	}
 }
 
-inline double cw::nco(double freq)
+inline float cw::nco(float freq)
 {
 	phaseacc += 2.0 * M_PI * freq / samplerate;
 
@@ -909,7 +909,7 @@ inline double cw::nco(double freq)
 	return sin(phaseacc);
 }
 
-inline double cw::qsknco()
+inline float cw::qsknco()
 {
 	qskphase += 2.0 * M_PI * 1000 / samplerate;
 
@@ -938,7 +938,7 @@ int q_carryover = 0, carryover = 0;
 
 void cw::send_symbol(int bits, int len)
 {
-	double freq;
+	float freq;
 	int sample, qsample, i;
 	int delta = 0;
 	int keydown;

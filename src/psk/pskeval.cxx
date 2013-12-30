@@ -48,9 +48,9 @@ void pskeval::sigdensity() {
 	int ihbw = (int)(0.6*bw);
 	int ibw = 2 * ihbw;
 
-	double *vals = new double[ibw];
-	double sig = 0.0;
-	double val = 0.0;
+	float *vals = new float[ibw];
+	float sig = 0.0;
+	float val = 0.0;
 
 	int low = progdefaults.LowFreqCutoff;
 	if (low < ihbw) low = ihbw;
@@ -77,9 +77,9 @@ void pskeval::sigdensity() {
 	delete [] vals;
 }
 
-double pskeval::sigpeak(int &f, int f1, int f2)
+float pskeval::sigpeak(int &f, int f1, int f2)
 {
-	double peak = 0;
+	float peak = 0;
 	f1 -= bw;
 	if (f1 <= progdefaults.LowFreqCutoff) f1 = progdefaults.LowFreqCutoff;
 	f2 += bw;
@@ -98,12 +98,12 @@ double pskeval::sigpeak(int &f, int f1, int f2)
 	return peak / sigmin / bw;
 }
 
-double pskeval::peak(int &f0, int f1, int f2, double db)
+float pskeval::peak(int &f0, int f1, int f2, float db)
 {
-	double peak = 0;
+	float peak = 0;
 
 	int fa = f2, fb = f1;
-	double level = pow(10, (10 + db) / 10.0);
+	float level = pow(10, (10 + db) / 10.0);
 
 //step 1
 	for (int i = f1; i < f2; i++) if (sigpwr[i] > peak) peak = sigpwr[i];
