@@ -243,7 +243,7 @@ void fftfilt::rtty_filter(float f)
  * Raised cosine gives better decodes for icarus recording
  * Matched filter has wider bandwidth, but less effective AFC tracking */
 
-		dht = (x > 1) ? 0.0 : 1 + cos( M_PI * x );
+		dht = (x > 1) ? 0.0 : 1.0 + cos( M_PI * x );
 //		dht = sinc( x );
 
 		filter[i].real() = dht*cos( (i+i+1) * -0.25 * M_PI);
