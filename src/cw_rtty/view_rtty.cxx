@@ -401,7 +401,7 @@ void view_rtty::Metric(int ch)
 void view_rtty::find_signals()
 {
 	float spwrhi = 0.0, spwrlo = 0.0, npwr = 0.0;
-	double rtty_squelch = pow(10, progStatus.VIEWER_rttysquelch / 10.0);
+	float rtty_squelch = pow(10, progStatus.VIEWER_rttysquelch / 10.0);
 	for (int i = 0; i < progdefaults.VIEWERchannels; i++) {
 		if (channel[i].state != IDLE) continue;
 		int cf = progdefaults.LowFreqCutoff + 100 * i;
