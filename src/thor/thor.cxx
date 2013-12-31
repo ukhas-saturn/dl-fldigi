@@ -333,7 +333,7 @@ cmplx thor::mixer(int n, const cmplx& in)
 	if (n == 0)
 		f = frequency - THORFIRSTIF;
 	else
-		f = THORFIRSTIF - THORBASEFREQ - bandwidth*0.5 + (samplerate / symlen) * ( (double)n / paths);
+		f = THORFIRSTIF - THORBASEFREQ - bandwidth*0.5 + (samplerate / symlen) * ( (float)n / paths);
 
 	float phase_n = phase[n];
 	cmplx z( cos(phase_n), sin(phase_n) );
@@ -465,7 +465,7 @@ void thor::softdecodesymbol()
 	unsigned char one, zero;
 	int c, nextmag=127, rawdoppler=0;
 	static int lastc=0, lastmag=0, nowmag=0, prev1rawdoppler=0;
-	static double lastdoppler=0, nowdoppler=0;
+	static float lastdoppler=0, nowdoppler=0;
 	unsigned char lastsymbols[4];
 	bool outofrange=false;
 
@@ -754,7 +754,7 @@ void thor::update_syncscope()
 
 	float max = 0, min = 1e6, range, mag;
 
-	memset(videodata, 0, paths * numbins * sizeof(double));
+	memset(videodata, 0, paths * numbins * sizeof(float));
 //LOG_INFO("%s", "cleared videodata");
 	if (!progStatus.sqlonoff || metric >= progStatus.sldrSquelchValue) {
 		for (int i = 0; i < paths * numbins; i++ ) {
@@ -776,7 +776,7 @@ void thor::update_syncscope()
 	set_video(videodata, paths * numbins, false);
 	videodata.next();
 
-	memset(scopedata, 0, THORSCOPESIZE * sizeof(double));
+	memset(scopedata, 0, THORSCOPESIZE * sizeof(float));
 	if (!progStatus.sqlonoff || metric >= progStatus.sldrSquelchValue) {
 		for (unsigned int i = 0, j = 0; i < THORSCOPESIZE; i++) {
 			j = (pipeptr + i * twosym / THORSCOPESIZE + 1) % (twosym);
@@ -789,8 +789,8 @@ void thor::update_syncscope()
 
 void thor::synchronize()
 {
-	double syn = -1;
-	double val, max = 0.0;
+	float syn = -1;
+	float val, max = 0.0;
 
 	if (staticburst == true) return;
 
@@ -950,7 +950,7 @@ int thor::get_secondary_char()
 
 void thor::sendtone(int tone, int duration)
 {
-	double f, phaseincr;
+	float f, phaseincr;
 	f = (tone + 0.5) * tonespacing + get_txfreq_woffset() - bandwidth / 2;
 	phaseincr = TWOPI * f / samplerate;
 	for (int j = 0; j < duration; j++) {

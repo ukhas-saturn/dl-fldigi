@@ -388,7 +388,7 @@ void dominoex::decodeDomino(int c)
 void dominoex::decodesymbol()
 {
 	int c;
-	double fdiff;
+	float fdiff;
 
 // Decode the IFK+ sequence, which results in a single nibble
 
@@ -459,7 +459,7 @@ void dominoex::update_syncscope()
 	float max = 0, min = 1e6, range, mag;
 
 // dom waterfall
-	memset(videodata, 0, (paths * numbins) * sizeof(double));
+	memset(videodata, 0, (paths * numbins) * sizeof(float));
 
 	if (!progStatus.sqlonoff || metric >= progStatus.sldrSquelchValue) {
 		for (int i = 0; i < (paths * numbins); i++ ) {
@@ -484,7 +484,7 @@ void dominoex::update_syncscope()
 //	set_scope(scopedata, twosym);
 // 64 data points is sufficient to show the signal progression through the
 // convolution filter.
-	memset(scopedata, 0, SCOPESIZE * sizeof(double));
+	memset(scopedata, 0, SCOPESIZE * sizeof(float));
 	if (!progStatus.sqlonoff || metric >= progStatus.sldrSquelchValue) {
 		for (unsigned int i = 0, j = 0; i < SCOPESIZE; i++) {
 			j = (pipeptr + i * twosym / SCOPESIZE + 1) % (twosym);

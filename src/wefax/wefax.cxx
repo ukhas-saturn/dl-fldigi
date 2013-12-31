@@ -2585,7 +2585,7 @@ int wefax::rx_process(const float *buf, int len)
 		}
 
 		/// Estimate the real sample rate.
-		float estim_smpl_rate = (double)total_len / total_tim ;
+		float estim_smpl_rate = (float)total_len / total_tim ;
 
 		/// If too far from what it should be, it means that pixels were lost.
 		if( estim_smpl_rate < 0.95 * modem::samplerate ) {

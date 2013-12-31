@@ -111,8 +111,8 @@ feld::feld(trx_mode m)
  			feldcolumnrate = 17.5;
 			rxpixrate = (RxColumnLen * feldcolumnrate);
 			txpixrate = (TxColumnLen * feldcolumnrate);
-			downsampleinc = (double)(rxpixrate/samplerate);
-			upsampleinc = (double)(txpixrate/samplerate);
+			downsampleinc = (float)(rxpixrate/samplerate);
+			upsampleinc = (float)(txpixrate/samplerate);
 			hell_bandwidth = txpixrate;
 			filter_bandwidth = progdefaults.HELL_BW_FH;
 			break;
@@ -120,8 +120,8 @@ feld::feld(trx_mode m)
 			feldcolumnrate = 2.1875;
 			rxpixrate = (RxColumnLen * feldcolumnrate);
 			txpixrate = (TxColumnLen * feldcolumnrate);
-			downsampleinc = (double)(rxpixrate/samplerate);
-			upsampleinc = (double)(txpixrate/samplerate);
+			downsampleinc = (float)(rxpixrate/samplerate);
+			upsampleinc = (float)(txpixrate/samplerate);
 			hell_bandwidth = txpixrate;
 			filter_bandwidth = progdefaults.HELL_BW_SH;
 			break;
@@ -129,8 +129,8 @@ feld::feld(trx_mode m)
 			feldcolumnrate = 87.5;
 			rxpixrate = (RxColumnLen * feldcolumnrate);
 			txpixrate = (TxColumnLen * feldcolumnrate);
-			downsampleinc = (double)(rxpixrate/samplerate);
-			upsampleinc = (double)(txpixrate/samplerate);
+			downsampleinc = (float)(rxpixrate/samplerate);
+			upsampleinc = (float)(txpixrate/samplerate);
 			hell_bandwidth = txpixrate;
 			filter_bandwidth = progdefaults.HELL_BW_X5;
 			break;
@@ -138,8 +138,8 @@ feld::feld(trx_mode m)
 			feldcolumnrate = 157.5;
 			rxpixrate = (RxColumnLen * feldcolumnrate);
 			txpixrate = (TxColumnLen * feldcolumnrate);
-			downsampleinc = (double)(rxpixrate/samplerate);
-			upsampleinc = (double)(txpixrate/samplerate);
+			downsampleinc = (float)(rxpixrate/samplerate);
+			upsampleinc = (float)(txpixrate/samplerate);
 			hell_bandwidth = txpixrate;
 			filter_bandwidth = progdefaults.HELL_BW_X9;
 			break;
@@ -148,8 +148,8 @@ feld::feld(trx_mode m)
 			feldcolumnrate = 17.5;
 			rxpixrate = (RxColumnLen * feldcolumnrate);
 			txpixrate = (TxColumnLen * feldcolumnrate);
-			downsampleinc = (double)(rxpixrate/samplerate);
-			upsampleinc = (double)(txpixrate/samplerate);
+			downsampleinc = (float)(rxpixrate/samplerate);
+			upsampleinc = (float)(txpixrate/samplerate);
 			hell_bandwidth = 122.5;
 			phi2freq = samplerate / M_PI / (hell_bandwidth / 2.0);
 			filter_bandwidth = progdefaults.HELL_BW_FSK;
@@ -159,8 +159,8 @@ feld::feld(trx_mode m)
 			feldcolumnrate = 17.5;
 			rxpixrate = (RxColumnLen * feldcolumnrate);
 			txpixrate = (TxColumnLen * feldcolumnrate);
-			downsampleinc = (double)(rxpixrate/samplerate);
-			upsampleinc = (double)(txpixrate/samplerate);
+			downsampleinc = (float)(rxpixrate/samplerate);
+			upsampleinc = (float)(txpixrate/samplerate);
 			hell_bandwidth = 55;
 			phi2freq = samplerate / M_PI / (hell_bandwidth / 2.0);
 			filter_bandwidth = progdefaults.HELL_BW_FSK105;
@@ -170,8 +170,8 @@ feld::feld(trx_mode m)
 			feldcolumnrate = 35;
 			rxpixrate = (RxColumnLen * feldcolumnrate);
 			txpixrate = (TxColumnLen * feldcolumnrate);
-			downsampleinc = (double)(rxpixrate/samplerate);
-			upsampleinc = (double)(txpixrate/samplerate);
+			downsampleinc = (float)(rxpixrate/samplerate);
+			upsampleinc = (float)(txpixrate/samplerate);
 			hell_bandwidth = 300;
 			phi2freq = samplerate / M_PI / (hell_bandwidth / 2.0);
 			filter_bandwidth = progdefaults.HELL_BW_HELL80;
@@ -273,7 +273,7 @@ void feld::FSKHELL_rx(cmplx z)
 
 void feld::rx(cmplx z)
 {
-	double x, avg;
+	float x, avg;
 
 	x = abs(z);
 	if (x > peakval) peakval = x;

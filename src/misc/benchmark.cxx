@@ -154,7 +154,7 @@ void do_benchmark(void)
 
 	LOG_INFO("processed: %" PRIuSZ " samples (decoded %" PRIuSZ ") in %.3f seconds", nproc, nrx,
 		 wall_time[1].tv_sec + wall_time[1].tv_nsec / 1e9);
-	double speed = nproc / (ru[1].ru_utime.tv_sec + ru[1].ru_utime.tv_usec / 1e6);
+	float speed = nproc / (ru[1].ru_utime.tv_sec + ru[1].ru_utime.tv_usec / 1e6);
 	LOG_INFO("cpu time : %" PRIdMAX ".%03" PRIdMAX "; speed=%.3f samples/s; factor=%.3f",
 		 (intmax_t)ru[1].ru_utime.tv_sec, (intmax_t)ru[1].ru_utime.tv_usec / 1000,
 		 speed, speed / active_modem->get_samplerate());
@@ -166,7 +166,7 @@ static size_t do_rx(struct rusage ru[2], struct timespec wall_time[2])
 {
 	size_t nread;
 	size_t inlen = 1 << 19;
-	double* inbuf = new double[inlen];
+	float* inbuf = new float[inlen];
 
 #if USE_SNDFILE
 	if (infile) {
@@ -174,13 +174,13 @@ static size_t do_rx(struct rusage ru[2], struct timespec wall_time[2])
 		clock_gettime(CLOCK_MONOTONIC, &wall_time[0]);
 		getrusage(RUSAGE_SELF, &ru[0]);
 
-		for (size_t n; (n = sf_readf_double(infile, inbuf, inlen)); nread += n)
+		for (size_t n; (n = sf_readf_float(infile, inbuf, inlen)); nread += n)
 			active_modem->rx_process(inbuf, n);
 	}
 	else
 #endif
 	{
-		memset(inbuf, 0, sizeof(double) * inlen);
+		memset(inbuf, 0, sizeof(float) * inlen);
 		clock_gettime(CLOCK_MONOTONIC, &wall_time[0]);
 		getrusage(RUSAGE_SELF, &ru[0]);
 
@@ -235,7 +235,7 @@ static size_t do_rx_src(struct rusage ru[2], struct timespec wall_time[2])
 	inbuf = new float[inlen];
 	size_t outlen = (size_t)floor(inlen * benchmark.src_ratio);
 	float* outbuf = new float[outlen];
-	double* rxbuf = new double[outlen];
+	float* rxbuf = new float[outlen];
 
 	long n;
 	size_t nread;
