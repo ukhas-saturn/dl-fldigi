@@ -532,7 +532,9 @@ bool rtty::rx(bool bit) // original modified for probability test
 char snrmsg[80];
 void rtty::Metric()
 {
-	float delta = rtty_baud/8.0;
+	float delta = 0.5 * rtty_baud;
+
+	// measures noise power between mark and space, scales up to 3khz
 	float np = wf->powerDensity(frequency, delta) * 3000 / delta;
 	float sp =
 		wf->powerDensity(frequency - shift/2, delta) +
