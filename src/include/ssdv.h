@@ -129,6 +129,37 @@ typedef struct {
 	uint16_t mcu_count;
 } ssdv_packet_info_t;
 
+/* WebP:
+struct {
+        // 0x55, 0x77;
+        uint32_t callsign;
+        uint8_t  image_id;
+        uint8_t  subimage_id;
+        uint16_t webp_flags;
+        // 210 bytes data
+        // 4 bytes crc;
+        // 32 bytes fec;
+        // = 256 bytes
+} ssdv_packet_webp_t; 
+*/
+
+#define WEBP_DATA_OFFSET (2 +4 +2 +2)
+#define WEBP_CRC_OFFSET (10 + 210)
+#define WEBP_FEC_OFFSET (220 + 4)
+
+/* RIFF Header: "RIFFxxxxWEBPVP8 yyyy", length 240 = 8 + 0xe8 = 20 + 0xdc = 20+10 + 210 byte payload*/
+/* Extended header : 2 bytes of flags(and size), 00,0x9d,01,0x2a, 4bytes (size 48,0,48,0) = 10bytes */
+#define WEBP_LEN (240)
+#define WEBP_HEADER_LEN (30)
+#define WEBP_DATA_LEN (WEBP_LEN - WEBP_HEADER_LEN)
+#define WEBP_HEADER {   0x52, 0x49, 0x46, 0x46, 0xe8, 0x00, 0x00, 0x00,\
+                        0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x20,\
+                        0xdc, 0x00, 0x00, 0x00, 0x30, 0x08, 0x00, 0x9D,\
+                        0x01, 0x2A, 0x30, 0x00, 0x30, 0x00, }
+#define WEBP_FLAG_OFFSET (20)
+
+extern int ssdv_hook_webp(const uint8_t *packet, const uint8_t *erasures);
+
 /* Encoding */
 extern char ssdv_enc_init(ssdv_t *s, char *callsign, uint8_t image_id);
 extern char ssdv_enc_set_buffer(ssdv_t *s, uint8_t *buffer);

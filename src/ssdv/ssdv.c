@@ -1353,5 +1353,29 @@ void ssdv_dec_header(ssdv_packet_info_t *info, uint8_t *packet)
 	else if(info->mcu_mode == 3) info->mcu_count *= 4;
 }
 
+extern int ssdv_hook_webp(const uint8_t *packet, const uint8_t *erasures)
+{
+        uint8_t pkt[SSDV_PKT_SIZE];
+        uint32_t e, i, x;
+
+        memcpy(&pkt[0], packet, SSDV_PKT_SIZE);
+        pkt[0] = 0x55;
+        pkt[1] = 0x77;
+        e = decode_rs_8(&pkt[1], 0, 0, 0);
+        if(e < 0) return(e);
+
+        if(pkt[1] != 0x77) return(-1);
+        x = crc32(&pkt[1], SSDV_PKT_SIZE_CRCDATA);
+
+        i = 1 + SSDV_PKT_SIZE_CRCDATA;
+        if(pkt[i++] != ((x >> 24) & 0xFF)) return(-1);
+        if(pkt[i++] != ((x >> 16) & 0xFF)) return(-1);
+        if(pkt[i++] != ((x >> 8) & 0xFF)) return(-1);
+        if(pkt[i++] != ((x >> 0) & 0xFF)) return(-1);
+
+
+
+        return 0;
+}
 /*****************************************************************************/
 
