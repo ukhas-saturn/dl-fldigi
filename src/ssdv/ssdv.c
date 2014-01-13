@@ -1353,15 +1353,24 @@ void ssdv_dec_header(ssdv_packet_info_t *info, uint8_t *packet)
 	else if(info->mcu_mode == 3) info->mcu_count *= 4;
 }
 
-extern int ssdv_hook_webp(const uint8_t *packet, const uint8_t *erasures)
+extern int ssdv_hook_webp(uint8_t *packet, const uint8_t *erasures, uint8_t *image)
 {
         uint8_t pkt[SSDV_PKT_SIZE];
         uint32_t e, i, x;
+	int eras_pos[32], no_eras;
 
-        memcpy(&pkt[0], packet, SSDV_PKT_SIZE);
+        memcpy(pkt, packet, SSDV_PKT_SIZE);
         pkt[0] = 0x55;
         pkt[1] = 0x77;
-        e = decode_rs_8(&pkt[1], 0, 0, 0);
+
+	no_eras = 0;
+	if(erasures)
+		for(i = 1; i < SSDV_PKT_SIZE; i++)
+		{
+			if(erasures[i]) eras_pos[no_eras++] = i - 1;
+			if(32 == no_eras) break;
+		}
+        e = decode_rs_8(&pkt[1], eras_pos, no_eras, 0);
         if(e < 0) return(e);
 
         if(pkt[1] != 0x77) return(-1);
@@ -1373,7 +1382,16 @@ extern int ssdv_hook_webp(const uint8_t *packet, const uint8_t *erasures)
         if(pkt[i++] != ((x >> 8) & 0xFF)) return(-1);
         if(pkt[i++] != ((x >> 0) & 0xFF)) return(-1);
 
+	/* Passed checksum so copy back corrected packet and decode*/
+	memcpy(packet, pkt, SSDV_PKT_SIZE);
 
+	uint8_t webpheader[WEBP_HEADER_LEN] = WEBP_HEADER;
+	for (i=0; i<WEBP_HEADER_LEN; i++)
+		image[i] = webpheader[i];
+	image[WEBP_FLAG_OFFSET+0] = pkt[WEBP_DATA_OFFSET -2];
+	image[WEBP_FLAG_OFFSET+1] = pkt[WEBP_DATA_OFFSET -1];
+	for (i=0; i<(WEBP_LEN - WEBP_HEADER_LEN); i++)
+		image[WEBP_HEADER_LEN + i] = pkt[WEBP_DATA_OFFSET + i];
 
         return 0;
 }

@@ -385,6 +385,8 @@ void ssdv_rx::upload_packet(int fixes)
 void ssdv_rx::put_byte(uint8_t byte, int lost)
 {
 	int i;
+	char msg[200], callsign[10];
+	uint8_t webpimage[256];
 	
 	/* If more than 32 bytes where lost clear the buffer */
 	if(lost > 32) clear_buffer();
@@ -401,8 +403,27 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 	
 	/* Test if this is a packet and is valid */
 	uint8_t *b = &buffer[bc];
-	if( 0 == ssdv_hook_webp(b, &erasures[bc]) ) {
+	if( 0 == ssdv_hook_webp(b, &erasures[bc], webpimage) ){
 		put_status("SSDV: Decoded WebP image packet!", 10);
+		//if (dl_fldigi::online()) upload_packet(b);
+		ssdv_decode_callsign(callsign, (b[2]<<24)+(b[3]<<16)+(b[4]<<8)+(b[5]<<0) );
+		snprintf(msg, 200, "\nWebP image. Callsign:%s, Image ID: %d.%02x\n",
+				callsign, b[6], b[7] );
+		ReceiveText->addstr(msg, FTextBase::QSY);
+
+		/* no embedded viewer for WebP, save image for local use */
+		if(!progdefaults.ssdv_save_image) return;
+
+		/* filename could include packet checksum for disambiguation */
+		FILE *fout;
+		//savedir = (progdefaults.ssdv_save_dir.empty() ? "." : progdefaults.ssdv_save_dir.c_str());
+		snprintf(msg, 30, "/tmp/%s_%02x.%02x.webp", callsign, b[6], b[7] );
+		fout = fopen(msg, "wb");
+		if (fout)
+		{
+			fwrite(webpimage, 1, WEBP_LEN, fout);
+			fclose(fout);
+		}
 		return;
 	}
 	if(ssdv_dec_is_packet(b, &i, &erasures[bc]) != 0) return;
@@ -485,7 +506,6 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 	/* Display a message on the fldigi interface */
 	put_status("SSDV: Decoded image packet!", 10);
 	
-	char msg[200], callsign[10];
 	snprintf(msg, 200, "Decoded image packet. Callsign: %s, Image ID: %02X, Resolution: %dx%d, Packet ID: %d",
 		ssdv_decode_callsign(callsign, pkt_info.callsign),
 		pkt_info.image_id,

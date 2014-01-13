@@ -158,7 +158,7 @@ struct {
                         0x01, 0x2A, 0x30, 0x00, 0x30, 0x00, }
 #define WEBP_FLAG_OFFSET (20)
 
-extern int ssdv_hook_webp(const uint8_t *packet, const uint8_t *erasures);
+extern int ssdv_hook_webp(uint8_t *packet, const uint8_t *erasures, uint8_t *image);
 
 /* Encoding */
 extern char ssdv_enc_init(ssdv_t *s, char *callsign, uint8_t image_id);
