@@ -5,6 +5,7 @@
 #include <setjmp.h>
 #include "ssdv_rx.h"
 
+#include <webp/decode.h>
 #include <curl/curl.h>
 
 /* For put_status() */
@@ -382,13 +383,52 @@ void ssdv_rx::upload_packet(int fixes)
 	return;
 }
 
+/* Use embedded viewer to recompose webp packets (each one is 48x48 pixels).
+ * Format allows 16x16 image blocks, current viewer wraps at 8x8 (384x384 pixels)
+ * Overlay new images on top of old as packets arrive
+ * TODO: make libwebp optional at compile time */
+#define WEBP_SIZE (48 * 8)
+void ssdv_rx::show_webp(const uint8_t *webpimage, char subimage)
+{
+	int j, check_w, check_h, suboffset;
+	const uint8_t *rgb_buffer;
+	// First time only, setup window 
+	if ( (WEBP_SIZE != image_width) || (WEBP_SIZE != image_height) ) {
+		if(image) delete image;
+		image_width = WEBP_SIZE;
+		image_height = WEBP_SIZE;
+		image_len = WEBP_SIZE * WEBP_SIZE * 3; // RGB not RGBA
+		image = new unsigned char[image_len];
+
+		if(flrgb) delete flrgb;
+		flrgb = new Fl_RGB_Image(image, image_width, image_height, 3);
+		box->size(image_width, image_height);
+		box->image(flrgb);
+		size(image_width,image_height + UI_HEIGHT);
+	}
+
+	// Render webp image
+	rgb_buffer = WebPDecodeRGB(webpimage, WEBP_LEN, &check_w, &check_h);
+	if(!rgb_buffer) return;
+
+	suboffset = 3 * 48 * ( (subimage & 7) + WEBP_SIZE * ((subimage >> 4) & 7) ); 
+	if (check_w * check_h == 48*48) {
+		for (j = 0; j < 48; j++)
+			memcpy(image + suboffset + (3 * WEBP_SIZE * j), rgb_buffer + 48*3*j, 48*3 );
+		flrgb->uncache();
+		box->redraw();
+	}
+	// rgb_buffer is "const uint8_t *", even though we have to "free" it here
+	free((uint8_t *)rgb_buffer);
+}
+
 void ssdv_rx::put_byte(uint8_t byte, int lost)
 {
 	int i;
 	char msg[200], callsign[10];
 	uint8_t webpimage[256];
 	
-	/* If more than 32 bytes where lost clear the buffer */
+	/* If more than 32 bytes were lost clear the buffer */
 	if(lost > 32) clear_buffer();
 	
 	/* Fill in the lost bytes */
@@ -411,13 +451,18 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 				callsign, b[6], b[7] );
 		ReceiveText->addstr(msg, FTextBase::QSY);
 
-		/* no embedded viewer for WebP, save image for local use */
-		if(!progdefaults.ssdv_save_image) return;
+		/* Embedded Viewer */
+		ssdv_rx::show_webp(webpimage, b[7]);
+		flreceived->copy_label(callsign);
 
-		/* filename could include packet checksum for disambiguation */
+		/* Save image for local use and/or exit*/
+		if(!progdefaults.ssdv_save_image) return;
+		if(progdefaults.ssdv_save_dir.empty()) return;
+
+		/* filename could include packet checksum or timestamp for disambiguation */
 		FILE *fout;
-		//savedir = (progdefaults.ssdv_save_dir.empty() ? "." : progdefaults.ssdv_save_dir.c_str());
-		snprintf(msg, 30, "/tmp/%s_%02x.%02x.webp", callsign, b[6], b[7] );
+		snprintf(msg, 30, "%s/%s_%02x.%02x.webp", progdefaults.ssdv_save_dir.c_str(),
+					callsign, b[6], b[7] );
 		fout = fopen(msg, "wb");
 		if (fout)
 		{

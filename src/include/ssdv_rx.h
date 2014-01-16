@@ -64,6 +64,7 @@ private:
 	void upload_packet(int fixes);
 	void save_image(uint8_t *jpeg, size_t length);
 	void render_image(uint8_t *jpeg, size_t length);
+	void show_webp(const uint8_t *webpimage, char subimage);
 	
 public:
 	ssdv_rx(int w, int h, const char *title);
