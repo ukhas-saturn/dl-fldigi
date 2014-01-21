@@ -5,7 +5,6 @@
 #include <setjmp.h>
 #include "ssdv_rx.h"
 
-#include <webp/decode.h>
 #include <curl/curl.h>
 
 /* For put_status() */
@@ -13,6 +12,10 @@
 
 /* For progdefaults */
 #include "configuration.h"
+
+#if HAVE_LIBWEBP
+#include <webp/decode.h>
+#endif
 
 /* For online() getter */
 #include "dl_fldigi/dl_fldigi.h"
@@ -386,10 +389,12 @@ void ssdv_rx::upload_packet(int fixes)
 /* Use embedded viewer to recompose webp packets (each one is 48x48 pixels).
  * Format allows 16x16 image blocks, current viewer wraps at 8x8 (384x384 pixels)
  * Overlay new images on top of old as packets arrive
- * TODO: make libwebp optional at compile time */
+ * TL;DR: Little practical use, but works as intended */
+
 #define WEBP_SIZE (48 * 8)
 void ssdv_rx::show_webp(const uint8_t *webpimage, char subimage)
 {
+#if HAVE_LIBWEBP
 	int j, check_w, check_h, suboffset;
 	const uint8_t *rgb_buffer;
 	// First time only, setup window 
@@ -420,6 +425,7 @@ void ssdv_rx::show_webp(const uint8_t *webpimage, char subimage)
 	}
 	// rgb_buffer is "const uint8_t *", even though we have to "free" it here
 	free((uint8_t *)rgb_buffer);
+#endif
 }
 
 void ssdv_rx::put_byte(uint8_t byte, int lost)
