@@ -262,6 +262,7 @@ int SoundBase::Playback(bool val)
 	}
 	const char* fname;
 	int format;
+	progdefaults.loop_playback = fl_choice2(_("Playback continuous loop?"), _("No"), _("Yes"), NULL);
 	get_file_params("playback.wav", &fname, &format);
 	if (!fname)
 		return -1;
@@ -302,7 +303,7 @@ play_info.seekable);
 	src_set_ratio(play_src_state, play_src_data->src_ratio);
 LOG_INFO("src ratio %f", play_src_data->src_ratio);
 
-	progdefaults.loop_playback = fl_choice2(_("Playback continuous loop?"), _("No"), _("Yes"), NULL);
+	//progdefaults.loop_playback = fl_choice2(_("Playback continuous loop?"), _("No"), _("Yes"), NULL);
 
 	playback = true;
 	new_playback = true;
@@ -2082,11 +2083,12 @@ size_t SoundNull::Write_stereo(float* bufleft, float* bufright, size_t count)
 
 size_t SoundNull::Read(float *buf, size_t count)
 {
+	size_t actual = count;
 #if USE_SNDFILE
 	if (playback) {
-		read_file(ifPlayback, buf, count);
+		actual = read_file(ifPlayback, buf, count);
 		if (progdefaults.EnableMixer)
-			for (size_t i = 0; i < count; i++)
+			for (size_t i = 0; i < actual; i++)
 				buf[i] *= progStatus.RcvMixer;
 	}
 	else
@@ -2096,9 +2098,11 @@ size_t SoundNull::Read(float *buf, size_t count)
 	if (capture)
 		write_file(ofCapture, buf, count);
 #endif
+	// TODO: playback speed should depend on realtime, not padding
+	// allow full delay if pipe is empty, short delay for slow CPUs
 	if (!bHighSpeed)
-		MilliSleep((long)ceil((1e3 * count) / sample_frequency));
+		MilliSleep((long)ceil((count * ( (actual<count)? 1000 : 600) )/ sample_frequency));
 
-	return count;
+	return actual;
 
 }
