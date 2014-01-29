@@ -2935,7 +2935,7 @@ bool clean_exit(bool ask) {
 		LOG_ERROR("trx in unexpected state %d", trx_state);
 		exit(1);
 	}
-	while (trx_state != STATE_ENDED) {
+	if (trx_state != STATE_ENDED) {
 		REQ_FLUSH(GET_THREAD_ID());
 		Fl::wait();
 	}
