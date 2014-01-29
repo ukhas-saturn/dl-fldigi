@@ -155,7 +155,7 @@ class NavtexCatalog : public RecordLoader< NavtexCatalog >
 	static float DistToStationName( const std::string & msg, const std::string & pattern ) {
 		std::stringstream strm( msg );
 		/// Any big number is OK, if bigger than any string length.
-		float currDist = 1.7976931348623157e+308; // DBL_MAX ;
+		float currDist = 1e37; // DBL_MAX == FLT_MAX;
 		typedef std::istream_iterator<std::string> StrmIterStr ;
 		for( StrmIterStr itStrm( strm ); itStrm != StrmIterStr(); ++itStrm ) {
 			const std::string tmp = *itStrm ;

@@ -85,9 +85,9 @@ LOG_FILE_SOURCE(debug::LOG_RPC);
 using namespace std;
 using namespace XmlRpc;
 
-/// Not defined the usual way on Mingw
+/// Standard def, DBL_MAX == FLT_MAX
 #ifndef DBL_MAX
-#define DBL_MAX 1.7976931348623157e+308
+#define DBL_MAX 1e37
 #endif
 
 namespace xmlrpc_c
