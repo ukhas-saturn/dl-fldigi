@@ -88,7 +88,7 @@ cRsId::cRsId()
 
 	reset();
 
-	rsfft = new g_fft<rs_fft_type>(RSID_ARRAY_SIZE);
+	rsfft = new p_fft(RSID_ARRAY_SIZE);
 
 	memset(fftwindow, 0, sizeof(fftwindow));
 

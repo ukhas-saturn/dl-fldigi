@@ -48,7 +48,7 @@
 #include "ringbuffer.h"
 #include "globals.h"
 #include "modem.h"
-#include "gfft.h"
+#include "pfft.h"
 
 #define RSID_SAMPLE_RATE 11025.0
 
@@ -109,7 +109,7 @@ private:
 	rs_cpx_type		aFFTcmplx[RSID_ARRAY_SIZE];
 	rs_fft_type		aFFTAmpl[RSID_FFT_SIZE];
 
-	g_fft<rs_fft_type>		*rsfft;
+	p_fft			*rsfft;
 
 	bool	bPrevTimeSliceValid;
 	int		iPrevDistance;

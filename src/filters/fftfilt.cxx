@@ -50,13 +50,10 @@
 // create forward and reverse FFTs
 //------------------------------------------------------------------------------
 
-// probably only need a single instance of g_fft !!
-// use for both forward and reverse
-
 void fftfilt::init_filter()
 {
 	flen2 = flen >> 1;
-	fft			= new g_fft<float>(flen);
+	fft		= new p_fft(flen);
 
 	filter		= new cmplx[flen];
 	timedata	= new cmplx[flen];
@@ -136,7 +133,8 @@ void fftfilt::create_filter(float f1, float f2)
 	for (int i = 0; i < flen2; i++)
 		ht[i] *= _blackman(i, flen2);
 
-// this may change since green fft is in place fft
+// TODO: this may change since green fft is in place fft
+// 	need zero copy system
 	memcpy(filter, ht, flen * sizeof(cmplx));
 
 // ht is flen complex points with imaginary all zero

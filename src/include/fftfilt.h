@@ -6,7 +6,7 @@
 #define	_FFTFILT_H
 
 #include "complex.h"
-#include "gfft.h"
+#include "pfft.h"
 
 //----------------------------------------------------------------------
 
@@ -16,8 +16,8 @@ enum {NONE, BLACKMAN, HAMMING, HANNING};
 protected:
 	int flen;
 	int flen2;
-	g_fft<float> *fft;
-	g_fft<float> *ift;
+	p_fft *fft;
+	p_fft *ift;
 	cmplx *ht;
 	cmplx *filter;
 	cmplx *timedata;

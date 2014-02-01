@@ -30,16 +30,16 @@
 //==============================================================================
 // Original Green C implementation written as a C++ template
 // Code has been tested for types
-//    g_fft<float>
-//    g_fft<float_t>
+//    g_fft<double>
+//    g_fft<double_t>
 //    g_fft<float>
 //    g_fft<float_t>
 // where the xxx types perform better than the xxx_t types
 // typical performance for 8192 point fft on an Intel(R) Pentium(R) Dual
 // CPU  E2180  @ 2.00GHz
 //      type      complex_fwd  real_fwd  
-//      float    0.407 ms     0.203 ms
-//      float_t  1.269 ms     0.593 ms
+//      double    0.407 ms     0.203 ms
+//      double_t  1.269 ms     0.593 ms
 //      float     0.385 ms     0.193 ms
 //      float_t   1.160 ms     0.627 ms
 //==============================================================================
@@ -131,8 +131,13 @@ public:
 		}
 	}
 
+#if 0
+/* Handle complexFFT on Pi GPU */
 	void ComplexFFT(std::complex<FFT_TYPE> *buf);
 	void InverseComplexFFT(std::complex<FFT_TYPE> *buf);
+#endif
+/* Other FFT functions still use software */
+
 	void RealFFT(std::complex<FFT_TYPE> *buf);
 	void InverseRealFFT(std::complex<FFT_TYPE> *buf);
 	FFT_TYPE GetInverseComplexFFTScale();
@@ -3306,6 +3311,7 @@ int g_fft<FFT_TYPE>::ConvertFFTSize(int N)
 	return 0;
 }
 
+#if 0
 //------------------------------------------------------------------------------
 // Compute in-place complex FFT
 // FFTsize: FFT length in samples
@@ -3335,6 +3341,8 @@ void g_fft<FFT_TYPE>::InverseComplexFFT(std::complex<FFT_TYPE> *buf)
 	FFT_TYPE *nbuf = static_cast<FFT_TYPE *>(ptr);
 	iffts1(nbuf, FFT_N, Utbl, BRLow);
 }
+#endif
+
 
 //------------------------------------------------------------------------------
 // Compute in-place real FFT

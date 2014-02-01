@@ -379,6 +379,7 @@ dl_fldigi_SOURCES += \
 	include/notifydialog.h \
 	include/record_browse.h \
 	include/olivia.h \
+	include/pfft.h \
 	include/pkg.h \
 	include/picture.h \
 	include/progress.h \
@@ -526,6 +527,7 @@ dl_fldigi_SOURCES += \
 	navtex/navtex.cxx \
 	include/navtex.h \
 	olivia/olivia.cxx \
+	pifft/pfft.cxx \
 	psk/psk.cxx \
 	psk/pskcoeff.cxx \
 	psk/pskvaricode.cxx \
