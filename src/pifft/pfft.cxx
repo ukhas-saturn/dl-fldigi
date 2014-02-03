@@ -164,23 +164,29 @@ void gpu_fft_release(struct GPU_FFT *info) {
 }
 
 void p_fft::GpuInit(){
+	fftf = 0;
+	fftr = 0;
 	gpu_fft_prepare( FFT_size, GPU_FFT_FWD, 1, &fftf); // call once for
 	gpu_fft_prepare( FFT_size, GPU_FFT_REV, 1, &fftr); // forward & back
+	// Should quit fldigi if fft fails to init
 }
 
 void p_fft::GpuDeinit(){
-	gpu_fft_release(fftf); // Videocore memory lost if not freed !
-	gpu_fft_release(fftr);
+	if (fftf) gpu_fft_release(fftf);
+	// Videocore memory lost if not freed !
+	if (fftr) gpu_fft_release(fftr);
 }
 
 void p_fft::ComplexFFT(std::complex<float> *buf){
-	memcpy(fftf->in, buf, FFT_size * 2 * sizeof(float) );
+	if (!fftf) return;
+	memcpy(fftf->in, buf, (sizeof(float) * 2) << FFT_size);
 	gpu_fft_execute(fftf);
-	memcpy(buf, fftf->in, FFT_size * 2 * sizeof(float) );
+	memcpy(buf, fftf->out, (sizeof(float) * 2) << FFT_size);
 }
 
 void p_fft::InverseComplexFFT(std::complex<float> *buf){
-	memcpy(fftr->in, buf, FFT_size * 2 * sizeof(float) );
+	if (!fftr) return;
+	memcpy(fftr->in, buf, (sizeof(float) * 2) << FFT_size);
 	gpu_fft_execute(fftr);
-	memcpy(buf, fftr->in, FFT_size * 2 * sizeof(float) );
+	memcpy(buf, fftr->out, (sizeof(float) * 2) << FFT_size);
 }

@@ -2101,7 +2101,7 @@ size_t SoundNull::Read(float *buf, size_t count)
 	// TODO: playback speed should depend on realtime, not padding
 	// allow full delay if pipe is empty, short delay for slow CPUs
 	if (!bHighSpeed)
-		MilliSleep((long)ceil((count * ( (actual<count)? 1000 : 600) )/ sample_frequency));
+		MilliSleep((long)ceil((count * ( (actual<count)? 1000 : 200) )/ sample_frequency));
 
 	return actual;
 
