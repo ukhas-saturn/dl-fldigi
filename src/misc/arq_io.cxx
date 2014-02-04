@@ -838,6 +838,7 @@ void arq_init()
 
 	txstring.clear();
 
+#ifdef ARQ_RACE_ON_EXIT_FIX
 	if (!ARQ_SOCKET_Server::start( progdefaults.arq_address.c_str(), progdefaults.arq_port.c_str() ))
 		return;
 
@@ -847,6 +848,7 @@ void arq_init()
 	}
 
 	arq_enabled = true;
+#endif
 }
 
 void arq_close(void)
