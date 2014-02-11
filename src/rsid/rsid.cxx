@@ -88,7 +88,7 @@ cRsId::cRsId()
 
 	reset();
 
-	rsfft = new p_fft(RSID_ARRAY_SIZE);
+	rsfft = new p_fft(RSID_ARRAY_SIZE, 1);
 
 	memset(fftwindow, 0, sizeof(fftwindow));
 
@@ -297,7 +297,7 @@ void cRsId::search(void)
 			aFFTcmplx[i] = cmplx(aInputSamples[i], 0);
 	}
 
-	rsfft->ComplexFFT(aFFTcmplx);
+	rsfft->ComplexFFT(aFFTcmplx,aFFTcmplx);
 
 	memset(aFFTAmpl, 0, sizeof(aFFTAmpl));
 

@@ -50,24 +50,24 @@
 // create forward and reverse FFTs
 //------------------------------------------------------------------------------
 
-void fftfilt::init_filter()
+void fftfilt::init_filter(int jobs)
 {
 	flen2 = flen >> 1;
-	fft		= new p_fft(flen);
+	fft		= new p_fft(flen, jobs);
 
-	filter		= new cmplx[flen];
-	timedata	= new cmplx[flen];
-	freqdata	= new cmplx[flen];
-	output		= new cmplx[flen];
-	ovlbuf		= new cmplx[flen2];
-	ht			= new cmplx[flen];
+	filter		= new cmplx[flen*jobs];
+	timedata	= new cmplx[flen*jobs];
+	freqdata	= new cmplx[flen*jobs];
+	output		= new cmplx[flen*jobs];
+	ovlbuf		= new cmplx[flen2*jobs];
+	ht		= new cmplx[flen*jobs];
 
-	memset(filter, 0, flen * sizeof(cmplx));
-	memset(timedata, 0, flen * sizeof(cmplx));
-	memset(freqdata, 0, flen * sizeof(cmplx));
-	memset(output, 0, flen * sizeof(cmplx));
-	memset(ovlbuf, 0, flen2 * sizeof(cmplx));
-	memset(ht, 0, flen * sizeof(cmplx));
+	memset(filter, 0, jobs * flen * sizeof(cmplx));
+	memset(timedata, 0, jobs * flen * sizeof(cmplx));
+	memset(freqdata, 0, jobs * flen * sizeof(cmplx));
+	memset(output, 0, jobs * flen * sizeof(cmplx));
+	memset(ovlbuf, 0, jobs * flen2 * sizeof(cmplx));
+	memset(ht, 0, jobs * flen * sizeof(cmplx));
 
 	inptr = 0;
 }
@@ -79,10 +79,10 @@ void fftfilt::init_filter()
 // f1 == 0 ==> low pass filter
 // f2 == 0 ==> high pass filter
 //------------------------------------------------------------------------------
-fftfilt::fftfilt(float f1, float f2, int len)
+fftfilt::fftfilt(float f1, float f2, int len, int jobs)
 {
 	flen	= len;
-	init_filter();
+	init_filter( (2==jobs)? 2:1 );
 	create_filter(f1, f2);
 }
 
@@ -92,7 +92,7 @@ fftfilt::fftfilt(float f1, float f2, int len)
 fftfilt::fftfilt(float f, int len)
 {
 	flen	= len;
-	init_filter();
+	init_filter( 1 );
 	create_lpf(f);
 }
 
@@ -133,17 +133,12 @@ void fftfilt::create_filter(float f1, float f2)
 	for (int i = 0; i < flen2; i++)
 		ht[i] *= _blackman(i, flen2);
 
-// TODO: this may change since green fft is in place fft
-// 	need zero copy system
-	memcpy(filter, ht, flen * sizeof(cmplx));
-
 // ht is flen complex points with imaginary all zero
 // first half describes h(t), second half all zeros
 // perform the cmplx forward fft to obtain H(w)
 // filter is flen/2 complex values
 
-	fft->ComplexFFT(filter);
-//	fft->transform(ht, filter);
+	fft->ComplexFFT(ht, filter);
 
 // normalize the output filter for unity gain
 	float scale = 0, mag;
@@ -156,34 +151,34 @@ void fftfilt::create_filter(float f1, float f2)
 			filter[i] /= scale;
 	}
 
-// perform the reverse fft to obtain h(t)
-// for testing
-// uncomment to obtain filter characteristics
-/*
-	cmplx *revht = new cmplx[flen];
-	memcpy(revht, filter, flen * sizeof(cmplx));
-
-	fft->InverseComplexFFT(revht);
-
-	std::fstream fspec;
-	fspec.open("fspec.csv", std::ios::out);
-	fspec << "i,imp.re,imp.im,filt.re,filt.im,filt.abs,revimp.re,revimp.im\n";
-	for (int i = 0; i < flen2; i++)
-		fspec
-			<< i << "," << ht[i].real() << "," << ht[i].imag() << ","
-			<< filter[i].real() << "," << filter[i].imag() << ","
-			<< abs(filter[i]) << ","
-			<< revht[i].real() << "," << revht[i].imag() << ","
-			<< std::endl;
-	fspec.close();
-	delete [] revht;
-*/
-	pass = 2;
 }
 
 /*
  * Filter with fast convolution (overlap-add algorithm).
+ * Dual version halves Pi GPU latency, almost doubles speed
  */
+
+int fftfilt::rundual(const cmplx &in1, const cmplx &in2, cmplx **out1, cmplx **out2)
+{
+	timedata[inptr]  = in1;
+	timedata[inptr++] = in2;
+	if (inptr < flen2) return 0;
+	fft->ComplexFFT(timedata, freqdata);
+	for (int i = 0; i < flen*2; i++) freqdata[i] *= filter[i];
+	fft->InverseComplexFFT(freqdata, output);
+	for (int i = 0; i < flen2; i++) {
+		output[i] += ovlbuf[i];
+		ovlbuf[i] = output[i+flen2];
+		output[flen+i] += ovlbuf[flen2+i];
+		ovlbuf[flen2+i] = output[flen+i+flen2];
+	}
+
+	*out1 = output;
+	*out2 = &output[flen];
+
+	inptr = 0;
+	return flen2;
+}
 
 int fftfilt::run(const cmplx & in, cmplx **out)
 {
@@ -192,32 +187,29 @@ int fftfilt::run(const cmplx & in, cmplx **out)
 
 	if (inptr < flen2)
 		return 0;
-	if (pass) --pass; // filter output is not stable until 2 passes
 
 // FFT transpose to the frequency domain
-	memcpy(freqdata, timedata, flen * sizeof(cmplx));
-	fft->ComplexFFT(freqdata);
+//	memcpy(freqdata, timedata, flen * sizeof(cmplx));
+	fft->ComplexFFT(timedata, freqdata);
 
 // multiply with the filter shape
 	for (int i = 0; i < flen; i++)
 		freqdata[i] *= filter[i];
 
 // transform back to time domain
-	fft->InverseComplexFFT(freqdata);
+	fft->InverseComplexFFT(freqdata, output);
 
 // overlap and add
 // save the second half for overlapping next inverse FFT
 	for (int i = 0; i < flen2; i++) {
-		output[i] = ovlbuf[i] + freqdata[i];
-		ovlbuf[i] = freqdata[i+flen2];
+		output[i] += ovlbuf[i];
+		ovlbuf[i] = output[i+flen2];
 	}
 
 // clear inbuf pointer
 	inptr = 0;
 
 // signal the caller there is flen/2 samples ready
-	if (pass) return 0;
-
 	*out = output;
 	return flen2;
 }
@@ -226,32 +218,5 @@ int fftfilt::run(const cmplx & in, cmplx **out)
 // rtty filter
 //------------------------------------------------------------------------------
 
-//bool print_filter = true; // flag to inhibit printing multiple copies
-
-void fftfilt::rtty_filter(float f)
-{
-// Raised cosine filter, adjusted to suit FFT arrangement
-	
-	float dht;
-
-	for( int i = 0; i < flen2; ++i ) {
-		float x = (float)i/(f * M_PI * (float)(flen2));	
-
-/* Literature suggests using matched filter OR raised cosine
- * Raised cosine gives better decodes for icarus recording
- * Matched filter has wider bandwidth, but less effective AFC tracking */
-
-		dht = (x > 1) ? 0.0 : 1.0 + cos( M_PI * x );
-//		dht = sinc( x );
-
-		filter[i].real() = dht*cos( (i+i+1) * -0.25 * M_PI);
-		filter[i].imag() = dht*sin( (i+i+1) * -0.25 * M_PI);
-
-		filter[(flen-1-i)].real() = filter[i].real();
-		filter[(flen-1-i)].imag() =-filter[i].imag();
-	}
-
-// start outputs after 2 full passes are complete
-	pass = 2;
-}
+void fftfilt::rtty_filter(float f){ create_filter(0,f); }
 

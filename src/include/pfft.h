@@ -11,10 +11,10 @@ private:
 	struct GPU_FFT_COMPLEX *base;
 	struct GPU_FFT *fftf;
 	struct GPU_FFT *fftr;
-	void GpuInit();
+	void GpuInit(int jobs);
 	void GpuDeinit();
 public:
-        p_fft(int M = 1024) {
+        p_fft(int M, int jobs) {
 		FFT_size = 8;
                 if (M < 256) M = 256;
                 if (M > 65536) M = 65536;
@@ -22,18 +22,14 @@ public:
 			M >>= 1;
                 	FFT_size++;
 		}
-		GpuInit();
-		//gpu_fft_prepare( FFT_size, GPU_FFT_FWD, 1, &fftf);
-		//gpu_fft_prepare( FFT_size, GPU_FFT_REV, 1, &fftr);
+		GpuInit(jobs);
 	}
         ~p_fft() {
 		GpuDeinit();
-		//gpu_fft_release(fftf);
-		//gpu_fft_release(fftr);
         }
 
-        void ComplexFFT(cmplx *buf);
-        void InverseComplexFFT(cmplx *buf);
+        void ComplexFFT(cmplx *in, cmplx *out);
+        void InverseComplexFFT(cmplx *in, cmplx *out);
 };
 
 #endif

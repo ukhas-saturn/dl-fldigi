@@ -196,20 +196,17 @@ void rtty::reset_filters()
     printf("reseting Filter for Baud %f, %i\n", rtty_baud, samplerate);  // print dot length
 	int filter_length = 1024;
 
-    
         if (mark_filt) {
-            mark_filt->rtty_filter(rtty_baud/samplerate);
+            mark_filt->create_filter(0, rtty_baud/samplerate);
         } else {
             mark_filt = new fftfilt(rtty_baud/samplerate, filter_length);
-            mark_filt->rtty_filter(rtty_baud/samplerate);
-         }
+        }
 
         if (space_filt) {
-            space_filt->rtty_filter(rtty_baud/samplerate);
+            space_filt->create_filter(0, rtty_baud/samplerate);
         } else {
             space_filt = new fftfilt(rtty_baud/samplerate, filter_length);
-            space_filt->rtty_filter(rtty_baud/samplerate);
-         }
+        }
 }
 
 void rtty::restart()

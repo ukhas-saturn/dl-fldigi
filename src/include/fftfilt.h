@@ -37,15 +37,16 @@ protected:
 				 0.50 * cos(2.0 * M_PI * i / len) + 
 				 0.08 * cos(4.0 * M_PI * i / len));
 	}
-	void init_filter();
+	void init_filter(int jobs);
 
 public:
-	fftfilt(float f1, float f2, int len);
+	fftfilt(float f1, float f2, int len, int jobs=1);
 	fftfilt(float f, int len);
 	~fftfilt();
 // f1 < f2 ==> bandpass
 // f1 > f2 ==> band reject
 	void create_filter(float f1, float f2);
+
 	void create_lpf(float f) {
 		create_filter(0, f);
 	}
@@ -55,6 +56,7 @@ public:
 	void rtty_filter(float);
 
 	int run(const cmplx& in, cmplx **out);
+	int rundual(const cmplx& in1, const cmplx& in2, cmplx **out1, cmplx **out2);
 };
 
 #endif
