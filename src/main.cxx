@@ -199,13 +199,7 @@ static void checkdirectories(void);
 static void arg_error(const char* name, const char* arg, bool missing);
 static void fatal_error(string);
 
-// TODO: find out why fldigi crashes on OS X if the wizard window is
-// shown before fldigi_main.
-#ifndef __APPLE__
-#  define SHOW_WIZARD_BEFORE_MAIN_WINDOW 1
-#else
 #  define SHOW_WIZARD_BEFORE_MAIN_WINDOW 0
-#endif
 
 void start_process(string executable)
 {
@@ -271,7 +265,7 @@ static void auto_start()
 		start_process(progdefaults.auto_prog3_pathname);
 }
 
-// these functions are all started after Fl::run() is executing
+// These functions are all started after Fl::run() is executing
 void delayed_startup(void *)
 {
 
@@ -279,24 +273,21 @@ void delayed_startup(void *)
 
 	arq_init();
 
-#ifdef __WIN32__
-	if (progdefaults.auto_talk) open_talker();
-#else
-	grpTalker->hide();
-#endif
+//	grpTalker->hide();
 
 	XML_RPC_Server::start(progdefaults.xmlrpc_address.c_str(), progdefaults.xmlrpc_port.c_str());
 
 	notify_start();
 
-	if (progdefaults.usepskrep)
-		if (!pskrep_start())
-			LOG_ERROR("Could not start PSK reporter: %s", pskrep_error());
+//	if (progdefaults.usepskrep)
+//		if (!pskrep_start())
+//			LOG_ERROR("Could not start PSK reporter: %s", pskrep_error());
 
 	auto_start();
 
-	if (progdefaults.check_for_updates)
-		cb_mnuCheckUpdate((Fl_Widget *)0, NULL);
+//
+//	if (progdefaults.check_for_updates)
+//		cb_mnuCheckUpdate((Fl_Widget *)0, NULL);
 
 }
 
@@ -599,10 +590,9 @@ int main(int argc, char ** argv)
 		show_wizard();
 #endif
 
-	Fl::add_timeout(.05, delayed_startup);
-
 	dl_fldigi::ready(bHAB);
 
+	Fl::add_timeout(0.15, delayed_startup);
 	int ret = Fl::run();
 
 	return ret;

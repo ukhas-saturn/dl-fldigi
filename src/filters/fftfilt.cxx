@@ -155,7 +155,10 @@ void fftfilt::create_filter(float f1, float f2)
 
 /*
  * Filter with fast convolution (overlap-add algorithm).
+ *
  * Dual version halves Pi GPU latency, almost doubles speed
+ * - draft code only. With hardware acceleration RTTY is <1% cpu for FFT
+ *  so further improvements are less signficant.
  */
 
 int fftfilt::rundual(const cmplx &in1, const cmplx &in2, cmplx **out1, cmplx **out2)
@@ -164,7 +167,10 @@ int fftfilt::rundual(const cmplx &in1, const cmplx &in2, cmplx **out1, cmplx **o
 	timedata[inptr++] = in2;
 	if (inptr < flen2) return 0;
 	fft->ComplexFFT(timedata, freqdata);
-	for (int i = 0; i < flen*2; i++) freqdata[i] *= filter[i];
+	for (int i = 0; i < flen; i++) {
+		freqdata[i] *= filter[i];
+		freqdata[flen+i] *= filter[i];
+	}
 	fft->InverseComplexFFT(freqdata, output);
 	for (int i = 0; i < flen2; i++) {
 		output[i] += ovlbuf[i];
