@@ -184,10 +184,30 @@ void p_fft::ComplexFFT(cmplx *ibuf, cmplx *obuf){
 	memcpy(obuf, fftf->out, sizeof(cmplx) << FFT_size);
 }
 
+//dual version.
+void p_fft::ComplexFFT2(cmplx *ibuf, cmplx *obuf){
+	if (!fftf) return;
+	memcpy(fftf->in, ibuf, sizeof(cmplx) << FFT_size);
+	memcpy(fftf->in + fftf->step, ibuf + (1 << FFT_size), sizeof(cmplx) << FFT_size);
+	gpu_fft_execute(fftf);
+	memcpy(obuf, fftf->out, sizeof(cmplx) << FFT_size);
+	memcpy(obuf + (1 << FFT_size), fftf->out + fftf->step, sizeof(cmplx) << FFT_size);
+}
+
 void p_fft::InverseComplexFFT(cmplx *ibuf, cmplx *obuf){
 	if (!fftr) return;
 	memcpy(fftr->in, ibuf, sizeof(cmplx) << FFT_size);
 	gpu_fft_execute(fftr);
 	memcpy(obuf, fftr->out, sizeof(cmplx) << FFT_size);
+}
+
+//dual version
+void p_fft::InverseComplexFFT2(cmplx *ibuf, cmplx *obuf){
+	if (!fftr) return;
+	memcpy(fftr->in, ibuf, sizeof(cmplx) << FFT_size);
+	memcpy(fftr->in + fftr->step, ibuf + (1 << FFT_size), sizeof(cmplx) << FFT_size);
+	gpu_fft_execute(fftr);
+	memcpy(obuf, fftr->out, sizeof(cmplx) << FFT_size);
+	memcpy(obuf + (1 << FFT_size), fftr->out + fftr->step, sizeof(cmplx) << FFT_size);
 }
 

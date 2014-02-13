@@ -49,8 +49,6 @@ using namespace std;
 
 #include "dl_fldigi/hbtint.h"
 
-#define FILTER_DEBUG 0
-
 view_rtty *rttyviewer = (view_rtty *)0;
 
 //=====================================================================
@@ -182,7 +180,6 @@ void rtty::init()
 rtty::~rtty()
 {
 	if (mark_filt) delete mark_filt;
-	if (space_filt) delete space_filt;
 	if (pipe) delete [] pipe;
 	if (dsppipe) delete [] dsppipe;
 	delete m_Osc1;
@@ -199,13 +196,7 @@ void rtty::reset_filters()
         if (mark_filt) {
             mark_filt->create_filter(0, rtty_baud/samplerate);
         } else {
-            mark_filt = new fftfilt(rtty_baud/samplerate, filter_length);
-        }
-
-        if (space_filt) {
-            space_filt->create_filter(0, rtty_baud/samplerate);
-        } else {
-            space_filt = new fftfilt(rtty_baud/samplerate, filter_length);
+            mark_filt = new fftfilt(0, rtty_baud/samplerate, filter_length, 2);
         }
 }
 
@@ -586,19 +577,6 @@ void rtty::searchUp()
 	}
 }
 
-#if FILTER_DEBUG == 1
-int snum = 0;
-int mnum = 0;
-#define ook(sp) \
-{ \
-	value = sin(2.0*M_PI*( \
-		(((sp / symbollen) % 2 == 0) ? (frequency + shift/2.0) : (frequency - shift/2.0))\
-		/samplerate)*sp); \
-}
-
-std::fstream ook_signal("ook_signal.csv", std::ios::out );
-#endif
-
 int rtty::rx_process(const float *buf, int len)
 {
 	const float *buffer = buf;
@@ -620,27 +598,12 @@ int rtty::rx_process(const float *buf, int len)
 	}
 
 	Metric();
-#if FILTER_DEBUG == 1
-float value;
-#endif
+
 	while (length-- > 0) {
 
 // Create analytic signal from sound card input samples
 
-#if FILTER_DEBUG == 1
-if (snum < 2 * filter_length) {
-	frequency = 1000.0;
-	ook(snum);
-//	z.real() = z.imag() = (snum/symbollen % 2 == 0) ? 1.0 : 0.0;
-	z = complex(value, value);
-	ook_signal << snum << "," << z.real() << ",";
-//	snum++;
-} else {
 	z = cmplx(*buffer, *buffer);
-}
-#else
-	z = cmplx(*buffer, *buffer);
-#endif
 	buffer++;
 
 // Mix it with the audio carrier frequency to create two baseband signals
@@ -651,16 +614,9 @@ if (snum < 2 * filter_length) {
 // same size outputs available for further processing
 
 		zmark = mixer(mark_phase, frequency + shift/2.0, z);
-		mark_filt->run(zmark, &zp_mark);
-
 		zspace = mixer(space_phase, frequency - shift/2.0, z);
-		n_out = space_filt->run(zspace, &zp_space);
-#if FILTER_DEBUG == 1
-if (snum < 2 * filter_length) {
-	ook_signal << abs(zmark) <<"\n";
-	snum++;
-}
-#endif
+		n_out = mark_filt->rundual(zmark, zspace, &zp_mark, &zp_space);
+
 		for (int i = 0; i < n_out; i++) {
 
 			mark_mag = abs(zp_mark[i]);
@@ -673,10 +629,6 @@ if (snum < 2 * filter_length) {
 						(space_mag > space_env) ? symbollen / 4 : symbollen * 16);
 			space_noise = decayavg (space_noise, space_mag,
 						(space_mag < space_noise) ? symbollen / 4 : symbollen * 48);
-#if FILTER_DEBUG == 1
-if (mnum < 2 * filter_length)
-	ook_signal << ",,," << mnum++ + filter_length / 2 << "," << mark_mag << "," << space_mag << "\n";
-#endif
 			noise_floor = min(space_noise, mark_noise);
 
 // clipped if clipped decoder selected
@@ -1267,7 +1219,7 @@ void SymbolShaper::Preset(float baud, float sr)
 // set up the new sinc-table based on the new parameters --------------
 
     //long double sum = 0.0;
-    float sum = 0.0;
+    double sum = 0.0;
 
     for( int x=0; x<m_table_size; ++x ) {
         int const offset = m_table_size/2;

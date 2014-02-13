@@ -29,7 +29,9 @@ public:
         }
 
         void ComplexFFT(cmplx *in, cmplx *out);
+	void ComplexFFT2(cmplx *in, cmplx *out);
         void InverseComplexFFT(cmplx *in, cmplx *out);
+	void InverseComplexFFT2(cmplx *in, cmplx *out);
 };
 
 #endif

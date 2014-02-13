@@ -55,19 +55,19 @@ void fftfilt::init_filter(int jobs)
 	flen2 = flen >> 1;
 	fft		= new p_fft(flen, jobs);
 
-	filter		= new cmplx[flen*jobs];
+	filter		= new cmplx[flen];
 	timedata	= new cmplx[flen*jobs];
 	freqdata	= new cmplx[flen*jobs];
 	output		= new cmplx[flen*jobs];
 	ovlbuf		= new cmplx[flen2*jobs];
-	ht		= new cmplx[flen*jobs];
+	ht		= new cmplx[flen];
 
-	memset(filter, 0, jobs * flen * sizeof(cmplx));
+	memset(filter, 0, flen * sizeof(cmplx));
 	memset(timedata, 0, jobs * flen * sizeof(cmplx));
 	memset(freqdata, 0, jobs * flen * sizeof(cmplx));
 	memset(output, 0, jobs * flen * sizeof(cmplx));
 	memset(ovlbuf, 0, jobs * flen2 * sizeof(cmplx));
-	memset(ht, 0, jobs * flen * sizeof(cmplx));
+	memset(ht, 0, flen * sizeof(cmplx));
 
 	inptr = 0;
 }
@@ -157,21 +157,21 @@ void fftfilt::create_filter(float f1, float f2)
  * Filter with fast convolution (overlap-add algorithm).
  *
  * Dual version halves Pi GPU latency, almost doubles speed
- * - draft code only. With hardware acceleration RTTY is <1% cpu for FFT
+ * - With hardware acceleration RTTY is <1% cpu for FFT
  *  so further improvements are less signficant.
  */
 
 int fftfilt::rundual(const cmplx &in1, const cmplx &in2, cmplx **out1, cmplx **out2)
 {
 	timedata[inptr]  = in1;
-	timedata[inptr++] = in2;
+	timedata[flen + inptr++] = in2;
 	if (inptr < flen2) return 0;
-	fft->ComplexFFT(timedata, freqdata);
+	fft->ComplexFFT2(timedata, freqdata);
 	for (int i = 0; i < flen; i++) {
 		freqdata[i] *= filter[i];
 		freqdata[flen+i] *= filter[i];
 	}
-	fft->InverseComplexFFT(freqdata, output);
+	fft->InverseComplexFFT2(freqdata, output);
 	for (int i = 0; i < flen2; i++) {
 		output[i] += ovlbuf[i];
 		ovlbuf[i] = output[i+flen2];
