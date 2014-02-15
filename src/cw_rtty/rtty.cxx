@@ -588,9 +588,11 @@ int rtty::rx_process(const float *buf, int len)
 	int n_out = 0;
 	static int bitcount = 5 * nbits * symbollen;
 
+/* This sucks bigtime. TODO: find out what it does
 	if ( !progdefaults.report_when_visible ||
 		 dlgViewer->visible() || progStatus.show_channels )
 		if (!bHistory && rttyviewer) rttyviewer->rx_process(buf, len);
+*/
 
 	if (progStatus.rtty_filter_changed) {
 		progStatus.rtty_filter_changed = false;
