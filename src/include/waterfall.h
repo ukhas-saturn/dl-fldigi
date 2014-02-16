@@ -30,7 +30,8 @@
 #include <FL/Fl_Counter.H>
 #include <FL/Fl_Box.H>
 
-#include "gfft.h"
+#include "complex.h"
+#include "pfft.h"
 #include "fldigi-config.h"
 #include "digiscope.h"
 #include "flslider2.h"
@@ -219,7 +220,7 @@ private:
 	float		*circbuff;
 	int			ptrCB;
 	wf_fft_type	*pwr;
-	g_fft<wf_fft_type> *wfft;
+	p_fft	*wfft;
 	int     prefilter;
 
 

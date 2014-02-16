@@ -135,7 +135,7 @@ WFdisp::WFdisp (int x0, int y0, int w0, int h0, char *lbl) :
 	tmp_fft_db		= new short int[image_area];
 	circbuff		= new float[FFT_LEN];
 	wfbuf			= new wf_cpx_type[FFT_LEN];
-	wfft			= new g_fft<wf_fft_type>(FFT_LEN);
+	wfft			= new p_fft(FFT_LEN, 1);
 	fftwindow		= new float[FFT_LEN];
 	setPrefilter(progdefaults.wfPreFilter);
 
@@ -505,21 +505,18 @@ void WFdisp::processFFT() {
 
 	if (--dispcnt == 0) {
 		static const int log2disp100 = log2disp(-100);
-		float vscale = 2.0 / FFT_LEN;
+		float vscale = 4.0 / FFT_LEN;
+		float point;
 
 		memset(wfbuf, 0, FFT_LEN * sizeof(*wfbuf));
-		void *pv = static_cast<void*>(wfbuf);
-		wf_fft_type *pbuf = static_cast<wf_fft_type*>(pv);
 
-		int latency = progdefaults.wf_latency;
-		if (latency < 1) latency = 1;
-		if (latency > 16) latency = 16;
-		int nsamples = FFT_LEN * latency / 16;
-		vscale *= sqrt(16.0 / latency);
-		for (int i = 0; i < nsamples; i++)
-			pbuf[i] = fftwindow[i * 16 / latency] * circbuff[i] * vscale;
+		int nsamples = FFT_LEN >> 2;
+		for (int i = 0; i < nsamples; i++) {
+			point = fftwindow[i] * circbuff[i] * vscale;
+			wfbuf[i] = cmplx(point, point);
+		}
 
-		wfft->RealFFT(wfbuf);
+		wfft->ComplexFFT(wfbuf, wfbuf);
 
 		memset(pwr, 0, progdefaults.LowFreqCutoff * sizeof(wf_fft_type));
 		memset(&fft_db[ptrFFTbuff * IMAGE_WIDTH],
