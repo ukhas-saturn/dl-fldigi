@@ -2149,7 +2149,7 @@ int Fl_Text_Display_mod::position_style( int lineStartPos, int lineLen, int line
   IS_UTF8_ALIGNED2(buffer(), lineStartPos)
 
   Fl_Text_Buffer_mod * buf = mBuffer;
-  Fl_Text_Buffer_mod *styleBuf = mStyleBuffer;
+  //Fl_Text_Buffer_mod *styleBuf = mStyleBuffer;
   int pos, style = 0;
   
   if ( lineStartPos == -1 || buf == NULL )
@@ -2159,6 +2159,8 @@ int Fl_Text_Display_mod::position_style( int lineStartPos, int lineLen, int line
   
   if ( lineIndex >= lineLen )
     style = FILL_MASK;
+#if 0
+/*TODO: gprof suggests this is being called much more often than expected */
   else if ( styleBuf != NULL ) {
     style = ( unsigned char ) styleBuf->byte_at( pos );
     if (style == mUnfinishedStyle && mUnfinishedHighlightCB) {
@@ -2167,6 +2169,7 @@ int Fl_Text_Display_mod::position_style( int lineStartPos, int lineLen, int line
       style = (unsigned char) styleBuf->byte_at( pos);
     }
   }
+#endif
   if (buf->primary_selection()->includes(pos))
     style |= PRIMARY_MASK;
   if (buf->highlight_selection()->includes(pos))

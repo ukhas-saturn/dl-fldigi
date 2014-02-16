@@ -428,7 +428,7 @@ void Digiscope::draw()
 			case PHASE1:
 			case PHASE2:
 			case PHASE3:	draw_phase(); break;
-			case RTTY :		draw_rtty(); break;
+			case RTTY: /*draw_rtty();*/  break;
 			case XHAIRS :	draw_xy(); break;
 			case DOMDATA :	draw_scope(); break;
 			case BLANK : 

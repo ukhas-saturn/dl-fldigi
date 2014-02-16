@@ -449,6 +449,7 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 	
 	/* Test if this is a packet and is valid */
 	uint8_t *b = &buffer[bc];
+#if HAVE_LIBWEBP
 	if( 0 == ssdv_hook_webp(b, &erasures[bc], webpimage) ){
 		put_status("SSDV: Decoded WebP image packet!", 10);
 		//if (dl_fldigi::online()) upload_packet(b);
@@ -477,6 +478,7 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 		}
 		return;
 	}
+#endif
 	if(ssdv_dec_is_packet(b, &i, &erasures[bc]) != 0) return;
 	
 	/* Make a note of the number of errors */

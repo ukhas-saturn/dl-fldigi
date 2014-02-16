@@ -41,7 +41,6 @@ using namespace std;
 #include "confdialog.h"
 #include "configuration.h"
 #include "status.h"
-#include "digiscope.h"
 #include "trx.h"
 #include "debug.h"
 #include "synop.h"
@@ -696,6 +695,8 @@ int rtty::rx_process(const float *buf, int len)
 //				bit = v0 > 0;
 //			}
 
+#if 0
+/* Digiscope is a nice feature, but CPU usage is too high */
 // XY scope signal generation
 
 			if (progdefaults.true_scope) {
@@ -748,6 +749,7 @@ int rtty::rx_process(const float *buf, int len)
 // block-size.
 			xy_phase += (TWOPI * (128.0 / samplerate));
 // end XY signal generation
+#endif
 
 			mark_history[inp_ptr] = zp_mark[i];
 			space_history[inp_ptr] = zp_space[i];
@@ -764,7 +766,7 @@ int rtty::rx_process(const float *buf, int len)
 // either character or idle signal
 			if ( rx( reverse ? !bit : bit ) ) {
 				dspcnt = symbollen * (nbits + 2);
-				if (!bHighSpeed) Update_syncscope();
+				//if (!bHighSpeed) Update_syncscope();
 				clear_zdata = true;
 				bitcount = 5 * nbits * symbollen;
 				if (sigsearch) sigsearch--;
@@ -786,6 +788,7 @@ int rtty::rx_process(const float *buf, int len)
 			} else
 				if (bitcount) --bitcount;
 		}
+#if 0
 		if (!bHighSpeed) {
 			if (!bitcount) {
 				if (clear_zdata) {
@@ -799,6 +802,7 @@ int rtty::rx_process(const float *buf, int len)
 				showxy = symbollen;
 			}
 		}
+#endif
 	}
 	return 0;
 }
