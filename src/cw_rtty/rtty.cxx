@@ -580,7 +580,7 @@ int rtty::rx_process(const float *buf, int len)
 {
 	const float *buffer = buf;
 	int length = len;
-	static int showxy = symbollen;
+	//static int showxy = symbollen;
 
 	cmplx z, zmark, zspace, *zp_mark, *zp_space;
 

@@ -1,3 +1,18 @@
+// FFT library header for Raspberry Pi Hardware Acceleration
+// Copyright (C) 2013 Dave Freese, W1HKJ
+//               2014 John Greb
+//
+// This file is part of dl-fldigi.
+//
+// Fldigi is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
 #ifndef PI_FFT_H
 #define PI_FFT_H
