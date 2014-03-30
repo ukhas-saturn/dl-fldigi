@@ -1,6 +1,9 @@
-This is not free software. Hardware Acceleration for Raspberry Pi requires an external library that is not covered by the GPL. For convenience this has been included alongside the Fl-digi source code and modified under a seperate licence from Broadcom. The Broadcom Licence is not compatible with the GPL, so redistribution in Binary form is not acceptable. The GPU code will need to be compiled to a seperate executable file for compliance. Redistribution of Source needs to respect the distinction between FL-digi and the Broadcom library.
 
-The Fldigi Authors allow joint licencing by GPLv3 or the Lesser GPL, which is less restrictive.
+Hardware Acceleration for Raspberry Pi requires firmware that is not covered by the GPL. For convenience this has been included alongside the Fl-digi source code. The headers needed to load firmware are covered under a BSD licence from Broadcom.
+
+The Fldigi Authors allow joint licencing by GPLv3 or the Lesser GPL.
+
+Source code for the firmware cannot be released, but Andrew Holme has authorised reverse engineering: open source tools exist to disassemble, modify and reassemble the GPU FFT code, so it is available as Open Source.
 
 Copyright (c) 2012, Broadcom Europe Ltd.
 Copyright (c) 2013, Andrew Holme.

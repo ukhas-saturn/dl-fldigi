@@ -260,10 +260,14 @@ int SoundBase::Playback(bool val)
 		playback = false;
 		return 1;
 	}
-	const char* fname;
+	const char* fname = "/dev/stdin";
 	int format;
-	progdefaults.loop_playback = fl_choice2(_("Playback continuous loop?"), _("No"), _("Yes"), NULL);
-	get_file_params("playback.wav", &fname, &format);
+
+	if (!bPIPE) {
+		get_file_params("playback.wav", &fname, &format);
+		progdefaults.loop_playback = fl_choice2(_("Playback continuous loop?"), _("No"), _("Yes"), NULL);
+	} else bPIPE = false; // a wav file only starts once
+
 	if (!fname)
 		return -1;
 

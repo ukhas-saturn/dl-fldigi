@@ -129,6 +129,7 @@ extern Fl_Light_Button		*btnTxRSID;
 extern Fl_Light_Button		*btnTune;
 
 extern bool			bWF_only;
+extern bool			bPIPE;
 
 extern bool					bHAB;
 extern Fl_Group				*TopFrameHAB;

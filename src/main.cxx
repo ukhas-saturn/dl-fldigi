@@ -418,6 +418,7 @@ int main(int argc, char ** argv)
 		debug::stop();
 	}
 
+#if 0
 	LOG_INFO("appname: %s", appname.c_str());
 	if (NBEMSapps_dir)
 		LOG_INFO("%s present", test_file_name.c_str());
@@ -460,6 +461,7 @@ int main(int argc, char ** argv)
 	LOG_INFO("FLMSG_ICS_dir: %s", FLMSG_ICS_dir.c_str());
 	LOG_INFO("FLMSG_ICS_msg_dir: %s", FLMSG_ICS_msg_dir.c_str());
 	LOG_INFO("FLMSG_ICS_tmp_dir: %s", FLMSG_ICS_tmp_dir.c_str());
+#endif
 
 	bool have_config = progdefaults.readDefaultsXML();
 
@@ -745,6 +747,9 @@ void generate_option_help(void) {
 	     << "  --hab\n"
 	     << "    High Altitude Balloon Setup (dl-fldigi)\n\n"
 
+	     << "  --pipe\n"
+	     << "    Playback WAV file from unix pipe(in hab mode)\n\n"
+
 	     << "  --window-width PIXELS\n"
 	     << "    Set the window width\n\n"
 
@@ -856,7 +861,7 @@ int parse_args(int argc, char **argv, int& idx)
 
                OPT_FONT, OPT_WFALL_HEIGHT,
                OPT_WINDOW_WIDTH, OPT_WINDOW_HEIGHT, OPT_WFALL_ONLY,
-               OPT_HAB,
+               OPT_HAB, OPT_PIPE,
 #if USE_PORTAUDIO
                OPT_FRAMES_PER_BUFFER,
 #endif
@@ -906,6 +911,7 @@ int parse_args(int argc, char **argv, int& idx)
 		{ "wfall-only",    0, 0, OPT_WFALL_ONLY },
 		{ "hab",		   0, 0, OPT_HAB },
 		{ "wo",            0, 0, OPT_WFALL_ONLY },
+		{ "pipe",          0, 0, OPT_PIPE },
 
 #if USE_PORTAUDIO
 		{ "frames-per-buffer",1, 0, OPT_FRAMES_PER_BUFFER },
@@ -1099,6 +1105,8 @@ int parse_args(int argc, char **argv, int& idx)
 			bWF_only = true;
 			break;
 
+		case OPT_PIPE:
+			bPIPE = true;
 		case OPT_HAB:
 			bHAB = true;
 			break;

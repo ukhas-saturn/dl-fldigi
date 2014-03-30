@@ -160,6 +160,7 @@
 #include "dl_fldigi/hbtint.h"
 #include "dl_fldigi/update.h"
 bool bHAB = false;
+bool bPIPE = false;
 
 #define LOG_TO_FILE_MLABEL     _("Log all RX/TX text")
 #define RIGCONTROL_MLABEL      _("Rig control")
@@ -1397,6 +1398,7 @@ void init_modem_sync(trx_mode m, int f)
 	}
 
 	REQ_FLUSH(TRX_TID);
+	if (bPIPE && scard) scard->Playback(true);
 }
 
 void cb_init_mode(Fl_Widget *, void *mode)
