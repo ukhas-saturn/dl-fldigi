@@ -34,8 +34,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mailbox.h"
 #include "gpu_fft_shaders.h"
 
-#define GPU_FFT_MEM_FLG 0xC // cached=0xC; direct=0x4
-#define GPU_FFT_MEM_MAP 0x0 // cached=0x0; direct=0x20000000
+// Use uncached memory for concurrent OpenGl
+// https://github.com/raspberrypi/userland/commit/da728305f9eaf48d3d2feed5f34305809f81ed76
+#define GPU_FFT_MEM_FLG 0x4
+  // cached=0xC; direct=0x4
+#define GPU_FFT_MEM_MAP 0x20000000
+  // cached=0x0; direct=0x20000000
 
 typedef struct GPU_FFT_COMPLEX COMPLEX;
 
