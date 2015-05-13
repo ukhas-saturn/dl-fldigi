@@ -1,13 +1,26 @@
+// ----------------------------------------------------------------------------
 //
+// flxmlrpc Copyright (c) 2015 by W1HKJ, Dave Freese <iam_w1hkj@w1hkj.com>
+//    
 // XmlRpc++ Copyright (c) 2002-2008 by Chris Morley
 //
+// This file is part of fldigi
+//
+// flxmlrpc is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
 
 #include <config.h>
 
 #include "XmlRpcValue.h"
 #include "XmlRpcException.h"
 #include "XmlRpcUtil.h"
-#include "base64.h"
+#include "XmlRpcBase64.h"
 
 #include <iostream>
 #include <ostream>
@@ -461,12 +474,11 @@ namespace XmlRpc {
     if (sscanf(stime.c_str(),"%4d%2d%2dT%2d:%2d:%2d",&t.tm_year,&t.tm_mon,&t.tm_mday,&t.tm_hour,&t.tm_min,&t.tm_sec) != 6)
       return false;
 
-    t.tm_year -= 1900;    // 	years since 1900
-    t.tm_mon -= 1;        // 	months 0..11
     t.tm_isdst = -1;
     _type = TypeDateTime;
     _value.asTime = new struct tm(t);
     *offset += int(stime.length());
+
     return true;
   }
 
@@ -496,7 +508,7 @@ namespace XmlRpc {
 
     // convert from base64 to binary
     int iostatus = 0;
-	  base64<char> decoder;
+	  xmlrpc_base64<char> decoder;
     std::back_insert_iterator<BinaryData> ins = std::back_inserter(*(_value.asBinary));
 		decoder.get(asString.begin(), asString.end(), ins, iostatus);
 
@@ -510,9 +522,9 @@ namespace XmlRpc {
     // convert to base64
     std::vector<char> base64data;
     int iostatus = 0;
-    base64<char> encoder;
+    xmlrpc_base64<char> encoder;
     std::back_insert_iterator<std::vector<char> > ins = std::back_inserter(base64data);
-    encoder.put(_value.asBinary->begin(), _value.asBinary->end(), ins, iostatus, base64<>::crlf());
+    encoder.put(_value.asBinary->begin(), _value.asBinary->end(), ins, iostatus, xmlrpc_base64<>::crlf());
 
     // Wrap with xml
     std::string xml = "<value><base64>";
@@ -636,8 +648,8 @@ namespace XmlRpc {
         {
           int iostatus = 0;
           std::ostreambuf_iterator<char> out(os);
-          base64<char> encoder;
-          encoder.put(_value.asBinary->begin(), _value.asBinary->end(), out, iostatus, base64<>::crlf());
+          xmlrpc_base64<char> encoder;
+          encoder.put(_value.asBinary->begin(), _value.asBinary->end(), out, iostatus, xmlrpc_base64<>::crlf());
           break;
         }
       case TypeArray:

@@ -1,3 +1,26 @@
+<<<<<<< HEAD
+=======
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
+//
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
+
+>>>>>>> 8b9343684c181dacfffae03a89a1ac188e5aa0b1
 // Syntax: ELEM_(rsid_code, rsid_tag, fldigi_mode)
 // fldigi_mode is NUM_MODES if mode is not available in fldigi,
 // otherwise one of the tags defined in globals.h.
@@ -253,10 +276,28 @@ const int cRsId::rsid_ids_size1 = sizeof(rsid_ids_1)/sizeof(*rsid_ids_1) - 1;
         ELEM2_(681, DOMINOEX_88, MODE_DOMINOEX88)       \
                                                         \
         ELEM2_(687, MFSK31, MODE_MFSK31)                \
+<<<<<<< HEAD
         												\
         ELEM2_(1026, MFSK64L, MODE_MFSK64L)             \
         ELEM2_(1029, MFSK128L, MODE_MFSK128L)           \
                                                         \
+=======
+                                                        \
+        ELEM2_(1026, MFSK64L, MODE_MFSK64L)             \
+        ELEM2_(1029, MFSK128L, MODE_MFSK128L)           \
+                                                        \
+        ELEM2_(1066, PSK8P125, MODE_8PSK125)            \
+        ELEM2_(1071, PSK8P250, MODE_8PSK250)            \
+        ELEM2_(1076, PSK8P500, MODE_8PSK500)            \
+        ELEM2_(1047, PSK8P1000, MODE_8PSK1000)          \
+                                                        \
+        ELEM2_(1037, PSK8P125F, MODE_8PSK125F)          \
+        ELEM2_(1038, PSK8P250F, MODE_8PSK250F)          \
+        ELEM2_(1043, PSK8P500F, MODE_8PSK500F)          \
+        ELEM2_(1078, PSK8P1000F, MODE_8PSK1000F)        \
+        ELEM2_(1058, PSK8P1200F, MODE_8PSK1200F)        \
+                                                        \
+>>>>>>> 8b9343684c181dacfffae03a89a1ac188e5aa0b1
         ELEM2_(0, NONE2, NUM_MODES)
 
 #define ELEM2_(code_, tag_, mode_) RSID_ ## tag_ = code_,

@@ -48,8 +48,6 @@
 #include "confdialog.h"
 #include "status.h"
 
-#include "dl_fldigi/hbtint.h"
-
 LOG_FILE_SOURCE(debug::LOG_RIGCONTROL);
 
 using namespace std;
@@ -74,16 +72,20 @@ static void *rigCAT_loop(void *args);
 static unsigned char replybuff[RXBUFFSIZE+1];
 static unsigned char retbuf[3];
 
-bool sendCommand (string s, int retnbr)
+bool sendCommand (string s, int retnbr, int waitval)
 {
 	int numwrite = (int)s.length();
-	int readafter = progdefaults.RigCatWait;
-	int numread;
-	int retval;
+	int readafter = 0;
+	int numread = 0;
+	int retval = 0;
+
 	numread = retnbr;
-	if (progdefaults.RigCatECHO) numread += numwrite;
+
+	if (progdefaults.RigCatECHO)
+		numread += numwrite;
+
 	readafter =
-		progdefaults.RigCatWait + (int) ceilf (
+		waitval + (int) ceilf (
 			numread * (9 + progdefaults.RigCatStopbits) *
 			1000.0 / rigio.Baud() );
 
@@ -97,7 +99,16 @@ bool sendCommand (string s, int retnbr)
 
 	memset(replybuff, 0, RXBUFFSIZE + 1);
 	numread = 0;
-	MilliSleep( readafter );
+	while (readafter > 50) {
+		MilliSleep(50);
+		Fl::awake();
+		readafter -= 50;
+	}
+	if (readafter) {
+		MilliSleep(readafter);
+		Fl::awake();
+	}
+
 	while (numread < RXBUFFSIZE) {
 		memset(retbuf, 0, 2);
 		if (rigio.ReadBuffer(retbuf, 1) == 0) break;
@@ -306,7 +317,7 @@ long long fm_freqdata(DATA d, size_t p)
 	return fret;
 }
 
-long long rigCAT_getfreq(int retries, bool &failed)
+long long rigCAT_getfreq(int retries, bool &failed, int waitval)
 {
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
@@ -356,9 +367,20 @@ long long rigCAT_getfreq(int retries, bool &failed)
 //		for (int n = 0; n < progdefaults.RigCatRetries; n++) {
 		for (int n = 0; n < retries; n++) {
 			if (n && progdefaults.RigCatTimeout > 0)
-				MilliSleep(progdefaults.RigCatTimeout);
+			{
+				int timeout = progdefaults.RigCatTimeout;
+				while (timeout > 50) {
+					MilliSleep(50);
+					Fl::awake();
+					timeout -= 50;
+				}
+				if (timeout) {
+					MilliSleep(timeout);
+					Fl::awake();
+				}
+			}
 // send the command
-			if ( !sendCommand(strCmd, rTemp.size) ) {
+			if ( !sendCommand(strCmd, rTemp.size, waitval) ) {
 				LOG_VERBOSE("sendCommand failed");
 				goto retry_get_freq;
 			}
@@ -454,7 +476,7 @@ void rigCAT_setfreq(long long f)
 					MilliSleep(50);
 					guard_lock ser_guard( &rigCAT_mutex );
 					if (rigCAT_exit) return;
-					if (sendCommand(strCmd, rTemp.size)) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
 				}
 				return;
 			}
@@ -465,7 +487,7 @@ void rigCAT_setfreq(long long f)
 			MilliSleep(50);
 			guard_lock ser_guard( &rigCAT_mutex );
 			if (rigCAT_exit) return;
-			if (sendCommand(strCmd, 0)) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
 	if (progdefaults.RigCatVSP == false)
@@ -514,11 +536,22 @@ string rigCAT_getmode()
 		XMLIOS  rTemp = *preply;
 
 		for (int n = 0; n < progdefaults.RigCatRetries; n++) {
-			if (n && progdefaults.RigCatTimeout > 0)
-				MilliSleep(progdefaults.RigCatTimeout);
+			if (progdefaults.RigCatTimeout > 50)
+			{
+				int timeout = progdefaults.RigCatTimeout;
+				while (timeout > 50) {
+					MilliSleep(50);
+					Fl::awake();
+					timeout -= 50;
+				}
+				if (timeout) {
+					MilliSleep(timeout);
+					Fl::awake();
+				}
+			}
 			size_t p = 0, pData = 0;
 // send the command
-			if (!sendCommand(strCmd, rTemp.size)) goto retry_get_mode;
+			if (!sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) goto retry_get_mode;
 // check the pre data string
 			len = rTemp.str1.size();
 			if (len) {
@@ -632,7 +665,7 @@ void rigCAT_setmode(const string& md)
 					MilliSleep(50);
 					guard_lock ser_guard( &rigCAT_mutex );
 					if (rigCAT_exit) return;
-					if (sendCommand(strCmd, rTemp.size)) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
 				}
 				return;
 			}
@@ -643,7 +676,7 @@ void rigCAT_setmode(const string& md)
 			MilliSleep(50);
 			guard_lock ser_guard( &rigCAT_mutex );
 			if (rigCAT_exit) return;
-			if (sendCommand(strCmd, 0)) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
 	if (progdefaults.RigCatVSP == false)
@@ -690,13 +723,24 @@ string rigCAT_getwidth()
 
 		XMLIOS  rTemp = *preply;
 		for (int n = 0; n < progdefaults.RigCatRetries; n++) {
-			if (n && progdefaults.RigCatTimeout > 0)
-				MilliSleep(progdefaults.RigCatTimeout);
+			if (progdefaults.RigCatTimeout > 50)
+			{
+				int timeout = progdefaults.RigCatTimeout;
+				while (timeout > 50) {
+					MilliSleep(50);
+					Fl::awake();
+					timeout -= 50;
+				}
+				if (timeout) {
+					MilliSleep(timeout);
+					Fl::awake();
+				}
+			}
 
 			p = 0;
 			pData = 0;
 // send the command
-			if ( !sendCommand(strCmd, rTemp.size) ) goto retry_get_width;
+			if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) goto retry_get_width;
 // check the pre data string
 			len = rTemp.str1.size();
 			if (len) {
@@ -814,7 +858,7 @@ void rigCAT_setwidth(const string& w)
 					MilliSleep(50);
 					guard_lock ser_guard( &rigCAT_mutex );
 					if (rigCAT_exit) return;
-					if (sendCommand(strCmd, rTemp.size)) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
 				}
 			}
 			preply++;
@@ -824,7 +868,7 @@ void rigCAT_setwidth(const string& w)
 			MilliSleep(50);
 			guard_lock ser_guard( &rigCAT_mutex );
 			if (rigCAT_exit) return;
-			if (sendCommand(strCmd, 0)) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
 	LOG_VERBOSE("Retries failed");
@@ -869,7 +913,7 @@ void rigCAT_pttON()
 					MilliSleep(50);
 					guard_lock ser_guard( &rigCAT_mutex );
 					if (rigCAT_exit) return;
-					if (sendCommand(strCmd, rTemp.size)) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
 				}
 				return;
 			}
@@ -880,7 +924,7 @@ void rigCAT_pttON()
 			MilliSleep(50);
 			guard_lock ser_guard( &rigCAT_mutex );
 			if (rigCAT_exit) return;
-			if (sendCommand(strCmd, 0)) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
 	LOG_VERBOSE("Retries failed");
@@ -924,7 +968,7 @@ void rigCAT_pttOFF()
 					MilliSleep(50);
 					guard_lock ser_guard( &rigCAT_mutex );
 					if (rigCAT_exit) return;
-					if (sendCommand(strCmd, rTemp.size)) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
 				}
 				return;
 			}
@@ -935,13 +979,13 @@ void rigCAT_pttOFF()
 			MilliSleep(50);
 			guard_lock ser_guard( &rigCAT_mutex );
 			if (rigCAT_exit) return;
-			if (sendCommand(strCmd, 0)) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
 	LOG_VERBOSE("Retries failed");
 }
 
-void rigCAT_sendINIT(const string& icmd)
+void rigCAT_sendINIT(const string& icmd, int multiplier)
 {
 	{
 		guard_lock ser_guard( &rigCAT_mutex );
@@ -979,7 +1023,7 @@ void rigCAT_sendINIT(const string& icmd)
 					MilliSleep(50);
 					guard_lock ser_guard( &rigCAT_mutex );
 					if (rigCAT_exit) return;
-					if (sendCommand(strCmd, rTemp.size)) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatInitDelay)) return;
 				}
 				return;
 			}
@@ -990,7 +1034,7 @@ void rigCAT_sendINIT(const string& icmd)
 			MilliSleep(50);
 			guard_lock ser_guard( &rigCAT_mutex );
 			if (rigCAT_exit) return;
-			if (sendCommand(strCmd, 0)) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatInitDelay)) return;
 		}
 	}
 	LOG_VERBOSE("Retries failed");
@@ -998,7 +1042,7 @@ void rigCAT_sendINIT(const string& icmd)
 
 void rigCAT_defaults()
 {
-	mnuXmlRigBaudrate->value(xmlrig.baud);
+	listbox_xml_rig_baudrate->index(xmlrig.baud);
 	valRigCatStopbits->value(xmlrig.stopbits);
 	btnRigCatRTSplus->value(xmlrig.rts);
 	btnRigCatDTRplus->value(xmlrig.dtr);
@@ -1009,6 +1053,7 @@ void rigCAT_defaults()
 	cntRigCatRetries->value(xmlrig.retries);
 	cntRigCatTimeout->value(xmlrig.timeout);
 	cntRigCatWait->value(xmlrig.write_delay);
+	cntRigCatInitDelay->value(xmlrig.init_delay);
 	btnRigCatEcho->value(xmlrig.echo);
 	btnRigCatCMDptt->value(xmlrig.cmdptt);
 	chkRigCatVSP->value(xmlrig.vsp);
@@ -1017,7 +1062,7 @@ void rigCAT_defaults()
 void rigCAT_restore_defaults()
 {
 	inpXmlRigDevice->value(progdefaults.XmlRigDevice.c_str());
-	mnuXmlRigBaudrate->value(progdefaults.XmlRigBaudrate);
+	listbox_xml_rig_baudrate->index(progdefaults.XmlRigBaudrate);
 	valRigCatStopbits->value(progdefaults.RigCatStopbits);
 	btnRigCatRTSplus->value(progdefaults.RigCatRTSplus);
 	btnRigCatDTRplus->value(progdefaults.RigCatDTRplus);
@@ -1028,6 +1073,7 @@ void rigCAT_restore_defaults()
 	cntRigCatRetries->value(progdefaults.RigCatRetries);
 	cntRigCatTimeout->value(progdefaults.RigCatTimeout);
 	cntRigCatWait->value(progdefaults.RigCatWait);
+	cntRigCatInitDelay->value(progdefaults.RigCatInitDelay);
 	btnRigCatEcho->value(progdefaults.RigCatECHO);
 	btnRigCatCMDptt->value(progdefaults.RigCatCMDptt);
 	chkRigCatVSP->value(progdefaults.RigCatVSP);
@@ -1040,7 +1086,7 @@ void rigCAT_restore_defaults()
 void rigCAT_init_defaults()
 {
 	progdefaults.XmlRigDevice = inpXmlRigDevice->value();
-	progdefaults.XmlRigBaudrate = mnuXmlRigBaudrate->value();
+	progdefaults.XmlRigBaudrate = listbox_xml_rig_baudrate->index();
 	progdefaults.RigCatStopbits = static_cast<int>(valRigCatStopbits->value());
 	progdefaults.RigCatRTSplus = btnRigCatRTSplus->value();
 	progdefaults.RigCatDTRplus = btnRigCatDTRplus->value();
@@ -1051,6 +1097,7 @@ void rigCAT_init_defaults()
 	progdefaults.RigCatRetries = static_cast<int>(cntRigCatRetries->value());
 	progdefaults.RigCatTimeout = static_cast<int>(cntRigCatTimeout->value());
 	progdefaults.RigCatWait = static_cast<int>(cntRigCatWait->value());
+	progdefaults.RigCatInitDelay = static_cast<int>(cntRigCatInitDelay->value());
 	progdefaults.RigCatECHO = btnRigCatEcho->value();
 	progdefaults.RigCatCMDptt = btnRigCatCMDptt->value();
 	progdefaults.RigCatVSP = chkRigCatVSP->value();
@@ -1116,13 +1163,13 @@ echo	   : %c\n",
 		sRigWidth = "";
 
 		nonCATrig = false;
-		rigCAT_sendINIT("INIT");
+		rigCAT_sendINIT("INIT", progdefaults.RigCatInitDelay);
 
 // must be able to get frequency 3 times in sequence or serial port might
 // be shared with another application (flrig)
 		bool failed = false;
 		for (int i = 1; i <= 5; i++) {
-			rigCAT_getfreq(1, failed);
+			rigCAT_getfreq(1, failed, progdefaults.RigCatInitDelay);
 			if (failed) break;
 			LOG_INFO("Passed serial port test # %d", i);
 //			MilliSleep(50);
@@ -1173,6 +1220,8 @@ void rigCAT_close(void)
 	if ( rigCAT_open == false || rigCAT_exit == true)
 		return;
 
+	rigCAT_sendINIT("CLOSE");
+
 	{
 		guard_lock ser_guard( &rigCAT_mutex );
 		rigCAT_exit = true;
@@ -1182,12 +1231,10 @@ void rigCAT_close(void)
 
 	pthread_join(rigCAT_thread, NULL);
 
-	rigCAT_sendINIT("CLOSE");
-
 	rigio.ClosePort();
 
-	rigCAT_open = false;
 	rigCAT_exit = false;
+	rigCAT_open = false;
 	rigCAT_bypass = false;
 	wf->USB(true);
 
@@ -1272,11 +1319,7 @@ static void *rigCAT_loop(void *args)
 			wf->rfcarrier(freq);
 		}
 
-		if (freq > 0)
-			dl_fldigi::hbtint::rig_set_freq(freq);
-
 		sWidth = rigCAT_getwidth();
-
 		if (sWidth.size() && sWidth != sRigWidth) {
 			sRigWidth = sWidth;
 			show_bw(sWidth);
@@ -1291,9 +1334,6 @@ static void *rigCAT_loop(void *args)
 				wf->USB(true);
 			show_mode(sMode);
 		}
-
-		if (sMode.size())
-			dl_fldigi::hbtint::rig_set_mode(sMode);
 	}
 
 	return NULL;

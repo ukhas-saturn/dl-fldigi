@@ -40,7 +40,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <memory.h>
-#include "configuration.h"
 
 #include "misc.h"
 #include "fftfilt.h"
@@ -53,6 +52,17 @@
 // probably only need a single instance of g_fft !!
 // use for both forward and reverse
 
+void fftfilt::clear_filter()
+{
+	memset(filter, 0, flen * sizeof(cmplx));
+	memset(timedata, 0, flen * sizeof(cmplx));
+	memset(freqdata, 0, flen * sizeof(cmplx));
+	memset(output, 0, flen * sizeof(cmplx));
+	memset(ovlbuf, 0, flen2 * sizeof(cmplx));
+	memset(ht, 0, flen * sizeof(cmplx));
+	inptr = 0;
+}
+
 void fftfilt::init_filter()
 {
 	flen2 = flen >> 1;
@@ -64,15 +74,12 @@ void fftfilt::init_filter()
 	output		= new cmplx[flen];
 	ovlbuf		= new cmplx[flen2];
 	ht			= new cmplx[flen];
+}
 
-	memset(filter, 0, flen * sizeof(cmplx));
-	memset(timedata, 0, flen * sizeof(cmplx));
-	memset(freqdata, 0, flen * sizeof(cmplx));
-	memset(output, 0, flen * sizeof(cmplx));
-	memset(ovlbuf, 0, flen2 * sizeof(cmplx));
-	memset(ht, 0, flen * sizeof(cmplx));
-
-	inptr = 0;
+// number of samples needed to completely flush the filter
+int fftfilt::flush_size()
+{
+	return flen - inptr;
 }
 
 //------------------------------------------------------------------------------
@@ -113,6 +120,7 @@ fftfilt::~fftfilt()
 
 void fftfilt::create_filter(double f1, double f2)
 {
+	clear_filter();
 // initialize the filter to zero
 	memset(ht, 0, flen * sizeof(cmplx));
 
@@ -180,7 +188,8 @@ void fftfilt::create_filter(double f1, double f2)
 	fspec.close();
 	delete [] revht;
 */
-	pass = 2;
+// start output after 2 full passes are complete
+	pass = 1;
 }
 
 /*
@@ -247,36 +256,35 @@ void fftfilt::rtty_filter(double f)
 //   1.4   .0054
 //   1.5   .0062
 //   1.6   .0076
-    if(progdefaults.RTTY_BW <= 100){
-        f *= 1.4;
 
-        double dht;
-        for( int i = 0; i < flen2; ++i ) {
-            double x = (double)i/(double)(flen2);	
+	f *= 1.4;
 
-    // raised cosine response (changed for -1.0...+1.0 times Nyquist-f
-    // instead of books versions ranging from -1..+1 times samplerate)
+	double dht;
+	for( int i = 0; i < flen2; ++i ) {
+		double x = (double)i/(double)(flen2);	
 
-            dht =
-                x <= 0 ? 1.0 :
-                x > 2.0 * f ? 0.0 :
-                cos((M_PI * x) / (f * 4.0));
+// raised cosine response (changed for -1.0...+1.0 times Nyquist-f
+// instead of books versions ranging from -1..+1 times samplerate)
 
-            dht *= dht; // cos^2
+		dht =
+			x <= 0 ? 1.0 :
+			x > 2.0 * f ? 0.0 :
+			cos((M_PI * x) / (f * 4.0));
 
-    // amplitude equalized nyquist-channel response
-            dht /= sinc(2.0 * i * f);
+		dht *= dht; // cos^2
 
-            filter[i].real() = dht*cos((double)i* - 0.5*M_PI);
-            filter[i].imag() = dht*sin((double)i* - 0.5*M_PI);
+// amplitude equalized nyquist-channel response
+		dht /= sinc(2.0 * i * f);
 
-            filter[(flen-i)%flen].real() = dht*cos((double)i*+0.5*M_PI);
-            filter[(flen-i)%flen].imag() = dht*sin((double)i*+0.5*M_PI);
-        }
-    }
-    else{
-    }
-    
+		filter[i] = 
+			cmplx(	dht*cos((double)i* - 0.5*M_PI), 
+					dht*sin((double)i* - 0.5*M_PI) );
+
+		filter[(flen-i)%flen] = 
+			cmplx(	dht*cos((double)i*+0.5*M_PI),
+					dht*sin((double)i*+0.5*M_PI) );
+	}
+
 // perform the reverse fft to obtain h(t)
 // for testing
 // uncomment to obtain filter characteristics
@@ -298,7 +306,7 @@ void fftfilt::rtty_filter(double f)
 	fspec.close();
 	delete [] revht;
 */
-// start outputs after 2 full passes are complete
-	pass = 2;
+// start output after 2 full passes are complete
+	pass = 1;
 }
 

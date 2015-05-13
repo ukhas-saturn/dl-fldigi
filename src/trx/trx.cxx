@@ -6,7 +6,7 @@
 // Copyright (C) 2007-2010
 //		Stelios Bounanos, M0GLD
 //
-// This file is part of fldigi.  Adapted in part from code contained in gmfsk 
+// This file is part of fldigi.  Adapted in part from code contained in gmfsk
 // source code distribution.
 //
 // Fldigi is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 
 #include <config.h>
 
+#include <sys/time.h>
 #include <fcntl.h>
 #include <semaphore.h>
 #include <cstdlib>
@@ -45,6 +46,7 @@
 #include "debug.h"
 #include "nullmodem.h"
 #include "macros.h"
+#include "rigsupport.h"
 
 #if BENCHMARK_MODE
 #  include "benchmark.h"
@@ -80,11 +82,13 @@ static int	_trx_tune;
 #define NUMMEMBUFS 1024
 static ringbuffer<double> trxrb(ceil2(NUMMEMBUFS * SCBLOCKSIZE));
 static float fbuf[SCBLOCKSIZE];
-bool    bHistory = false;
-bool    bHighSpeed = false;
+bool	bHistory = false;
+bool	bHighSpeed = false;
 static  double hsbuff[SCBLOCKSIZE];
 
 static bool trxrunning = false;
+
+bool	rx_only = false;
 
 #include "tune.cxx"
 
@@ -196,8 +200,8 @@ void trx_trx_receive_loop()
 	assert(powerof2(SCBLOCKSIZE));
 
 	if (unlikely(!active_modem)) {
-		MilliSleep(10);
-		return;
+	MilliSleep(10);
+	return;
 	}
 
 #if BENCHMARK_MODE
@@ -207,8 +211,8 @@ void trx_trx_receive_loop()
 #endif
 
 	if (unlikely(!scard)) {
-		MilliSleep(10);
-		return;
+	MilliSleep(10);
+	return;
 	}
 
 	try {
@@ -217,13 +221,15 @@ void trx_trx_receive_loop()
 			REQ(sound_update, progdefaults.btnAudioIOis);
 	}
 	catch (const SndException& e) {
-		LOG_ERROR("%s", e.what());
+		LOG_ERROR("%s. line: %i", e.what(), __LINE__);
 		put_status(e.what(), 5);
 		scard->Close();
-		if (e.error() == EBUSY && progdefaults.btnAudioIOis == SND_IDX_PORT) {
+//	if (e.error() == EBUSY && progdefaults.btnAudioIOis == SND_IDX_PORT) {
+		if (progdefaults.btnAudioIOis == SND_IDX_PORT) {
 			sound_close();
 			sound_init();
 		}
+
 		MilliSleep(1000);
 		return;
 	}
@@ -237,6 +243,10 @@ void trx_trx_receive_loop()
 			numread = 0;
 			while (numread < SCBLOCKSIZE && trx_state == STATE_RX)
 				numread += scard->Read(fbuf + numread, SCBLOCKSIZE - numread);
+			if (numread > SCBLOCKSIZE) {
+				LOG_ERROR("numread error %lu", (unsigned long) numread);
+				numread = SCBLOCKSIZE;
+			}
 			if (bHighSpeed) {
 				for (size_t i = 0; i < numread; i++)
 					hsbuff[i] = fbuf[i];
@@ -251,7 +261,7 @@ void trx_trx_receive_loop()
 		}
 		catch (const SndException& e) {
 			scard->Close();
-			LOG_ERROR("%s", e.what());
+			LOG_ERROR("%s. line: %i", e.what(), __LINE__);
 			put_status(e.what(), 5);
 			MilliSleep(10);
 			return;
@@ -304,32 +314,36 @@ void trx_trx_receive_loop()
 //=============================================================================
 void trx_trx_transmit_loop()
 {
+	if (rx_only) return;
+
 	int  current_samplerate;
 	if (!scard) {
 		MilliSleep(10);
 		return;
 	}
 	if (active_modem) {
+
 		try {
 			current_samplerate = active_modem->get_samplerate();
 			scard->Open(O_WRONLY, current_samplerate);
 		}
 		catch (const SndException& e) {
-			LOG_ERROR("%s", e.what());
+			LOG_ERROR("%s. line: %i", e.what(), __LINE__);
 			put_status(e.what(), 1);
 			MilliSleep(10);
 			return;
 		}
 
-		if (active_modem != ssb_modem && active_modem != anal_modem) {
+		if ((active_modem != ssb_modem) &&
+			(active_modem != anal_modem) &&
+			!active_modem->XMLRPC_CPS_TEST &&
+			!PERFORM_CPS_TEST ) {
 			push2talk->set(true);
 			REQ(&waterfall::set_XmtRcvBtn, wf, true);
 		}
 		active_modem->tx_init(scard);
 
-		if (!progdefaults.DTMFstr.empty()) dtmf->send();
-
-		if ( ReedSolomon->assigned(active_modem->get_mode()) && 
+		if ( ReedSolomon->assigned(active_modem->get_mode()) &&
 			 (progdefaults.TransmitRSid || progStatus.n_rsids != 0)) {
 			if (progStatus.n_rsids < 0) {
 				for (int i = 0; i > progStatus.n_rsids; i--) {
@@ -348,8 +362,14 @@ void trx_trx_transmit_loop()
 		}
 
 		if (progStatus.n_rsids >= 0) {
+
+			active_modem->tx_sample_count = 0;
+			active_modem->tx_sample_rate = active_modem->get_samplerate();
+
 			while (trx_state == STATE_TX) {
 				try {
+					if (!progdefaults.DTMFstr.empty())
+						dtmf->send();
 					if (active_modem->tx_process() < 0)
 						trx_state = STATE_RX;
 				}
@@ -364,7 +384,7 @@ void trx_trx_transmit_loop()
 		} else
 			trx_state = STATE_RX;
 
-		if (ReedSolomon->assigned(active_modem->get_mode()) && 
+		if (ReedSolomon->assigned(active_modem->get_mode()) &&
 			progdefaults.TransmitRSid &&
 			progdefaults.rsid_post &&
 			progStatus.n_rsids >= 0) ReedSolomon->send(false);
@@ -384,11 +404,14 @@ void trx_trx_transmit_loop()
 	REQ(&waterfall::set_XmtRcvBtn, wf, false);
 	if (progStatus.timer)
 		REQ(startMacroTimer);
+	WriteARQ(0x06);
 }
 
 //=============================================================================
 void trx_tune_loop()
 {
+	if (rx_only) return;
+
 	int  current_samplerate;
 	if (!scard) {
 		MilliSleep(10);
@@ -400,7 +423,7 @@ void trx_tune_loop()
 			scard->Open(O_WRONLY, current_samplerate);
 		}
 		catch (const SndException& e) {
-			LOG_ERROR("%s", e.what());
+			LOG_ERROR("%s. line: %i", e.what(), __LINE__);
 			put_status(e.what(), 1);
 			MilliSleep(10);
 			return;
@@ -422,7 +445,7 @@ void trx_tune_loop()
 		}
 		catch (const SndException& e) {
 			scard->Close();
-			LOG_ERROR("%s", e.what());
+			LOG_ERROR("%s. line: %i", e.what(), __LINE__);
 			put_status(e.what(), 5);
 			MilliSleep(10);
 			return;
@@ -471,23 +494,26 @@ void *trx_loop(void *args)
 			trx_state = STATE_ENDED;
 			// fall through
 		case STATE_ENDED:
-			Fl::lock();
-			Fl::awake();
-			Fl::unlock();
+			REQ(set_flrig_ptt, 0);
 			return 0;
 		case STATE_RESTART:
+			REQ(set_flrig_ptt, 0);
 			trx_reset_loop();
 			break;
 		case STATE_NEW_MODEM:
+			REQ(set_flrig_ptt, 0);
 			trx_start_modem_loop();
 			break;
 		case STATE_TX:
+			REQ(set_flrig_ptt, 1);
 			trx_trx_transmit_loop();
 			break;
 		case STATE_TUNE:
+			REQ(set_flrig_ptt, 1);
 			trx_tune_loop();
 			break;
 		case STATE_RX:
+			REQ(set_flrig_ptt, 0);
 			trx_trx_receive_loop();
 			break;
 		default:
@@ -519,6 +545,7 @@ void trx_start_modem_loop()
 		active_modem->set_freq(new_freq);
 	trx_state = STATE_RX;
 	REQ(&waterfall::opmode, wf);
+	REQ(set599);
 
 	if (old_modem) {
 		*mode_info[old_modem->get_mode()].modem = 0;
@@ -550,7 +577,7 @@ void trx_reset_loop()
 #endif
 #if USE_PORTAUDIO
 	case SND_IDX_PORT:
-	    scard = new SoundPort(scDevice[0].c_str(), scDevice[1].c_str());
+		scard = new SoundPort(scDevice[0].c_str(), scDevice[1].c_str());
 		break;
 #endif
 #if USE_PULSEAUDIO
@@ -565,7 +592,7 @@ void trx_reset_loop()
 		abort();
 	}
 
-	trx_state = STATE_RX;	
+	trx_state = STATE_RX;
 }
 
 //=============================================================================
@@ -584,7 +611,7 @@ void trx_start(void)
 		LOG(debug::ERROR_LEVEL, debug::LOG_MODEM, "trx already running!");
 		return;
 	}
-	
+
 	if (scard) delete scard;
 	if (ReedSolomon) delete ReedSolomon;
 	if (dtmf) delete dtmf;
@@ -646,7 +673,7 @@ void trx_start(void)
 		LOG(debug::ERROR_LEVEL, debug::LOG_MODEM, "pthread_create failed");
 		trxrunning = false;
 		exit(1);
-	} 
+	}
 	trxrunning = true;
 }
 
@@ -654,7 +681,8 @@ void trx_start(void)
 void trx_close()
 {
 	trx_state = STATE_ABORT;
-	while (trx_state != STATE_ENDED)
+	int count = 10;
+	while (trx_state != STATE_ENDED && count--)
 		MilliSleep(100);
 
 #if USE_NAMED_SEMAPHORES

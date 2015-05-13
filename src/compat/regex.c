@@ -4,20 +4,26 @@
    internationalization features.)
 
    Copyright (C) 1993 Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+*/
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
+//
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
 
 /* AIX requires this to be the first thing in the file. */
 #if defined (_AIX) && !defined (REGEX_MALLOC)
@@ -2810,7 +2816,7 @@ re_set_registers (bufp, regs, num_regs, starts, ends)
     {
       bufp->regs_allocated = REGS_UNALLOCATED;
       regs->num_regs = 0;
-      regs->start = regs->end = (regoff_t) 0;
+      regs->start = regs->end = (regoff_t *) 0;
     }
 }
 
@@ -4056,6 +4062,8 @@ re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
 	    POP_FAILURE_POINT (sdummy, pdummy,
 			       dummy_low_reg, dummy_high_reg,
 			       reg_dummy, reg_dummy, reg_info_dummy);
+		if (pdummy == 0) DEBUG_PRINT2("pdummy surely is! %p", pdummy);
+		if (sdummy == 0) DEBUG_PRINT2("sdummy surely is! %p", sdummy);
 	  }
 	  /* Note fall through.  */
 

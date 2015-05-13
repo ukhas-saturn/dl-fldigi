@@ -1,6 +1,22 @@
-/*
- *    fftfilt.h  --  Fast convolution FIR filter
-*/
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
+//
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
 
 #ifndef	_FFTFILT_H
 #define	_FFTFILT_H
@@ -38,6 +54,7 @@ protected:
 				 0.08 * cos(4.0 * M_PI * i / len));
 	}
 	void init_filter();
+	void clear_filter();
 
 public:
 	fftfilt(double f1, double f2, int len);
@@ -55,6 +72,7 @@ public:
 	void rtty_filter(double);
 
 	int run(const cmplx& in, cmplx **out);
+	int flush_size();
 };
 
 #endif

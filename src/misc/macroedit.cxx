@@ -77,7 +77,6 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<MYRST>\tmy RST"));
 	w->add(_("<ANTENNA>\tmy antenna"));
 	w->add(_("<BAND>\toperating band"));
-	w->add(LINE_SEP);
 	w->add(_("<VER>\tFldigi version"));
 
 	w->add(LINE_SEP);
@@ -92,7 +91,7 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<NXTNBR>\tnext QSO rec #"));
 	w->add(_("<MAPIT>\tmap on google"));
 	w->add(_("<MAPIT:adr/lat/loc>\tmap by value"));
- 
+
 	w->add(LINE_SEP);
 	w->add(_("<CLRRX>\tclear RX pane"));
 	w->add(_("<CLRTX>\tclear TX pane"));
@@ -147,14 +146,14 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<GOFREQ:NNNN>\tmove to freq NNNN Hz"));
 	w->add(_("<QSYTO>\tleft-clk QSY button"));
 	w->add(_("<QSYFM>\tright-clk QSY button"));
+	w->add(_("<QSY:FFF.F[:NNNN]>\tqsy to kHz, Hz"));
+	w->add(_("<QSY+:+/-n.nnn>\tincr/decr xcvr freq"));
+	w->add(_("<RIGMODE:mode>\tvalid xcvr mode"));
+	w->add(_("<FILWID:width>\tvalid xcvr filter width"));
+	w->add(_("<FOCUS>\trig freq has kbd focus"));
 
 	w->add(LINE_SEP);
 	w->add(_("<QRG:text>\tinsert QRG into Rx text"));
-
-	w->add(LINE_SEP);
-	w->add(_("<QSY:FFF.F[:NNNN]>\tqsy to kHz, Hz"));
-	w->add(_("<RIGMODE:mode>\tvalid xcvr mode"));
-	w->add(_("<FILWID:width>\tvalid xcvr filter width"));
 
 	w->add(LINE_SEP);
 	w->add(_("<FILE:>\tinsert text file"));
@@ -167,15 +166,16 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<TUNE:NN>\ttune signal for NN sec"));
 	w->add(_("<WAIT:NN>\tdelay xmt for NN sec"));
 	w->add(_("<REPEAT>\trepeat macro continuously"));
-	w->add(_("<SKED:hhmm[:YYYYDDMM]>\tschedule execution"));
+	w->add(_("<SKED:hhmm[ss][:YYYYMMDD]>\tschedule execution"));
 
 	w->add(LINE_SEP);
 	w->add(_("<TXATTEN:nn.n>\t set xmt attenuator"));
 
 	w->add(LINE_SEP);
 	w->add(_("<CWID>\tCW identifier"));
-	w->add(_("<ID>\tsend mode ID in video text"));
-	w->add(_("<TEXT>\tvideo text"));
+	w->add(_("<ID>\tsend mode ID; TX start only"));
+	w->add(_("<TEXT>\ttext at start of TX"));
+	w->add(_("<VIDEO:\tvideo text in TX stream"));
 	w->add(_("<TXRSID:on|off|t>\tTx RSID on,off,toggle"));
 	w->add(_("<RXRSID:on|off|t>\tRx RSID on,off,toggle"));
 	w->add(_("<NRSID:NN>\tTransmit |NN| successive RsID bursts"));
@@ -200,8 +200,22 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<SAVE>\tsave current macro file"));
 
 	w->add(LINE_SEP);
-	w->add(_("<COMMENT:text>\tuntransmitted comment"));
+	w->add(_("<COMMENT:comment text>\tignore all comment text"));
 
+	w->add(LINE_SEP);
+	w->add(_("<CPS_TEST:nn>\tmodem char/sec test on nn chars"));
+	w->add(_("<CPS_N:n>\tmodem timing test, 'n' random 5 char groups"));
+	w->add(_("<CPS_FILE:>\tmodem timing test, spec' file"));
+	w->add(_("<CPS_STRING:s>\tmodem timing test, string 's'"));
+
+	w->add(LINE_SEP);
+	w->add(_("<WAV_TEST>\tWAV file; internal string"));
+	w->add(_("<WAV_N:n>\tWAV file; 'n' random 5 char groups"));
+	w->add(_("<WAV_FILE:>\tWAV file; spec' file"));
+	w->add(_("<WAV_STRING:s>\tWAV file; string 's'"));
+
+	w->add(LINE_SEP);
+	w->add(_("<CSV:on|off|t>\tAnalysis CSV on,off,toggle"));
 	w->add(LINE_SEP);
 	assert(MODE_CONTESTIA < MODE_OLIVIA);
 	char s[256];
@@ -280,26 +294,31 @@ void cbMacroEditOK(Fl_Widget *w, void *)
 	}
 
 	if (iType == MACRO_EDIT_BUTTON) {
-		macros.text[iMacro] = macrotext->value();
-		macros.name[iMacro] = labeltext->value();
-
-		if (progdefaults.mbar2_pos) {
-			if (iMacro < NUMMACKEYS) {
-				btnMacro[iMacro % NUMMACKEYS]->label( macros.name[iMacro].c_str() );
-				btnMacro[iMacro % NUMMACKEYS]->redraw_label();
-			} else {
-				btnMacro[(iMacro % NUMMACKEYS) + NUMMACKEYS]->label( macros.name[iMacro].c_str() );
-				btnMacro[(iMacro % NUMMACKEYS) + NUMMACKEYS]->redraw_label();
-			}
-		} else {
-			btnMacro[iMacro % NUMMACKEYS]->label( macros.name[iMacro].c_str() );
-			btnMacro[iMacro % NUMMACKEYS]->redraw_label();
-		}
-
-		macros.changed = true;
+		update_macro_button(iMacro, macrotext->value(), labeltext->value());
 	}
 	else if (iType == MACRO_EDIT_INPUT)
 		iInput->value(macrotext->value());
+}
+
+void update_macro_button(int iMacro, const char *text, const char *name)
+{
+	macros.text[iMacro].assign(text);
+	macros.name[iMacro].assign(name);
+
+	if (progdefaults.mbar_scheme > MACRO_SINGLE_BAR_MAX) {
+		if (iMacro < NUMMACKEYS) {
+			btnMacro[iMacro % NUMMACKEYS]->label( macros.name[iMacro].c_str() );
+			btnMacro[iMacro % NUMMACKEYS]->redraw_label();
+		} else {
+			btnMacro[(iMacro % NUMMACKEYS) + NUMMACKEYS]->label( macros.name[iMacro].c_str() );
+			btnMacro[(iMacro % NUMMACKEYS) + NUMMACKEYS]->redraw_label();
+		}
+	} else {
+		btnMacro[iMacro % NUMMACKEYS]->label( macros.name[iMacro].c_str() );
+		btnMacro[iMacro % NUMMACKEYS]->redraw_label();
+	}
+
+	macros.changed = true;
 }
 
 void cbInsertMacro(Fl_Widget *, void *)
@@ -314,24 +333,41 @@ void cbInsertMacro(Fl_Widget *, void *)
 	if (text == LINE_SEP)
 		return;
 	if (text == "<FILE:>") {
-		string filters = "Text\t*." "txt";
-		const char* p = FSEL::select(_("Text file to insert"), filters.c_str(),
-					 "text." "txt");
+		string filters = "Text\t*.txt";
+		const char* p = FSEL::select(
+			_("Text file to insert"),
+			filters.c_str(),
+			HomeDir.c_str());
 		if (p) {
 			text.insert(6, p);
 		} else
 			text = "";
+	} else if ((text == "<CPS_FILE:>") || (text == "<WAV_FILE:>")) {
+		string filters = "Text\t*.txt";
+		const char* p = FSEL::select(
+			_("Test text file"),
+			filters.c_str(),
+			HomeDir.c_str());
+		if (p) {
+			text.insert(10, p);
+		} else
+			text = "";
 	} else if (text == "<IMAGE:>") {
-		string filters = "Text\t*." "txt";
-		const char *p = FSEL::select(_("MFSK image file"), "*.{png,jpg,bmp}\t*", "");
+		string filters = "*.{png,jpg,bmp}\t*.png";
+		const char *p = FSEL::select(
+			_("MFSK image file"),
+			filters.c_str(),
+			PicsDir.c_str());
 		if (p) {
 			text.insert(7, p);
 		} else
 			text = "";
 	} else if (text == "<MACROS:>") {
-		string filters = "Macrost\t*." "mdf";
-		const char* p = FSEL::select(_("Change to Macro file"), filters.c_str(),
-					 "macros." "mdf");
+		string filters = "Macrost\t*.mdf";
+		const char* p = FSEL::select(
+			_("Change to Macro file"),
+			filters.c_str(),
+			MacrosDir.c_str());
 		if (p) {
 			text.insert(8, p);
 		} else
@@ -339,9 +375,11 @@ void cbInsertMacro(Fl_Widget *, void *)
 	}
 #ifdef __MINGW32__
 	else if (text == "<EXEC>") {
-		string filters = "Exe\t*." "exe";
-		const char* p = FSEL::select(_("Executable file to insert"), filters.c_str(),
-					"WordPad.exe");
+		string filters = "Exe\t*.exe";
+		const char* p = FSEL::select(
+			_("Executable file to insert"),
+			filters.c_str(),
+			HomeDir.c_str());
 		if (p) {
 			string exefile = p;
 			exefile.append("</EXEC>");
@@ -372,7 +410,7 @@ Fl_Double_Window* make_macroeditor(void)
 	Fl_Tile *tile = new Fl_Tile(0,22,800,140);
 	macrotext = new Fl_Input2(0, 22, 450, 140, _("Macro Text"));
 	macrotext->type(FL_MULTILINE_INPUT);
-	macrotext->textfont(FL_COURIER);
+	macrotext->textfont(FL_HELVETICA);
 	macrotext->align(FL_ALIGN_TOP);
 
 	macroDefs = new Fl_Hold_Browser(450, 22, 350, 140, _("Select Tag"));
@@ -388,7 +426,7 @@ Fl_Double_Window* make_macroeditor(void)
 	Fl_Group *grpD = new Fl_Group(0, 164, 452, 24);
 	Fl_Box *box3a = new Fl_Box(0, 164, 327, 24, "");
 	labeltext = new Fl_Input2(337, 164, 115, 24, _("Macro Button Label"));
-	labeltext->textfont(FL_COURIER);
+	labeltext->textfont(FL_HELVETICA);
 	grpD->end();
 	grpD->resizable(box3a);
 
@@ -434,8 +472,19 @@ void editMacro(int n, int t, Fl_Input* in)
 		macrotext->value(in->value());
 		labeltext->hide();
 	}
+	macrotext->textfont(progdefaults.MacroEditFontnbr);
+	macrotext->textsize(progdefaults.MacroEditFontsize);
 	iMacro = n;
 	iType = t;
 	iInput = in;
 	MacroEditDialog->show();
+}
+
+void update_macroedit_font()
+{
+	if (!MacroEditDialog) return;
+	if (!MacroEditDialog->visible()) return;
+	macrotext->textfont(progdefaults.MacroEditFontnbr);
+	macrotext->textsize(progdefaults.MacroEditFontsize);
+	MacroEditDialog->redraw();
 }

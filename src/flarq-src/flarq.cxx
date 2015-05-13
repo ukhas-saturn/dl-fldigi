@@ -1,23 +1,24 @@
 // ----------------------------------------------------------------------------
 // flarq.cxx - Fast Light ARQ Application
 //
-// Copyright (C) 2007-2009
-//		Dave Freese, W1HKJ
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
 //
-// This file is part of fldigi.
+// This file is part of fldigi
 //
-// Fldigi is free software: you can redistribute it and/or modify
+// fldigi is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
+// the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
-// Fldigi is distributed in the hope that it will be useful,
+// fldigi is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with fldigi.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
 #include <config.h>
@@ -1735,42 +1736,42 @@ int main (int argc, char *argv[] )
 
 #ifdef __WOE32__
 		size_t p = appdir.rfind("flarq.exe");
-		if (p != std::string::npos) {
-			appdir.erase(p);
-			string testfile;
-			testfile.assign(appdir).append("NBEMS.DIR");
-			FILE *testdir = fopen(testfile.c_str(),"r");
-			if (testdir) {
-				fclose(testdir);
-				NBEMS_dir = appdir;
-			}
+		appdir.erase(p);
+		p = appdir.find("FL_APPS/");
+		if (p != string::npos) {
+			NBEMS_dir.assign(appdir.substr(0, p + 8));
+		} else {
+			fl_filename_expand(dirbuf, sizeof(dirbuf) -1, "$USERPROFILE/");
+			NBEMS_dir.assign(dirbuf);
 		}
-		if (NBEMS_dir.empty()) {
-			fl_filename_expand(dirbuf, FL_PATH_MAX, "$USERPROFILE/");
-			NBEMS_dir = dirbuf;
-		}
-		NBEMS_dir.append("NBEMS.files\\");
+		NBEMS_dir.append("NBEMS.files/");
+
 #else
+
+		fl_filename_absolute(dirbuf, sizeof(dirbuf), argv[0]);
+		appdir.assign(dirbuf);
 		size_t p = appdir.rfind("flarq");
-		if (p != std::string::npos) {
-			if (appdir.find("./flarq") != std::string::npos) {
-				if (getcwd(dirbuf, FL_PATH_MAX))
-					appdir.assign(dirbuf).append("/");
-			} else
-				appdir.erase(p);
-			string testfile;
-			testfile.assign(appdir).append("NBEMS.DIR");
-			FILE *testdir = fopen(testfile.c_str(),"r");
-			if (testdir) {
-				fclose(testdir);
-				NBEMS_dir = appdir;
-			}
-		}
-		if (NBEMS_dir.empty()) {
+		if (p != string::npos)
+			appdir.erase(p);
+		p = appdir.find("FL_APPS/");
+		if (p != string::npos)
+			NBEMS_dir.assign(appdir.substr(0, p + 8));
+		else {
 			fl_filename_expand(dirbuf, FL_PATH_MAX, "$HOME/");
 			NBEMS_dir = dirbuf;
 		}
-		NBEMS_dir.append(".nbems/");
+
+		DIR *isdir = 0;
+		string test_dir;
+		test_dir.assign(NBEMS_dir).append("NBEMS.files/");
+		isdir = opendir(test_dir.c_str());
+		if (isdir) {
+			NBEMS_dir = test_dir;
+			closedir(isdir);
+		} else {
+			NBEMS_dir.append(".nbems/");
+		}
+
 #endif
 	}
 

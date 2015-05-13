@@ -6,27 +6,30 @@
 //
 // This modem code owes much to the efforts of Joe Veldhuis, N8FQ
 //
-// This file is part of fldigi.  Adapted from code contained in gmfsk source code
-// distribution.
+// Adapted from code contained in gmfsk source code distribution.
 //  gmfsk Copyright (C) 2001, 2002, 2003
 //  Tomi Manninen (oh2bns@sral.fi)
 //  Copyright (C) 2004
 //  Lawrence Glaister (ve7it@shaw.ca)
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
 //
-// Fldigi is free software: you can redistribute it and/or modify
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
+// the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
-// Fldigi is distributed in the hope that it will be useful,
+// fldigi is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with fldigi.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
-
 
 #include <config.h>
 
@@ -219,10 +222,7 @@ cmplx feld::mixer(cmplx in)
 
 	rxphacc -= 2.0 * M_PI * frequency / samplerate;
 
-	if (rxphacc > M_PI)
-		rxphacc -= 2.0 * M_PI;
-	else if (rxphacc < M_PI)
-		rxphacc += 2.0 * M_PI;
+	if (rxphacc < 0) rxphacc += TWOPI;
 
 	return z;
 }
@@ -448,8 +448,7 @@ double feld::nco(double freq)
 
 	txphacc += 2.0 * M_PI * freq / samplerate;
 
-	if (txphacc > M_PI)
-		txphacc -= 2.0 * M_PI;
+	if (txphacc > TWOPI) txphacc -= TWOPI;
 
 	return x;
 }
@@ -470,7 +469,7 @@ void feld::send_symbol(int currsymb, int nextsymb)
 		switch (mode) {
 			ncoval = nco(tone);
 			case MODE_FSKHELL : case MODE_FSKH105 : case MODE_HELL80 :
-				if ((tone2 != tone) && ((1.0 - fabs(ncoval)) < .001)) 
+				if ((tone2 != tone) && ((1.0 - fabs(ncoval)) < .001))
 					tone = tone2;
 				break;
 			case MODE_HELLX5 : case MODE_HELLX9 :

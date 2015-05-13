@@ -4,6 +4,7 @@
 #include "lgbook.h"
 #include <config.h>
 #include <FL/Fl_Pixmap.H>
+#include "flmisc.h"
 #include "logsupport.h"
 #include "pixmaps.h"
 
@@ -566,7 +567,7 @@ void create_logbook_dialogs() {
     } // Fl_Group* o
     wExport->end();
   } // Fl_Double_Window* wExport
-  { dlgLogbook = new Fl_Double_Window(590, 510, _("Logbook"));
+  { dlgLogbook = new Fl_Double_Window(590, 514, _("Logbook"));
     { inpDate_log = new Fl_DateInput(4, 24, 100, 24, _("Date On"));
       inpDate_log->tooltip(_("Date QSO started"));
       inpDate_log->box(FL_DOWN_BOX);

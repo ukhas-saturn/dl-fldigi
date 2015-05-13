@@ -67,7 +67,7 @@ FTextBase::FTextBase(int x, int y, int w, int h, const char *l)
 {
 	oldw = oldh = olds = -1;
 	oldf = (Fl_Font)-1;
-	textfont(FL_COURIER);
+	textfont(FL_HELVETICA);
 	textsize(FL_NORMAL_SIZE);
 	textcolor(FL_FOREGROUND_COLOR);
 
@@ -140,9 +140,10 @@ void FTextBase::add(unsigned char c, int attr)
 	insert(s);
 }
 
-void FTextBase::set_word_wrap(bool b)
+void FTextBase::set_word_wrap(bool b, bool b2)
 {
 	wrap_mode((wrap = b), wrap_col);
+	if (b2) restore_wrap = wrap;
 	show_insert_position();
 }
 
@@ -418,7 +419,7 @@ void FTextBase::init_context_menu(void)
 	for (int i = 0; i < context_menu->size() - 1; i++) {
 		if (context_menu[i].user_data() == 0 &&
 		    context_menu[i].labeltype() == _FL_MULTI_LABEL) {
-			set_icon_label(&context_menu[i]);
+			icons::set_icon_label(&context_menu[i]);
 			context_menu[i].user_data(this);
 		}
 	}
@@ -465,20 +466,20 @@ int FTextBase::reset_wrap_col(void)
 
 void FTextBase::reset_styles(int set)
 {
-	set_style(NATTR, FL_COURIER, FL_NORMAL_SIZE, FL_FOREGROUND_COLOR, set);
-	set_style(XMIT, FL_COURIER, FL_NORMAL_SIZE, FL_RED, set);
-	set_style(CTRL, FL_COURIER, FL_NORMAL_SIZE, FL_DARK_GREEN, set);
-	set_style(SKIP, FL_COURIER, FL_NORMAL_SIZE, FL_BLUE, set);
-	set_style(ALTR, FL_COURIER, FL_NORMAL_SIZE, FL_DARK_MAGENTA, set);
+	set_style(NATTR, FL_HELVETICA, FL_NORMAL_SIZE, FL_FOREGROUND_COLOR, set);
+	set_style(XMIT, FL_HELVETICA, FL_NORMAL_SIZE, FL_RED, set);
+	set_style(CTRL, FL_HELVETICA, FL_NORMAL_SIZE, FL_DARK_GREEN, set);
+	set_style(SKIP, FL_HELVETICA, FL_NORMAL_SIZE, FL_BLUE, set);
+	set_style(ALTR, FL_HELVETICA, FL_NORMAL_SIZE, FL_DARK_MAGENTA, set);
 }
 
 // ----------------------------------------------------------------------------
 
 Fl_Menu_Item FTextView::menu[] = {
-	{ make_icon_label(_("Copy"), edit_copy_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Clear"), edit_clear_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Select All"), edit_select_all_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Save as..."), save_as_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Copy"), edit_copy_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Clear"), edit_clear_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Select All"), edit_select_all_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Save as..."), save_as_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
 	{ _("Word wrap"),       0, 0, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL },
 	{ 0 }
 };
@@ -526,6 +527,8 @@ int FTextView::handle(int event)
 			handle_context_menu();
 			return 1;
  		}
+		if (Fl::event_button() == FL_MIDDLE_MOUSE)
+			return 1; // ignore mouse2 text pastes inside the received text
 		break;
 	case FL_DRAG:
 		if (Fl::event_button() != FL_LEFT_MOUSE)
@@ -548,10 +551,10 @@ int FTextView::handle(int event)
 
 void FTextView::handle_context_menu(void)
 {
-	set_active(&menu[VIEW_MENU_COPY], tbuf->selected());
-	set_active(&menu[VIEW_MENU_CLEAR], tbuf->length());
-	set_active(&menu[VIEW_MENU_SELECT_ALL], tbuf->length());
-	set_active(&menu[VIEW_MENU_SAVE], tbuf->length());
+	icons::set_active(&menu[VIEW_MENU_COPY], tbuf->selected());
+	icons::set_active(&menu[VIEW_MENU_CLEAR], tbuf->length());
+	icons::set_active(&menu[VIEW_MENU_SELECT_ALL], tbuf->length());
+	icons::set_active(&menu[VIEW_MENU_SAVE], tbuf->length());
 	if (wrap)
 		menu[VIEW_MENU_WRAP].set();
 	else
@@ -580,8 +583,7 @@ void FTextView::menu_cb(size_t item)
 		saveFile();
 		break;
 	case VIEW_MENU_WRAP:
-		set_word_wrap(!wrap);
-		restore_wrap = wrap;
+		set_word_wrap(!wrap, true);
 		break;
 	}
 }
@@ -639,11 +641,11 @@ loop:
 
 
 Fl_Menu_Item FTextEdit::menu[] = {
-	{ make_icon_label(_("Cut"), edit_cut_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Copy"), edit_copy_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Paste"), edit_paste_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Clear"), edit_clear_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Insert file..."), file_open_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Cut"), edit_cut_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Copy"), edit_copy_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Paste"), edit_paste_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Clear"), edit_clear_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Insert file..."), file_open_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
 	{ _("Word wrap"), 0, 0, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL } ,
 	{ 0 }
 };
@@ -719,15 +721,11 @@ int FTextEdit::handle_key(int key)
 {
 // read ctl-ddd, where d is a digit, as ascii characters (in base 10)
 // and insert verbatim; e.g. ctl-001 inserts a <soh>
-	if (key == FL_Control_L || key == FL_Control_R) return 0;
-	bool t1 = isdigit(key);
-	bool t2 = false;
-	if (key >= FL_KP) t2 = isdigit(key - FL_KP + '0');
-	bool t3 = (Fl::event_state() & FL_CTRL) == FL_CTRL;
-	if (t3 && (t1 || t2))
+	if (Fl::event_state() & FL_CTRL && (isdigit(key) || isdigit(key - FL_KP)))
 		return handle_key_ascii(key);
 	ascii_cnt = 0; // restart the numeric keypad entries.
 	ascii_chr = 0;
+
 	return 0;
 }
 
@@ -823,9 +821,9 @@ LOG_INFO("DnD file %s", text.c_str());
 void FTextEdit::handle_context_menu(void)
 {
 	bool selected = tbuf->selected();
-	set_active(&menu[EDIT_MENU_CUT], selected);
-	set_active(&menu[EDIT_MENU_COPY], selected);
-	set_active(&menu[EDIT_MENU_CLEAR], tbuf->length());
+	icons::set_active(&menu[EDIT_MENU_CUT], selected);
+	icons::set_active(&menu[EDIT_MENU_COPY], selected);
+	icons::set_active(&menu[EDIT_MENU_CLEAR], tbuf->length());
 
 	if (wrap)
 		menu[EDIT_MENU_WRAP].set();
@@ -858,8 +856,7 @@ void FTextEdit::menu_cb(size_t item)
 		readFile();
 		break;
 	case EDIT_MENU_WRAP:
-		set_word_wrap(!wrap);
-		restore_wrap = wrap;
+		set_word_wrap(!wrap, true);
 		break;
 	}
 }

@@ -8,11 +8,11 @@ AC_PREREQ(2.61)
 dnl major and minor must be integers; patch may
 dnl contain other characters or be empty
 m4_define(FLDIGI_MAJOR, [3])
-m4_define(FLDIGI_MINOR, [21])
-m4_define(FLDIGI_PATCH, [.77])
+m4_define(FLDIGI_MINOR, [22])
+m4_define(FLDIGI_PATCH, [.08])
 m4_define(FLARQ_MAJOR,  [4])
 m4_define(FLARQ_MINOR,  [3])
-m4_define(FLARQ_PATCH,  [.4])
+m4_define(FLARQ_PATCH,  [.5])
 
 AC_INIT([dl-fldigi], FLDIGI_MAJOR.FLDIGI_MINOR[]FLDIGI_PATCH, [fldigi-devel@lists.berlios.de])
 
@@ -46,7 +46,7 @@ AC_CANONICAL_HOST
 # define target, target_cpu, target_vendor, target_os
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE([-Wall foreign std-options 1.9.6])
+AM_INIT_AUTOMAKE([-Wall -Wno-portability foreign std-options subdir-objects 1.9.6])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/main.cxx])
@@ -54,11 +54,11 @@ AC_CONFIG_HEADER([src/config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 
-FLDIGI_AUTHORS="Dave Freese, Stelios Bounanos, Leigh Klotz, Remi Chateauneu, and others"
-FLARQ_AUTHORS="Dave Freese"
+FLDIGI_AUTHORS="Dave Freese, Stelios Bounanos, and others"
+FLARQ_AUTHORS="Dave Freese, Robert Stiles, and others"
 PACKAGE_HOME="http://www.w1hkj.com/Fldigi.html"
 PACKAGE_DL="http://www.w1hkj.com/download.html"
-PACKAGE_PROJ="http://developer.berlios.de/project/showfiles.php?group_id=9149"
+PACKAGE_PROJ="http://sourceforge.net/projects/fldigi/files/"
 PACKAGE_NEWBUG="https://fedorahosted.org/fldigi/newticket"
 PACKAGE_DOCS="http://www.w1hkj.com/FldigiHelp/index.html"
 PACKAGE_GUIDE="http://www.w1hkj.com/beginners.html"
@@ -121,7 +121,7 @@ AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([getaddrinfo gethostbyname hstrerror gmtime_r localtime_r memmove memset mkdir select setenv snprintf socket socketpair strcasecmp strcasestr strchr strdup strerror strlcpy strncasecmp strrchr strstr strtol uname unsetenv vsnprintf])
+AC_CHECK_FUNCS([getaddrinfo gethostbyname hstrerror gmtime_r localtime_r memmove memset mkdir select setenv snprintf socket socketpair strcasecmp strcasestr strchr strdup strerror strlcpy strncpy strncmp strnlen strncasecmp strrchr strstr strtol uname unsetenv vsnprintf])
 
 # Check for O_CLOEXEC
 AC_FCNTL_FLAGS
@@ -190,23 +190,24 @@ AC_FLDIGI_TLS
 # if falling back to Boost
 AC_FLDIGI_BIND
 
+### std::hash or alternatives
+# Set ac_cv_std_hash or ac_cv_std_tr1_hash to yes/no
+# Define HAVE_STD_HASH or HAVE_STD_TR1_HASH in config.h
+# Substitute BOOST_CPPFLAGS and BOOST_LDFLAGS in Makefile
+# if falling back to Boost
+AC_FLDIGI_HASH
+
 ### FLTK
 # Substitute FLTK_CFLAGS and FLTK_LIBS in Makefile
 # Set FLUID variable
 # Set HAVE_FLUID Makefile conditional
 AC_FLDIGI_FLTK
 
-### OSS
-# Set ac_cv_oss to yes/no
-# Define USE_OSS in config.h
-AC_FLDIGI_OSS
-
 ### libcurl
 # check if curl is available
 if test "x$ac_cv_want_fldigi" = "xyes"; then
 	AC_FLDIGI_PKG_CHECK([curl], [libcurl >= 7.10.0], [no], [no])
 fi
-
 
 ### libpng
 # Required if $ac_cv_want_fldigi is "yes"
@@ -284,6 +285,15 @@ if test "x$ac_cv_want_fldigi" = "xyes"; then
     AC_FLDIGI_PKG_CHECK([ssl], [libssl], [no], [no])
 fi
 
+### libflxmlrpc
+# Set ac_cv_flxmlrpc to yes/no
+# Define USE_FLXMLRPC in config.h
+# Substitute FLXMLRPC_CFLAGS and FLXMLRPC_LIBS in Makefile
+
+AC_FLDIGI_PKG_CHECK([flxmlrpc], [flxmlrpc >= 0.1.0], 
+  [yes], [yes], [use external flxmlrpc library @<:@autodetect@:>@],
+  [ENABLE_FLXMLRPC])
+
 ### libintl
 # Substitute INTL_CFLAGS in Makefile
 # Substitute INTL_LIBS in Makefile
@@ -336,9 +346,10 @@ if test "x$ac_cv_want_fldigi" = "xyes"; then
   AC_MSG_RESULT([ fldigi build options:
 
   sndfile ..................... $ac_cv_sndfile
-  oss ......................... $ac_cv_oss
   portaudio ................... $ac_cv_portaudio
   pulseaudio .................. $ac_cv_pulseaudio
+
+  flxmlrpc .................... $ac_cv_flxmlrpc
 
   hamlib ...................... $ac_cv_hamlib
 ])

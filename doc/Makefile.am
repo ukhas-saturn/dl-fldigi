@@ -3,8 +3,8 @@
 
 ASCIIDOC_CONF = asciidoc.conf
 
-ASCIIDOC_SRC = dl-fldigi.1.txt dl-fldigi-shell.1.txt flarq.1.txt guide.txt
-ASCIIDOC_MAN_DIST = dl-fldigi.1 dl-fldigi-shell.1 flarq.1
+ASCIIDOC_SRC = dl-fldigi.1.txt guide.txt
+ASCIIDOC_MAN_DIST = dl-fldigi.1
 ASCIIDOC_MAN_INST =
 ASCIIDOC_HTML =
 
@@ -25,7 +25,7 @@ MOSTLYCLEANFILES = *.xml
 DISTCLEANFILES = $(ASCIIDOC_HTML)
 MAINTAINERCLEANFILES = $(ASCIIDOC_MAN_INST)
 
-A2X_ARGS = --format=manpage --destination-dir=$(builddir)/../doc
+A2X_ARGS = --format=manpage
 if HAVE_ASCIIDOC_NO_XMLLINT
     A2X_ARGS += --no-xmllint
 endif
@@ -45,12 +45,14 @@ endif
 #$(ASCIIDOC_MAN_INST): asciidoc.conf
 #	a2x $(A2X_ARGS) $@.txt
 #fldigi.1: fldigi.1.txt
-#dl-fldigi-shell.1: dl-fldigi-shell.1.txt
 
 # The rest of the Makefile is enabled only if we have asciidoc
 if HAVE_ASCIIDOC
-
-ASCIIDOC_ICONS_DIR ?= /usr/share/asciidoc/images/icons
+# Try to discover the correct iconsdir.  Use the first one that
+# contains an entry matching `tip.*'.
+ASCIIDOC_ICONS_DIRS := /etc/asciidoc/icons /etc/asciidoc/images /etc/asciidoc/images/icons /etc/asciidoc/images/../icons \
+                       /usr/share/asciidoc/icons /usr/share/asciidoc/images /usr/share/asciidoc/images/icons
+ASCIIDOC_ICONS_DIR ?= $(dir $(firstword $(strip $(foreach f,$(addsuffix /tip*,$(ASCIIDOC_ICONS_DIRS)),$(wildcard $(f))))))
 # Additional attributes are defined in guide.conf
 ASCIIDOC_ARGS = --unsafe -a toc -a data-uri -a badges -a icons -a iconsdir=$(ASCIIDOC_ICONS_DIR)
 

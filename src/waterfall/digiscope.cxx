@@ -49,10 +49,13 @@ Digiscope::Digiscope (int X, int Y, int W, int H) :
 	box(FL_DOWN_BOX);
 	vidbuf = new unsigned char[ 3 * (W-4) * (H-4)];
 	vidline = new unsigned char[ 3 * (W-4)];
+	memset(vidbuf, 0, 3*(W-4)*(H-4) * sizeof(unsigned char));
+	memset(vidline, 0, 3 * (W-4) * sizeof(unsigned char));
 	_highlight = false;
 	_len = MAX_LEN;
 	_zptr = 0;
-	_x1 = _x2 = _y1 = _y2;
+	for (int i = 0; i < NUM_GRIDS; i++)
+		_x[i] = _y[i] = 0;
 	phase_mode = PHASE1;
 }
 
@@ -189,8 +192,8 @@ void Digiscope::mode(scope_mode md)
 	_mode = md;
 	memset(_buf, 0, MAX_LEN * sizeof(double));
 	linecnt = 0;
-	memset (vidbuf, 0, 3*W*H * sizeof (unsigned char) );
-	memset (vidline, 0, 3*W*sizeof(unsigned char) );
+	memset(vidbuf, 0, 3*W*H * sizeof(unsigned char));
+	memset(vidline, 0, 3 * W * sizeof(unsigned char));
 	vidline[3*W/2] = 255;
 	vidline[3*W/2+1] = 0;
 	vidline[3*W/2+2] = 0;
@@ -293,33 +296,21 @@ void Digiscope::draw_scope()
 	fl_end_line();
 
 // x & y axis'
-	if (_x1) {
-		fl_color(FL_WHITE);
-		fl_begin_line();
-			fl_vertex(_x1, 0.0);
-			fl_vertex(_x1, 1.0);
-		fl_end_line();
-	}
-	if (_x2) {
-		fl_color(FL_YELLOW);
-		fl_begin_line();
-			fl_vertex(_x2, 0.0);
-			fl_vertex(_x2, 1.0);
-		fl_end_line();
-	}
-	if (_y1) {
-		fl_color(FL_WHITE);
-		fl_begin_line();
-			fl_vertex(0.0, _y1);
-			fl_vertex(1.0, _y1);
-		fl_end_line();
-	}
-	if (_y2) {
-		fl_color(FL_YELLOW);
-		fl_begin_line();
-			fl_vertex(0.0, _y2);
-			fl_vertex(1.0, _y2);
-		fl_end_line();
+	for (int i = 0; i < NUM_GRIDS; i++) {
+		if (_x[i]) {
+			fl_color(FL_WHITE);
+			fl_begin_line();
+			fl_vertex(_x[i], 0.0);
+			fl_vertex(_x[i], 1.0);
+			fl_end_line();
+		}
+		if (_y[i]) {
+			fl_color(FL_WHITE);
+			fl_begin_line();
+			fl_vertex(0.0, _y[i]);
+			fl_vertex(1.0, _y[i]);
+			fl_end_line();
+		}
 	}
 
 	fl_pop_matrix();
@@ -397,12 +388,19 @@ void Digiscope::draw_rtty()
 		fl_vertex( 0.0, 0.1);
 		fl_vertex( 1.0, 0.1);
 	fl_end_line();
+	fl_color(FL_WHITE);
+	fl_begin_line();
+		fl_vertex( 0.0, 0.5);
+		fl_vertex( 1.0, 0.5);
+	fl_end_line();
 	fl_color(FL_GREEN);
 	fl_begin_line();
+	double value = 0.0;
 	for (int i = 0; i < npts; i++) {
-		np = i * _len / npts;
-		np = np < MAX_LEN ? np : MAX_LEN - 1;
-		fl_vertex( (double)i / npts, 0.5 + 0.75 * _buf[np] );
+		np = round(1.0 * i * _len / npts);
+		if (np >= MAX_LEN) np = MAX_LEN - 1;
+		value = _buf[np];
+		fl_vertex( 1.0 * i / (npts - 1), 0.5 + 0.75 * value );
 	}
 	fl_end_line();
 	fl_pop_matrix();
@@ -506,7 +504,8 @@ void Digiscope::resize(int x, int y, int w, int h)
 	delete [] vidline;
 	vidbuf = new unsigned char[ 3 * (w-4) * (h-4)];
 	vidline = new unsigned char[ 3 * (w-4)];
+	memset(vidbuf, 0, 3*(w-4)*(h-4) * sizeof(unsigned char));
+	memset(vidline, 0, 3*(w-4) * sizeof(unsigned char));
 
 	Fl_Widget::resize(x, y, w, h);
-	mode(_mode);
 }

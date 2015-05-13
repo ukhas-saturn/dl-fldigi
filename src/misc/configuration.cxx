@@ -37,6 +37,7 @@
 #include "gettext.h"
 #include "nls.h"
 #include "icons.h"
+#include "rigsupport.h"
 
 #if USE_HAMLIB
 	#include "hamlib.h"
@@ -82,11 +83,11 @@ using namespace std;
 
 
 const char *szBaudRates[] = {
-	"", 
+	"",
 	"300","600","1200","2400",
 	"4800","9600","19200","38400",
 	"57600","115200","230400","460800"};
-	
+
 const char *szBands[] = {
 	"",
 	"1830", "3580", "7030", "7070", "10138",
@@ -385,19 +386,17 @@ bool configuration::readDefaultsXML()
 void configuration::loadDefaults()
 {
 // RTTY
-	if (rtty_shift > 0) {
-		selShift->value(rtty_shift);
+	selShift->index(rtty_shift);
+	if (progdefaults.rtty_shift == selShift->lsize() - 1) {
+		selCustomShift->activate();
+		selCustomShift->value(rtty_custom_shift);
+	} else
 		selCustomShift->deactivate();
-	}
-	else { // Custom shift
-		selShift->value(selShift->size() - 2);
-		selShift->activate();
-	}
-	selBaud->value(rtty_baud);
-	selBits->value(rtty_bits);
-	selParity->value(rtty_parity);
+	selBaud->index(rtty_baud);
+	selBits->index(rtty_bits);
+	selParity->index(rtty_parity);
 //	chkMsbFirst->value(rtty_msbfirst);
-	selStopBits->value(rtty_stop);
+	selStopBits->index(rtty_stop);
 	btnCRCRLF->value(rtty_crcrlf);
 	btnAUTOCRLF->value(rtty_autocrlf);
 	cntrAUTOCRLF->value(rtty_autocount);
@@ -405,19 +404,19 @@ void configuration::loadDefaults()
 	chkUOSrx->value(UOSrx);
 	chkUOStx->value(UOStx);
 
-	mnuRTTYAFCSpeed->value(rtty_afcspeed);
+	i_listbox_rtty_afc_speed->index(rtty_afcspeed);
 	btnPreferXhairScope->value(PreferXhairScope);
 
 // OLIVIA
-	mnuOlivia_Tones->value(oliviatones);
-	mnuOlivia_Bandwidth->value(oliviabw);
+	i_listbox_olivia_tones->index(oliviatones);
+	i_listbox_olivia_bandwidth->index(oliviabw);
 	cntOlivia_smargin->value(oliviasmargin);
 	cntOlivia_sinteg->value(oliviasinteg);
 	btnOlivia_8bit->value(olivia8bit);
 
 // CONTESTIA
-	mnuContestia_Tones->value(contestiatones);
-	mnuContestia_Bandwidth->value(contestiabw);
+	i_listbox_contestia_tones->index(contestiatones);
+	i_listbox_contestia_bandwidth->index(contestiabw);
 	cntContestia_smargin->value(contestiasmargin);
 	cntContestia_sinteg->value(contestiasinteg);
 	btnContestia_8bit->value(contestia8bit);
@@ -448,7 +447,7 @@ void configuration::saveDefaults()
 	FreqControlFontName = Fl::get_font_name(FreqControlFontnbr);
 
 #if ENABLE_NLS && defined(__WOE32__)
-	set_ui_lang(mnuLang->value());
+	set_ui_lang(listbox_language->index());
 #endif
 
 	writeDefaultsXML();
@@ -508,13 +507,13 @@ int configuration::setDefaults()
 	btnUseUHrouterPTT->value(progdefaults.UseUHrouterPTT);
 
 #if USE_HAMLIB
-	mnuSideband->add(_("Rig mode"));
-	mnuSideband->add(_("Always LSB"));
-	mnuSideband->add(_("Always USB"));
-	mnuSideband->value(HamlibSideband);
+	listbox_sideband->add(_("Rig mode"));
+	listbox_sideband->add(_("Always LSB"));
+	listbox_sideband->add(_("Always USB"));
+	listbox_sideband->index(HamlibSideband);
     btnHamlibCMDptt->value(HamlibCMDptt);
     inpRIGdev->show();
-	mnuBaudRate->show();
+	listbox_baudrate->show();
 	cboHamlibRig->show();
 	cboHamlibRig->value(HamRigName.c_str());
 #else
@@ -527,28 +526,20 @@ int configuration::setDefaults()
 
 	inpTTYdev->value(PTTdev.c_str());
 
-	if (chkUSEHAMLIBis) {
-		chkUSEHAMLIB->value(1);
-		chkUSERIGCAT->value(0);  chkUSEXMLRPC->value(0);
-	} else if (chkUSERIGCATis) {
-		chkUSERIGCAT->value(1);
-		chkUSEHAMLIB->value(0); chkUSEXMLRPC->value(0);
-	} else if (chkUSEXMLRPCis) {
-		chkUSEXMLRPC->value(1);
-		chkUSEHAMLIB->value(0); chkUSERIGCAT->value(0);
-	} else {
-		chkUSEHAMLIB->value(0); 
-		chkUSERIGCAT->value(0);
-		chkUSEHAMLIB->value(0);
-		chkUSEXMLRPC->value(0);
-	}
+	chkUSEHAMLIB->value(0);
+	chkUSERIGCAT->value(0);
+	chkUSEXMLRPC->value(0);
+	if (chkUSEHAMLIBis) chkUSEHAMLIB->value(1);
+	if (chkUSERIGCATis) chkUSERIGCAT->value(1);
+	if (chkUSEXMLRPCis) chkUSEXMLRPC->value(1);
+
 	if (!XmlRigFilename.empty()) readRigXML();
 
 	inpRIGdev->value(HamRigDevice.c_str());
-	mnuBaudRate->value(HamRigBaudrate);
+	listbox_baudrate->index(HamRigBaudrate);
 
 	inpXmlRigDevice->value(XmlRigDevice.c_str());
-	mnuXmlRigBaudrate->value(XmlRigBaudrate);
+	listbox_xml_rig_baudrate->index(XmlRigBaudrate);
 
 	valCWsweetspot->value(CWsweetspot);
 	valRTTYsweetspot->value(RTTYsweetspot);
@@ -563,22 +554,22 @@ int configuration::setDefaults()
 
 	for (size_t i = 0;
 	     i < sizeof(waterfall::wf_wheel_action)/sizeof(*waterfall::wf_wheel_action); i++)
-		mnuWaterfallWheelAction->add(waterfall::wf_wheel_action[i]);
-	mnuWaterfallWheelAction->value(WaterfallWheelAction);
+		listboxWaterfallWheelAction->add(waterfall::wf_wheel_action[i]);
+	listboxWaterfallWheelAction->index(WaterfallWheelAction);
 
 	btnStartAtSweetSpot->value(StartAtSweetSpot);
 	btnPSKmailSweetSpot->value(PSKmailSweetSpot);
 	cntSearchRange->value(SearchRange);
 	cntServerOffset->value(ServerOffset);
 	cntACQsn->value(ACQsn);
-			
+
 	btnCursorBWcolor->color(
 		fl_rgb_color(cursorLineRGBI.R, cursorLineRGBI.G, cursorLineRGBI.B) );
 	btnCursorCenterLineColor->color(
 		fl_rgb_color(cursorCenterRGBI.R, cursorCenterRGBI.G, cursorCenterRGBI.B) );
 	btnBwTracksColor->color(
 		fl_rgb_color(bwTrackRGBI.R, bwTrackRGBI.G, bwTrackRGBI.B) );
-				
+
 	cntCWweight->value(CWweight);
 	sldrCWxmtWPM->value(CWspeed);
 	cntCWdefWPM->value(defCWspeed);
@@ -591,17 +582,17 @@ int configuration::setDefaults()
 	cntCWupperlimit->minimum(CWlowerlimit + 20);
 	cntCWrisetime->value(CWrisetime);
 	cntCWdash2dot->value(CWdash2dot);
-	mnuQSKshape->value(QSKshape);
+	i_listboxQSKshape->index(QSKshape);
 	sldrCWxmtWPM->minimum(CWlowerlimit);
 	sldrCWxmtWPM->maximum(CWupperlimit);
 	btnQSK->value(QSK);
 	cntPreTiming->value(CWpre);
 	cntPostTiming->value(CWpost);
 	btnCWID->value(CWid);
-			
-	selHellFont->value(feldfontnbr);
+
+	listboxHellFont->index(feldfontnbr);
 	btnFeldHellIdle->value(HellXmtIdle);
-			
+
 	btnTxRSID->value(TransmitRSid);
 	btnRSID->value(rsid);
 	chkRSidWideSearch->value(rsidWideSearch);
@@ -681,16 +672,14 @@ int configuration::setDefaults()
 	ostringstream ss;
 	for (lang_def_t* p = ui_langs; p->lang; p++) {
 		ss.str("");
-		ss << p->native_name << " (" << p->percent_done << "%)";
-		mnuLang->add(ss.str().c_str());
+		ss << p->native_name;
+		listbox_language->add(ss.str().c_str());
 	}
-	mnuLang->value(get_ui_lang());
-	mnuLang->show();
+	listbox_language->index(get_ui_lang());
+	listbox_language->show();
 #else
-	mnuLang->hide();
+	listbox_language->hide();
 #endif
-
-	inpGPSdev->value(gps_device.c_str());
 
 	return 1;
 }
@@ -702,7 +691,7 @@ Reset all options to their default values?\n\n\
 Reset options will take effect at the next start\n\
 Files: fldigi_def.xml and fldigi.prefs will be deleted!\n"), _("OK"), _("Cancel"), NULL) &&
 			Fl::event_key() != FL_Escape) {
-		if (!fl_choice2(_("Confirm RESET"), _("Yes"), _("No"), NULL) && 
+		if (!fl_choice2(_("Confirm RESET"), _("Yes"), _("No"), NULL) &&
 			Fl::event_key() != FL_Escape) {
 			reset();
 			atexit(reset);
@@ -725,8 +714,10 @@ void configuration::initInterface()
 // close down any possible rig interface threads
 #if USE_HAMLIB
 	hamlib_close();
+//		MilliSleep(100);
 #endif
 	rigCAT_close();
+//		MilliSleep(100);
 
 	RigCatCMDptt = btnRigCatCMDptt->value();
 	TTYptt = btnTTYptt->value();
@@ -750,18 +741,17 @@ void configuration::initInterface()
 	else
 		HamRigModel = hamlib_get_rig_model(cboHamlibRig->index());
 	HamRigDevice = inpRIGdev->value();
-	HamRigBaudrate = mnuBaudRate->value();
+	HamRigBaudrate = listbox_baudrate->index();
 #else
 	cboHamlibRig->hide();
 	inpRIGdev->hide();
-	mnuBaudRate->hide();
+	listbox_baudrate->hide();
 #endif
 
 	bool riginitOK = false;
 
 	if (chkUSERIGCATis) { // start the rigCAT thread
 		if (rigCAT_init(true)) {
-			LOG_VERBOSE("%s", "using rigCAT");
 			wf->USB(true);
 			wf->setQSY(1);
 			riginitOK = true;
@@ -784,11 +774,12 @@ void configuration::initInterface()
 	}
 
 	if (riginitOK == false) {
-		LOG_VERBOSE("%s", "NO rig control");
 		rigCAT_init(false);
 		wf->USB(true);
 		wf->setQSY(0);
 	}
+
+	if (connected_to_flrig) wf->setQSY(1);
 
 	if (HamlibCMDptt && chkUSEHAMLIBis)
 		push2talk->reset(PTT::PTT_HAMLIB);
@@ -843,16 +834,6 @@ static bool open_serial(const char* dev)
 		CloseHandle(fd);
 		ret = true;
 	}
-	else 
-	{
-		DWORD err = GetLastError();
-
-		if (err == ERROR_ACCESS_DENIED)
-		{
-			LOG_DEBUG("opening port %s resulted in ERROR_ACCESS_DENIED, it exists but is currently open - allowing");
-			ret = true;
-		}
-	}
 #endif
 	return ret;
 }
@@ -863,7 +844,6 @@ void configuration::testCommPorts()
 	inpTTYdev->clear();
 	inpRIGdev->clear();
 	inpXmlRigDevice->clear();
-
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
 #endif
@@ -879,7 +859,10 @@ void configuration::testCommPorts()
 #if defined(__linux__)
 		"/dev/ttyS%u",
 		"/dev/ttyUSB%u",
-		"/dev/usb/ttyUSB%u"
+		"/dev/usb/ttyUSB%u",
+		"/dev/ttyACM%u",
+		"/dev/usb/ttyACM%u",
+		"/opt/vttyS%u"
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 		"/dev/tty%2.2u"
 #elif defined(__CYGWIN__)
@@ -925,6 +908,7 @@ void configuration::testCommPorts()
 			if ( !(stat(ttyname, &st) == 0 && S_ISCHR(st.st_mode)) )
 				continue;
 #  else // __WOE32__
+			LOG_DEBUG("Testing serial port %s", ttyname);
 			if (!open_serial(ttyname))
 				continue;
 #    ifdef __CYGWIN__
@@ -934,14 +918,12 @@ void configuration::testCommPorts()
 #    endif
 #  endif // __WOE32__
 
-			LOG_INFO("Found serial port %s", ttyname);
+			LOG_VERBOSE("Found serial port %s", ttyname);
 			inpTTYdev->add(ttyname);
 #  if USE_HAMLIB
 			inpRIGdev->add(ttyname);
 #  endif
 			inpXmlRigDevice->add(ttyname);
-
-			inpGPSdev->add(ttyname);
 		}
 #else // __APPLE__
 		glob_t gbuf;
@@ -950,13 +932,13 @@ void configuration::testCommPorts()
 			if ( !(stat(gbuf.gl_pathv[j], &st) == 0 && S_ISCHR(st.st_mode)) ||
 			     strstr(gbuf.gl_pathv[j], "modem") )
 				continue;
-			LOG_INFO("Found serial port %s", gbuf.gl_pathv[j]);
+			LOG_VERBOSE("Found serial port %s", gbuf.gl_pathv[j]);
 			inpTTYdev->add(gbuf.gl_pathv[j]);
 #  if USE_HAMLIB
 			inpRIGdev->add(gbuf.gl_pathv[j]);
 #  endif
 			inpXmlRigDevice->add(gbuf.gl_pathv[j]);
-			inpGPSdev->add(gbuf.gl_pathv[j]);
+
 		}
 		globfree(&gbuf);
 #endif // __APPLE__

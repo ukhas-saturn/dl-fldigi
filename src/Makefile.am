@@ -1,5 +1,6 @@
 ## Copyright (C) 2007-2009 Stelios Bounanos, M0GLD (m0gld AT enotty DOT net)
 # Copyright (c) 2008 Dave Freese, W1HKJ (w1hkj AT w1hkj DOT com)
+# Copyright (c) 2012 Remi Chateauneu, F4ECW (remi dot chateauneu AT gmail DOT com)
 # License: GPLv3+: GNU GPL version 3 or later.
 
 bin_PROGRAMS =
@@ -24,27 +25,72 @@ flarq_CFLAGS = $(flarq_CXXFLAGS)
 flarq_LDFLAGS = @FLARQ_BUILD_LDFLAGS@
 flarq_LDADD = @FLARQ_BUILD_LDADD@
 
-HAMLIB_SRC = include/hamlib.h rigcontrol/hamlib.cxx include/rigclass.h rigcontrol/rigclass.cxx
-XMLRPC_SRC = include/xmlrpc.h misc/xmlrpc.cxx
+if WIN32
+fldigi_CPPFLAGS += -fno-var-tracking
+fldigi_CXXFLAGS += -fno-var-tracking
+endif
+
+HAMLIB_SRC = \
+include/hamlib.h \
+rigcontrol/hamlib.cxx \
+include/rigclass.h \
+rigcontrol/rigclass.cxx
+XMLRPC_SRC = \
+include/xmlrpc.h \
+misc/xmlrpc.cxx
 FLDIGI_WIN32_RES_SRC = fldigirc.rc
 FLARQ_WIN32_RES_SRC = flarq-src/flarqrc.rc
 COMMON_WIN32_RES_SRC = common.rc
-LOCATOR_SRC = misc/locator.c
 BENCHMARK_SRC = include/benchmark.h misc/benchmark.cxx
 REGEX_SRC = compat/regex.h compat/regex.c
 STACK_SRC = include/stack.h misc/stack.cxx
 MINGW32_SRC = include/compat.h compat/getsysinfo.c compat/mingw.c compat/mingw.h
 NLS_SRC = misc/nls.cxx include/nls.h
 
-# We distribute these but do not always compile them
+# Build the xmlrpcpp source if libflxmlrpc is not found
+XMLRPCPP_SRC = \
+	xmlrpcpp/XmlRpcBase64.h \
+	xmlrpcpp/XmlRpcClient.cpp \
+	xmlrpcpp/XmlRpcClient.h \
+	xmlrpcpp/XmlRpcDispatch.cpp \
+	xmlrpcpp/XmlRpcDispatch.h \
+	xmlrpcpp/XmlRpcException.h \
+	xmlrpcpp/XmlRpc.h \
+	xmlrpcpp/XmlRpcMutex.cpp \
+	xmlrpcpp/XmlRpcMutex.h \
+	xmlrpcpp/XmlRpcServerConnection.cpp \
+	xmlrpcpp/XmlRpcServerConnection.h \
+	xmlrpcpp/XmlRpcServer.cpp \
+	xmlrpcpp/XmlRpcServer.h \
+	xmlrpcpp/XmlRpcServerMethod.cpp \
+	xmlrpcpp/XmlRpcServerMethod.h \
+	xmlrpcpp/XmlRpcSocket.cpp \
+	xmlrpcpp/XmlRpcSocket.h \
+	xmlrpcpp/XmlRpcSource.cpp \
+	xmlrpcpp/XmlRpcSource.h \
+	xmlrpcpp/XmlRpcUtil.cpp \
+	xmlrpcpp/XmlRpcUtil.h \
+	xmlrpcpp/XmlRpcValue.cpp \
+	xmlrpcpp/XmlRpcValue.h
+
 EXTRA_dl_fldigi_SOURCES = $(HAMLIB_SRC) $(XMLRPC_SRC) $(FLDIGI_WIN32_RES_SRC) $(COMMON_WIN32_RES_SRC) \
-	$(LOCATOR_SRC) $(BENCHMARK_SRC) $(REGEX_SRC) $(STACK_SRC) $(MINGW32_SRC) $(NLS_SRC)
+	$(BENCHMARK_SRC) $(REGEX_SRC) $(STACK_SRC) $(MINGW32_SRC) $(NLS_SRC) $(XMLRPCPP_SRC)
+
 EXTRA_flarq_SOURCES = $(FLARQ_WIN32_RES_SRC) $(COMMON_WIN32_RES_SRC)
 
 dl_fldigi_SOURCES =
 flarq_SOURCES =
 
 dl_fldigi_SOURCES += $(XMLRPC_SRC)
+
+if !ENABLE_FLXMLRPC
+fldigi_SOURCES += $(XMLRPCPP_SRC)
+else
+fldigi_CPPFLAGS += @FLXMLRPC_CFLAGS@
+fldigi_CXXFLAGS += @FLXMLRPC_CFLAGS@
+fldigi_CFLAGS   += @FLXMLRPC_CFLAGS@
+fldigi_LDFLAGS  += @FLXMLRPC_LIBS@
+endif
 
 if ENABLE_HAMLIB
   dl_fldigi_SOURCES += $(HAMLIB_SRC)
@@ -114,10 +160,6 @@ endif
 
 install-exec-local:
 if WANT_FLDIGI
-	if test -f $(srcdir)/../scripts/dl-fldigi-shell; then \
-	    $(mkinstalldirs) $(DESTDIR)/$(bindir); \
-            $(INSTALL_SCRIPT) $(srcdir)/../scripts/dl-fldigi-shell $(DESTDIR)/$(bindir); \
-        fi
 	if test -f $(srcdir)/../scripts/ftp_kml_files.sh; then \
 	    $(mkinstalldirs) $(DESTDIR)/$(bindir); \
         $(INSTALL_SCRIPT) $(srcdir)/../scripts/ftp_kml_files.sh $(DESTDIR)/$(bindir); \
@@ -164,6 +206,30 @@ if WANT_FLDIGI
 	    $(mkinstalldirs) $(DESTDIR)/$(pkgdatadir)/kml; \
 	    $(INSTALL_DATA) $(srcdir)/../kml/styles.kml $(DESTDIR)/$(pkgdatadir)/kml; \
 	fi
+	if test -f $(srcdir)/../data/NAVTEX_Stations.csv; then \
+	    $(mkinstalldirs) $(DESTDIR)/$(datadir)/fldigi; \
+	    $(INSTALL_DATA) $(srcdir)/../data/NAVTEX_Stations.csv $(DESTDIR)/$(pkgdatadir); \
+	fi
+	if test -f $(srcdir)/../data/nsd_bbsss.txt; then \
+	    $(mkinstalldirs) $(DESTDIR)/$(datadir)/fldigi; \
+	    $(INSTALL_DATA) $(srcdir)/../data/nsd_bbsss.txt $(DESTDIR)/$(pkgdatadir); \
+	fi
+	if test -f $(srcdir)/../data/station_table.txt; then \
+	    $(mkinstalldirs) $(DESTDIR)/$(datadir)/fldigi; \
+	    $(INSTALL_DATA) $(srcdir)/../data/station_table.txt $(DESTDIR)/$(pkgdatadir); \
+	fi
+	if test -f $(srcdir)/../data/ToR-Stats-SHIP.csv; then \
+	    $(mkinstalldirs) $(DESTDIR)/$(datadir)/fldigi; \
+	    $(INSTALL_DATA) $(srcdir)/../data/ToR-Stats-SHIP.csv $(DESTDIR)/$(pkgdatadir); \
+	fi
+	if test -f $(srcdir)/../data/wmo_list.txt; then \
+	    $(mkinstalldirs) $(DESTDIR)/$(datadir)/fldigi; \
+	    $(INSTALL_DATA) $(srcdir)/../data/wmo_list.txt $(DESTDIR)/$(pkgdatadir); \
+	fi
+	if test -f $(srcdir)/../kml/styles.kml; then \
+	    $(mkinstalldirs) $(DESTDIR)/$(pkgdatadir)/kml; \
+	    $(INSTALL_DATA) $(srcdir)/../kml/styles.kml $(DESTDIR)/$(pkgdatadir)/kml; \
+	fi
 endif
 if WANT_FLARQ
 	if test -f $(srcdir)/../data/flarq.xpm; then \
@@ -178,7 +244,6 @@ endif
 
 uninstall-local:
 if WANT_FLDIGI
-	rm -f $(DESTDIR)$(bindir)/dl-fldigi-shell
 	rm -f $(DESTDIR)/$(datadir)/pixmaps/dl-fldigi.xpm
 	rm -f $(DESTDIR)/$(datadir)/applications/dl-fldigi.desktop
 	rm -f $(DESTDIR)/$(datadir)/applications/dl-fldigi-hab.desktop
@@ -296,13 +361,16 @@ dl_fldigi_SOURCES += \
 	dominoex/dominovar.cxx \
 	feld/feld.cxx \
 	feld/feldfonts.cxx \
-	fileselector/FL/Native_File_Chooser.H \
-	fileselector/Native_File_Chooser.cxx \
 	fileselector/fileselect.cxx \
 	filters/fftfilt.cxx \
 	filters/filters.cxx \
 	filters/viterbi.cxx \
 	globals/globals.cxx \
+	config_script/create_default_script.cxx \
+	config_script/run_scripts.cxx \
+	config_script/run_script.h \
+	config_script/script_parsing.cxx \
+	config_script/script_parsing.h \
 	include/htmlstrings.h \
 	include/arq_io.h \
 	include/confdialog.h \
@@ -313,6 +381,7 @@ dl_fldigi_SOURCES += \
 	include/Panel.h \
 	include/FreqControl.h \
 	include/analysis.h \
+	include/fftscan.h \
 	include/ascii.h \
 	include/charsetdistiller.h \
 	include/charsetlist.h \
@@ -322,6 +391,7 @@ dl_fldigi_SOURCES += \
 	include/configuration.h \
 	include/contestia.h \
 	include/cw.h \
+	include/data_io.h \
 	include/debug.h \
 	include/digiscope.h \
 	include/dxcc.h \
@@ -352,6 +422,8 @@ dl_fldigi_SOURCES += \
 	include/jalocha/pj_lowpass3.h \
 	include/jalocha/pj_mfsk.h \
 	include/jalocha/pj_struc.h \
+	include/kiss_io.h \
+	include/ax25_decode.h \
 	include/coordinate.h \
 	include/gfft.h \
 	include/kmlserver.h \
@@ -366,8 +438,8 @@ dl_fldigi_SOURCES += \
 	include/mfskvaricode.h \
 	include/wefax.h \
 	include/wefax-pic.h \
+	include/navtex.h \
 	include/misc.h \
-	include/mixer.h \
 	include/modem.h \
 	include/morse.h \
 	include/mt63base.h \
@@ -404,6 +476,7 @@ dl_fldigi_SOURCES += \
 	include/rsid.h \
 	include/rtty.h \
 	include/view_rtty.h \
+	include/nco.h \
 	include/synop.h \
 	include/nullmodem.h \
 	include/record_loader.h \
@@ -411,6 +484,9 @@ dl_fldigi_SOURCES += \
 	include/rx_extract.h \
 	include/speak.h \
 	include/serial.h \
+	include/estrings.h \
+	include/smeter.h \
+	include/pwrmeter.h \
 	include/socket.h \
 	include/sound.h \
 	include/soundconf.h \
@@ -486,11 +562,14 @@ dl_fldigi_SOURCES += \
 	logger/speak.cxx \
 	main.cxx \
 	mfsk/interleave.cxx \
+	misc/locator.cxx \
 	mfsk/mfsk.cxx \
 	mfsk/mfskvaricode.cxx \
 	wefax/wefax.cxx \
 	wefax/wefax-pic.cxx \
+	navtex/navtex.cxx \
 	misc/ascii.cxx \
+	misc/ax25_decode.cxx \
 	misc/charsetdistiller.cxx \
 	misc/charsetlist.cxx \
 	misc/configuration.cxx \
@@ -498,6 +577,7 @@ dl_fldigi_SOURCES += \
 	misc/debug.cxx \
 	misc/dxcc.cxx \
 	misc/icons.cxx \
+	misc/kiss_io.cxx \
 	misc/kmlserver.cxx \
 	misc/log.cxx \
 	misc/macroedit.cxx \
@@ -523,7 +603,6 @@ dl_fldigi_SOURCES += \
 	mt63/dsp.cxx \
 	mt63/mt63.cxx \
 	mt63/mt63base.cxx \
-	navtex/navtex.cxx \
 	include/navtex.h \
 	olivia/olivia.cxx \
 	psk/psk.cxx \
@@ -539,8 +618,9 @@ dl_fldigi_SOURCES += \
 	rigcontrol/rigsupport.cxx \
 	rigcontrol/rigxml.cxx \
 	rigcontrol/serial.cxx \
+	rigcontrol/xmlrpc_rig.cxx \
+	misc/estrings.cxx \
 	rsid/rsid.cxx \
-	soundcard/mixer.cxx \
 	soundcard/sound.cxx \
 	soundcard/soundconf.cxx \
 	spot/notify.cxx \
@@ -571,36 +651,12 @@ dl_fldigi_SOURCES += \
 	widgets/picture.cxx \
 	widgets/progress.cxx \
 	widgets/psk_browser.cxx \
+	widgets/smeter.cxx \
+	widgets/pwrmeter.cxx \
 	wwv/analysis.cxx \
+	wwv/fftscan.cxx \
 	wwv/wwv.cxx \
 	logbook/xmlrpc_log.cxx \
-	xmlrpcpp/XmlRpc.h \
-	xmlrpcpp/XmlRpcClient.cpp \
-	xmlrpcpp/XmlRpcClient.h \
-	xmlrpcpp/XmlRpcDispatch.cpp \
-	xmlrpcpp/XmlRpcDispatch.h \
-	xmlrpcpp/XmlRpcException.h \
-	xmlrpcpp/XmlRpcMutex.cpp \
-	xmlrpcpp/XmlRpcMutex.h \
-	xmlrpcpp/XmlRpcServer.cpp \
-	xmlrpcpp/XmlRpcServer.h \
-	xmlrpcpp/XmlRpcServerConnection.cpp \
-	xmlrpcpp/XmlRpcServerConnection.h \
-	xmlrpcpp/XmlRpcServerMethod.cpp \
-	xmlrpcpp/XmlRpcServerMethod.h \
-	xmlrpcpp/XmlRpcSocket.cpp \
-	xmlrpcpp/XmlRpcSocket.h \
-	xmlrpcpp/XmlRpcSource.cpp \
-	xmlrpcpp/XmlRpcSource.h \
-	xmlrpcpp/XmlRpcThread.cpp \
-	xmlrpcpp/XmlRpcThread.h \
-	xmlrpcpp/XmlRpcThreadedServer.cpp \
-	xmlrpcpp/XmlRpcThreadedServer.h \
-	xmlrpcpp/XmlRpcUtil.cpp \
-	xmlrpcpp/XmlRpcUtil.h \
-	xmlrpcpp/XmlRpcValue.cpp \
-	xmlrpcpp/XmlRpcValue.h \
-	xmlrpcpp/base64.h \
 	misc/jsoncpp.cpp \
 	habitat/CouchDB.cxx \
 	habitat/Extractor.cxx \
@@ -618,6 +674,9 @@ dl_fldigi_SOURCES += \
 	dl_fldigi/version.cxx \
 	libtiniconv/tiniconv.c \
 	libtiniconv/tiniconv_desc.c
+
+#	packet/pkt.cxx
+#	include/pkt.h
 
 # Sources that are part of the distribution but are not compiled directly
 EXTRA_dl_fldigi_SOURCES += \
@@ -708,7 +767,6 @@ EXTRA_dl_fldigi_SOURCES += \
 	libtiniconv/README \
 	libtiniconv/README.FLDIGI
 
-
 flarq_SOURCES += \
 	dialogs/font_browser.cxx \
 	flarq-src/arq.cxx \
@@ -740,8 +798,6 @@ flarq_SOURCES += \
 	include/table.h \
 	include/util.h \
 	combo/combo.cxx \
-	fileselector/FL/Native_File_Chooser.H \
-	fileselector/Native_File_Chooser.cxx \
 	fileselector/fileselect.cxx \
 	logbook/table.cxx \
 	misc/ascii.cxx \
@@ -767,7 +823,7 @@ flarq_SOURCES += \
 EXTRA_DIST = \
 	$(srcdir)/../scripts/mkappbundle.sh \
 	$(srcdir)/../scripts/mkhamlibstatic.sh \
-	$(srcdir)/../scripts/dl-fldigi-shell \
+	$(srcdir)/../scripts/mknsisinst.sh \
 	$(srcdir)/../scripts/tests/cr.sh \
 	$(srcdir)/../scripts/tests/config-h.sh \
 	$(srcdir)/../data/fldigi-psk.png \

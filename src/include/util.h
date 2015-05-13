@@ -24,6 +24,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+// include the system defines
+#include "config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -129,6 +132,10 @@ extern "C" {
 
 const__ uint32_t ceil2(uint32_t n);
 const__ uint32_t floor2(uint32_t n);
+
+#if !HAVE_STRNLEN
+size_t strnlen(const char* str, size_t len);
+#endif
 
 #if !HAVE_STRCASESTR
 char* strcasestr(const char* haystack, const char* needle);

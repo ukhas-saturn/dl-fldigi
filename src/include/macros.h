@@ -1,3 +1,23 @@
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
+//
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
+
 #ifndef _MACROS_H
 #define _MACROS_H
 
@@ -7,6 +27,12 @@
 #define NUMKEYROWS 2
 #define MAXKEYROWS 4
 #define MAXMACROS (MAXKEYROWS * NUMMACKEYS)
+
+extern void CPS_report(int);
+extern bool PERFORM_CPS_TEST;
+extern int num_cps_chars;
+extern struct timeval tv_cps_start;
+
 
 struct CONTESTCNTR {
 	int count;
@@ -67,7 +93,8 @@ extern size_t repeatchar;
 void set_macro_env(void);
 
 void queue_reset();
-void queue_execute();
+void Tx_queue_execute();
+void Rx_queue_execute();
 bool queue_must_rx();
 void idleTimer(void *);
 

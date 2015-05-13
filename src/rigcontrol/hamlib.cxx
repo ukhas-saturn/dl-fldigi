@@ -51,8 +51,6 @@
 #include "debug.h"
 #include "re.h"
 
-#include "dl_fldigi/hbtint.h"
-
 LOG_FILE_SOURCE(debug::LOG_RIGCONTROL);
 
 using namespace std;
@@ -106,7 +104,7 @@ void hamlib_get_defaults()
 	}
 
 	testrig.getConf("serial_speed", szParam);
-	mnuBaudRate->value(progdefaults.nBaudRate(szParam));
+	listbox_baudrate->value(szParam);
 
 	testrig.getConf("post_write_delay", szParam);
 	sscanf(szParam, "%d", &i);
@@ -163,9 +161,9 @@ void hamlib_restore_defaults()
 	if (chkHamlibRTSCTSflow->value()) chkHamlibRTSplus->deactivate();
 	chkHamlibRTSplus->value(progdefaults.HamlibRTSplus);
 	chkHamlibXONXOFFflow->value(progdefaults.HamlibXONXOFFflow);
-	mnuSideband->value(progdefaults.HamlibSideband);
+	listbox_sideband->index(progdefaults.HamlibSideband);
 	valHamRigStopbits->value(progdefaults.HamRigStopbits);
-	mnuBaudRate->value(progdefaults.HamRigBaudrate);
+	listbox_baudrate->index(progdefaults.HamRigBaudrate);
 	if (xcvr && xcvr->canSetPTT()) btnHamlibCMDptt->activate();
 	else btnHamlibCMDptt->deactivate();
 	btnHamlibCMDptt->value(progdefaults.HamlibCMDptt);
@@ -190,9 +188,9 @@ void hamlib_init_defaults()
 	progdefaults.HamlibRTSCTSflow = chkHamlibRTSCTSflow->value();
 	progdefaults.HamlibRTSplus = chkHamlibRTSplus->value();
 	progdefaults.HamlibXONXOFFflow = chkHamlibXONXOFFflow->value();
-	progdefaults.HamlibSideband = mnuSideband->value();
+	progdefaults.HamlibSideband = listbox_sideband->index();
 	progdefaults.HamRigStopbits = static_cast<int>(valHamRigStopbits->value());
-	progdefaults.HamRigBaudrate = mnuBaudRate->value();
+	progdefaults.HamRigBaudrate = listbox_baudrate->index();
 	progdefaults.HamlibCMDptt = btnHamlibCMDptt->value();
 	progdefaults.HamConfig = inpHamlibConfig->value();
 }
@@ -542,9 +540,6 @@ static void *hamlib_loop(void *args)
 			wf->rfcarrier(hamlib_freq);
 		}
 
-		if (freqok && freq)
-			dl_fldigi::hbtint::rig_set_freq(freq);
-
 		if (modeok && (hamlib_rmode != numode)) {
 			hamlib_rmode = numode;
 			show_mode(modeString(hamlib_rmode));
@@ -557,9 +552,6 @@ static void *hamlib_loop(void *args)
 					  hamlib_rmode == RIG_MODE_ECSSLSB ||
 					  hamlib_rmode == RIG_MODE_RTTY));
 		}
-
-		if (modeok)
-			dl_fldigi::hbtint::rig_set_mode(modeString(numode));
 
 		if (hamlib_exit)
 			break;

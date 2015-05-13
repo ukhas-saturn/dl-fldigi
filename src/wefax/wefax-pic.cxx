@@ -4,7 +4,7 @@
 // Copyright (C) 2010
 //		Remi Chateauneu, F4ECW
 //
-// This file is part of fldigi.  Adapted from code contained in HAMFAX source code 
+// This file is part of fldigi.  Adapted from code contained in HAMFAX source code
 // distribution.
 //  Hamfax Copyright (C) Christof Schmitt
 //
@@ -19,8 +19,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with fldigi; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
 #include <config.h>
@@ -157,7 +156,7 @@ static double slant_factor_with_ratio( double ratio_percent )
 }
 
 /// Minimum fax number of rows should be at least this size.
-static const int mini_max_fax_lines = 1000 ;
+//static const int mini_max_fax_lines = 1000 ;
 
 /// When set by the user, no new pixel is added or printed.
 /// However, when the printing resumes, the position is not altered.
@@ -168,7 +167,7 @@ static void set_win_label( Fl_Window * wefax_pic, const std::string & lab)
 {
 	/// If the wefax window (rx or tx) is embedded in the main window.
 	// then we would set wefax_pic = fl_digi_main;
-	if( progdefaults.WEFAX_EmbeddedGui ) return ; 
+	if( progdefaults.WEFAX_EmbeddedGui ) return ;
 	char* label = strdup(lab.c_str());
 	wefax_pic->copy_label(label);
 	free(label);
@@ -215,7 +214,7 @@ static void wefax_pic_show_tx()
 		wefax_pic_tx_win->hide();
 		if( progdefaults.WEFAX_EmbeddedGui )
 		{
-			wefax_pic_rx_win->resize( 
+			wefax_pic_rx_win->resize(
 				text_panel->x() + mvgroup->w(), text_panel->y(),
 				text_panel->w() - mvgroup->w(),
 				text_panel->h() );
@@ -225,10 +224,10 @@ static void wefax_pic_show_tx()
 	{
 		if( progdefaults.WEFAX_EmbeddedGui )
 		{
-			wefax_pic_rx_win->resize( 
+			wefax_pic_rx_win->resize(
 				text_panel->x() + mvgroup->w(), text_panel->y(),
 				text_panel->w() - mvgroup->w(), text_panel->h()/2);
-			wefax_pic_tx_win->resize( 
+			wefax_pic_tx_win->resize(
 				text_panel->x() + mvgroup->w(), wefax_pic_rx_win->y() + wefax_pic_rx_win->h(),
 				text_panel->w() - mvgroup->w(), text_panel->h() - wefax_pic_rx_win->h());
 		}
@@ -341,7 +340,7 @@ int wefax_pic::update_rx_pic_col(unsigned char data, int pix_pos )
 	/// Each time the received image becomes too high, we increase its height.
 	static const int curr_pix_incr_height = 100 ;
 
-	/// Three ints per pixel. It is safer to recalculate the 
+	/// Three ints per pixel. It is safer to recalculate the
 	/// row index to avoid any buffer overflow, because the given
 	/// row is invalid if the image was horizontally moved.
 	int row_number = 1 + ( pix_pos / ( wefax_pic_rx_picture->pix_width() * bytes_per_pix ) );
@@ -1109,7 +1108,7 @@ void wefax_pic::create_rx_viewer(int pos_x, int pos_y,int win_wid, int hei_win)
 	wefax_btn_rx_save->callback(wefax_cb_pic_rx_save, 0);
 	wefax_btn_rx_save->tooltip(_("Save current image in a file."));
 
-	/// Clear, Skipt APT and Skip phasing are at the same place	
+	/// Clear, Skipt APT and Skip phasing are at the same place
 	wid_off_up += wid_btn_margin + wid_btn_curr ;
 	wid_btn_curr = 75 ;
 	wefax_btn_rx_abort = new Fl_Button(wid_off_up, hei_off_up, wid_btn_curr, height_btn, _("Clear"));
@@ -1119,7 +1118,7 @@ void wefax_pic::create_rx_viewer(int pos_x, int pos_y,int win_wid, int hei_win)
 	wefax_btn_rx_skip_apt = new Fl_Button(wid_off_up, hei_off_up, wid_btn_curr, height_btn, _("Skip APT"));
 	wefax_btn_rx_skip_apt->callback(wefax_cb_pic_rx_skip_apt, 0);
 	wefax_btn_rx_skip_apt->tooltip(_("Skip Automatic Picture Transmission step"));
-	
+
 	wefax_btn_rx_skip_phasing = new Fl_Button(wid_off_up, hei_off_up, wid_btn_curr, height_btn, _("Skip Phase"));
 	wefax_btn_rx_skip_phasing->callback(wefax_cb_pic_rx_skip_phasing, 0);
 	wefax_btn_rx_skip_phasing->tooltip(_("Skip phasing step"));
@@ -1481,7 +1480,7 @@ static void wefax_cb_pic_tx_load(Fl_Widget *, void *)
 	const char *fil_name =
 		FSEL::select(_("Load image file"), "Portable Network Graphics\t*.png\n"
 			"Independent JPEG Group\t*.{jpg,jif,jpeg,jpe}\n"
-			"Graphics Interchange Format\t*.gif", 
+			"Graphics Interchange Format\t*.gif",
 			default_dir_get( progdefaults.wefax_load_dir ).c_str() );
 	if (!fil_name) {
 		LOG_WARN( " Cannot FSEL::select" );
@@ -1819,12 +1818,13 @@ void wefax_pic::create_both(bool called_from_fl_digi)
 	if( called_from_fl_digi && progdefaults.WEFAX_EmbeddedGui )
 	{
 		int rxWinHeight = progdefaults.WEFAX_HideTx ? text_panel->h() : text_panel->h()/2 ;
+
 		wefax_pic::create_rx_viewer(
-			text_panel->x() + mvgroup->w(), text_panel->y(),
-			text_panel->w() - mvgroup->w(), rxWinHeight );
+			wefax_group->x(), wefax_group->y(),
+			wefax_group->w(), rxWinHeight );
 		wefax_pic::create_tx_viewer(
-			text_panel->x() + mvgroup->w(), text_panel->y() + ReceiveText->h(),
-			text_panel->w() - mvgroup->w(), text_panel->h() - ReceiveText->h());
+			wefax_group->x(), wefax_group->y() + rxWinHeight,//ReceiveText->h(),
+			wefax_group->w(), wefax_group->h() - rxWinHeight);//ReceiveText->h());
 	}
 	else
 	if( ! called_from_fl_digi && ! progdefaults.WEFAX_EmbeddedGui )

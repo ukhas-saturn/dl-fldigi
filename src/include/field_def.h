@@ -1,8 +1,30 @@
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
+//
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
+
 #ifndef FIELD_DEFS
 #define FIELD_DEFS
 
 // removed unused fields to reduce size of each record and speed up
 // record processing
+
+// field position should correspond with fields[] in adif_io.cxx
 
 enum ADIF_FIELD_POS {
 FREQ = 0,
@@ -27,16 +49,16 @@ CNTY,
 COUNTRY,
 CQZ,
 DXCC,
+QSL_VIA,
 IOTA,
 ITUZ,
 CONT,
-MYXCHG,
-XCHG1,
 SRX,
 STX,
-TX_PWR,
+XCHG1,
+MYXCHG,
+TX_PWR, // do not add fields below this line; EXPORT must be last field in struc
 EXPORT, // flag used internally in fldigi's logbook
-QSL_VIA,
 NUMFIELDS };
 
 // ADIF multiline string is a sequence of Characters and line-breaks,

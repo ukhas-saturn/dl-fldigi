@@ -64,6 +64,7 @@ void parseLSBMODES(size_t &);
 void parseDISCARD(size_t &);
 
 void parseWRITE_DELAY(size_t &);
+void parseINIT_DELAY(size_t &);
 void parsePOST_WRITE_DELAY(size_t &);
 void parseRETRIES(size_t &);
 void parseTIMEOUT(size_t &);
@@ -134,6 +135,7 @@ TAGS rigdeftags[] = {
 	{"<PROGRAMMER", parseDISCARD},
 	{"<STATUS",		parseDISCARD},
 	{"<WRITE_DELAY", parseWRITE_DELAY},
+	{"<INIT_DELAY", parseINIT_DELAY},
 	{"<POST_WRITE_DELAY", parsePOST_WRITE_DELAY},
 	{"<RETRIES", parseRETRIES},
 	{"<TIMEOUT", parseTIMEOUT},
@@ -148,7 +150,7 @@ TAGS rigdeftags[] = {
 	{"<CMDPTT", parseCMDPTT},
 	{"<STOPBITS", parseSTOPBITS},
 	{"<VSP", parseVSP},
-	{0, 0} 
+	{0, 0}
 };
 
 TAGS commandtags[] = {
@@ -541,6 +543,13 @@ void parseSTOPBITS(size_t &p0){
 void parseWRITE_DELAY(size_t &p0){
 	int val = getInt(p0);
 	xmlrig.write_delay = val;
+	size_t pend = tagEnd(p0);
+	p0 = pend;
+}
+
+void parseINIT_DELAY(size_t &p0){
+	int val = getInt(p0);
+	xmlrig.init_delay = val;
 	size_t pend = tagEnd(p0);
 	p0 = pend;
 }
@@ -938,9 +947,13 @@ void selectRigXmlFilename()
 	if (p) {
 		progdefaults.XmlRigFilename = p;
 		txtXmlRigFilename->value(fl_filename_name(p));
-		rigCAT_close();
-		readRigXML();
-		rigCAT_defaults();
+		loadRigXmlFile();
 	}
 }
 
+void loadRigXmlFile(void)
+{
+	rigCAT_close();
+	readRigXML();
+	rigCAT_defaults();
+}

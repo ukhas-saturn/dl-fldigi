@@ -1,6 +1,19 @@
+// ----------------------------------------------------------------------------
 //
+// flxmlrpc Copyright (c) 2015 by W1HKJ, Dave Freese <iam_w1hkj@w1hkj.com>
+//    
 // XmlRpc++ Copyright (c) 2002-2008 by Chris Morley
 //
+// This file is part of fldigi
+//
+// flxmlrpc is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
 
 #include <config.h>
 
@@ -9,7 +22,7 @@
 #include "XmlRpcSocket.h"
 #include "XmlRpc.h"
 
-#include "base64.h"   // For HTTP authentication encoding
+#include "XmlRpcBase64.h"   // For HTTP authentication encoding
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -294,14 +307,14 @@ XmlRpcClient::generateHeader(std::string const& body)
     // convert to base64
     std::vector<char> base64data;
     int iostatus = 0;
-    base64<char> encoder;
+    xmlrpc_base64<char> encoder;
     std::back_insert_iterator<std::vector<char> > ins =
       std::back_inserter(base64data);
 
     std::string authBuf = _login + ":" + _password;
 
     encoder.put(authBuf.begin(), authBuf.end(), ins, iostatus,
-                base64<>::crlf());
+                xmlrpc_base64<>::crlf());
 
     header += "Authorization: Basic ";
     std::string authEnc(base64data.begin(), base64data.end());
@@ -319,7 +332,7 @@ XmlRpcClient::generateHeader(std::string const& body)
 
   header += "Content-Type: text/xml\r\nContent-length: ";
 
-  sprintf(buff,"%"PRIuSZ"\r\n\r\n", body.size());
+  sprintf(buff,"%d\r\n\r\n", static_cast<int>(body.size()));
 
   return header + buff;
 }

@@ -80,9 +80,9 @@ void  mfsk::tx_init(SoundBase *sc)
 	bitstate = 0;
 
 	double bw2 = (numtones + 1) * samplerate / symlen / 2.0;
-	double flo = (frequency - bw2) / samplerate;
+	double flo = (get_txfreq_woffset() - bw2) / samplerate;
 	if (flo <= 0) flo = 0;
-	double fhi = (frequency + bw2) / samplerate;
+	double fhi = (get_txfreq_woffset() + bw2) / samplerate;
 	xmtfilt->init_bandpass (127, 1, flo, fhi);
 
 	videoText();
@@ -163,9 +163,6 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 	mode = mfsk_mode;
 	depth = 10;
 
-	//VK2ETA high speed modes
-	preamble = 107;
-
 // CAP_IMG is set in cap iff image transfer supported
 	switch (mode) {
 
@@ -176,6 +173,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		depth = 5;
 		basetone = 256;
 		numtones = 32;
+		preamble = 107; // original mfsk modes
 		break;
 	case MODE_MFSK8:
 		samplerate = 8000;
@@ -184,6 +182,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		depth = 5;
 		basetone = 128;
 		numtones = 32;
+		preamble = 107; // original mfsk modes
 		break;
 	case MODE_MFSK31:
 		samplerate = 8000;
@@ -192,7 +191,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		depth = 10;
 		basetone = 32;
 		numtones = 8;
-//		cap |= CAP_IMG;
+		preamble = 107; // original mfsk modes
 		break;
 	case MODE_MFSK32:
 		samplerate = 8000;
@@ -201,6 +200,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		depth = 10;
 		basetone = 32;
 		numtones = 16;
+		preamble = 107; // original mfsk modes
 		cap |= CAP_IMG;
 		break;
 	case MODE_MFSK64:
@@ -223,7 +223,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		cap |= CAP_IMG;
 		preamble = 214;
 		break;
-		
+
 	case MODE_MFSK64L:
 		samplerate = 8000;
 		symlen =  128;
@@ -241,7 +241,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		preamble = 5000;
 		basetone = 8;
 		numtones = 16;
-		break;	
+		break;
 
 	case MODE_MFSK11:
 		samplerate = 11025;
@@ -250,7 +250,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		depth = 10;
 		basetone = 93;
 		numtones = 16;
-//		cap |= CAP_IMG;
+		preamble = 107;
 		break;
 	case MODE_MFSK22:
 		samplerate = 11025;
@@ -259,7 +259,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		depth = 10;
 		basetone = 46;
 		numtones = 16;
-//		cap |= CAP_IMG;
+		preamble = 107;
 		break;
 
 	case MODE_MFSK16:
@@ -270,6 +270,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		depth = 10;
 		basetone = 64;
 		numtones = 16;
+		preamble = 107;
 		cap |= CAP_IMG;
 		break;
 	}
@@ -454,7 +455,6 @@ void mfsk::recvchar(int c)
 
 	if (check_picture_header(c) == true) {
 		counter = tracepair.delay;
-printf("symbolbit = %d, symbits = %d\n", symbolbit, symbits);
 		switch (mode) {
 			case MODE_MFSK16:
 				if (symbolbit == symbits) counter += symlen;
@@ -535,35 +535,37 @@ void mfsk::decodesymbol(unsigned char symbol)
 		if (symcounter) {
 			if ((c = dec1->decode(symbolpair, &met)) == -1)
 				return;
-			met1 = decayavg(met1, met, 32);
+			met1 = decayavg(met1, met, 50);//32);
 			if (met1 < met2)
 				return;
-			metric = met1 / 1.5;
+			metric = met1;
 		} else {
 			if ((c = dec2->decode(symbolpair, &met)) == -1)
 				return;
-			met2 = decayavg(met2, met, 32);
+			met2 = decayavg(met2, met, 50);//32);
 			if (met2 < met1)
 				return;
-			metric = met2 / 1.5;
+			metric = met2;
 		}
 	} else {
 		if (symcounter) return;
 		if ((c = dec2->decode(symbolpair, &met)) == -1)
 			return;
-		met2 = decayavg(met2, met, 32);
-		metric = met2 / 1.5;
+		met2 = decayavg(met2, met, 50);//32);
+		metric = met2;
 	}
 
 	if (progdefaults.Pskmails2nreport && (mailserver || mailclient)) {
 		// s2n reporting: re-calibrate
-		s2n_metric = metric * 3 - 42;
+		s2n_metric = metric * 4.5 - 42;
 		s2n_metric = CLAMP(s2n_metric, 0.0, 100.0);
 	}
 
 	// Re-scale the metric and update main window
-	metric -= 32.0;
-	if (metric <= 5.0) metric = 5.0;
+	metric -= 60.0;
+	metric *= 0.5;
+
+	metric = CLAMP(metric, 0.0, 100.0);
 	display_metric(metric);
 
 	if (progStatus.sqlonoff && metric < progStatus.sldrSquelchValue)
@@ -619,7 +621,7 @@ void mfsk::softdecode(cmplx *bins)
 	          if (CWIcounter[k] > CWI_MAXCOUNT) CWIcounter[k] = CWI_MAXCOUNT + 1;
 	}
 
-// gray decode and form soft decision samples
+// Grey decode and form soft decision samples
 	for (i = 0; i < numtones; i++) {
 		j = graydecode(i);
 
@@ -676,8 +678,7 @@ cmplx mfsk::mixer(cmplx in, double f)
 	z = in * cmplx( cos(phaseacc), sin(phaseacc) );
 
 	phaseacc -= TWOPI * f / samplerate;
-	if (phaseacc > TWOPI) phaseacc -= TWOPI;
-	if (phaseacc < -TWOPI) phaseacc += TWOPI;
+	if (phaseacc < 0) phaseacc += TWOPI;
 
 	return z;
 }
@@ -917,10 +918,7 @@ void mfsk::sendsymbol(int sym)
 	for (int i = 0; i < symlen; i++) {
 		outbuf[i] = cos(phaseacc);
 		phaseacc -= phaseincr;
-		if (phaseacc > M_PI)
-			phaseacc -= TWOPI;
-		else if (phaseacc < M_PI)
-			phaseacc += TWOPI;
+		if (phaseacc < 0) phaseacc += TWOPI;
 	}
 	transmit (outbuf, symlen);
 }
@@ -993,8 +991,7 @@ void mfsk::sendpic(unsigned char *data, int len)
 		for (j = 0; j < TXspp; j++) {
 			*ptr++ = cos(phaseacc);
 			phaseacc += TWOPI * f / samplerate;
-			if (phaseacc > M_PI)
-				phaseacc -= 2.0 * M_PI;
+			if (phaseacc > TWOPI) phaseacc -= TWOPI;
 		}
 	}
 
@@ -1010,8 +1007,7 @@ void mfsk::flush_xmt_filter(int n)
 	for (int i = 0; i < n; i++) {
 		outbuf[i] = cos(phaseacc);
 		phaseacc += TWOPI * (reverse ? f2 : f1) / samplerate;
-		if (phaseacc > M_PI)
-			phaseacc -= 2.0 * M_PI;
+		if (phaseacc > TWOPI) phaseacc -= TWOPI;
 	}
 	transmit (outbuf, tracepair.delay);
 }
@@ -1068,6 +1064,15 @@ int mfsk::tx_process()
 		case TX_STATE_DATA:
 			xmtbyte = get_tx_char();
 
+			if(active_modem->XMLRPC_CPS_TEST) {
+				if(startpic) startpic = false;
+				if(xmtbyte == 0x05) {
+					sendchar(0x04); // 0x4 has the same symbol count as 0x5
+					break;
+				}
+			}
+
+
 			if (xmtbyte == 0x05 || startpic == true) {
 				put_status("Tx pic: start");
 				int len = (int)strlen(picheader);
@@ -1081,11 +1086,8 @@ int mfsk::tx_process()
 				txstate = TX_STATE_FLUSH;
 			else if (xmtbyte == GET_TX_CHAR_NODATA)
 				sendidle();
-			else {
-				if (xmtbyte & 0x8000) // UTF-8 character send two bytes
-					sendchar((xmtbyte >> 8) & 0xFF);
+			else
 				sendchar(xmtbyte);
-			}
  			break;
 
 		case TX_STATE_FLUSH:
@@ -1093,8 +1095,6 @@ int mfsk::tx_process()
 			sendchar(4);		// EOT
 			sendchar('\r');
 			flushtx(preamble);
-//			clearbits();
-//			send_epilogue();
 			rxstate = RX_STATE_DATA;
 			txstate = TX_STATE_PREAMBLE;
 			stopflag = false;
@@ -1148,10 +1148,18 @@ int mfsk::tx_process()
 	return 0;
 }
 
-void mfsk::send_image(std::string s)
+void mfsk::send_color_image(std::string s)
 {
-	load_image(s.c_str());
-	pic_TxSendColor();
+	if (load_image(s.c_str())) {
+		pic_TxSendColor();
+	}
+}
+
+void mfsk::send_Grey_image(std::string s)
+{
+	if (load_image(s.c_str())) {
+		pic_TxSendGrey();
+	}
 }
 
 

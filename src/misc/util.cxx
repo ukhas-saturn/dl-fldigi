@@ -7,6 +7,8 @@
 //		Dave Freese, W1HKJ
 // Copyright (C) 2013
 //		Remi Chateauneu, F4ECW
+// Copyright (C) 2015
+//		Robert Stiles, KK5VD
 //
 // This file is part of fldigi.
 //
@@ -30,6 +32,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <cstdlib>
+#include <string>
 
 #include "config.h"
 #include "util.h"
@@ -38,7 +41,9 @@
 #  include "compat.h"
 #endif
 
-/// Return the smallest power of 2 not less than n
+/** ********************************************************************
+ * Return the smallest power of 2 not less than n
+ ***********************************************************************/
 uint32_t ceil2(uint32_t n)
 {
         --n;
@@ -51,6 +56,9 @@ uint32_t ceil2(uint32_t n)
         return n + 1;
 }
 
+/** ********************************************************************
+ * Return the largest power of 2 not greater than n
+ ***********************************************************************/
 /// Return the largest power of 2 not greater than n
 uint32_t floor2(uint32_t n)
 {
@@ -65,7 +73,10 @@ uint32_t floor2(uint32_t n)
 
 #include <stdlib.h>
 
-/// Transforms the version, as a string, into an integer, so comparisons are possible.
+/** ********************************************************************
+ * Transforms the version, as a string, into an integer, so comparisons
+ * are possible.
+ ***********************************************************************/
 unsigned long ver2int(const char* version)
 {
 	unsigned long v = 0L;
@@ -78,9 +89,12 @@ unsigned long ver2int(const char* version)
 	return v;
 }
 
+/** ********************************************************************
+ * from git 1.6.1.2 compat/strcasestr.c
+ ***********************************************************************/
 #if !HAVE_STRCASESTR
 #  include <ctype.h>
-// from git 1.6.1.2 compat/strcasestr.c
+
 char *strcasestr(const char *haystack, const char *needle)
 {
 	int nlen = strlen(needle);
@@ -103,8 +117,10 @@ char *strcasestr(const char *haystack, const char *needle)
 }
 #endif // !HAVE_STRCASESTR
 
+/** ********************************************************************
+ * from git 1.6.1.2 compat/strcasestr.c
+ ***********************************************************************/
 #if !HAVE_STRLCPY
-// from git 1.6.1.2 compat/strcasestr.c
 size_t strlcpy(char *dest, const char *src, size_t size)
 {
 	size_t ret = strlen(src);
@@ -118,8 +134,64 @@ size_t strlcpy(char *dest, const char *src, size_t size)
 }
 #endif // !HAVE_STRLCPY
 
+/** ********************************************************************
+ *
+ ***********************************************************************/
+#if !HAVE_STRNLEN
+size_t strnlen(const char *s, size_t maxlen)
+{
+	if((!s) || (maxlen < 1))
+		return 0;
+	size_t count = 0;
+	while(*s++ && (maxlen-- > 0))
+		count++;
+	return count;
+}
+#endif // !HAVE_STRNLEN
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
+#if !HAVE_STRNCPY
+char * strncpy(char *dst, const char *src, size_t maxlen)
+{
+	if((!dst) || (!src) || (maxlen < 1))
+		return dst;
+
+	char *_dst = dst;
+	while(*src && *_dst && (--maxlen > 0))
+		*_dst++ = *src++;
+	*_dst = 0;
+
+	return dst;
+}
+#endif // !HAVE_STRNCPY
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
+#if !HAVE_STRNCMP
+int strncmp(const char *s1, const char *s2, size_t maxlen)
+{
+	if((!s1) || (!s2) || (maxlen < 1))
+		return 0;
+
+	unsigned char *u1 = (unsigned char *)s1;
+	unsigned char *u2 = (unsigned char *)s2;
+	int dif = 0;
+
+	while(*u1 && *u2 && (maxlen-- > 0)) {
+		dif = *u1++ - *u2++;
+		if(dif) break;
+	}
+	return dif;
+}
+#endif // !HAVE_STRNCMP
+
+/** ********************************************************************
+ * from git 1.6.3.1 compat/setenv.c
+ ***********************************************************************/
 #if !HAVE_SETENV
-// from git 1.6.3.1 compat/setenv.c
 int setenv(const char *name, const char *value, int replace)
 {
 	int out;
@@ -154,8 +226,10 @@ int setenv(const char *name, const char *value, int replace)
 }
 #endif
 
+/***********************************************************************
+ * from git 1.6.3.1 compat/setenv.c
+ ***********************************************************************/
 #if !HAVE_UNSETENV
-// from git 1.6.3.1 compat/setenv.c
 int unsetenv(const char *name)
 {
 	extern char **environ;
@@ -183,6 +257,10 @@ int unsetenv(const char *name)
 }
 #endif
 
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
 #ifdef __MINGW32__
 int set_cloexec(int fd, unsigned char v) { return 0; }
 #else
@@ -195,6 +273,9 @@ int set_cloexec(int fd, unsigned char v)
 }
 #endif // __MINGW32__
 
+/** ********************************************************************
+ *
+ ***********************************************************************/
 int set_nonblock(int fd, unsigned char v)
 {
 #ifndef __MINGW32__
@@ -218,6 +299,10 @@ int set_nonblock(int fd, unsigned char v)
 #  include <netinet/in.h>
 #  include <netinet/tcp.h>
 #endif
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
 int set_nodelay(int fd, unsigned char v)
 {
 	int val = v;
@@ -227,12 +312,20 @@ int set_nodelay(int fd, unsigned char v)
 #ifdef __MINGW32__
 #  include <ws2tcpip.h>
 #endif
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
 int get_bufsize(int fd, int dir, int* len)
 {
 	socklen_t optlen = sizeof(*len);
 	return getsockopt(fd, SOL_SOCKET, (dir == 0 ? SO_RCVBUF : SO_SNDBUF),
 			  (char*)len, &optlen);
 }
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
 int set_bufsize(int fd, int dir, int len)
 {
 	return setsockopt(fd, SOL_SOCKET, (dir == 0 ? SO_RCVBUF : SO_SNDBUF),
@@ -250,6 +343,9 @@ static struct sigaction* sigact = 0;
 static pthread_mutex_t sigmutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
+/** ********************************************************************
+ *
+ ***********************************************************************/
 void save_signals(void)
 {
 #ifndef __MINGW32__
@@ -263,6 +359,9 @@ void save_signals(void)
 #endif
 }
 
+/** ********************************************************************
+ *
+ ***********************************************************************/
 void restore_signals(void)
 {
 #ifndef __MINGW32__
@@ -276,6 +375,9 @@ void restore_signals(void)
 #endif
 }
 
+/** ********************************************************************
+ *
+ ***********************************************************************/
 uint32_t simple_hash_data(const unsigned char* buf, size_t len, uint32_t code)
 {
 	for (size_t i = 0; i < len; i++)
@@ -283,6 +385,10 @@ uint32_t simple_hash_data(const unsigned char* buf, size_t len, uint32_t code)
 
 	return code;
 }
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
 uint32_t simple_hash_str(const unsigned char* str, uint32_t code)
 {
 	while (*str)
@@ -296,6 +402,9 @@ uint32_t simple_hash_str(const unsigned char* str, uint32_t code)
 static const char hexsym[] = "0123456789ABCDEF";
 
 static std::vector<char>* hexbuf;
+/** ********************************************************************
+ *
+ ***********************************************************************/
 const char* str2hex(const unsigned char* str, size_t len)
 {
 	if (unlikely(len == 0))
@@ -318,12 +427,19 @@ const char* str2hex(const unsigned char* str, size_t len)
 
 	return &(*hexbuf)[0];
 }
+
+/** ********************************************************************
+ *
+ ***********************************************************************/
 const char* str2hex(const char* str, size_t len)
 {
 	return str2hex((const unsigned char*)str, len ? len : strlen(str));
 }
 
 static std::vector<char>* binbuf;
+/** ********************************************************************
+ *
+ ***********************************************************************/
 const char* uint2bin(unsigned u, size_t len)
 {
 	if (unlikely(len == 0))
@@ -345,6 +461,9 @@ const char* uint2bin(unsigned u, size_t len)
 	return &(*binbuf)[0];
 }
 
+/** ********************************************************************
+ *
+ ***********************************************************************/
 void MilliSleep(long msecs)
 {
 #ifndef __MINGW32__
@@ -355,7 +474,10 @@ void MilliSleep(long msecs)
 #endif
 }
 
-/// Returns 0 if a process is running, 0 if not there and -1 if the test cannot be made.
+/** ********************************************************************
+ * Returns 0 if a process is running, 0 if not there and -1 if the
+ * test cannot be made.
+ ***********************************************************************/
 int test_process(int pid)
 {
 #ifdef __MINGW32__
@@ -387,13 +509,15 @@ int test_process(int pid)
 /// This includes Windows.h
 #include <winbase.h>
 
-/// Retrieve the system error message for the last-error code
-static const char * WindowsError(DWORD dw) 
-{ 
+/** ********************************************************************
+ * Retrieve the system error message for the last-error code
+ ***********************************************************************/
+static const char * WindowsError(DWORD dw)
+{
     LPVOID lpMsgBuf;
 
     FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
         FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
@@ -410,7 +534,10 @@ static const char * WindowsError(DWORD dw)
 }
 #endif
 
-/// Starts a process and returns its pid, and -1 if error. Returns 0 if this cannot be made.
+/** ********************************************************************
+ * Starts a process and returns its pid, and -1 if error. Returns 0 if
+ * this cannot be made.
+ ***********************************************************************/
 int fork_process( const char * cmd )
 {
 #ifdef __MINGW32__
@@ -442,7 +569,9 @@ int fork_process( const char * cmd )
 #endif
 }
 
-/// Returns true if OK. Beware, the error case is not reentrant.
+/** ********************************************************************
+ *  Returns true if OK. Beware, the error case is not reentrant.
+ ***********************************************************************/
 const char * create_directory( const char * dir )
 {
 	if ( mkdir(dir, 0777) == -1 )

@@ -175,11 +175,4 @@ void handle_signal(int s)
 		signum = s;
 		diediedie();
 	}
-#ifdef __MINGW32__
-	else
-	{
-		/* Reset the signal */
-		signal(SIGUSR2, handle_signal);
-	}
-#endif
 }

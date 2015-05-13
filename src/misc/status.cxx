@@ -62,6 +62,7 @@
 #include "qso_db.h"
 
 #include "misc.h"
+#include "data_io.h"
 
 #define STATUS_FILENAME "status"
 
@@ -70,22 +71,22 @@ status progStatus = {
 	mode_info[MODE_PSK31].sname,	// lastmode_name
 	50,					// int mainX;
 	50,					// int mainY;
-	WNOM,				// int mainW;
-	HNOM,				// int mainH;
+	WMIN, 				// int mainW;
+	HMIN, 				// int mainH;
 	false,				// bool WF_UI;
 	false,				// bool NO_RIGLOG;
 	false,				// bool Rig_Log_UI;
 	false,				// bool Rig_Contest_UI;
 	false,				// bool DOCKEDSCOPE;
 	50,					// int RxTextHeight;
-	WNOM / 2,			// int tiled_group_x;
+	WMIN/2,				// int tiled_group_x;
 	false,				// bool show_channels;
 	50,					// int rigX;
 	50,					// int rigY;
 	560,				// int rigW
 	80,					// int rigH
 	1000,				// int carrier;
-	0,					// int noCATfreq;
+	14070000,			// int noCATfreq;
 	"USB",				// string noCATmode;
 	"3000",				// string noCATwidth;
 	1,					// int mag;
@@ -101,16 +102,20 @@ status progStatus = {
 	3.0,				// double VIEWER_psksquelch
 	-6.0,				// double VIEWER_rttysquelch
 	false,				// bool VIEWERvisible
+	50,					// unsigned int	fsqMONITORxpos;
+	50,					// unsigned int	fsqMONITORypos;
+	600,				// unsigned int	fsqMONITORwidth;
+	400,				// unsigned int	fsqMONITORheight;
 	100,				// int		tile_x
 	200,				// int		tile_w;
-	50,					// int		tile_y;
-	100,				// int		tile_h;
+	90,					// int		tile_y;
+	150,				// int		tile_h;
 	false,				// bool LOGenabled
 	5.0,				// double sldrSquelchValue
+	5.0,				// double sldrPwrSquelchValue
 	true,				// bool afconoff
 	true,				// bool sqlonoff
-	1.0,				// double	RcvMixer;
-	1.0,				// double	XmtMixer;
+	false,				// bool pwrsqlonoff
 	50,					// int	scopeX;
 	50,					// int	scopeY;
 	false,				// bool	scopeVisible;
@@ -173,10 +178,29 @@ status progStatus = {
 	progdefaults.useUART,
 	progdefaults.PreferXhairScope,
 	progdefaults.PseudoFSK,
+	true,						// bool shaped_rtty
 	progdefaults.UOSrx,
 	progdefaults.UOStx,
+    DEFAULT_XMLPRC_IP_ADDRESS,
+    DEFAULT_XMLRPC_IP_PORT,
+    DEFAULT_ARQ_IP_ADDRESS,
+    DEFAULT_ARQ_IP_PORT,
+    DEFAULT_KISS_IP_ADDRESS,
+    DEFAULT_KISS_IP_IO_PORT,
+    DEFAULT_KISS_IP_OUT_PORT,
+	progdefaults.kiss_dual_port_enabled,
+	progdefaults.data_io_enabled,
+	progdefaults.ax25_decode_enabled,
+	progdefaults.enableBusyChannel,
+	progdefaults.busyChannelSeconds,
+	progdefaults.kpsql_attenuation,
+	progdefaults.csma_enabled,
+	true,
+	0.0,
 
 	"CQ",				// string browser_search;
+
+	false,				// meters
 
 	false				// bool bLastStateRead;
 };
@@ -212,7 +236,7 @@ void status::saveLastState()
 	logbook_col_5 = wBrowser->columnWidth(5);
 
 
-	if (!bWF_only && !bHAB) {
+	if (!bWF_only) {
 		RxTextHeight = (ReceiveText->h() * 100) / text_panel->h();//VTgroup->h();
 		quick_entry = ReceiveText->get_quick_entry();
 		rx_scroll_hints = ReceiveText->get_scroll_hints();
@@ -220,7 +244,7 @@ void status::saveLastState()
 		tx_word_wrap = TransmitText->get_word_wrap();
 
 		tile_w = text_panel->w();
-		tile_y = ReceiveText->h();
+		tile_y = progdefaults.rxtx_swap ? TransmitText->h() : ReceiveText->h();
 		tile_h = text_panel->h();
 		if (text_panel->w() != ReceiveText->w())
 			tile_x = mvgroup->w();
@@ -276,6 +300,22 @@ void status::saveLastState()
 	UOSrx = progdefaults.UOSrx;
 	UOStx = progdefaults.UOStx;
 
+	xmlrpc_address         = progdefaults.xmlrpc_address;
+	xmlrpc_port            = progdefaults.xmlrpc_port;
+	arq_address            = progdefaults.arq_address;
+	arq_port               = progdefaults.arq_port;
+	kiss_address           = progdefaults.kiss_address;
+	kiss_io_port           = progdefaults.kiss_io_port;
+	kiss_out_port          = progdefaults.kiss_out_port;
+	kiss_dual_port_enabled = progdefaults.kiss_dual_port_enabled;
+	data_io_enabled        = progdefaults.data_io_enabled;
+	ax25_decode_enabled    = progdefaults.ax25_decode_enabled;
+	enableBusyChannel      = progdefaults.enableBusyChannel;
+	busyChannelSeconds     = progdefaults.busyChannelSeconds;
+    kpsql_attenuation      = progdefaults.kpsql_attenuation;
+	csma_enabled           = progdefaults.csma_enabled;
+	squelch_value = 0;
+
 	Fl_Preferences spref(HomeDir.c_str(), "w1hkj.com", PACKAGE_TARNAME);
 
 	spref.set("version", PACKAGE_VERSION);
@@ -283,10 +323,10 @@ void status::saveLastState()
 
 	spref.set("mode_name", mode_info[lastmode].sname);
 	spref.set("squelch_enabled", sqlonoff);
+	spref.set("pwr_squelch_enabled", pwrsqlonoff);
 	spref.set("squelch_level", sldrSquelchValue);
+	spref.set("pwr_squelch_level", sldrPwrSquelchValue);
 	spref.set("afc_enabled", afconoff);
-	spref.set("rx_mixer_level", RcvMixer);
-	spref.set("tx_mixer_level", XmtMixer);
 
 	spref.set("log_enabled", LOGenabled);
 
@@ -303,12 +343,14 @@ void status::saveLastState()
 	spref.set("main_x", mainX);
 	spref.set("main_y", mainY);
 	spref.set("main_w", mainW);
-if (!bWF_only and !bHAB) {
+
+if (!bWF_only) {
 	spref.set("main_h", mainH);
 	spref.set("rx_text_height", RxTextHeight);
 	spref.set("tiled_group_x", tiled_group_x);
 	spref.set("show_channels", show_channels);
 }
+
 	spref.set("wf_ui", WF_UI);
 	spref.set("riglog_ui", Rig_Log_UI);
 	spref.set("rigcontest_ui", Rig_Contest_UI);
@@ -328,6 +370,11 @@ if (!bWF_only and !bHAB) {
 	spref.set("viewer_psksq", VIEWER_psksquelch);
 	spref.set("viewer_rttysq", VIEWER_rttysquelch);
 	spref.set("viewer_nchars", static_cast<int>(VIEWERnchars));
+
+	spref.set("fsq_monitor_x", static_cast<int>(fsqMONITORxpos));
+	spref.set("fsq_monitor_y", static_cast<int>(fsqMONITORypos));
+	spref.set("fsq_monitor_w", static_cast<int>(fsqMONITORwidth));
+	spref.set("fsq_monitor_h", static_cast<int>(fsqMONITORheight));
 
 	spref.set("tile_x", tile_x);
 	spref.set("tile_y", tile_y);
@@ -392,10 +439,38 @@ if (!bWF_only and !bHAB) {
 	spref.set("rtty_useUART", useUART);
 	spref.set("preferxhairscope", PreferXhairScope);
 	spref.set("psaudofsk", PseudoFSK);
+	spref.set("shaped_rtty", shaped_rtty);
 	spref.set("uosrx", UOSrx);
 	spref.set("uostx", UOStx);
 
+	if(!xmlrpc_address_override_flag) {
+		spref.set("xmlrpc_address", xmlrpc_address.c_str());
+		spref.set("xmlrpc_port", xmlrpc_port.c_str());
+	}
+
+	if(!arq_address_override_flag) {
+		spref.set("arq_address", arq_address.c_str());
+		spref.set("arq_port", arq_port.c_str());
+	}
+
+	if(!kiss_address_override_flag) {
+		spref.set("kiss_address", kiss_address.c_str());
+		spref.set("kiss_io_port", kiss_io_port.c_str());
+		spref.set("kiss_out_port", kiss_out_port.c_str());
+		spref.set("kiss_dual_port_enabled", kiss_dual_port_enabled);
+	}
+
+	if(override_data_io_enabled != DISABLED_IO)
+		spref.set("data_io_enabled", data_io_enabled);
+
+	spref.set("ax25_decode_enabled", ax25_decode_enabled);
+	spref.set("enableBusyChannel", enableBusyChannel);
+	spref.set("busyChannelSeconds", busyChannelSeconds);
+	spref.set("kpsql_attenuation", kpsql_attenuation);
+	spref.set("csma_enabled", csma_enabled);
 	spref.set("browser_search", browser_search.c_str());
+
+	spref.set("meters", meters);
 
 //	spref.set("xml_logbook", xml_logbook);
 }
@@ -430,10 +505,10 @@ void status::loadLastState()
 	}
 
 	spref.get("squelch_enabled", i, sqlonoff); sqlonoff = i;
-	spref.get("squelch_level", sldrSquelchValue, sldrSquelchValue);
+	spref.get("pwr_squelch_enabled", i, pwrsqlonoff); pwrsqlonoff = i;
+	spref.get("squelch_level", i, sldrSquelchValue); sldrSquelchValue = i;
+	spref.get("pwr_squelch_level", i, sldrPwrSquelchValue); sldrPwrSquelchValue = i;
 	spref.get("afc_enabled", i, afconoff); afconoff = i;
-	spref.get("rx_mixer_level", RcvMixer, RcvMixer);
-	spref.get("tx_mixer_level", XmtMixer, XmtMixer);
 
 	spref.get("rx_text_height", RxTextHeight, RxTextHeight);
 	spref.get("tiled_group_x", tiled_group_x, tiled_group_x);
@@ -449,7 +524,7 @@ void status::loadLastState()
 	progdefaults.wfRefLevel = reflevel;
 	spref.get("wf_ampspan", ampspan, ampspan);
 	progdefaults.wfAmpSpan = ampspan;
-	
+
 	spref.get("noCATfreq", noCATfreq, noCATfreq);
 
 	memset(strbuff, 0, sizeof(strbuff));
@@ -461,9 +536,21 @@ void status::loadLastState()
 	noCATwidth = strbuff;
 
 	spref.get("main_x", mainX, mainX);
+	if (mainX > Fl::w())
+		mainX = 0;
+
 	spref.get("main_y", mainY, mainY);
+	if (mainY > Fl::h())
+		mainY = 0;
+
 	spref.get("main_w", mainW, mainW);
+	if (mainW < WMIN) mainW = WMIN;
+	if (mainW > Fl::w()) mainW = Fl::w();
+
 	spref.get("main_h", mainH, mainH);
+	if (mainH < HMIN) mainH = HMIN;
+	if (mainH > Fl::w()) mainH = Fl::h();
+
 	spref.get("wf_ui", i, WF_UI); WF_UI = i;
 	spref.get("riglog_ui", i, Rig_Log_UI); Rig_Log_UI = i;
 	spref.get("rigcontest_ui", i, Rig_Contest_UI); Rig_Contest_UI = i;
@@ -484,6 +571,10 @@ void status::loadLastState()
 	spref.get("viewer_rttysq", VIEWER_rttysquelch, VIEWER_rttysquelch);
 	spref.get("viewer_nchars", i, VIEWERnchars); VIEWERnchars = i;
 
+	spref.get("fsq_monitor_x", i, fsqMONITORxpos); fsqMONITORxpos = i;
+	spref.get("fsq_monitor_y", i, fsqMONITORypos); fsqMONITORypos = i;
+	spref.get("fsq_monitor_w", i, fsqMONITORwidth); fsqMONITORwidth = i;
+	spref.get("fsq_monitor_h", i, fsqMONITORheight); fsqMONITORheight = i;
 
 	spref.get("tile_x", tile_x, tile_x);
 	spref.get("tile_y", tile_y, tile_y);
@@ -550,13 +641,64 @@ void status::loadLastState()
 	spref.get("rtty_useUART", i, useUART); useUART = i;
 	spref.get("preferxhairscope", i, PreferXhairScope); PreferXhairScope = i;
 	spref.get("psaudofsk", i, PseudoFSK); PseudoFSK = i;
+	spref.get("shaped_rtty", i, shaped_rtty); shaped_rtty = i;
 	spref.get("uosrx", i, UOSrx); UOSrx = i;
 	spref.get("uostx", i, UOStx); UOStx = i;
+
+	if(!xmlrpc_address_override_flag) {
+		memset(strbuff, 0, sizeof(strbuff));
+		spref.get("xmlrpc_address", strbuff, xmlrpc_address.c_str(), sizeof(strbuff) - 1);
+		xmlrpc_address = strbuff;
+	}
+	if (!xmlrpc_port_override_flag) {
+		memset(strbuff, 0, sizeof(strbuff));
+		spref.get("xmlrpc_port", strbuff, xmlrpc_port.c_str(), sizeof(strbuff) - 1);
+		xmlrpc_port = strbuff;
+	}
+
+	if(!arq_address_override_flag) {
+		memset(strbuff, 0, sizeof(strbuff));
+		spref.get("arq_address", strbuff, arq_address.c_str(), sizeof(strbuff) - 1);
+		arq_address = strbuff;
+	}
+	if(!arq_port_override_flag) {
+		memset(strbuff, 0, sizeof(strbuff));
+		spref.get("arq_port", strbuff, arq_port.c_str(), sizeof(strbuff) - 1);
+		arq_port = strbuff;
+	}
+
+	if(!kiss_address_override_flag) {
+		memset(strbuff, 0, sizeof(strbuff));
+		spref.get("kiss_address", strbuff, kiss_address.c_str(), sizeof(strbuff) - 1);
+		kiss_address = strbuff;
+
+
+		memset(strbuff, 0, sizeof(strbuff));
+		spref.get("kiss_io_port", strbuff, kiss_io_port.c_str(), sizeof(strbuff) - 1);
+		kiss_io_port = strbuff;
+
+		memset(strbuff, 0, sizeof(strbuff));
+		spref.get("kiss_out_port", strbuff, kiss_out_port.c_str(), sizeof(strbuff) - 1);
+		kiss_out_port = strbuff;
+
+		spref.get("kiss_dual_port_enabled", i, kiss_dual_port_enabled); kiss_dual_port_enabled     = i;
+	}
+
+	if(override_data_io_enabled != DISABLED_IO)
+		spref.get("data_io_enabled", i, data_io_enabled); data_io_enabled = i;
+
+	spref.get("ax25_decode_enabled",    i, ax25_decode_enabled);    ax25_decode_enabled = i;
+	spref.get("enableBusyChannel",      i, enableBusyChannel);      enableBusyChannel   = i;
+	spref.get("busyChannelSeconds",     i, busyChannelSeconds);     busyChannelSeconds  = i;
+	spref.get("kpsql_attenuation",      i, kpsql_attenuation);      kpsql_attenuation   = i;
+	spref.get("csma_enabled",           i, csma_enabled);           csma_enabled        = i;
 
 	memset(strbuff, 0, sizeof(strbuff));
 	spref.get("browser_search", strbuff, browser_search.c_str(), sizeof(strbuff) - 1);
 	browser_search = strbuff;
 	seek_re.recompile(browser_search.c_str());
+
+	spref.get("meters",  i, meters); meters = i;
 
 //	spref.get("xml_logbook", i, xml_logbook); xml_logbook = i;
 }
@@ -568,19 +710,18 @@ void status::initLastState()
 
 // RTTY
 	if (lastmode == MODE_RTTY ) {
-		if (rtty_shift > 0) {
-			progdefaults.rtty_shift = rtty_shift;
-			selShift->value(rtty_shift);
+		progdefaults.rtty_shift = rtty_shift;
+		selShift->index(progdefaults.rtty_shift + 1);
+		if (rtty_shift == selShift->lsize() - 1) {
 			selCustomShift->deactivate();
 		}
 		else { // Custom shift
-			selShift->value(selShift->size() - 2);
-			selShift->activate();
+			selCustomShift->activate();
 		}
-		selBaud->value(progdefaults.rtty_baud = rtty_baud);
-		selBits->value(progdefaults.rtty_bits = rtty_bits);
-		selParity->value(progdefaults.rtty_parity = rtty_parity);
-		selStopBits->value(progdefaults.rtty_stop = rtty_stop);
+		selBaud->index((progdefaults.rtty_baud = rtty_baud) + 1);
+		selBits->index((progdefaults.rtty_bits = rtty_bits) + 1);
+		selParity->index((progdefaults.rtty_parity = rtty_parity) + 1);
+		selStopBits->index((progdefaults.rtty_stop = rtty_stop) + 1);
 		btnCRCRLF->value(progdefaults.rtty_crcrlf = rtty_crcrlf);
 		btnAUTOCRLF->value(progdefaults.rtty_autocrlf = rtty_autocrlf);
 		cntrAUTOCRLF->value(progdefaults.rtty_autocount = rtty_autocount);
@@ -588,10 +729,11 @@ void status::initLastState()
 		chkUOSrx->value(progdefaults.UOSrx = UOSrx);
 		chkUOStx->value(progdefaults.UOStx = UOStx);
 //		chkXagc->value(progdefaults.Xagc = Xagc);
-		mnuRTTYAFCSpeed->value(progdefaults.rtty_afcspeed = rtty_afcspeed);
+		i_listbox_rtty_afc_speed->index(progdefaults.rtty_afcspeed = rtty_afcspeed);
 		btnPreferXhairScope->value(progdefaults.PreferXhairScope = PreferXhairScope);
 
 		if (mvsquelch) {
+//printf("init rtty squelch %f\n", VIEWER_rttysquelch);
 			mvsquelch->range(-12.0, 6.0);
 			mvsquelch->value(VIEWER_rttysquelch);
 		}
@@ -614,8 +756,8 @@ void status::initLastState()
 
 // OLIVIA
 	if (lastmode == MODE_OLIVIA) {
-		mnuOlivia_Tones->value(progdefaults.oliviatones = oliviatones);
-		mnuOlivia_Bandwidth->value(progdefaults.oliviabw = oliviabw);
+		i_listbox_olivia_tones->index(progdefaults.oliviatones = oliviatones);
+		i_listbox_olivia_bandwidth->index(progdefaults.oliviabw = oliviabw);
 		cntOlivia_smargin->value(progdefaults.oliviasmargin = oliviamargin);
 		cntOlivia_sinteg->value(progdefaults.oliviasinteg = oliviainteg);
 		btnOlivia_8bit->value(progdefaults.olivia8bit = olivia8bit);
@@ -623,8 +765,8 @@ void status::initLastState()
 
 // CONTESTIA
 	if (lastmode == MODE_CONTESTIA) {
-		mnuContestia_Tones->value(progdefaults.contestiatones = contestiatones);
-		mnuContestia_Bandwidth->value(progdefaults.contestiabw = contestiabw);
+		i_listbox_contestia_tones->index(progdefaults.contestiatones = contestiatones);
+		i_listbox_contestia_bandwidth->index(progdefaults.contestiabw = contestiabw);
 		cntContestia_smargin->value(progdefaults.contestiasmargin = contestiamargin);
 		cntContestia_sinteg->value(progdefaults.contestiasinteg = contestiainteg);
 		btnContestia_8bit->value(progdefaults.contestia8bit = contestia8bit);
@@ -640,31 +782,76 @@ void status::initLastState()
 	wf->setAmpSpan();
 
 	btnAFC->value(afconoff);
-	btnSQL->value(sqlonoff);
-	sldrSquelch->value(sldrSquelchValue);
-	valRcvMixer->value(RcvMixer * 100.0);
-	valXmtMixer->value(XmtMixer * 100.0);
 
-	if (mainX > Fl::w())
-		mainX = 20;
-	if (mainY > Fl::h())
-		mainY = 20;
-	if (mainW < WMIN || mainW > Fl::w())
-		mainW = MAX(WMIN, Fl::w() / 2);
-	if (mainH < HMIN || mainH > Fl::h())
-		mainH = MAX(HMIN, Fl::h() / 2);
-
-	if (bWF_only) 
-		fl_digi_main->resize(mainX, mainY, mainW, Hmenu + Hwfall + Hstatus + 4);
-	else if (bHAB) {
-		if (HAB_width < 0)
-			HAB_width = Fl::w();
-		if (HAB_width < WMIN_hab)
-			HAB_width = WMIN_hab;
-		if (HAB_width > Fl::w())
-			HAB_width = Fl::w();
-		fl_digi_main->resize(mainX, mainY, HAB_width, HAB_height);
+	if(override_data_io_enabled != DISABLED_IO) {
+		data_io_enabled = override_data_io_enabled;
+		progdefaults.data_io_enabled = data_io_enabled;
+		progStatus.data_io_enabled = data_io_enabled;
 	}
+
+	if(progStatus.data_io_enabled == KISS_IO) {
+		data_io_enabled = KISS_IO;
+		progdefaults.data_io_enabled = KISS_IO;
+	} else {
+		data_io_enabled = ARQ_IO;
+		progdefaults.data_io_enabled = ARQ_IO;
+		progStatus.data_io_enabled = ARQ_IO;
+		pwrsqlonoff = false;
+	}
+
+	btnSQL->value(sqlonoff);
+	btnPSQL->value(pwrsqlonoff);
+
+	if(pwrsqlonoff)
+		sldrSquelch->value(sldrPwrSquelchValue);
+	else
+		sldrSquelch->value(sldrSquelchValue);
+
+	if (arq_address_override_flag)
+		arq_address = progdefaults.arq_address = override_arq_address;
+	if (arq_port_override_flag)
+		arq_port = progdefaults.arq_port = override_arq_port;
+
+	if(kiss_address_override_flag) {
+		if(!override_kiss_address.empty())
+			kiss_address = progdefaults.kiss_address = override_kiss_address;
+		if(!override_kiss_io_port.empty())
+			kiss_io_port = progdefaults.kiss_io_port = override_kiss_io_port;
+		if(!override_kiss_out_port.empty())
+			kiss_out_port = progdefaults.kiss_out_port = override_kiss_out_port;
+		if(override_kiss_dual_port_enabled > -1)
+			kiss_dual_port_enabled = progdefaults.kiss_dual_port_enabled = override_kiss_dual_port_enabled;
+	}
+
+	if (xmlrpc_address_override_flag)
+		xmlrpc_address = progdefaults.xmlrpc_address = override_xmlrpc_address;
+	if (xmlrpc_port_override_flag)
+		xmlrpc_port = progdefaults.xmlrpc_port = override_xmlrpc_port;
+
+	txtArq_ip_address->value(arq_address.c_str());
+	txtArq_ip_port_no->value(arq_port.c_str());
+
+	txtXmlrpc_ip_address->value(xmlrpc_address.c_str());
+	txtXmlrpc_ip_port_no->value(xmlrpc_port.c_str());
+
+	txtKiss_ip_address->value(kiss_address.c_str());
+	txtKiss_ip_io_port_no->value(kiss_io_port.c_str());
+	txtKiss_ip_out_port_no->value(kiss_out_port.c_str());
+
+	btnEnable_dual_port->value(kiss_dual_port_enabled);
+	progdefaults.kiss_dual_port_enabled = kiss_dual_port_enabled;
+
+	btnEnable_csma->value(csma_enabled);
+	progdefaults.csma_enabled = csma_enabled;
+
+	btnEnable_ax25_decode->value(ax25_decode_enabled);
+	progdefaults.ax25_decode_enabled = ax25_decode_enabled;
+
+	cntKPSQLAttenuation->value(kpsql_attenuation);
+	progdefaults.kpsql_attenuation = kpsql_attenuation;
+
+	if (bWF_only)
+		fl_digi_main->resize(mainX, mainY, mainW, Hmenu + Hwfall + Hstatus);
 	else {
 		fl_digi_main->resize(mainX, mainY, mainW, mainH);
 
@@ -698,8 +885,8 @@ void status::initLastState()
 
 	ReceiveText->set_quick_entry(quick_entry);
 	ReceiveText->set_scroll_hints(rx_scroll_hints);
-	ReceiveText->set_word_wrap(rx_word_wrap);
-	TransmitText->set_word_wrap(tx_word_wrap);
+	ReceiveText->set_word_wrap(rx_word_wrap, true);
+	TransmitText->set_word_wrap(tx_word_wrap, true);
 
 //	set_server_label(xml_logbook);
 

@@ -220,7 +220,7 @@ private:
         void		src_data_reset(unsigned dir);
         static long	src_read_cb(void* arg, float** data);
         size_t          resample_write(float* buf, size_t count);
-	device_iterator name_to_device(const std::string& name, unsigned dir);
+	device_iterator name_to_device(std::string& name, unsigned dir);
         void 		init_stream(unsigned dir);
         void 		start_stream(unsigned dir);
         void 		pause_stream(unsigned dir);
@@ -238,7 +238,7 @@ private:
 	static std::vector<const PaDeviceInfo*> devs;
         double	 				req_sample_rate;
         float* 					fbuf;
-	float*					src_buffer;
+		float*					src_buffer;
 	SRC_DATA	*tx_src_data;
 
         enum {
@@ -317,6 +317,7 @@ private:
 
 	SRC_DATA* tx_src_data;
 	float* fbuf;
+	float* rbuf;
 	float* snd_buffer;
 	float* src_buffer;
 };

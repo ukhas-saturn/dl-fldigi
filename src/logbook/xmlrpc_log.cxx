@@ -1,10 +1,22 @@
-// =====================================================================
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
 //
-// xmlrpc_io.cxx
+// This file is part of fldigi
 //
-// connect to logbook xmlrpc server
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
 //
-// =====================================================================
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
 
 #include <iostream>
 #include <cmath>
@@ -125,9 +137,9 @@ bool xml_get_record(const char *callsign)
 		double lon1, lat1, lon2, lat2;
 		double azimuth, distance;
 		char szAZ[4];
-		if ( locator2longlat(&lon1, &lat1, progdefaults.myLocator.c_str()) == RIG_OK &&
-			 locator2longlat(&lon2, &lat2, inpLoc->value()) == RIG_OK &&
-			 qrb(lon1, lat1, lon2, lat2, &distance, &azimuth) == RIG_OK ) {
+		if ( QRB::locator2longlat(&lon1, &lat1, progdefaults.myLocator.c_str()) == QRB::QRB_OK &&
+			 QRB::locator2longlat(&lon2, &lat2, inpLoc->value()) == QRB::QRB_OK &&
+			 QRB::qrb(lon1, lat1, lon2, lat2, &distance, &azimuth) == QRB::QRB_OK ) {
 			snprintf(szAZ,sizeof(szAZ),"%0.f", azimuth);
 			inpAZ->value(szAZ);
 		} else
@@ -157,6 +169,7 @@ void xml_add_record()
 	}
 
 // create the ADIF record
+	char Mhz[30];
 	adif.erase();
 
 	adif_str(QSO_DATE, sDate_on.c_str()); 
@@ -165,7 +178,6 @@ void xml_add_record()
 	adif_str(TIME_OFF, sTime_off.c_str());
 	adif_str(CALL, inpCall->value());
 	{
-		char Mhz[30];
 		snprintf(Mhz, sizeof(Mhz), "%-f", atof(inpFreq->value()) / 1000.0);
 		inpFreq_log->value(Mhz);
 		adif_str(FREQ, Mhz);
@@ -200,6 +212,41 @@ void xml_add_record()
 	XmlRpcValue oneArg, result;
 	oneArg[0] = adif.c_str();
 	std::cout << "result: " << log_client->execute("log.add_record", oneArg, result) << std::endl;
+
+// submit it foreign log programs
+	cQsoRec rec;
+	rec.putField(CALL, inpCall->value());
+	rec.putField(NAME, inpName->value());
+	rec.putField(QSO_DATE, sDate_on.c_str());
+	rec.putField(QSO_DATE_OFF, sDate_off.c_str());
+	rec.putField(TIME_ON, inpTimeOn->value());
+	rec.putField(TIME_OFF, ztime());
+	rec.putField(FREQ, Mhz);
+	rec.putField(MODE, mode_info[active_modem->get_mode()].adif_name);
+	rec.putField(QTH, inpQth->value());
+	rec.putField(STATE, inpState->value());
+	rec.putField(VE_PROV, inpVEprov->value());
+	rec.putField(COUNTRY, inpCountry->value());
+	rec.putField(GRIDSQUARE, inpLoc->value());
+	rec.putField(NOTES, inpNotes->value());
+	rec.putField(QSLRDATE, "");
+	rec.putField(QSLSDATE, "");
+	rec.putField(RST_RCVD, inpRstIn->value ());
+	rec.putField(RST_SENT, inpRstOut->value ());
+	rec.putField(SRX, inpSerNo->value());
+	rec.putField(STX, outSerNo->value());
+	rec.putField(XCHG1, inpXchgIn->value());
+	rec.putField(MYXCHG, progdefaults.myXchg.c_str());
+	rec.putField(CNTY, "");
+	rec.putField(IOTA, "");
+	rec.putField(DXCC, "");
+	rec.putField(CONT, "");
+	rec.putField(CQZ, "");
+	rec.putField(ITUZ, "");
+	rec.putField(TX_PWR, "");
+
+	submit_record(rec);
+
 }
 
 bool xml_check_dup()
@@ -231,14 +278,10 @@ bool xml_check_dup()
 
 void connect_to_log_server(void *)
 {
-	if (!log_client) {
-		int xmllog_port = atoi(progdefaults.xmllog_port.c_str());
-		log_client = new XmlRpcClient(progdefaults.xmllog_address.c_str(), xmllog_port);
-	} else {
-		delete log_client;
-		int xmllog_port = atoi(progdefaults.xmllog_port.c_str());
-		log_client = new XmlRpcClient(progdefaults.xmllog_address.c_str(), xmllog_port);
-	}
+	if (log_client) delete log_client;
+	log_client = new XmlRpcClient(
+					progdefaults.xmllog_address.c_str(),
+					atoi(progdefaults.xmllog_port.c_str()));
 
 	if (progdefaults.xml_logbook) {
 		if (test_connection(true)) {

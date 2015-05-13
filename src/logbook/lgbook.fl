@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0300 
 i18n_type 1 
 i18n_include "gettext.h" 
 i18n_function _ 
@@ -11,6 +11,9 @@ decl {\#include <config.h>} {private local
 decl {\#include <FL/Fl_Pixmap.H>} {private local
 } 
 
+decl {\#include "flmisc.h"} {selected private local
+} 
+
 decl {\#include "logsupport.h"} {private local
 } 
 
@@ -18,6 +21,18 @@ decl {\#include "pixmaps.h"} {private local
 } 
 
 decl {\#include "flinput2.h"} {public local
+} 
+
+decl {
+// Avoid 'nitems' macro collision between FreeBSD's sys/params.h and fltk's
+// FL/Fl_Check_Browser.H (http://www.fltk.org/str.php?L2984)
+\#undef nitems
+\#include <FL/Fl_Check_Browser.H>
+\#define FLTK_nitems nitems
+\#undef nitems
+// ^^^ Avoid 'nitems' macro collision
+ extern Fl_Check_Browser *chkExportBrowser;
+} {public local
 } 
 
 Function {create_logbook_dialogs()} {open return_type void
@@ -311,8 +326,8 @@ btnSelectNotes->value(0);}
     }
   }
   Fl_Window dlgLogbook {
-    label Logbook open
-    xywh {522 70 590 510} type Double resizable visible
+    label Logbook
+    xywh {603 71 590 514} type Double resizable visible
   } {
     Fl_Input inpDate_log {
       label {Date On}
@@ -510,7 +525,7 @@ btnSelectNotes->value(0);}
       tooltip {Find next} xywh {547 284 24 22} color 50 selection_color 48 align 16
       code0 {bSearchNext->image(new Fl_Pixmap(right_arrow_icon));}
     }
-    Fl_Group wBrowser {open selected
+    Fl_Group wBrowser {open
       xywh {2 315 586 195} box DOWN_FRAME color 7 selection_color 15 resizable
       code0 {\#include "table.h"}
       class Table
@@ -537,7 +552,7 @@ wBrowser->allowResize (1);
 wBrowser->gridEnabled (0);
 dlgLogbook->xclass(PACKAGE_TARNAME);} {}
   Fl_Window wCabrillo {
-    label {Cabrillo Setup}
+    label {Cabrillo Setup} selected
     xywh {516 612 675 340} type Double hide
   } {
     Fl_Group {} {

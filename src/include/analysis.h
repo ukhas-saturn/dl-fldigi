@@ -30,40 +30,36 @@
 #include "filters.h"
 #include "fftfilt.h"
 #include "modem.h"
-#include "mbuffer.h"
 
-#define	anal_SampleRate	8000
-#define	analMaxSymLen	512
-
-#define dispwidth 100
+#define ANAL_SAMPLERATE	8000
+#define FILT_LEN        4		//seconds
+#define PIPE_LEN		120
+#define DSP_CNT			1		//seconds
+#define ANAL_BW			4
 
 class anal : public modem {
 private:
 
 	double		phaseacc;
-	double		anal_squelch;
 
 	C_FIR_filter	*hilbert;
 	fftfilt *bpfilt;
 	Cmovavg *ffilt;
 	Cmovavg *favg;
 
-	mbuffer<double, analMaxSymLen, 2> pipe;
-	int pipeptr;
+	double pipe[PIPE_LEN];
 
 	double prevsymbol;
 	cmplx prevsmpl;
-	int	symbollen;
 
-	int restart_count;
-
-	double		fout_1;
-	double		fout_2;
-	long		wf_freq;
+	double		fout;
+	long int	wf_freq;
+	double      dspcnt;
+	long int	passno;
 
 	struct timespec start_time;
 
-	double sum;
+	double elapsed;
 
 	void clear_syncscope();
 	inline cmplx mixer(cmplx in);
@@ -81,6 +77,7 @@ public:
 	void rx_init();
 	void tx_init(SoundBase *sc);
 	void restart();
+	void start_csv();
 	int rx_process(const double *buf, int len);
 	int tx_process();
 

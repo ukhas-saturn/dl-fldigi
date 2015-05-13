@@ -1,5 +1,25 @@
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
+//
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
+
 #ifndef SUPPORT_H
-#define SUPPORT_h
+#define SUPPORT_H
 
 #include <string>
 
@@ -9,14 +29,7 @@
 #include "qso_db.h"
 #include "adif_io.h"
 
-// Avoid 'nitems' macro collision in FreeBSD's sys/params.h
-// with fltk's FL/Fl_Check_Browser.H
-// ->nitems() is called by functions in this file
-
-#undef nitems
 #include "lgbook.h"
-#define FLTK_nitems nitems
-#undef nitems
 
 #ifdef __WOE32__
 #  define ADIF_SUFFIX "adi"

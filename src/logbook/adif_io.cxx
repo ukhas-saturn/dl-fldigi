@@ -1,3 +1,23 @@
+// ----------------------------------------------------------------------------
+// Copyright (C) 2014
+//              David Freese, W1HKJ
+//
+// This file is part of fldigi
+//
+// fldigi is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// fldigi is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
+
 #include <FL/Fl.H>
 #include <FL/filename.H>
 #include <FL/fl_ask.H>
@@ -62,14 +82,12 @@ FIELD fields[] = {
 	{ITUZ,           "ITUZ",         &btnSelectITUZ},      // ITU zone
 	{CONT,           "CONT",         &btnSelectCONT},      // contacted stations continent
 
-	{MYXCHG,         "MYXCHG",       &btnSelectMyXchg},    // contest exchange sent
-	{XCHG1,          "XCHG1",        &btnSelectXchgIn},    // contest exchange #1 / free1 in xlog
-
-	{MYXCHG,         "STX_STRING",   &btnSelectMyXchg},    // contest exchange sent
-	{XCHG1,          "SRX_STRING",   &btnSelectXchgIn},    // contest exchange #1 / free1 in xlog
-
 	{SRX,            "SRX",          &btnSelectSerialIN},  // received serial number for a contest QSO
 	{STX,            "STX",          &btnSelectSerialOUT}, // QSO transmitted serial number
+
+	{XCHG1,          "SRX_STRING",   &btnSelectXchgIn},    // contest exchange #1 / free1 in xlog
+	{MYXCHG,         "STX_STRING",   &btnSelectMyXchg},    // contest exchange sent
+
 	{TX_PWR,         "TX_PWR",       &btnSelectTX_pwr},    // power transmitted by this station
 	{NUMFIELDS,      "",             NULL}
 };
@@ -139,7 +157,9 @@ static inline int findfield( char *p )
 			*p1 = 0;
 			pos = strcasestr(fastlookup, p);
 			*p1 = ':';
-			if (pos) return fields[(pos - fastlookup) / maxlen].type;
+			if (pos) {
+				return fields[(pos - fastlookup) / maxlen].type;
+			}
 		}
 	}
 	return -2;		//search key not found
@@ -194,52 +214,49 @@ void cAdifIO::do_readfile(const char *fname, cQsoDb *db)
 	long filesize = 0;
 	char *buff;
 	int found;
-
-LOG_INFO("Reading %s", fname);
+	static char szmsg[200];
 
 // open the adif file
 	FILE *adiFile = fopen (fname, "r");
 
-	if (adiFile == NULL) {
-LOG_INFO("Cannot open %s", fname);
+	if (adiFile == NULL)
 		return;
-	}
-
 // determine its size for buffer creation
 	fseek (adiFile, 0, SEEK_END);
 	filesize = ftell (adiFile);
 
 	if (filesize == 0) {
-		LOG_INFO(_("Empty ADIF logbook file %s"), fl_filename_name(fname));
+		snprintf(szmsg, sizeof(szmsg), _("Empty ADIF logbook file %s"), fname);
+		REQ(write_rxtext, "\n");
+		REQ(write_rxtext, szmsg);
+		REQ(write_rxtext, "\n");
+		LOG_ERROR("%s", szmsg);
 		return;
 	}
 
 	buff = new char[filesize + 1];
 
-	static char szmsg[100];
-	static char szmsg2[100];
-	snprintf(szmsg, sizeof(szmsg), "Reading %ld bytes from %s",
-		filesize, fl_filename_name(fname));
-	REQ(write_rxtext, "\n*** ");
-	REQ(write_rxtext, szmsg);
-	LOG_INFO("%s", szmsg);
 // read the entire file into the buffer
 
 	fseek (adiFile, 0, SEEK_SET);
 	int retval = fread (buff, filesize, 1, adiFile);
 	fclose (adiFile);
 	if (retval != 1) {
-		LOG_ERROR(_("Error reading %s"), fl_filename_name(fname));
+		snprintf(szmsg, sizeof(szmsg), _("Error reading %s"), fname);
+		REQ(write_rxtext, "\n");
+		REQ(write_rxtext, szmsg);
+		REQ(write_rxtext, "\n");
+		LOG_ERROR("%s", szmsg);
 		return;
 	}
 
 // relaxed file integrity test to all importing from non conforming log programs
 	if (strcasestr(buff, "<CALL:") == 0) {
-		strcpy(szmsg2, "NO RECORDS IN FILE");
-		REQ(write_rxtext, "\n*** ");
-		REQ(write_rxtext, szmsg2);
+		snprintf(szmsg, sizeof(szmsg), "NO RECORDS IN FILE: %s", fname);
 		REQ(write_rxtext, "\n");
-		LOG_INFO("%s", szmsg2);
+		REQ(write_rxtext, szmsg);
+		REQ(write_rxtext, "\n");
+		LOG_INFO("%s", szmsg);
 		delete [] buff;
 		db->clearDatabase();
 		return;
@@ -260,17 +277,18 @@ LOG_INFO("Cannot open %s", fname);
 		}
 		if (!p1) {
 			delete [] buff;
-			strcpy(szmsg2, "Corrupt ADIF file ***");
-			REQ(write_rxtext, "\n*** ");
-			REQ(write_rxtext, szmsg2);
+			snprintf(szmsg, sizeof(szmsg), "Corrupt logbook file: %s", fname);
 			REQ(write_rxtext, "\n");
-			LOG_ERROR("%s", szmsg2);
+			REQ(write_rxtext, szmsg);
+			REQ(write_rxtext, "\n");
+			LOG_ERROR("%s", szmsg);
 			return;	 // must not be an ADIF compliant file
 		}
 		p1 += 1;
 	}
 
 	p2 = strchr(p1,'<'); // find first ADIF specifier
+//	adifqso.clearRec();
 
 	adifqso = 0;
 	while (p2) {
@@ -295,11 +313,14 @@ LOG_INFO("Cannot open %s", fname);
 	t0 = t1 - t0;
 	float t = (t0.tv_sec + t0.tv_nsec/1e9);
 
-	snprintf(szmsg2, sizeof(szmsg2), "Read %d records in %4.2f seconds", db->nbrRecs(), t);
-	REQ(write_rxtext, "\n*** ");
-	REQ(write_rxtext, szmsg2);
+	snprintf(szmsg, sizeof(szmsg), "\
+Loaded logbook: %s\n\
+                %d records in %4.2f seconds",
+fname, db->nbrRecs(), t);
 	REQ(write_rxtext, "\n");
-	LOG_INFO("%s", szmsg2);
+	REQ(write_rxtext, szmsg);
+	REQ(write_rxtext, "\n");
+	LOG_INFO("%s", szmsg);
 
 	if (db == &qsodb)
 		REQ(adif_read_OK);
@@ -393,10 +414,8 @@ void cAdifIO::readFile (const char *fname, cQsoDb *db)
 {
 	ENSURE_THREAD(FLMAIN_TID);
 
-	if (!ADIF_RW_thread) {
+	if (!ADIF_RW_thread)
 		ADIF_RW_init();
-		MilliSleep(50);
-	}
 
 	pthread_mutex_lock(&ADIF_RW_mutex);
 
@@ -468,10 +487,7 @@ void cAdifIO::do_writelog()
 
 	if (!adiFile) {
 		LOG_ERROR("Cannot write to %s", adif_file_name.c_str());
-		if (wrdb) {
-			delete wrdb;
-			wrdb = 0;
-		}
+		if (wrdb) delete wrdb;
 		return;
 	}
 	LOG_INFO("Writing %s", adif_file_name.c_str());
@@ -516,10 +532,7 @@ void cAdifIO::do_writelog()
 
 	fclose (adiFile);
 
-	if (wrdb) {
-		delete wrdb;
-		wrdb = 0;
-	}
+	if (wrdb) delete wrdb;
 
 #ifdef _POSIX_MONOTONIC_CLOCK
 	clock_gettime(CLOCK_MONOTONIC, &t1);
@@ -533,6 +546,9 @@ void cAdifIO::do_writelog()
 	static char szmsg[50];
 	snprintf(szmsg, sizeof(szmsg), "%d records in %4.2f seconds", adifdb->nbrRecs(), t);
 	LOG_INFO("%s", szmsg);
+
+	snprintf(szmsg, sizeof(szmsg), "Wrote log %d recs", adifdb->nbrRecs());
+	put_status(szmsg, 5.0);
 
 	return;
 }
@@ -589,13 +605,11 @@ static void ADIF_RW_init()
 
 	if (ADIF_RW_thread)
 		return;
-LOG_INFO("%s","Starting logbook r/w thread");
-
 	ADIF_RW_thread = new pthread_t;
 	ADIF_RW_EXIT = false;
 	if (pthread_create(ADIF_RW_thread, NULL, ADIF_RW_loop, NULL) != 0) {
 		LOG_PERROR("pthread_create");
 		return;
 	}
-//	MilliSleep(50); // increased from 10 for Win7 testing
+	MilliSleep(10);
 }
