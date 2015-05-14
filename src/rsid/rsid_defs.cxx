@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 // ----------------------------------------------------------------------------
 // Copyright (C) 2014
 //              David Freese, W1HKJ
@@ -20,7 +18,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
->>>>>>> 8b9343684c181dacfffae03a89a1ac188e5aa0b1
 // Syntax: ELEM_(rsid_code, rsid_tag, fldigi_mode)
 // fldigi_mode is NUM_MODES if mode is not available in fldigi,
 // otherwise one of the tags defined in globals.h.
@@ -276,12 +273,6 @@ const int cRsId::rsid_ids_size1 = sizeof(rsid_ids_1)/sizeof(*rsid_ids_1) - 1;
         ELEM2_(681, DOMINOEX_88, MODE_DOMINOEX88)       \
                                                         \
         ELEM2_(687, MFSK31, MODE_MFSK31)                \
-<<<<<<< HEAD
-        												\
-        ELEM2_(1026, MFSK64L, MODE_MFSK64L)             \
-        ELEM2_(1029, MFSK128L, MODE_MFSK128L)           \
-                                                        \
-=======
                                                         \
         ELEM2_(1026, MFSK64L, MODE_MFSK64L)             \
         ELEM2_(1029, MFSK128L, MODE_MFSK128L)           \
@@ -297,7 +288,6 @@ const int cRsId::rsid_ids_size1 = sizeof(rsid_ids_1)/sizeof(*rsid_ids_1) - 1;
         ELEM2_(1078, PSK8P1000F, MODE_8PSK1000F)        \
         ELEM2_(1058, PSK8P1200F, MODE_8PSK1200F)        \
                                                         \
->>>>>>> 8b9343684c181dacfffae03a89a1ac188e5aa0b1
         ELEM2_(0, NONE2, NUM_MODES)
 
 #define ELEM2_(code_, tag_, mode_) RSID_ ## tag_ = code_,

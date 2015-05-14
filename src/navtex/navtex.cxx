@@ -11,11 +11,7 @@
 //
 // fldigi is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
-<<<<<<< HEAD
-// the Free Software Foundation; either version 2 of the License, or
-=======
 // the Free Software Foundation; either version 3 of the License, or
->>>>>>> 8b9343684c181dacfffae03a89a1ac188e5aa0b1
 // (at your option) any later version.
 //
 // fldigi is distributed in the hope that it will be useful,
@@ -24,13 +20,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-<<<<<<< HEAD
-// along with fldigi; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-=======
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
->>>>>>> 8b9343684c181dacfffae03a89a1ac188e5aa0b1
 
 #include <math.h>
 #include <stdlib.h>
@@ -1464,16 +1455,6 @@ public:
 		}
 	}
 
-<<<<<<< HEAD
-	void send_sine( double seconds, double freq )
-	{
-		int nb_samples = seconds * m_ptr_navtex->get_samplerate();
-		double max_level = 0.99 ; // Between -1.0 and 1.0
-		double ratio = 2.0 * M_PI * (double)freq / (double)m_ptr_navtex->get_samplerate() ;
-		for (int i = 0; i < nb_samples ; ++i )
-		{
-			add_sample( max_level * sin( i * ratio ) );
-=======
 // REMI : Note change to send_sine
 	void send_sine( double seconds, double freq )
 	{
@@ -1485,7 +1466,6 @@ public:
 		{
 			add_sample( max_level * sin( phase += ratio));//i * ratio ) );
 			if (phase > 2.0 * M_PI) phase -= 2.0*M_PI;
->>>>>>> 8b9343684c181dacfffae03a89a1ac188e5aa0b1
 		}
 	}
 

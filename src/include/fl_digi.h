@@ -27,6 +27,8 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Browser.H>
 #include <FL/Fl_Pack.H>
+#include <FL/Fl_Output.H>
+#include <FL/Fl_Choice.H>
 
 #include "combo.h"
 //#include "Fl_Tile_Check.h"
@@ -113,6 +115,29 @@ extern Fl_Input2		*inpCall2;
 extern Fl_Input2		*inpCall3;
 extern Fl_Input2		*inpCall4;
 extern Fl_Input2		*inpName1;
+
+extern bool		bHAB;
+extern Fl_Group		*TopFrameHAB;
+extern Fl_Choice	*habFlight;
+extern Fl_Button	*habOpenBrowser;
+extern Fl_Choice	*habCHPayload;
+extern Fl_Choice	*habCHTransmission;
+extern Fl_Button	*habConfigureButton;
+extern Fl_Button	*habSwitchModes;
+extern Fl_Output	*habRXPayload;
+extern Fl_Output	*habTime;
+extern Fl_Output	*habLat;
+extern Fl_Output	*habLon;
+extern Fl_Output	*habAlt;
+extern Fl_Output	*habChecksum;
+extern Fl_Output	*habBearing;
+extern Fl_Output	*habDistance;
+extern Fl_Output	*habElevation;
+extern Fl_Output	*habTimeSinceLastRx;
+extern Fl_Output	*habString;
+
+extern int		HAB_height;
+extern int		HAB_width;
 
 extern Fl_Group		*QsoInfoFrame1B;
 extern Fl_Group		*qsoFrameView;
@@ -214,9 +239,14 @@ extern void set_scope_yaxis_2(double x2);
 extern void set_scope_clear_axis();
 
 extern void set_CWwpm();
-extern void put_rx_char(unsigned int data, int style = FTextBase::RECV);
+extern void put_rx_char(unsigned int data, int style = FTextBase::RECV, bool extracted = false);
 extern void put_rx_processed_char(unsigned int data, int style = FTextBase::RECV);
 extern void put_sec_char( char chr );
+
+// dl-fldigi
+extern void put_rx_ssdv(unsigned int data, int lost);
+void set_menu_dl_online(bool val);
+void set_menu_dl_refresh_active(bool active);
 
 enum status_timeout {
 	STATUS_CLEAR,
@@ -227,6 +257,7 @@ enum status_timeout {
 extern const char *zshowtime();
 
 extern void put_status(const char *msg, double timeout = 0.0, status_timeout action = STATUS_CLEAR);
+extern void put_status_safe(const char *msg, double timeout = 0.0, status_timeout action = STATUS_CLEAR);
 extern void clear_StatusMessages();
 extern void put_MODEstatus(const char* fmt, ...) format__(printf, 1, 2);
 extern void put_MODEstatus(trx_mode mode);

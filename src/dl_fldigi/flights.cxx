@@ -763,6 +763,7 @@ static void autoconfigure_rtty(const Json::Value &settings)
 
 static void autoconfigure_rtty_shift(const Json::Value &value)
 {
+#if 0
     if (!value.isNumeric())
         return;
 
@@ -790,10 +791,12 @@ static void autoconfigure_rtty_shift(const Json::Value &value)
     progdefaults.rtty_shift = -1;
     selCustomShift->value(shift);
     progdefaults.rtty_custom_shift = shift;
+#endif
 }
 
 static void autoconfigure_rtty_baud(const Json::Value &value)
 {
+#if 0
     if (!value.isNumeric())
         return;
 
@@ -809,10 +812,12 @@ static void autoconfigure_rtty_baud(const Json::Value &value)
             return;
         }
     }
+#endif
 }
 
 static void autoconfigure_rtty_encoding(const Json::Value &value)
 {
+#if 0
     if (!value.isString())
         return;
 
@@ -838,10 +843,12 @@ static void autoconfigure_rtty_encoding(const Json::Value &value)
         progdefaults.rtty_parity = RTTY_PARITY_NONE;
         selParity->value(RTTY_PARITY_NONE);
     }
+#endif
 }
 
 static void autoconfigure_rtty_parity(const Json::Value &value)
 {
+#if 0
     if (!value.isString())
         return;
 
@@ -867,10 +874,12 @@ static void autoconfigure_rtty_parity(const Json::Value &value)
 
     selParity->value(select);
     progdefaults.rtty_parity = select;
+#endif
 }
 
 static void autoconfigure_rtty_stop(const Json::Value &value)
 {
+#if 0
     if (!value.isNumeric())
         return;
 
@@ -900,6 +909,7 @@ static void autoconfigure_rtty_stop(const Json::Value &value)
 
     progdefaults.rtty_stop = select;
     selStopBits->value(select);
+#endif
 }
 
 static void autoconfigure_dominoex(const Json::Value &settings)

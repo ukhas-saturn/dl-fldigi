@@ -18,9 +18,11 @@ doc/*.1
 po/POTFILES
 po/*.gmo
 po/stamp-po
-src/.deps/
+src/.deps
+src/*/.deps
 src/config.h
 src/config.h.in*
+src/*/.dirstamp
 src/flarq
 src/fldigi
 src/dl-fldigi

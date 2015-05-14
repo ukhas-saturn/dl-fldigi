@@ -2711,14 +2711,6 @@ resetDOMEX();
 progdefaults.changed = true;
 }
 
-Fl_Counter2 *valDominoEX_ADJ=(Fl_Counter2 *)0;
-
-static void cb_valDominoEX_ADJ(Fl_Counter2* o, void*) {
-  progdefaults.DOMINOEX_ADJ = o->value();
-resetDOMEX();
-progdefaults.changed = true;
-}
-
 Fl_Check_Button *chkDominoEX_FEC=(Fl_Check_Button *)0;
 
 static void cb_chkDominoEX_FEC(Fl_Check_Button* o, void*) {
@@ -4431,72 +4423,6 @@ static void cb_btn_arq_s2n_report(Fl_Check_Button* o, void*) {
   progdefaults.Pskmails2nreport=o->value();
 }
 
-Fl_Check_Button *btnCWIsLSB=(Fl_Check_Button *)0;
-
-static void cb_btnCWIsLSB(Fl_Check_Button* o, void*) {
-  progdefaults.CWIsLSB=o->value();
-progdefaults.changed=true;
-}
-
-Fl_Group *tabSpot=(Fl_Group *)0;
-
-Fl_Group *grpTalker=(Fl_Group *)0;
-
-Fl_Light_Button *btnConnectTalker=(Fl_Light_Button *)0;
-
-static void cb_btnConnectTalker(Fl_Light_Button* o, void*) {
-  if (o->value()) open_talker();
-else close_talker();
-}
-
-Fl_Check_Button *btn_auto_talk=(Fl_Check_Button *)0;
-
-static void cb_btn_auto_talk(Fl_Check_Button* o, void*) {
-  progdefaults.auto_talk = o->value();
-}
-
-Fl_Check_Button *chkRxStream=(Fl_Check_Button *)0;
-
-static void cb_chkRxStream(Fl_Check_Button* o, void*) {
-  progdefaults.speak = o->value();
-progdefaults.changed = true;
-}
-
-Fl_Group *tabDTMF=(Fl_Group *)0;
-
-Fl_Check_Button *chkDTMFdecode=(Fl_Check_Button *)0;
-
-static void cb_chkDTMFdecode(Fl_Check_Button* o, void*) {
-  progdefaults.DTMFdecode = o->value();
-}
-
-Fl_Group *tabWX=(Fl_Group *)0;
-
-Fl_Input2 *inpPSKRepHost=(Fl_Input2 *)0;
-
-static void cb_inpPSKRepHost(Fl_Input2* o, void*) {
-  progdefaults.pskrep_host = o->value();
-btnPSKRepInit->labelcolor(FL_RED);
-btnPSKRepInit->redraw_label();
-progdefaults.changed = true;
-}
-
-Fl_Input2 *inpQRZusername=(Fl_Input2 *)0;
-
-static void cb_inpQRZusername(Fl_Input2* o, void*) {
-  progdefaults.QRZusername = o->value();
-progdefaults.changed = true;
-}
-
-Fl_Input *inpQRZuserpassword=(Fl_Input *)0;
-
-static void cb_inpQRZuserpassword(Fl_Input* o, void*) {
-  progdefaults.QRZuserpassword = o->value();
-progdefaults.changed = true;
-}
-
-Fl_Box *boxPSKRepMsg=(Fl_Box *)0;
-
 Fl_Group *tabSweetSpot=(Fl_Group *)0;
 
 Fl_Value_Input2 *valCWsweetspot=(Fl_Value_Input2 *)0;
@@ -4529,7 +4455,7 @@ progdefaults.changed = true;
 
 Fl_Check_Button *btnCWIsLSB=(Fl_Check_Button *)0;
 
-static void cb_btnCWIsLSB1(Fl_Check_Button* o, void*) {
+static void cb_btnCWIsLSB(Fl_Check_Button* o, void*) {
   progdefaults.CWIsLSB=o->value();
 progdefaults.changed=true;
 }
@@ -4540,20 +4466,20 @@ Fl_Group *grpTalker=(Fl_Group *)0;
 
 Fl_Light_Button *btnConnectTalker=(Fl_Light_Button *)0;
 
-static void cb_btnConnectTalker1(Fl_Light_Button* o, void*) {
+static void cb_btnConnectTalker(Fl_Light_Button* o, void*) {
   if (o->value()) open_talker();
 else close_talker();
 }
 
 Fl_Check_Button *btn_auto_talk=(Fl_Check_Button *)0;
 
-static void cb_btn_auto_talk1(Fl_Check_Button* o, void*) {
+static void cb_btn_auto_talk(Fl_Check_Button* o, void*) {
   progdefaults.auto_talk = o->value();
 }
 
 Fl_Check_Button *chkRxStream=(Fl_Check_Button *)0;
 
-static void cb_chkRxStream1(Fl_Check_Button* o, void*) {
+static void cb_chkRxStream(Fl_Check_Button* o, void*) {
   progdefaults.speak = o->value();
 progdefaults.changed = true;
 }
@@ -4562,7 +4488,7 @@ Fl_Group *tabDTMF=(Fl_Group *)0;
 
 Fl_Check_Button *chkDTMFdecode=(Fl_Check_Button *)0;
 
-static void cb_chkDTMFdecode1(Fl_Check_Button* o, void*) {
+static void cb_chkDTMFdecode(Fl_Check_Button* o, void*) {
   progdefaults.DTMFdecode = o->value();
 }
 
@@ -5092,14 +5018,14 @@ progdefaults.changed = true;
 
 Fl_Input2 *inpQRZusername=(Fl_Input2 *)0;
 
-static void cb_inpQRZusername1(Fl_Input2* o, void*) {
+static void cb_inpQRZusername(Fl_Input2* o, void*) {
   progdefaults.QRZusername = o->value();
 progdefaults.changed = true;
 }
 
 Fl_Input2 *inpQRZuserpassword=(Fl_Input2 *)0;
 
-static void cb_inpQRZuserpassword1(Fl_Input2* o, void*) {
+static void cb_inpQRZuserpassword(Fl_Input2* o, void*) {
   progdefaults.QRZuserpassword = o->value();
 progdefaults.changed = true;
 }
@@ -5643,6 +5569,13 @@ Fl_Button *btnResetConfig=(Fl_Button *)0;
 static void cb_btnResetConfig(Fl_Button*, void*) {
   progdefaults.resetDefaults();
 progdefaults.changed = false;
+}
+
+Fl_Button *btnApplyConfig=(Fl_Button *)0;
+
+static void cb_btnApplyConfig(Fl_Button*, void*) {
+  dl_fldigi::commit();
+btnApplyConfig->deactivate();
 }
 
 Fl_Double_Window* ConfigureDialog() {
@@ -7998,24 +7931,6 @@ i on a\ntouch screen device such as a tablet."));
                 o->value(progdefaults.DOMINOEX_BW);
                 o->labelsize(FL_NORMAL_SIZE);
               } // Fl_Counter2* valDominoEX_BW
-              { Fl_Counter2* o = valDominoEX_ADJ = new Fl_Counter2(156, 166, 63, 20, _("Tone-spacing adjust"));
-                valDominoEX_ADJ->tooltip(_("Tone-spacing adjust"));
-                valDominoEX_ADJ->type(1);
-                valDominoEX_ADJ->box(FL_UP_BOX);
-                valDominoEX_ADJ->color(FL_BACKGROUND_COLOR);
-                valDominoEX_ADJ->selection_color(FL_INACTIVE_COLOR);
-                valDominoEX_ADJ->labeltype(FL_NORMAL_LABEL);
-                valDominoEX_ADJ->labelfont(0);
-                valDominoEX_ADJ->labelsize(14);
-                valDominoEX_ADJ->labelcolor(FL_FOREGROUND_COLOR);
-                valDominoEX_ADJ->minimum(-100);
-                valDominoEX_ADJ->maximum(100);
-                valDominoEX_ADJ->callback((Fl_Callback*)cb_valDominoEX_ADJ);
-                valDominoEX_ADJ->align(Fl_Align(FL_ALIGN_RIGHT));
-                valDominoEX_ADJ->when(FL_WHEN_CHANGED);
-                o->value(progdefaults.DOMINOEX_ADJ);
-                o->labelsize(FL_NORMAL_SIZE);
-              } // Fl_Counter2* valDominoEX_ADJ
               { Fl_Check_Button* o = chkDominoEX_FEC = new Fl_Check_Button(65, 171, 51, 20, _("FEC"));
                 chkDominoEX_FEC->tooltip(_("Enable MultiPSK-compatible FEC"));
                 chkDominoEX_FEC->down_box(FL_DOWN_BOX);
@@ -10372,108 +10287,8 @@ gured on the\n\"Notifications\" configure dialog."));
               } // Fl_Check_Button* btn_arq_s2n_report
               o->end();
             } // Fl_Group* o
-            { Fl_Group* o = new Fl_Group(28, 151, 490, 60, _("K3 A1A configuation"));
-              o->box(FL_ENGRAVED_FRAME);
-              o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btnCWIsLSB = new Fl_Check_Button(243, 172, 70, 15, _("CW is LSB"));
-                btnCWIsLSB->tooltip(_("Select this for Elecraft K3\nOther radios should not need it."));
-                btnCWIsLSB->down_box(FL_DOWN_BOX);
-                btnCWIsLSB->callback((Fl_Callback*)cb_btnCWIsLSB);
-                o->value(progdefaults.CWIsLSB);
-              } // Fl_Check_Button* btnCWIsLSB
-              o->end();
-            } // Fl_Group* o
             tabPskmail->end();
           } // Fl_Group* tabPskmail
-          { tabSpot = new Fl_Group(0, 50, 600, 330, _("Spotting"));
-            tabSpot->hide();
-            { grpTalker = new Fl_Group(29, 132, 490, 73, _("Talker Socket (MS only)"));
-              grpTalker->box(FL_ENGRAVED_FRAME);
-              grpTalker->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { btnConnectTalker = new Fl_Light_Button(55, 152, 74, 20, _("Talker"));
-                btnConnectTalker->selection_color(FL_DARK_GREEN);
-                btnConnectTalker->callback((Fl_Callback*)cb_btnConnectTalker);
-              } // Fl_Light_Button* btnConnectTalker
-              { Fl_Box* o = new Fl_Box(134, 152, 345, 20, _("Connect/disconnect to Talker socket server"));
-                o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
-              } // Fl_Box* o
-              { Fl_Check_Button* o = btn_auto_talk = new Fl_Check_Button(55, 180, 391, 15, _("Auto connect when fldigi opens (server must be up)"));
-                btn_auto_talk->down_box(FL_DOWN_BOX);
-                btn_auto_talk->callback((Fl_Callback*)cb_btn_auto_talk);
-                o->value(progdefaults.auto_talk);
-              } // Fl_Check_Button* btn_auto_talk
-              grpTalker->end();
-            } // Fl_Group* grpTalker
-            { Fl_Group* o = new Fl_Group(55, 72, 490, 254, _("PSK Reporter"));
-              o->box(FL_ENGRAVED_FRAME);
-              o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { chkRxStream = new Fl_Check_Button(65, 103, 324, 20, _("Enable rx text stream"));
-                chkRxStream->tooltip(_("Parse all incoming text"));
-                chkRxStream->down_box(FL_DOWN_BOX);
-                chkRxStream->callback((Fl_Callback*)cb_chkRxStream);
-                btnPSKRepAuto->value(progdefaults.pskrep_auto);
-              } // Fl_Check_Button* chkRxStream
-              o->end();
-            } // Fl_Group* o
-            tabSpot->end();
-          } // Fl_Group* tabSpot
-          { tabDTMF = new Fl_Group(0, 50, 540, 320, _("DTMF"));
-            tabDTMF->hide();
-            { Fl_Check_Button* o = chkDTMFdecode = new Fl_Check_Button(187, 103, 175, 20, _("Decode DTMF tones"));
-              chkDTMFdecode->tooltip(_("Send rx text to file: textout.txt"));
-              chkDTMFdecode->down_box(FL_DOWN_BOX);
-              chkDTMFdecode->callback((Fl_Callback*)cb_chkDTMFdecode);
-              o->value(progdefaults.DTMFdecode);
-            } // Fl_Check_Button* chkDTMFdecode
-            tabDTMF->end();
-          } // Fl_Group* tabDTMF
-          { tabWX = new Fl_Group(0, 50, 540, 320, _("WX"));
-            tabWX->hide();
-            { Fl_Group* o = new Fl_Group(27, 60, 490, 300, _("Weather query specification"));
-              o->box(FL_ENGRAVED_FRAME);
-              o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { inpPSKRepHost = new Fl_Input2(108, 228, 220, 24, _("Host:"));
-                inpPSKRepHost->tooltip(_("To whom the connection is made"));
-                inpPSKRepHost->box(FL_DOWN_BOX);
-                inpPSKRepHost->color(FL_BACKGROUND2_COLOR);
-                inpPSKRepHost->selection_color(FL_SELECTION_COLOR);
-                inpPSKRepHost->labeltype(FL_NORMAL_LABEL);
-                inpPSKRepHost->labelfont(0);
-                inpPSKRepHost->labelsize(14);
-                inpPSKRepHost->labelcolor(FL_FOREGROUND_COLOR);
-                inpPSKRepHost->callback((Fl_Callback*)cb_inpPSKRepHost);
-                inpPSKRepHost->align(Fl_Align(FL_ALIGN_LEFT));
-                inpPSKRepHost->when(FL_WHEN_CHANGED);
-                inpPSKRepHost->value(progdefaults.pskrep_host.c_str());
-                inpPSKRepHost->labelsize(FL_NORMAL_SIZE);
-              } // Fl_Input2* inpPSKRepHost
-              { inpQRZusername = new Fl_Input2(477, 228, 60, 24, _("User name"));
-                inpQRZusername->tooltip(_("Using UDP port #"));
-                inpQRZusername->box(FL_DOWN_BOX);
-                inpQRZusername->color(FL_BACKGROUND2_COLOR);
-                inpQRZusername->selection_color(FL_SELECTION_COLOR);
-                inpQRZusername->labeltype(FL_NORMAL_LABEL);
-                inpQRZusername->labelfont(0);
-                inpQRZusername->labelsize(14);
-                inpQRZusername->labelcolor(FL_FOREGROUND_COLOR);
-                inpQRZusername->callback((Fl_Callback*)cb_inpQRZusername);
-                inpQRZusername->align(Fl_Align(FL_ALIGN_LEFT));
-                inpQRZusername->when(FL_WHEN_CHANGED);
-                inpPSKRepPort->value(progdefaults.pskrep_port.c_str());
-                inpPSKRepPort->labelsize(FL_NORMAL_SIZE);
-              } // Fl_Input2* inpQRZusername
-              { inpQRZuserpassword = new Fl_Input(457, 273, 80, 24, _("Password"));
-                inpQRZuserpassword->tooltip(_("Initialize the socket client"));
-                inpQRZuserpassword->callback((Fl_Callback*)cb_inpQRZuserpassword);
-              } // Fl_Input* inpQRZuserpassword
-              { boxPSKRepMsg = new Fl_Box(67, 257, 300, 48, _("<PSK Reporter error message>"));
-                boxPSKRepMsg->labelfont(2);
-                boxPSKRepMsg->label(0);
-              } // Fl_Box* boxPSKRepMsg
-              o->end();
-            } // Fl_Group* o
-            tabWX->end();
-          } // Fl_Group* tabWX
           { tabSweetSpot = new Fl_Group(0, 50, 600, 330, _("Sweet Spot"));
             tabSweetSpot->hide();
             { Fl_Group* o = new Fl_Group(55, 71, 490, 75);
@@ -10551,7 +10366,7 @@ gured on the\n\"Notifications\" configure dialog."));
               { Fl_Check_Button* o = btnCWIsLSB = new Fl_Check_Button(270, 172, 70, 15, _("CW is LSB"));
                 btnCWIsLSB->tooltip(_("Select this for Elecraft K3\nOther radios should not need it."));
                 btnCWIsLSB->down_box(FL_DOWN_BOX);
-                btnCWIsLSB->callback((Fl_Callback*)cb_btnCWIsLSB1);
+                btnCWIsLSB->callback((Fl_Callback*)cb_btnCWIsLSB);
                 o->value(progdefaults.CWIsLSB);
               } // Fl_Check_Button* btnCWIsLSB
               o->end();
@@ -10565,14 +10380,14 @@ gured on the\n\"Notifications\" configure dialog."));
               grpTalker->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
               { btnConnectTalker = new Fl_Light_Button(81, 152, 74, 20, _("Talker"));
                 btnConnectTalker->selection_color(FL_DARK_GREEN);
-                btnConnectTalker->callback((Fl_Callback*)cb_btnConnectTalker1);
+                btnConnectTalker->callback((Fl_Callback*)cb_btnConnectTalker);
               } // Fl_Light_Button* btnConnectTalker
               { Fl_Box* o = new Fl_Box(160, 152, 345, 20, _("Connect/disconnect to Talker socket server"));
                 o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
               } // Fl_Box* o
               { Fl_Check_Button* o = btn_auto_talk = new Fl_Check_Button(81, 180, 391, 15, _("Auto connect when fldigi opens (server must be up)"));
                 btn_auto_talk->down_box(FL_DOWN_BOX);
-                btn_auto_talk->callback((Fl_Callback*)cb_btn_auto_talk1);
+                btn_auto_talk->callback((Fl_Callback*)cb_btn_auto_talk);
                 o->value(progdefaults.auto_talk);
               } // Fl_Check_Button* btn_auto_talk
               grpTalker->end();
@@ -10583,7 +10398,7 @@ gured on the\n\"Notifications\" configure dialog."));
               { Fl_Check_Button* o = chkRxStream = new Fl_Check_Button(81, 99, 175, 20, _("Enable rx text stream"));
                 chkRxStream->tooltip(_("Send rx text to file: textout.txt"));
                 chkRxStream->down_box(FL_DOWN_BOX);
-                chkRxStream->callback((Fl_Callback*)cb_chkRxStream1);
+                chkRxStream->callback((Fl_Callback*)cb_chkRxStream);
                 o->value(progdefaults.speak);
               } // Fl_Check_Button* chkRxStream
               o->end();
@@ -10595,7 +10410,7 @@ gured on the\n\"Notifications\" configure dialog."));
             { Fl_Check_Button* o = chkDTMFdecode = new Fl_Check_Button(212, 103, 175, 20, _("Decode DTMF tones"));
               chkDTMFdecode->tooltip(_("Decode received DTMF tones"));
               chkDTMFdecode->down_box(FL_DOWN_BOX);
-              chkDTMFdecode->callback((Fl_Callback*)cb_chkDTMFdecode1);
+              chkDTMFdecode->callback((Fl_Callback*)cb_chkDTMFdecode);
               o->value(progdefaults.DTMFdecode);
             } // Fl_Check_Button* chkDTMFdecode
             tabDTMF->end();
@@ -11148,7 +10963,7 @@ and restarted if needed."));
                 inpQRZusername->labelfont(0);
                 inpQRZusername->labelsize(14);
                 inpQRZusername->labelcolor(FL_FOREGROUND_COLOR);
-                inpQRZusername->callback((Fl_Callback*)cb_inpQRZusername1);
+                inpQRZusername->callback((Fl_Callback*)cb_inpQRZusername);
                 inpQRZusername->align(Fl_Align(FL_ALIGN_LEFT));
                 inpQRZusername->when(FL_WHEN_RELEASE);
                 o->value(progdefaults.QRZusername.c_str());
@@ -11163,7 +10978,7 @@ and restarted if needed."));
                 inpQRZuserpassword->labelfont(0);
                 inpQRZuserpassword->labelsize(14);
                 inpQRZuserpassword->labelcolor(FL_FOREGROUND_COLOR);
-                inpQRZuserpassword->callback((Fl_Callback*)cb_inpQRZuserpassword1);
+                inpQRZuserpassword->callback((Fl_Callback*)cb_inpQRZuserpassword);
                 inpQRZuserpassword->align(Fl_Align(FL_ALIGN_LEFT));
                 inpQRZuserpassword->when(FL_WHEN_RELEASE);
                 o->value(progdefaults.QRZuserpassword.c_str());
@@ -11288,7 +11103,7 @@ and restarted if needed."));
         } // Fl_Tabs* tabsQRZ
         tabQRZ->end();
       } // Fl_Group* tabQRZ
-      { tabAutoStart = new Fl_Group(0, 25, 600, 355, _("Autostart"));
+      { tabAutoStart = new Fl_Group(0, 25, 600, 355, _("StartUp"));
         tabAutoStart->tooltip(_("Operator information"));
         tabAutoStart->callback((Fl_Callback*)cb_tabAutoStart);
         tabAutoStart->when(FL_WHEN_CHANGED);
@@ -11840,6 +11655,10 @@ i.e. localhost"));
     { btnResetConfig = new Fl_Button(20, 388, 130, 22, _("Restore defaults"));
       btnResetConfig->callback((Fl_Callback*)cb_btnResetConfig);
     } // Fl_Button* btnResetConfig
+    { btnApplyConfig = new Fl_Button(175, 375, 115, 22, _("Apply (dl)"));
+      btnApplyConfig->callback((Fl_Callback*)cb_btnApplyConfig);
+      btnApplyConfig->deactivate();
+    } // Fl_Button* btnApplyConfig
     o->set_non_modal();
     o->end();
   } // Fl_Double_Window* o

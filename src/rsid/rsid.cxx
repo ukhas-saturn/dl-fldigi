@@ -214,7 +214,7 @@ void cRsId::CalculateBuckets(const rs_fft_type *pSpectrum, int iBegin, int iEnd)
 			j = i + RSID_NTIMES;
 			Amp = pSpectrum[j];
 			if (Amp > AmpMax) {
-				AmpMax	= Amp;
+				AmpMax    = Amp;
 				iBucketMax = j;
 			}
 		}

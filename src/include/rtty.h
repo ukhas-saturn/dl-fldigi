@@ -39,9 +39,9 @@
 #include "digiscope.h"
 #include "view_rtty.h"
 
-#define	RTTY_SampleRate	8000
+//#define	RTTY_SampleRate	8000
 //#define RTTY_SampleRate 11025
-//#define RTTY_SampleRate 12000
+#define RTTY_SampleRate 12000
 
 #define MAXPIPE			1024
 #define MAXBITS			(2 * RTTY_SampleRate / 23 + 1)
@@ -96,6 +96,7 @@ private:
 
 	double		baudrate;
 	double		samplerate;
+
 };
 
 //enum TTY_MODE { LETTERS, FIGURES };
@@ -177,6 +178,14 @@ private:
 	int rxdata;
 	double cfreq; // center frequency between MARK/SPACE tones
 	double shift_offset; // 1/2 rtty_shift
+
+	//For SSDV
+	double posfreq, negfreq;
+	double freqerrhi, freqerrlo;
+	double poserr, negerr;
+	double poscnt, negcnt;
+	int lost;
+	int bytelen;
 
 	double prevsymbol;
 	cmplx prevsmpl;

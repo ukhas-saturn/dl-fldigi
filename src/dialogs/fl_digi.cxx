@@ -356,10 +356,6 @@ static Fl_Button		*qso_btnClearList = (Fl_Button *)0;
 static Fl_Button		*qso_btnAct = 0;
 static Fl_Input2		*qso_inpAct = 0;
 
-static Fl_Group			*MixerFrame;
-Fl_Value_Slider2	*valRcvMixer = (Fl_Value_Slider2 *)0;
-Fl_Value_Slider2	*valXmtMixer = (Fl_Value_Slider2 *)0;
-
 Fl_Group			*TopFrameHAB;
 Fl_Choice			*habFlight;
 Fl_Button			*habOpenBrowser;
@@ -3012,8 +3008,6 @@ int default_handler(int event)
 
 	Fl_Widget* w = Fl::focus();
 	int key = Fl::event_key();
-
-	int key = Fl::event_key();
 	if ((key == FL_F + 4) && Fl::event_alt()) clean_exit(true);
 
 	if (fl_digi_main->contains(w)) {
@@ -3173,8 +3167,6 @@ bool clean_exit(bool ask) {
 		if (ask)
 			save_on_exit();
 	}
-	if (ask)
-		if (!save_on_exit()) return false;
 
 	static bool double_exit = false;
 	if (double_exit)
@@ -6897,7 +6889,7 @@ void create_fl_digi_main_dl_fldigi() {
 				}
 				// set the icon label for items with the multi label type
 				if (alt_menu_[i].labeltype() == _FL_MULTI_LABEL)
-					set_icon_label(&alt_menu_[i]);
+					icons::set_icon_label(&alt_menu_[i]);
 			}
 			mnu->menu(alt_menu_);
 
@@ -7589,26 +7581,6 @@ static void rx_parser(const unsigned char data, int style)
 	// the input is valid UTF-8. All bytes of a multi-byte character
 	// will therefore have the eight bit set and can not match either
 	// '\r' or '\n'.
-	
-	static unsigned int lastdata = 0;
-	
-	if (data == '\n' && lastdata == '\r');
-	else if (data == '\r') {
-		add_rx_char('\n');
-		display_rx_data('\n', style);
-	} else {
-		add_rx_char(data);
-		display_rx_data(data, style);
-	}
-
-	// Collapse the "\r\n" sequence into "\n".
-	//
-	// The 'data' variable possibly contains only a part of a multi-byte
-	// UTF-8 character. This is not a problem. All data has passed
-	// through a distiller before we got here, so we can be sure that
-	// the input is valid UTF-8. All bytes of a multi-byte character
-	// will therefore have the eight bit set and can not match either
-	// '\r' or '\n'.
 
 	static unsigned int lastdata = 0;
 
@@ -7996,17 +7968,6 @@ int get_tx_char(void)
 		num_cps_chars++;
 		return xmltest_char();
 	}
-	que_ok = false;
-	que_timeout = 100; // 5 seconds
-	Fl::add_timeout(0.05, post_queue_execute);
-	queue_execute();
-}
-
-void do_que_execute(void *)
-{
-	que_waiting = false;
-	queue_execute();
-}
 
 	if (data_io_enabled == ARQ_IO && arq_text_available) {
 		return arq_get_char();

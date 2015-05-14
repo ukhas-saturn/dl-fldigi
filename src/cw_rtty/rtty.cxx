@@ -1,4 +1,4 @@
-    // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // rtty.cxx  --  RTTY modem
 //
 // Copyright (C) 2012
@@ -84,7 +84,6 @@ static char msg1[20];
 /* Terminating 0 at the end of the list for dl_fldigi/flights.cxx */
 const double rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850, 0};
 const double rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
-const int    rtty::BITS[]  = {5, 7, 8};
 // FILTLEN must be same size as BAUD
 const int		rtty::FILTLEN[] = { 512, 512, 512, 512, 512, 512, 512, 256, 128, 64, 64, 64, 64};
 const int		rtty::BITS[]  = {5, 7, 8};
@@ -510,8 +509,7 @@ bool rtty::rx(bool bit) // original modified for probability test
 						if (c == '\r' && lastchar == '\r');
 						else if (c == '\n' && lastchar == '\n');
 						else
-							//put_rx_char(progdefaults.rx_lowercase ? tolower(c) : c);
-                            put_rx_char(progdefaults.rx_lowercase ? tolower(c) : c, FTextBase::RECV, true);
+							put_rx_char(progdefaults.rx_lowercase ? tolower(c) : c, FTextBase::RECV, true);
 						lastchar = c;
 					}
 					flag = true;
@@ -1019,26 +1017,6 @@ if (!progStatus.shaped_rtty) {
 		ModulateStereo(outbuf, FSKbuf, stoplen);
 	else
 		ModulateXmtr(outbuf, stoplen);
-
-}
-
-void rtty::flush_stream()
-{
-	double const freq1 = get_txfreq_woffset() + shift / 2.0;
-	double const freq2 = get_txfreq_woffset() - shift / 2.0;
-	double mark = 0, space = 0;
-
-	for( int i = 0; i < symbollen * 6; ++i ) {
-		mark  = m_SymShaper1->Update(0)*m_Osc1->Update( freq1 );
-		space = m_SymShaper2->Update(0)*m_Osc2->Update( freq2 );
-		outbuf[i] = mark + space;
-		FSKbuf[i] = 0.0;
-	}
-
-	if (progdefaults.PseudoFSK)
-		ModulateStereo(outbuf, FSKbuf, symbollen * 6);
-	else
-		ModulateXmtr(outbuf, symbollen * 6);
 
 }
 

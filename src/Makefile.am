@@ -26,8 +26,8 @@ flarq_LDFLAGS = @FLARQ_BUILD_LDFLAGS@
 flarq_LDADD = @FLARQ_BUILD_LDADD@
 
 if WIN32
-fldigi_CPPFLAGS += -fno-var-tracking
-fldigi_CXXFLAGS += -fno-var-tracking
+dl_fldigi_CPPFLAGS += -fno-var-tracking
+dl_fldigi_CXXFLAGS += -fno-var-tracking
 endif
 
 HAMLIB_SRC = \
@@ -84,12 +84,12 @@ flarq_SOURCES =
 dl_fldigi_SOURCES += $(XMLRPC_SRC)
 
 if !ENABLE_FLXMLRPC
-fldigi_SOURCES += $(XMLRPCPP_SRC)
+dl_fldigi_SOURCES += $(XMLRPCPP_SRC)
 else
-fldigi_CPPFLAGS += @FLXMLRPC_CFLAGS@
-fldigi_CXXFLAGS += @FLXMLRPC_CFLAGS@
-fldigi_CFLAGS   += @FLXMLRPC_CFLAGS@
-fldigi_LDFLAGS  += @FLXMLRPC_LIBS@
+dl_fldigi_CPPFLAGS += @FLXMLRPC_CFLAGS@
+dl_fldigi_CXXFLAGS += @FLXMLRPC_CFLAGS@
+dl_fldigi_CFLAGS   += @FLXMLRPC_CFLAGS@
+dl_fldigi_LDFLAGS  += @FLXMLRPC_LIBS@
 endif
 
 if ENABLE_HAMLIB

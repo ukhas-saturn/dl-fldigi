@@ -10,7 +10,6 @@ ASCIIDOC_HTML =
 
 if WANT_FLDIGI
     ASCIIDOC_MAN_INST += dl-fldigi.1
-    ASCIIDOC_MAN_INST += dl-fldigi-shell.1
     ASCIIDOC_HTML += guide.html
 endif
 

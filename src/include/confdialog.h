@@ -680,6 +680,42 @@ extern Fl_Button *btnSaveConfig;
 #include <FL/Fl_Return_Button.H>
 extern Fl_Return_Button *btnCloseConfig;
 extern Fl_Button *btnResetConfig;
+
+extern Fl_Group *tabDL;
+extern Fl_Tabs *tabsDL;
+extern Fl_Group *tabDLEnable;
+extern Fl_Check_Button *confdialog_dl_online;
+extern Fl_Input *imagepacketurl;
+extern Fl_Check_Button *imagesave;
+extern Fl_Input *imagesavedir;
+extern Fl_Check_Button *btnTrackFreq;
+extern Fl_Counter2 *cntTrackFreqMin;
+extern Fl_Counter2 *cntTrackFreqMax;
+#include <FL/Fl_Float_Input.H>
+extern Fl_Float_Input *stationary_lat;
+extern Fl_Float_Input *stationary_lon;
+extern Fl_Input_Choice *inpGPSdev;
+#include <FL/Fl_Spinner.H>
+extern Fl_Output *gps_pos_lat;
+extern Fl_Output *gps_pos_altitude;
+extern Fl_Output *gps_pos_time;
+extern Fl_Output *gps_pos_lon;
+extern Fl_Button *gps_pos_save;
+extern Fl_Float_Input *stationary_alt;
+extern Fl_Group *tabDLFlights;
+#include <FL/Fl_Browser.H>
+extern Fl_Browser *flight_browser;
+extern Fl_Button *flight_docs_refresh_a;
+extern Fl_Choice *flight_payload_list;
+extern Fl_Button *payload_autoconfigure_a;
+extern Fl_Choice *flight_payload_transmission_list;
+extern Fl_Group *tabDLPayloads;
+extern Fl_Browser *payload_browser;
+extern Fl_Button *flight_docs_refresh_b;
+extern Fl_Button *payload_autoconfigure_b;
+extern Fl_Input *payload_search_text;
+extern Fl_Choice *payload_transmission_list;
+
 Fl_Double_Window* ConfigureDialog();
 void openConfig();
 void closeDialog();

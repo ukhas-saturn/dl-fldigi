@@ -1476,6 +1476,56 @@
         ELEM_(std::string, xmllog_port, "XMLLOG_PORT",                                  \
               "Logbook server port",                                                    \
               "8421")                                                                   \
+                                                                                         \
+         /* Extra dl-fldigi operator information */                                      \
+         ELEM_(std::string, myRadio, "MYRADIO", "Short radio description", "")           \
+         ELEM_(std::string, myLat, "MYLAT", "Stationary listener latitude", "")          \
+         ELEM_(std::string, myLon, "MYLON", "Stationary listener longitude", "")         \
+         ELEM_(std::string, myAlt, "MYALT", "Stationary listener altitude", "")          \
+                                                                                         \
+         /* habitat Flight selection stuff */                                            \
+         ELEM_(int, tracking_type, "TRACKING_WHAT",                                      \
+                 "Tracking 0: nothing, 1: a flight, 2: a testing payload", 0)            \
+         ELEM_(std::string, tracking_doc, "TRACKING_DOCID",                              \
+                 "The selected flight or payload document id", "")                       \
+         ELEM_(int, tracking_flight_payload, "TRACKING_FLIGHT_PAYLOAD",                  \
+                 "The selected payload (belonging to the tracked filght) (index)", -1)   \
+         ELEM_(int, tracking_transmission, "TRACKING_TRANSMISSION",                      \
+                 "The selected transmission (index)", -1)                                \
+                                                                                         \
+         /* dl-fldigi GPS Device Info */                                                 \
+         ELEM_(bool, gps_start_enabled, "GPSENABLED", "GPS Enabled on startup?", false)  \
+         ELEM_(std::string, gps_device, "GPSDEVICE", "GPS Serial port", "")              \
+         ELEM_(int, gps_speed, "GPSSPEED", "GPS Serial baud", 0)                         \
+         ELEM_(int, gps_period, "GPSPERIOD", "GPS Upload period", 30)                    \
+                                                                                         \
+         /* dl-fldigi Misc config stuff */                                               \
+         ELEM_(int, png_wfall, "PNG_WFALL", "", 0)                                       \
+         ELEM_(std::string, waterfall_png_location, "PNG_WFALL_LOC",                     \
+                 "Save location for PNG", "dl-fldigi-waterfall.png")                     \
+         ELEM_(bool, ssdv_save_image, "SSDV_SAVE_IMAGES", "", false)                     \
+         ELEM_(std::string, ssdv_save_dir, "SSDV_SAVE_DIR",                              \
+                 "Save location for received images", "")                                \
+         ELEM_(bool, track_freq, "TRACK_FREQ",                                           \
+                 "Adjust the RF frequency to match frequency drift", false)              \
+         ELEM_(int, track_freq_min, "TRACK_FREQ_MIN",                                    \
+                 "Minimum waterfall frequency", 1000)                                    \
+         ELEM_(int, track_freq_max, "TRACK_FREQ_MAX",                                    \
+                 "Maximum waterfall frequency", 2000)                                    \
+                                                                                         \
+         /* dl-fldigi network config stuff */                                            \
+         ELEM_(std::string, habitat_uri, "HABITAT_URI",                                  \
+                 "habitat CouchDB URI", "http://habitat.habhub.org")                     \
+         ELEM_(std::string, habitat_db, "HABITAT_DB",                                    \
+                 "habitat CouchDB databse", "habitat")                                   \
+                                                                                         \
+         /* TODO HABITAT LATER: swap to habitat! Give SSDV the UploaderThread object */  \
+         ELEM_(std::string, ssdv_packet_url, "SSDV_BLOCK_URL",                           \
+                 "Remote URL", "http://www.sanslogic.co.uk/ssdv/data.php")               \
+         ELEM_(std::string, ssdv_block_user, "SSDV_BLOCK_USER",                          \
+                 "Username for remote URL", "")                                          \
+         ELEM_(std::string, ssdv_block_pass, "SSDV_BLOCK_PASS",                          \
+                 "Password for remote URL", "")                                          \
                                                                                         \
         ELEM_(bool, check_for_updates, "CHECK_FOR_UPDATES",                             \
               "Check for updates when starting program",                                \

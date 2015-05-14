@@ -3338,16 +3338,6 @@ progdefaults.changed = true;}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Counter2
               }
-              Fl_Counter valDominoEX_ADJ {
-                label {Tone-spacing adjust}
-                callback {progdefaults.DOMINOEX_ADJ = o->value();
-resetDOMEX();
-progdefaults.changed = true;}
-                tooltip {Tone-spacing adjust} xywh {156 166 63 20} type Simple align 8 minimum -100 maximum 100
-                code0 {o->value(progdefaults.DOMINOEX_ADJ);}
-                code1 {o->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Counter2
-              }
               Fl_Check_Button chkDominoEX_FEC {
                 label FEC
                 callback {progdefaults.DOMINOEX_FEC = o->value();
@@ -5539,113 +5529,7 @@ progdefaults.changed = true;}
                 code0 {o->value(progdefaults.Pskmails2nreport);}
               }
             }
-            Fl_Group {} {
-              label {K3 A1A configuation} open
-              xywh {28 151 490 60} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Check_Button btnCWIsLSB {
-                label {CW is LSB}
-                callback {progdefaults.CWIsLSB=o->value();
-progdefaults.changed=true;}
-                tooltip {Select this for Elecraft K3
-Other radios should not need it.} xywh {243 172 70 15} down_box DOWN_BOX
-                code0 {o->value(progdefaults.CWIsLSB);}
-              }
-            }
-          }
-          Fl_Group tabSpot {
-            label Spotting open
-            xywh {0 50 600 330} hide
-          } {
-            Fl_Group grpTalker {
-              label {Talker Socket (MS only)} open
-              xywh {29 132 490 73} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Light_Button btnConnectTalker {
-                label Talker
-                callback {if (o->value()) open_talker();
-else close_talker();}
-                xywh {55 152 74 20} selection_color 60
-                code0 {extern void open_talker();}
-                code1 {extern void close_talker();}
-              }
-              Fl_Box {} {
-                label {Connect/disconnect to Talker socket server}
-                xywh {134 152 345 20} align 20
-              }
-              Fl_Check_Button btn_auto_talk {
-                label {Auto connect when fldigi opens (server must be up)}
-                callback {progdefaults.auto_talk = o->value();}
-                xywh {55 180 391 15} down_box DOWN_BOX
-                code0 {o->value(progdefaults.auto_talk);}
-              }
-            }
-            Fl_Group {} {
-              label {PSK Reporter} open
-              xywh {55 72 490 254} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Check_Button chkRxStream {
-                label {Enable rx text stream}
-                callback {progdefaults.speak = o->value();
-progdefaults.changed = true;}
-                tooltip {Parse all incoming text} xywh {65 103 324 20} down_box DOWN_BOX
-                code0 {btnPSKRepAuto->value(progdefaults.pskrep_auto);}
-              }
-            }
-          }
-          Fl_Group tabDTMF {
-            label DTMF open
-            xywh {0 50 540 320} hide
-          } {
-            Fl_Check_Button chkDTMFdecode {
-              label {Decode DTMF tones}
-              callback {progdefaults.DTMFdecode = o->value();}
-              tooltip {Send rx text to file: textout.txt} xywh {187 103 175 20} down_box DOWN_BOX
-              code0 {o->value(progdefaults.DTMFdecode);}
-            }
-          }
-          Fl_Group tabWX {
-            label WX open
-            xywh {0 50 540 320} hide
-          } {
-            Fl_Group {} {
-              label {Weather query specification} open
-              xywh {27 60 490 300} box ENGRAVED_FRAME align 21
-            } 
-{
-              Fl_Input inpPSKRepHost {
-                label {Host:}
-                callback {progdefaults.pskrep_host = o->value();
-btnPSKRepInit->labelcolor(FL_RED);
-btnPSKRepInit->redraw_label();
-progdefaults.changed = true;}
-                tooltip {To whom the connection is made} xywh {108 228 220 24} when 1
-                code0 {inpPSKRepHost->value(progdefaults.pskrep_host.c_str());}
-                code1 {inpPSKRepHost->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Input inpQRZusername {
-                label {User name}
-                callback {progdefaults.QRZusername = o->value();
-progdefaults.changed = true;}
-                tooltip {Using UDP port \#} xywh {477 228 60 24} when 1
-                code0 {inpPSKRepPort->value(progdefaults.pskrep_port.c_str());}
-                code1 {inpPSKRepPort->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Input inpQRZuserpassword {
-                label Password
-                callback {progdefaults.QRZuserpassword = o->value();
-progdefaults.changed = true;}
-                tooltip {Initialize the socket client} xywh {457 273 80 24}
-              }
-              Fl_Box boxPSKRepMsg {
-                label {<PSK Reporter error message>}
-                xywh {67 257 300 48} labelfont 2
-                code0 {boxPSKRepMsg->label(0);}
-              }
-            }
-          }
+	  }
           Fl_Group tabSweetSpot {
             label {Sweet Spot} open
             xywh {0 50 600 330} hide
@@ -6564,7 +6448,7 @@ progdefaults.changed = true;}
         }
       }
       Fl_Group tabAutoStart {
-        label Autostart
+        label StartUp
         callback {progdefaults.changed = true;} open
         tooltip {Operator information} xywh {0 25 600 355} when 1 hide
       } {
@@ -7120,6 +7004,12 @@ number to the default value.} xywh {425 345 73 25}
       callback {progdefaults.resetDefaults();
 progdefaults.changed = false;}
       xywh {20 388 130 22}
+    }
+    Fl_Button btnApplyConfig {
+      label {Apply (dl)}
+      callback {dl_fldigi::commit();
+btnApplyConfig->deactivate();}
+      xywh {175 375 115 22} deactivate
     }
   }
 } 
