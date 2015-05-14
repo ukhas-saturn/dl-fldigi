@@ -7009,7 +7009,7 @@ progdefaults.changed = false;}
       label {Apply (dl)}
       callback {dl_fldigi::commit();
 btnApplyConfig->deactivate();}
-      xywh {175 375 115 22} deactivate
+      xywh {175 388 115 22} deactivate
     }
   }
 } 

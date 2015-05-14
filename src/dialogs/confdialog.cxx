@@ -11655,7 +11655,7 @@ i.e. localhost"));
     { btnResetConfig = new Fl_Button(20, 388, 130, 22, _("Restore defaults"));
       btnResetConfig->callback((Fl_Callback*)cb_btnResetConfig);
     } // Fl_Button* btnResetConfig
-    { btnApplyConfig = new Fl_Button(175, 375, 115, 22, _("Apply (dl)"));
+    { btnApplyConfig = new Fl_Button(175, 388, 115, 22, _("Apply (dl)"));
       btnApplyConfig->callback((Fl_Callback*)cb_btnApplyConfig);
       btnApplyConfig->deactivate();
     } // Fl_Button* btnApplyConfig

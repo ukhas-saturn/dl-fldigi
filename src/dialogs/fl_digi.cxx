@@ -6866,7 +6866,6 @@ void create_fl_digi_main_dl_fldigi() {
 	int freqwidth = (int)fl_width("999999999") + 10;
 	fl_font(fnt, fsize);
 
-	int Htext = progStatus.mainH - Hwfall - Hmenu - Hstatus - Hmacros - Hqsoframe - 4;
 	int minRxHeight = 100;
 	int TopFrameHABheight = 120;
 

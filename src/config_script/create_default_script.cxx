@@ -196,7 +196,9 @@ static int add_command(FILE *fd, char *cmd, char * param, int indent_level);
 static int add_command(FILE *fd, char *cmd, int indent_level);
 static int add_command(FILE *fd, char *cmd, bool   param, int indent_level);
 static int add_command(FILE *fd, char *cmd, double param, int indent_level);
+#if USE_PORTAUDIO
 static int add_string(FILE *fd, char *cmd, int indent_level);
+#endif
 static void write_macro_list(FILE *fd);
 
 extern pthread_mutex_t mutex_script_io;
@@ -678,6 +680,7 @@ static int add_command(FILE *fd, char *cmd, int indent_level)
 	return ferror(fd);
 }
 
+#if USE_PORTAUDIO
 /** ********************************************************
  * \brief Add command and paramter to script file
  * \param fd File descriptor
@@ -697,4 +700,4 @@ static int add_string(FILE *fd, char *cmd, int indent_level)
 
 	return ferror(fd);
 }
-
+#endif

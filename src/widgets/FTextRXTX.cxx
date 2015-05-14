@@ -809,13 +809,6 @@ int FTextTX::handle(int event)
 
 	switch (event) {
 	case FL_KEYBOARD:
-		if (active_modem->get_mode() == MODE_FSQ) {
-			if (Fl::event_key() == FL_Enter || Fl::event_key() == FL_KP_Enter) {
-				this->add("^r");
-				start_tx();
-				return 1;
-			}
-		}
 		return handle_key(Fl::event_key()) ? 1 : FTextEdit::handle(event);
 	case FL_PUSH:
 		if (Fl::event_button() == FL_MIDDLE_MOUSE &&
