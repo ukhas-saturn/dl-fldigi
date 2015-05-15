@@ -1011,8 +1011,7 @@ void startup_modem(modem* m, int f)
 
 	trx_mode id = m->get_mode();
 
-	if (!bHAB)
-	{
+	if (!bHAB) {
 		if (id == MODE_CW) {
 			cntCW_WPM->show();
 			btnCW_Default->show();
@@ -1024,7 +1023,7 @@ void startup_modem(modem* m, int f)
 		}
 	}
 
-	if (!bWF_only) {
+	if ((!bHAB) && (!bWF_only)) {
 		if (id >= MODE_WEFAX_FIRST && id <= MODE_WEFAX_LAST) {
 			center_group->hide();
 			wefax_group->show();
@@ -4052,6 +4051,20 @@ _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 { _("&Logbook"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("View")), 'l', (Fl_Callback*)cb_mnuShowLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("ADIF")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Merge...")), 0, (Fl_Callback*)cb_mnuMergeADIF_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Export...")), 0, (Fl_Callback*)cb_mnuExportADIF_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{0,0,0,0,0,0,0,0,0},
+{ icons::make_icon_label(_("Reports")), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Text...")), 0, (Fl_Callback*)cb_mnuExportTEXT_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("CSV...")), 0, (Fl_Callback*)cb_mnuExportCSV_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Cabrillo...")), 0, (Fl_Callback*)cb_Export_Cabrillo, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{0,0,0,0,0,0,0,0,0},
+{ icons::make_icon_label(_("New")), 0, (Fl_Callback*)cb_mnuNewLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Open...")), 0, (Fl_Callback*)cb_mnuOpenLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Save")), 0, (Fl_Callback*)cb_mnuSaveLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ LOG_CONNECT_SERVER, 0, cb_log_server, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 {_("DL Client"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
@@ -4061,28 +4074,10 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Tracker"), pskr_icon), 0, cb_mnuVisitTracker, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("habitat"), pskr_icon), 0, cb_mnuVisitHabitat, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Help"), pskr_icon), 0, cb_mnuVisitDLHelp, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("View")), 'l', (Fl_Callback*)cb_mnuShowLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-
-{ icons::make_icon_label(_("ADIF")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Merge...")), 0, (Fl_Callback*)cb_mnuMergeADIF_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Export...")), 0, (Fl_Callback*)cb_mnuExportADIF_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{0,0,0,0,0,0,0,0,0},
-
-{ icons::make_icon_label(_("Reports")), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Text...")), 0, (Fl_Callback*)cb_mnuExportTEXT_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("CSV...")), 0, (Fl_Callback*)cb_mnuExportCSV_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Cabrillo...")), 0, (Fl_Callback*)cb_Export_Cabrillo, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{0,0,0,0,0,0,0,0,0},
-
-{ icons::make_icon_label(_("New")), 0, (Fl_Callback*)cb_mnuNewLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Open...")), 0, (Fl_Callback*)cb_mnuOpenLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Save")), 0, (Fl_Callback*)cb_mnuSaveLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-
-{ LOG_CONNECT_SERVER, 0, cb_log_server, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
-
 {0,0,0,0,0,0,0,0,0},
 
 {"     ", 0, 0, 0, FL_MENU_INACTIVE, FL_NORMAL_LABEL, 0, 14, 0},
+
 {_("&Help"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 #ifndef NDEBUG
 // settle the gmfsk vs fldigi argument once and for all
@@ -8447,7 +8442,7 @@ void set_rtty_shift(int shift)
 		return;
 
 	// Static const array otherwise will be built at each call.
-	static const int shifts[] = { 23, 85, 160, 170, 182, 200, 240, 350, 425, 850 };
+	static const int shifts[] = { 23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850 };
 	size_t i;
 	for (i = 0; i < sizeof(shifts)/sizeof(*shifts); i++)
 		if (shifts[i] == shift)
@@ -8465,7 +8460,7 @@ void set_rtty_baud(float baud)
 	// Static const array otherwise will be rebuilt at each call.
 	static const float bauds[] = {
 		45.0f, 45.45f, 50.0f, 56.0f, 75.0f,
-		100.0f, 110.0f, 150.0f, 200.0f, 300.0f
+		100.0f, 110.0f, 150.0f, 200.0f, 300.0f, 600.0f, 1200.0f
 	};
 	for (size_t i = 0; i < sizeof(bauds)/sizeof(*bauds); i++) {
 		if (bauds[i] == baud) {

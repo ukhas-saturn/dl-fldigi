@@ -5607,7 +5607,7 @@ Fl_Double_Window* ConfigureDialog() {
         tabOperator->tooltip(_("Operator information"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
-        { Fl_Group* o = new Fl_Group(55, 35, 490, 170, _("Station"));
+        { Fl_Group* o = new Fl_Group(55, 35, 490, 200, _("Station"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
           { inpMyCallsign = new Fl_Input2(160, 64, 110, 24, _("Callsign:"));
@@ -5680,7 +5680,8 @@ Fl_Double_Window* ConfigureDialog() {
             inpMyAntenna->when(FL_WHEN_RELEASE);
             inpMyAntenna->labelsize(FL_NORMAL_SIZE);
           } // Fl_Input2* inpMyAntenna
-          { Fl_Input* o = MyRadio = new Fl_Input(132, 200, 320, 25, _("Radio:"));
+          { Fl_Input* o = MyRadio = new Fl_Input(160, 200, 320, 24, _("Radio:"));
+            MyRadio->tooltip(_("Short description of radio"));
             MyRadio->callback((Fl_Callback*)cb_MyRadio);
             o->value(progdefaults.myRadio.c_str());
           } // Fl_Input* MyRadio

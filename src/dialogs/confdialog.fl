@@ -366,7 +366,7 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
       } {
         Fl_Group {} {
           label Station open
-          xywh {55 35 490 170} box ENGRAVED_FRAME align 21
+          xywh {55 35 490 200} box ENGRAVED_FRAME align 21
         } {
           Fl_Input inpMyCallsign {
             label {Callsign:}
@@ -435,7 +435,7 @@ btnApplyConfig->activate();}
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
-            xywh {132 200 320 25}
+            tooltip {Short description of radio} xywh {160 200 320 24}
             code0 {o->value(progdefaults.myRadio.c_str());}
           }
         }
