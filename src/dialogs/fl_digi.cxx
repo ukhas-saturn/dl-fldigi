@@ -3317,10 +3317,8 @@ static bool restore_minimize = false;
 
 void UI_select_central_frame(int y, int ht)
 {
-#if 0
 	if (bHAB)
 		return;
-#endif
 	text_panel->resize(0, y, fl_digi_main->w(), ht);
 	center_group->init_sizes();
 }

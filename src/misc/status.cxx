@@ -236,7 +236,7 @@ void status::saveLastState()
 	logbook_col_5 = wBrowser->columnWidth(5);
 
 
-	if (!bWF_only) {
+	if (!bWF_only && !bHAB) {
 		RxTextHeight = (ReceiveText->h() * 100) / text_panel->h();//VTgroup->h();
 		quick_entry = ReceiveText->get_quick_entry();
 		rx_scroll_hints = ReceiveText->get_scroll_hints();
@@ -852,7 +852,15 @@ void status::initLastState()
 
 	if (bWF_only)
 		fl_digi_main->resize(mainX, mainY, mainW, Hmenu + Hwfall + Hstatus);
-	else {
+	else if (bHAB) {
+		if (HAB_width < 0)
+			HAB_width = Fl::w();
+		if (HAB_width < WMIN_hab)
+			HAB_width = WMIN_hab;
+		if (HAB_width > Fl::w())
+			HAB_width = Fl::w();
+		fl_digi_main->resize(mainX, mainY, HAB_width, HAB_height);
+	} else {
 		fl_digi_main->resize(mainX, mainY, mainW, mainH);
 
 		set_macroLabels();
