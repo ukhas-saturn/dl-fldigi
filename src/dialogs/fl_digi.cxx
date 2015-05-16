@@ -522,11 +522,10 @@ void cb_contestiaI(Fl_Widget *w, void *arg);
 void cb_contestiaJ(Fl_Widget *w, void *arg);
 void cb_contestiaCustom(Fl_Widget *w, void *arg);
 
-void cb_rtty45(Fl_Widget *w, void *arg);
 void cb_rtty50(Fl_Widget *w, void *arg);
 void cb_rttyHAB50(Fl_Widget *w, void *arg);
-void cb_rtty75N(Fl_Widget *w, void *arg);
-void cb_rtty75W(Fl_Widget *w, void *arg);
+void cb_rtty100(Fl_Widget *w, void *arg);
+void cb_rtty300(Fl_Widget *w, void *arg);
 void cb_rttyCustom(Fl_Widget *w, void *arg);
 
 void set_colors();
@@ -732,10 +731,9 @@ static const Fl_Menu_Item quick_change_contestia[] = {
 };
 
 static const Fl_Menu_Item quick_change_rtty[] = {
-	{ "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY },
 	{ "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY },
-	{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY },
-	{ "RTTY-75W", 0, cb_rtty75W, (void *)MODE_RTTY },
+	{ "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY },
+	{ "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY },
 	{ _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY },
 	{ 0 }
 };
@@ -925,8 +923,8 @@ void cb_rtty45(Fl_Widget *w, void *arg)
 void cb_rtty50(Fl_Widget *w, void *arg)
 {
 	progdefaults.rtty_baud = 2;
-	progdefaults.rtty_bits = 0;
-	progdefaults.rtty_shift = 3;
+	progdefaults.rtty_bits = 1;
+	progdefaults.rtty_shift = 6;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -934,7 +932,7 @@ void cb_rtty50(Fl_Widget *w, void *arg)
 void cb_rttyHAB50(Fl_Widget *w, void *arg)
 {
 	progdefaults.rtty_baud = 2;
-	progdefaults.rtty_bits = 2;
+	progdefaults.rtty_bits = 1;
 	progdefaults.rtty_shift = 8;
 	progdefaults.rtty_parity = 0;
 	progdefaults.rtty_stop = 1;
@@ -942,20 +940,20 @@ void cb_rttyHAB50(Fl_Widget *w, void *arg)
 	cb_init_mode(w, arg);
 }
 
-void cb_rtty75N(Fl_Widget *w, void *arg)
+void cb_rtty100(Fl_Widget *w, void *arg)
 {
-	progdefaults.rtty_baud = 4;
-	progdefaults.rtty_bits = 0;
-	progdefaults.rtty_shift = 3;
+	progdefaults.rtty_baud = 5;
+	progdefaults.rtty_bits = 2;
+	progdefaults.rtty_shift = 8;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
 
-void cb_rtty75W(Fl_Widget *w, void *arg)
+void cb_rtty300(Fl_Widget *w, void *arg)
 {
-	progdefaults.rtty_baud = 4;
-	progdefaults.rtty_bits = 0;
-	progdefaults.rtty_shift = 9;
+	progdefaults.rtty_baud = 9;
+	progdefaults.rtty_bits = 2;
+	progdefaults.rtty_shift = 10;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -3948,8 +3946,9 @@ static Fl_Menu_Item menu_[] = {
 { RTTY_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
-{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
-{ "RTTY-75W", 0, cb_rtty75W, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-HAB-50", 0, cb_rttyHAB50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
@@ -6216,6 +6215,36 @@ void cb_mnuPlaybackHAB(Fl_Widget *w, void *d);
 
 static Fl_Menu_Item alt_menu_[] = {
 {_("&File"), 0,  0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("Folders")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Fldigi config..."), folder_open_icon), 0, cb_ShowConfig, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("FLMSG files..."), folder_open_icon), 0, cb_ShowFLMSG, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("NBEMS files..."), folder_open_icon), 0, cb_ShowNBEMS, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Data files..."), folder_open_icon), 0, cb_ShowDATA, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{0,0,0,0,0,0,0,0,0},
+
+{ icons::make_icon_label(_("Macros")), 0, 0, 0, FL_MENU_DIVIDER | FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Open ..."), file_open_icon), 0,  (Fl_Callback*)cb_mnuOpenMacro, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Save ..."), save_as_icon), 0,  (Fl_Callback*)cb_mnuSaveMacro, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{0,0,0,0,0,0,0,0,0},
+
+{ icons::make_icon_label(_("Config Scripts")), 0, 0, 0, FL_MENU_DIVIDER | FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{ _("Execute"),  0, (Fl_Callback*)cb_menu_scripts,  0, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
+{ _("Generate"), 0, (Fl_Callback*)cb_menu_make_default_scripts,  0, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
+{ 0,0,0,0,0,0,0,0,0},
+
+{ icons::make_icon_label(_("Text Capture")), 0, 0, 0, FL_MENU_DIVIDER | FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{ LOG_TO_FILE_MLABEL, 0, cb_logfile, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
+{0,0,0,0,0,0,0,0,0},
+
+#if USE_SNDFILE
+{ icons::make_icon_label(_("Audio")), 0, 0, 0, FL_MENU_DIVIDER | FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{_("RX capture"),  0, (Fl_Callback*)cb_mnuCapture,  0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
+{_("TX generate"), 0, (Fl_Callback*)cb_mnuGenerate, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
+{_("Playback"),    0, (Fl_Callback*)cb_mnuPlayback, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
+{0,0,0,0,0,0,0,0,0},
+#endif
+
 { icons::make_icon_label(_("Exit"), log_out_icon), 'x',  (Fl_Callback*)cb_E, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
@@ -6330,8 +6359,8 @@ static Fl_Menu_Item alt_menu_[] = {
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-HAB-50", 0, cb_rttyHAB50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0}, 
-{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
-{ "RTTY-75W", 0, cb_rtty75W, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
