@@ -610,6 +610,10 @@ int main(int argc, char ** argv)
 	LOG_INFO("FLMSG_ICS_tmp_dir: %s", FLMSG_ICS_tmp_dir.c_str());
 
 	bool have_config = progdefaults.readDefaultsXML();
+	// TODO: Fix first-start Wizard crashing in HAB mode
+	if (!have_config)
+		bHAB = false;
+
 	check_overrides();
 
 	xmlfname = HomeDir;
