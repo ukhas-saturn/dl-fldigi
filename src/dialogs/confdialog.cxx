@@ -3054,6 +3054,14 @@ resetRTTY();
 progdefaults.changed = true;
 }
 
+Fl_Value_Slider2 *sldrRTTYbandwidth=(Fl_Value_Slider2 *)0;
+
+static void cb_sldrRTTYbandwidth(Fl_Value_Slider2* o, void*) {
+  progdefaults.RTTY_BW = o->value();
+resetRTTY();
+progdefaults.changed = true;
+}
+
 Fl_Check_Button *btnAUTOCRLF=(Fl_Check_Button *)0;
 
 static void cb_btnAUTOCRLF(Fl_Check_Button* o, void*) {
@@ -5607,6 +5615,7 @@ Fl_Double_Window* ConfigureDialog() {
         tabOperator->tooltip(_("Operator information"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
+        tabOperator->hide();
         { Fl_Group* o = new Fl_Group(55, 35, 490, 200, _("Station"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -7296,11 +7305,11 @@ i on a\ntouch screen device such as a tablet."));
         tabWaterfall->end();
       } // Fl_Group* tabWaterfall
       { tabModems = new Fl_Group(0, 25, 600, 355, _("Modems"));
-        tabModems->hide();
         { tabsModems = new Fl_Tabs(0, 25, 600, 355);
           tabsModems->selection_color(FL_LIGHT1);
           tabsModems->align(Fl_Align(FL_ALIGN_TOP_RIGHT));
           { tabCW = new Fl_Group(0, 50, 600, 330, _("CW"));
+            tabCW->hide();
             { tabsCW = new Fl_Tabs(0, 50, 600, 330);
               tabsCW->selection_color(FL_LIGHT1);
               { Fl_Group* o = new Fl_Group(0, 75, 600, 305, _("General"));
@@ -8479,7 +8488,6 @@ i on a\ntouch screen device such as a tablet."));
             tabPSK->end();
           } // Fl_Group* tabPSK
           { tabRTTY = new Fl_Group(0, 50, 600, 330, _("RTTY"));
-            tabRTTY->hide();
             { tabsRTTY = new Fl_Tabs(0, 50, 600, 330);
               tabsRTTY->selection_color(FL_LIGHT1);
               { Fl_Group* o = new Fl_Group(0, 75, 600, 305, _("Tx"));
@@ -8584,6 +8592,27 @@ i on a\ntouch screen device such as a tablet."));
                        o->labelsize(FL_NORMAL_SIZE);
                 selStopBits->end();
                 } // Fl_ListBox* selStopBits
+                { Fl_Value_Slider2* o = sldrRTTYbandwidth = new Fl_Value_Slider2(35, 320, 250, 20, _("Filter Adjustment"));
+                sldrRTTYbandwidth->tooltip(_("RTTY filter bandwidth"));
+                sldrRTTYbandwidth->type(1);
+                sldrRTTYbandwidth->box(FL_DOWN_BOX);
+                sldrRTTYbandwidth->color(FL_BACKGROUND_COLOR);
+                sldrRTTYbandwidth->selection_color(FL_BACKGROUND_COLOR);
+                sldrRTTYbandwidth->labeltype(FL_NORMAL_LABEL);
+                sldrRTTYbandwidth->labelfont(0);
+                sldrRTTYbandwidth->labelsize(14);
+                sldrRTTYbandwidth->labelcolor(FL_FOREGROUND_COLOR);
+                sldrRTTYbandwidth->minimum(0.5);
+                sldrRTTYbandwidth->maximum(2);
+                sldrRTTYbandwidth->step(0.1);
+                sldrRTTYbandwidth->value(1);
+                sldrRTTYbandwidth->textsize(14);
+                sldrRTTYbandwidth->callback((Fl_Callback*)cb_sldrRTTYbandwidth);
+                sldrRTTYbandwidth->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+                sldrRTTYbandwidth->when(FL_WHEN_CHANGED);
+                o->value(progdefaults.RTTY_BW);
+                o->labelsize(FL_NORMAL_SIZE); o->textsize(FL_NORMAL_SIZE);
+                } // Fl_Value_Slider2* sldrRTTYbandwidth
                 { Fl_Check_Button* o = btnAUTOCRLF = new Fl_Check_Button(316, 103, 90, 22, _("AutoCRLF"));
                 btnAUTOCRLF->tooltip(_("Add CRLF after page width characters"));
                 btnAUTOCRLF->down_box(FL_DOWN_BOX);

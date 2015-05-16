@@ -361,8 +361,8 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
     } {
       Fl_Group tabOperator {
         label Operator
-        callback {progdefaults.changed = true;} open selected
-        tooltip {Operator information} xywh {0 25 600 355} when 1
+        callback {progdefaults.changed = true;} open
+        tooltip {Operator information} xywh {0 25 600 355} when 1 hide
       } {
         Fl_Group {} {
           label Station open
@@ -2831,14 +2831,14 @@ behaves inside the waterfall} xywh {65 207 150 22} box DOWN_BOX color 7 align 8
       }
       Fl_Group tabModems {
         label Modems open
-        xywh {0 25 600 355} hide
+        xywh {0 25 600 355}
       } {
         Fl_Tabs tabsModems {open
           xywh {0 25 600 355} selection_color 50 align 9
         } {
           Fl_Group tabCW {
             label CW open
-            xywh {0 50 600 330}
+            xywh {0 50 600 330} hide
           } {
             Fl_Tabs tabsCW {open
               xywh {0 50 600 330} selection_color 50
@@ -3747,7 +3747,7 @@ progdefaults.changed = true;}
           }
           Fl_Group tabRTTY {
             label RTTY open
-            xywh {0 50 600 330} hide
+            xywh {0 50 600 330}
           } {
             Fl_Tabs tabsRTTY {open
               xywh {0 50 600 330} selection_color 50
@@ -3825,6 +3825,16 @@ progdefaults.changed = true;} open
                        o->labelsize(FL_NORMAL_SIZE);}
                   class Fl_ListBox
                 } {}
+                Fl_Value_Slider sldrRTTYbandwidth {
+                  label {Filter Adjustment}
+                  callback {progdefaults.RTTY_BW = o->value();
+resetRTTY();
+progdefaults.changed = true;} selected
+                  tooltip {RTTY filter bandwidth} xywh {35 320 250 20} type Horizontal align 5 minimum 0.5 maximum 2 step 0.1 value 1 textsize 14
+                  code0 {o->value(progdefaults.RTTY_BW);}
+                  code1 {o->labelsize(FL_NORMAL_SIZE); o->textsize(FL_NORMAL_SIZE);}
+                  class Fl_Value_Slider2
+                }
                 Fl_Check_Button btnAUTOCRLF {
                   label AutoCRLF
                   callback {progdefaults.rtty_autocrlf = o->value();
@@ -5529,7 +5539,7 @@ progdefaults.changed = true;}
                 code0 {o->value(progdefaults.Pskmails2nreport);}
               }
             }
-	  }
+          }
           Fl_Group tabSweetSpot {
             label {Sweet Spot} open
             xywh {0 50 600 330} hide
@@ -5837,11 +5847,6 @@ progdefaults.changed = true;}
           }
         }
       }
-
-
-
-
-
       Fl_Group tabDL {
         label {DL Client} open
         xywh {0 25 540 350} selection_color 48 hide
@@ -6202,13 +6207,11 @@ dl_fldigi::hbtint::uthr->payloads();}
                 label Next
                 callback {dl_fldigi::flights::payload_search(true);}
                 xywh {245 300 60 25}
-
-				}
-			}
-		}
-	}
-}
-
+              }
+            }
+          }
+        }
+      }
       Fl_Group tabQRZ {
         label Web open
         tooltip {Callsign database} xywh {0 25 600 355} hide

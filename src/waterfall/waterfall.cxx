@@ -216,8 +216,10 @@ inline void WFdisp::makeMarker_(int width, const RGB* color, int freq, const RGB
 			(progdefaults.rtty_shift < rtty::numshifts ?
 				rtty::SHIFT[progdefaults.rtty_shift] :
 				progdefaults.rtty_custom_shift));
-		int bw_limit_hi = (int)(shift / 2 + progdefaults.RTTY_BW / 2.0);
-		int bw_limit_lo = (int)(shift / 2 - progdefaults.RTTY_BW / 2.0);
+		const double bauds[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
+		double rttyband = bauds[ progdefaults.rtty_baud ] * progdefaults.RTTY_BW;
+		int bw_limit_hi = (int)(shift / 2 + rttyband / 2);
+		int bw_limit_lo = (int)(shift / 2 - rttyband / 2);
 		int bw_freq = static_cast<int>(freq + 0.5);
 		int bw_lower1 = -bw_limit_hi;
 		int bw_upper1 = -bw_limit_lo;

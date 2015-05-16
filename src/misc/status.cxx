@@ -644,6 +644,7 @@ void status::loadLastState()
 	spref.get("shaped_rtty", i, shaped_rtty); shaped_rtty = i;
 	spref.get("uosrx", i, UOSrx); UOSrx = i;
 	spref.get("uostx", i, UOStx); UOStx = i;
+	progdefaults.RTTY_BW = 1.0;
 
 	if(!xmlrpc_address_override_flag) {
 		memset(strbuff, 0, sizeof(strbuff));

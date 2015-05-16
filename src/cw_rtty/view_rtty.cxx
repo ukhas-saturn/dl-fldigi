@@ -57,10 +57,10 @@ static char figures[32] = {
 	'9',	'?',	'&',	' ',	'.',	'/',	';',	' '
 };
 
-const double	view_rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 850};
+const double	view_rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850};
 // FILTLEN must be same size as BAUD
-const double	view_rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300};
-const int		view_rtty::FILTLEN[] = { 512, 512, 512, 512, 512, 512, 512, 256, 128, 64};
+const double	view_rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
+const int		view_rtty::FILTLEN[] = { 512, 512, 512, 512, 512, 512, 512, 256, 128, 64, 64, 64, 64};
 const int		view_rtty::BITS[]  = {5, 7, 8};
 const int		view_rtty::numshifts = (int)(sizeof(SHIFT) / sizeof(*SHIFT));
 const int		view_rtty::numbauds = (int)(sizeof(BAUD) / sizeof(*BAUD));
@@ -147,7 +147,7 @@ void view_rtty::restart()
 
 	set_bandwidth(shift);
 
-	rtty_BW = progdefaults.RTTY_BW;
+	rtty_BW = BAUD[progdefaults.rtty_baud];
 
 	bp_filt_lo = (shift/2.0 - rtty_BW/2.0) / samplerate;
 	if (bp_filt_lo < 0) bp_filt_lo = 0;

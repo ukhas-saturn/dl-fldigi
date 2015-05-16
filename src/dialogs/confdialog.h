@@ -347,6 +347,7 @@ extern Fl_ListBox *selBaud;
 extern Fl_ListBox *selBits;
 extern Fl_ListBox *selParity;
 extern Fl_ListBox *selStopBits;
+extern Fl_Value_Slider2 *sldrRTTYbandwidth;
 extern Fl_Check_Button *btnAUTOCRLF;
 extern Fl_Counter2 *cntrAUTOCRLF;
 extern Fl_Check_Button *btnCRCRLF;

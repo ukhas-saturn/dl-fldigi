@@ -207,12 +207,33 @@ rtty::~rtty()
 
 void rtty::reset_filters()
 {
+#if 0
 	delete mark_filt;
 	mark_filt = new fftfilt(rtty_baud/samplerate, filter_length);
 	mark_filt->rtty_filter(rtty_baud/samplerate);
 	delete space_filt;
 	space_filt = new fftfilt(rtty_baud/samplerate, filter_length);
 	space_filt->rtty_filter(rtty_baud/samplerate);
+#else
+	filter_length = 1024; // TODO: upstream code uses much smaller FFT sizes at higher baud
+	float rtty_band;
+
+	// FFTfilt passes bandwidth on both sides of the center freq.
+	rtty_band = (rtty_baud * 0.5) * progdefaults.RTTY_BW / samplerate;
+	//printf("resetting Filter for Baud %f, %i\n", rtty_baud, samplerate);
+
+	if (mark_filt) {
+		mark_filt->create_filter(0, rtty_band);
+	} else {
+		mark_filt = new fftfilt(0, rtty_band, filter_length);
+	}
+
+	if (space_filt) {
+		space_filt->create_filter(0, rtty_band);
+	} else {
+		space_filt = new fftfilt(0, rtty_band, filter_length);
+	}
+#endif
 }
 
 void rtty::restart()
