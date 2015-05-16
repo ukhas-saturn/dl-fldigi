@@ -8551,6 +8551,12 @@ void enable_arq(void)
 
 void enable_disable_kpsql(void)
 {
+	if (bHAB) {
+		progStatus.pwrsqlonoff = false;
+		sldrSquelch->value(progStatus.sldrSquelchValue);
+		return;
+	}
+
 	if(progdefaults.data_io_enabled == KISS_IO) {
 		check_kiss_modem();
 		btnPSQL->activate();
