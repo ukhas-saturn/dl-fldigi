@@ -296,6 +296,7 @@ extern Fl_Group *tabDomEX;
 extern Fl_Input2 *txtSecondary;
 extern Fl_Check_Button *valDominoEX_FILTER;
 extern Fl_Counter2 *valDominoEX_BW;
+extern Fl_Counter2 *valDominoEX_ADJ;
 extern Fl_Check_Button *chkDominoEX_FEC;
 extern Fl_Value_Slider2 *valDomCWI;
 extern Fl_Counter2 *valDominoEX_PATHS;

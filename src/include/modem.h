@@ -120,6 +120,7 @@ public:
 	virtual void	set_freq(double);
 	/// Inlining small formulas is still faster and shorter.
 	int		get_freq() const { return (int)( frequency + 0.5 ); }
+	double		track_freq(double freq);
 	void		init_freqlock();
 	void		set_freqlock(bool);
 	void		set_sigsearch(int n) { sigsearch = n; freqerr = 0.0;};
@@ -158,6 +159,9 @@ public:
 	       CAP_IMG = 1 << 3, CAP_BW = 1 << 4, CAP_RX = 1 << 5,
 	       CAP_TX = 1 << 6
 	};
+
+// UKHAS frequency tracking
+	unsigned char track_freq_lock;
 
 // for CW modem use only
 	bool		get_cwTrack();

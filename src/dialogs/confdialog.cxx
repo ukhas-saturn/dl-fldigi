@@ -2711,6 +2711,14 @@ resetDOMEX();
 progdefaults.changed = true;
 }
 
+Fl_Counter2 *valDominoEX_ADJ=(Fl_Counter2 *)0;
+
+static void cb_valDominoEX_ADJ(Fl_Counter2* o, void*) {
+  progdefaults.DOMINOEX_ADJ = o->value();
+resetDOMEX();
+progdefaults.changed = true;
+}
+
 Fl_Check_Button *chkDominoEX_FEC=(Fl_Check_Button *)0;
 
 static void cb_chkDominoEX_FEC(Fl_Check_Button* o, void*) {
@@ -7941,6 +7949,24 @@ i on a\ntouch screen device such as a tablet."));
                 o->value(progdefaults.DOMINOEX_BW);
                 o->labelsize(FL_NORMAL_SIZE);
               } // Fl_Counter2* valDominoEX_BW
+              { Fl_Counter2* o = valDominoEX_ADJ = new Fl_Counter2(156, 166, 63, 20, _("Tone-spacing adjust"));
+                valDominoEX_ADJ->tooltip(_("Tone-spacing adjust"));
+                valDominoEX_ADJ->type(1);
+                valDominoEX_ADJ->box(FL_UP_BOX);
+                valDominoEX_ADJ->color(FL_BACKGROUND_COLOR);
+                valDominoEX_ADJ->selection_color(FL_INACTIVE_COLOR);
+                valDominoEX_ADJ->labeltype(FL_NORMAL_LABEL);
+                valDominoEX_ADJ->labelfont(0);
+                valDominoEX_ADJ->labelsize(14);
+                valDominoEX_ADJ->labelcolor(FL_FOREGROUND_COLOR);
+                valDominoEX_ADJ->minimum(-100);
+                valDominoEX_ADJ->maximum(100);
+                valDominoEX_ADJ->callback((Fl_Callback*)cb_valDominoEX_ADJ);
+                valDominoEX_ADJ->align(Fl_Align(FL_ALIGN_RIGHT));
+                valDominoEX_ADJ->when(FL_WHEN_CHANGED);
+                o->value(progdefaults.DOMINOEX_ADJ);
+                o->labelsize(FL_NORMAL_SIZE);
+              } // Fl_Counter2* valDominoEX_ADJ
               { Fl_Check_Button* o = chkDominoEX_FEC = new Fl_Check_Button(65, 171, 51, 20, _("FEC"));
                 chkDominoEX_FEC->tooltip(_("Enable MultiPSK-compatible FEC"));
                 chkDominoEX_FEC->down_box(FL_DOWN_BOX);

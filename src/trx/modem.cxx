@@ -225,6 +225,7 @@ modem::modem()
 	s2n_ncount = s2n_sum = s2n_sum2 = s2n_metric = 0.0;
 	s2n_valid = false;
 
+	track_freq_lock = 0;
 	bandwidth = 0.0;
 }
 
@@ -249,8 +250,34 @@ void modem::init()
 		set_freq(wf->Carrier());
 }
 
+double modem::track_freq(double freq)
+{
+	/* locking code in logger/rx_extract.cxx may have been lost in a previous merge
+	 *	- was added in commit 78f05cef33dc2c59211eebedeae4d97a11529b1d */ 
+	if(track_freq_lock) return(freq);
+
+	if(freq >= progdefaults.track_freq_min &&
+	   freq <= progdefaults.track_freq_max)
+		return(freq);
+
+	double rf = wf->rfcarrier();
+	double cf = (progdefaults.track_freq_max + progdefaults.track_freq_min) / 2;
+
+	if(rf <= 0) return(freq);
+
+	if(wf->USB()) rf += freq - cf;
+	else rf -= freq - cf;
+
+	qsy(rf);
+
+	return(cf);
+}
+
 void modem::set_freq(double freq)
 {
+	if(progdefaults.track_freq)
+		freq = track_freq(freq);
+
 	frequency = CLAMP(
 		freq,
 		progdefaults.LowFreqCutoff + bandwidth / 2,
