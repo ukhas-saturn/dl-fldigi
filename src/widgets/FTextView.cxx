@@ -75,6 +75,7 @@ FTextBase::FTextBase(int x, int y, int w, int h, const char *l)
 	sbuf = new Fl_Text_Buffer_mod;
 
 	buffer(tbuf);
+	reset_styles(SET_FONT | SET_SIZE | SET_COLOR);
 	highlight_data(sbuf, styles, NATTR, FTEXT_DEF, 0, 0);
 	cursor_style(Fl_Text_Editor_mod::NORMAL_CURSOR);
 
@@ -84,8 +85,6 @@ FTextBase::FTextBase(int x, int y, int w, int h, const char *l)
 
 	// Do we want narrower scrollbars? The default width is 16.
 	// scrollbar_width((int)floor(scrollbar_width() * 3.0/4.0));
-
-	reset_styles(SET_FONT | SET_SIZE | SET_COLOR);
 }
 
 void FTextBase::clear()
