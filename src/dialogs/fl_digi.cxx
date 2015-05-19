@@ -916,6 +916,8 @@ void cb_rtty45(Fl_Widget *w, void *arg)
 	progdefaults.rtty_baud = 1;
 	progdefaults.rtty_bits = 0;
 	progdefaults.rtty_shift = 3;
+	progdefaults.rtty_parity = 0;
+	progdefaults.rtty_stop = 0;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -925,6 +927,8 @@ void cb_rtty50(Fl_Widget *w, void *arg)
 	progdefaults.rtty_baud = 2;
 	progdefaults.rtty_bits = 1;
 	progdefaults.rtty_shift = 6;
+	progdefaults.rtty_parity = 0;
+	progdefaults.rtty_stop = 0;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -935,7 +939,7 @@ void cb_rttyHAB50(Fl_Widget *w, void *arg)
 	progdefaults.rtty_bits = 1;
 	progdefaults.rtty_shift = 8;
 	progdefaults.rtty_parity = 0;
-	progdefaults.rtty_stop = 1;
+	progdefaults.rtty_stop = 0;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -945,6 +949,8 @@ void cb_rtty100(Fl_Widget *w, void *arg)
 	progdefaults.rtty_baud = 5;
 	progdefaults.rtty_bits = 2;
 	progdefaults.rtty_shift = 8;
+	progdefaults.rtty_parity = 0;
+	progdefaults.rtty_stop = 0;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -954,6 +960,8 @@ void cb_rtty300(Fl_Widget *w, void *arg)
 	progdefaults.rtty_baud = 9;
 	progdefaults.rtty_bits = 2;
 	progdefaults.rtty_shift = 10;
+	progdefaults.rtty_parity = 0;
+	progdefaults.rtty_stop = 0;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }

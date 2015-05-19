@@ -710,19 +710,26 @@ void status::initLastState()
 		loadLastState();
 
 // RTTY
+/*
+    dl-fldigi/commit/6762423be66d1f36a8e0d4346fd1b4972fef1bd5
+
+    - Note that i_listbox_xxx objects need indexing offset
+      to maintain compatability with progdefaults definitions.
+    - New objects should use listbox_xxx naming convention
+*/
 	if (lastmode == MODE_RTTY ) {
 		progdefaults.rtty_shift = rtty_shift;
-		selShift->index(progdefaults.rtty_shift + 1);
+		selShift->index(progdefaults.rtty_shift);
 		if (rtty_shift == selShift->lsize() - 1) {
 			selCustomShift->deactivate();
 		}
 		else { // Custom shift
 			selCustomShift->activate();
 		}
-		selBaud->index((progdefaults.rtty_baud = rtty_baud) + 1);
-		selBits->index((progdefaults.rtty_bits = rtty_bits) + 1);
-		selParity->index((progdefaults.rtty_parity = rtty_parity) + 1);
-		selStopBits->index((progdefaults.rtty_stop = rtty_stop) + 1);
+		selBaud->index(progdefaults.rtty_baud = rtty_baud);
+		selBits->index(progdefaults.rtty_bits = rtty_bits);
+		selParity->index(progdefaults.rtty_parity = rtty_parity);
+		selStopBits->index(progdefaults.rtty_stop = rtty_stop);
 		btnCRCRLF->value(progdefaults.rtty_crcrlf = rtty_crcrlf);
 		btnAUTOCRLF->value(progdefaults.rtty_autocrlf = rtty_autocrlf);
 		cntrAUTOCRLF->value(progdefaults.rtty_autocount = rtty_autocount);
