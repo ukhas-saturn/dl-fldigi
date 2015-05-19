@@ -87,7 +87,8 @@ const double rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 60
 // FILTLEN must be same size as BAUD
 const int		rtty::FILTLEN[] = { 512, 512, 512, 512, 512, 512, 512, 256, 128, 64, 64, 64, 64};
 const int		rtty::BITS[]  = {5, 7, 8};
-const int		rtty::numshifts = (int)(sizeof(SHIFT) / sizeof(*SHIFT));
+// dl-fldigi version has a trailing zero on the shift list, for flight autoconfig
+const int		rtty::numshifts = (int)(sizeof(SHIFT) / sizeof(*SHIFT)) - 1;
 const int		rtty::numbauds = (int)(sizeof(BAUD) / sizeof(*BAUD));
 
 void rtty::tx_init(SoundBase *sc)
@@ -240,7 +241,7 @@ void rtty::restart()
 {
 	double stl;
 
-	rtty_shift = shift = (progdefaults.rtty_shift >= 0 ?
+	rtty_shift = shift = ( (progdefaults.rtty_shift < numshifts) ?
 				  SHIFT[progdefaults.rtty_shift] : progdefaults.rtty_custom_shift);
 	if (progdefaults.rtty_baud > numbauds - 1) progdefaults.rtty_baud = numbauds - 1;
 	rtty_baud = BAUD[progdefaults.rtty_baud];
