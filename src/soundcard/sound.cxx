@@ -2238,3 +2238,117 @@ size_t SoundNull::Read(float *buf, size_t count)
 	return count;
 
 }
+
+#include "netcat.c"
+SoundIP::SoundIP(const char* inithost, const char* initport, bool udp_flag)
+{
+	stream = -1;
+	m_host = inithost;
+	m_port = initport;
+	portmode_udp = udp_flag;
+	udp_connected = false;
+
+        snd_buffer = new float[SND_BUF_LEN]; // floats out for fldigi
+	cbuff   =  new uint8_t[SND_BUF_LEN]; // 64K, max tcp/ip packet size
+	buffend = buffptr = 0;
+}
+
+SoundIP::~SoundIP()
+{
+	SoundIP::closestream();
+
+	delete [] snd_buffer;
+	delete [] cbuff;
+}
+
+int SoundIP::Open(int mode, int freq)
+{
+	resamplerate = freq;
+	m_step = 0.0;
+
+	if (stream < 0)
+		SoundIP::getstream();
+	return 0;
+}
+
+void SoundIP::Close(unsigned unused)
+{
+	SoundIP::closestream();
+}
+
+void SoundIP::Abort(unsigned unused)
+{
+	SoundIP::closestream();
+}
+
+size_t  SoundIP::Write(double* buf, size_t count)
+{
+	return count;
+}
+
+size_t  SoundIP::Write_stereo(double* bufleft, double* bufright, size_t count)
+{
+	return count;
+}
+
+size_t  SoundIP::Read(float *buff, size_t count)
+{
+	int n, s, out, rate, idlecount;
+	unsigned i, j, c;
+	float ratio;
+
+	rate = progdefaults.in_sample_rate;
+        if (rate < 8000)
+                rate = 48000; // unset / native default
+        ratio = 1.0 * rate / resamplerate;
+
+	if (stream < 0) {
+		// keep trying to open stream
+		MilliSleep(1000);
+		SoundIP::getstream();
+		for (i = 0; i < count; i++)
+			buff[i] = 0.0f;
+		return count;
+	}
+
+	idlecount = 10;
+	out = 0;
+	c = count;
+	for (;;) {
+		i = buffend - buffptr;
+		if ( i > c )
+			i = c;
+		if ( i > 0) {
+			for ( j = 0; j < i; j++)
+			buff[out + j] = snd_buffer[buffptr + j];
+		}
+		buffptr += i;
+		out += i;
+		c -= i;
+		if ( 0 == c)
+			return count;
+
+		n = readstream(cbuff);
+		if (n <= 0) {
+			MilliSleep(100);
+			if (--idlecount < 0) {
+				for (i = 0; i < count; i++)
+					buff[i] = 0.0f;
+				return count;
+			}
+		}
+
+		buffend = buffptr = 0;
+		// S16LE to float, resampled
+		for (s = 0; s * 2 < n; s++) {
+			m_step = m_step - 1.0;
+			if (m_step < 0) {
+				short s16le = cbuff[2*s] | ( cbuff[2*s+1] << 8);
+				snd_buffer[buffend++] = (1.0 / 32768) * s16le;
+				m_step += ratio;
+			}
+		}
+	}
+	return count;
+}
+

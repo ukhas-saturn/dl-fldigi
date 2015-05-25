@@ -460,16 +460,17 @@ extern Fl_Counter *mbw_delay;
 extern Fl_Group *tabSoundCard;
 extern Fl_Tabs *tabsSoundCard;
 extern Fl_Group *tabAudio;
-extern Fl_Group *AudioOSS;
-#include <FL/Fl_Input_Choice.H>
-extern Fl_Input_Choice *menuOSSDev;
+extern Fl_Group *AudioTCP;
+extern Fl_Input2 *inpIPServerHost;
+extern Fl_Input2 *inpIPServerPort;
+extern Fl_Group *AudioUDP;
+extern Fl_Round_Button *btnAudioIO[5];
 extern Fl_Group *AudioPort;
 extern Fl_Choice *menuPortInDev;
 extern Fl_Choice *menuPortOutDev;
 extern Fl_Group *AudioPulse;
 extern Fl_Input2 *inpPulseServer;
 extern Fl_Group *AudioNull;
-extern Fl_Round_Button *btnAudioIO[4];
 extern Fl_Group *tabAudioOpt;
 extern Fl_Group *grpAudioSampleRate;
 extern Fl_ListBox *menuInSampleRate;
@@ -591,6 +592,7 @@ extern Fl_Counter2 *cntTrackFreqMax;
 #include <FL/Fl_Float_Input.H>
 extern Fl_Float_Input *stationary_lat;
 extern Fl_Float_Input *stationary_lon;
+#include <FL/Fl_Input_Choice.H>
 extern Fl_Input_Choice *inpGPSdev;
 #include <FL/Fl_Spinner.H>
 extern Fl_Output *gps_pos_lat;
