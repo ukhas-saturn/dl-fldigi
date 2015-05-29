@@ -3,7 +3,7 @@ FLDIGI(1)
 
 
 == NAME ==
-fldigi - digital modem program for hamradio operators
+dl-fldigi - digital modem program for hamradio operators
 
 
 == SYNOPSIS ==
