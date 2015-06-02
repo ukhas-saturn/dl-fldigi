@@ -81,10 +81,6 @@ FTextBase::FTextBase(int x, int y, int w, int h, const char *l)
 
 	wrap_mode(wrap, wrap_col);
 	restore_wrap = wrap;
-//	wrap_restore = true;
-
-	// Do we want narrower scrollbars? The default width is 16.
-	// scrollbar_width((int)floor(scrollbar_width() * 3.0/4.0));
 }
 
 void FTextBase::clear()

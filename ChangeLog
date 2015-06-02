@@ -945,7 +945,15 @@
 	3114075: Fix socket/getaddrinfo support
 
 
+=Version 3.22.10=
+
+2015-06-01  David Freese  <iam_w1hkj@w1hkj.com>
+
+	dfc430f: FTextView styles bug
+
+
 =Version 3.22.09=
+
 
 2015-05-28  Kamal Mostafa  <kamal@whence.com>
 
