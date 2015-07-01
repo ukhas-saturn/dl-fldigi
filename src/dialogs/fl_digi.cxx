@@ -6620,6 +6620,13 @@ void noop_controls() // create and then hide all controls not being used
 	qso_btnAct = new Fl_Button(defwidget); qso_btnAct->hide();
 	qso_inpAct = new Fl_Input2(defwidget); qso_inpAct->hide();
 
+	if (bHAB) {
+		QsoInfoFrame1A =  new Fl_Group(defwidget);
+		QsoInfoFrame1B =  new Fl_Group(defwidget);
+		QsoInfoFrame1A->hide();
+		QsoInfoFrame1B->hide();
+	}
+
 	dummywindow->end();
 	dummywindow->hide();
 
