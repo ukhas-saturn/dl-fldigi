@@ -6900,12 +6900,11 @@ void create_fl_digi_main_dl_fldigi() {
 	int Y = 0;
 
 	fl_font(fnt, freqheight);
-	int freqwidth = (int)fl_width("999999999") + 10;
+	int freqwidth = (int)fl_width("999999.999");
 	fl_font(fnt, fsize);
 
 	int minRxHeight = 100;
 	int TopFrameHABheight = 120;
-
 
 	IMAGE_WIDTH = 4000;//progdefaults.HighFreqCutoff;
 	Hwfall = progdefaults.wfheight;
@@ -7132,8 +7131,7 @@ void create_fl_digi_main_dl_fldigi() {
 
 		/* Row three: frequency control, mode control, received string */
 
-		qsoFreqDisp1 = new cFreqControl(10, below(habRXPayload) + 4,
-										freqwidth, freqheight, "");
+		qsoFreqDisp1 = new cFreqControl(10, below(habRXPayload) + 4, freqwidth, freqheight, "10");
 		qsoFreqDisp1->box(FL_DOWN_BOX);
 		qsoFreqDisp1->color(FL_BACKGROUND_COLOR);
 		qsoFreqDisp1->selection_color(FL_BACKGROUND_COLOR);
@@ -7149,9 +7147,8 @@ void create_fl_digi_main_dl_fldigi() {
 													progdefaults.FDbackground.G,
 													progdefaults.FDbackground.B));
 		qsoFreqDisp1->value(0);
-		//qsoFreqDisp2->resizable(NULL);
 		
-		int w_pmb = (freqwidth - Wbtn + 2 * pad) / 2;
+		int w_pmb = freqwidth / 2;
 		qso_opMODE = new Fl_ComboBox(rightof(qsoFreqDisp1) + 2, below(habRXPayload) + 4, w_pmb, Hentry);
 		qso_opMODE->box(FL_DOWN_BOX);
 		qso_opMODE->color(FL_BACKGROUND2_COLOR);
