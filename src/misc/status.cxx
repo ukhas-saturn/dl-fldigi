@@ -808,10 +808,7 @@ void status::initLastState()
 	}
 
 	btnSQL->value(sqlonoff);
-	if (!bHAB)
-		btnPSQL->value(pwrsqlonoff);
-	else
-		pwrsqlonoff = false;
+	btnPSQL->value(pwrsqlonoff);
 
 	if(pwrsqlonoff)
 		sldrSquelch->value(sldrPwrSquelchValue);
