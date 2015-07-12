@@ -7257,7 +7257,8 @@ void create_fl_digi_main_dl_fldigi() {
 
 			StatusBar = new Fl_Box(
 				rightof(Status2), Y,
-				WMIN_hab - bwSqlOnOff - bwAfcOnOff - Wwarn - rightof(Status2) - 2 * pad,// - 60,
+				WMIN_hab - bwSqlOnOff - bwAfcOnOff  - bwPwrSqlOnOff
+						- Wwarn - rightof(Status2) - 2 * pad,
 				Hstatus, "");
 			StatusBar->box(FL_DOWN_BOX);
 			StatusBar->color(FL_BACKGROUND2_COLOR);
@@ -7276,12 +7277,12 @@ void create_fl_digi_main_dl_fldigi() {
 			sql_width -= 15; // leave room for resize handle
 #endif
 			btnAFC = new Fl_Light_Button(
-				WMIN_hab - bwSqlOnOff - bwAfcOnOff,
+				WMIN_hab - bwSqlOnOff - bwPwrSqlOnOff - bwAfcOnOff,
 				Y,
 				bwAfcOnOff, Hstatus, "AFC");
 			btnAFC->selection_color(progdefaults.AfcColor);
 			btnSQL = new Fl_Light_Button(
-				WMIN_hab - bwSqlOnOff,
+				WMIN_hab - bwSqlOnOff  - bwPwrSqlOnOff,
 				Y,
 				sql_width, Hstatus, "SQL");
 			btnSQL->selection_color(progdefaults.Sql1Color);
@@ -7290,8 +7291,17 @@ void create_fl_digi_main_dl_fldigi() {
 			btnAFC->value(1);
 			btnAFC->tooltip(_("Automatic Frequency Control"));
 			btnSQL->callback(cbSQL, 0);
-			btnSQL->value(1);
+			btnSQL->value(0);
 			btnSQL->tooltip(_("Squelch"));
+
+			btnPSQL = new Fl_Light_Button(
+					WMIN_hab - bwPwrSqlOnOff,
+					Y,
+					bwPwrSqlOnOff, Hstatus, "KPSQL");
+			btnPSQL->selection_color(progdefaults.Sql1Color);
+			btnPSQL->callback(cbPwrSQL, 0);
+			btnPSQL->value(0);
+			btnPSQL->tooltip(_("Monitor KISS Pwr Squelch"));
 
 			Fl_Group::current()->resizable(StatusBar);
 		hpack->end();
