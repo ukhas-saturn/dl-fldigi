@@ -138,7 +138,7 @@ const struct mode_info_t mode_info[NUM_MODES] = {
 	{ MODE_OLIVIA_32_1000, &olivia_32_1000_modem, "Olivia-32-1K", "OL 32-1K", "OLIV 32/1K", "OLIVIA", "OL32/1K", ARQ_IO | KISS_IO  },
 	{ MODE_OLIVIA_64_2000, &olivia_64_2000_modem, "Olivia-64-2K", "OL 64-2K", "OLIV 64/2K", "OLIVIA", "OL64/2K", ARQ_IO | KISS_IO  },
 
-	{ MODE_RTTY, &rtty_modem, "RTTY", "RTTY", "RTTY", "RTTY", "RY", DISABLED_IO },
+	{ MODE_RTTY, &rtty_modem, "RTTY", "RTTY", "RTTY", "RTTY", "RY", KISS_IO },
 
 	{ MODE_THOR4, &thor4_modem, "THOR4", "THOR 4", "THOR4", "THOR", "TH4", DISABLED_IO  },
 	{ MODE_THOR5, &thor5_modem, "THOR5", "THOR 5", "THOR5", "THOR", "TH5", DISABLED_IO  },
