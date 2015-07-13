@@ -2283,11 +2283,13 @@ void SoundIP::Abort(unsigned unused)
 
 size_t  SoundIP::Write(double* buf, size_t count)
 {
+	MilliSleep((long)ceil((1e3 * count) / resamplerate));
 	return count;
 }
 
 size_t  SoundIP::Write_stereo(double* bufleft, double* bufright, size_t count)
 {
+	MilliSleep((long)ceil((1e3 * count) / resamplerate));
 	return count;
 }
 
