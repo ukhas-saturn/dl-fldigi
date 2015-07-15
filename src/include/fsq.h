@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// fsq.h  --  BASIS FOR ALL MODEMS
+// fsq.h  -- FSQCALL compatible modem
 //
 // Copyright (C) 2006
 //		Dave Freese, W1HKJ
@@ -24,12 +24,16 @@
 #define _FSQ_H
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #include "trx.h"
 #include "modem.h"
 #include "complex.h"
 #include "filters.h"
 #include "crc8.h"
+#include "picture.h"
+#include <FL/Fl_Shared_Image.H>
 
 class fsq : public modem {
 
@@ -37,17 +41,24 @@ class fsq : public modem {
 #define FFTSIZE		4096
 #define FSQ_SYMLEN	4096
 
-#define BLOCK_SIZE (FFTSIZE / 2)
-#define SHIFT_SIZE	(FSQ_SYMLEN / 16) // at 3 baud
+#define BLOCK_SIZE	FFTSIZE // (FFTSIZE / 2)
+#define SHIFT_SIZE	(FSQ_SYMLEN / 16)
 
-#define FSQ_SHAPE_SIZE	64 // 5 msec rise time
-
+#define NUMBINS		142
 //#define FSQBOL " \n"
 //#define FSQEOL "\n "
 //#define FSQEOT "  \b  "
+enum STATE {TEXT, IMAGE};
 
-friend
-	void timed_xmt(void *);
+friend void timed_xmt(void *);
+friend void sounder(void *);
+friend void aging(void *);
+friend void fsq_add_tx_timeout(void *);
+friend void fsq_stop_aging();
+friend void fsq_start_sounder(void *);
+friend void fsq_stop_sounder();
+friend void try_transmit(void *);
+friend void fsq_transmit(void *);
 
 public:
 static int			symlen;
@@ -57,19 +68,17 @@ protected:
 	double			rx_stream[BLOCK_SIZE + SHIFT_SIZE];
 	cmplx			fft_data[2*FFTSIZE];
 	double			a_blackman[BLOCK_SIZE];
-	int				a_step;
+	double			tones[NUMBINS];
+	Cmovavg			*binfilt[NUMBINS];
+	int				movavg_size;
 	int 			bkptr;
 	g_fft<double>	*fft;
-	Cmovavg			*sqlch;
 	Cmovavg			*snfilt;
-	int				shift_size; // number of samples to shift in time
-	int				block_size; // size of the windowed sample set for FFT
+	Cmovavg			*baudfilt;
 	double			val;
 	double			max;
+	double			noise;
 	int				peak;
-	double			baud_estimate;
-	int				baud_counter;
-	int				baud_bin;
 	int				prev_peak;
 	int				last_peak;
 	int				peak_counter;
@@ -80,36 +89,37 @@ protected:
 	int				prev_nibble;
 	void			lf_check(int);
 	void			process_symbol(int);
-	double			signoise;
 	double			s2n;
 	char			szestimate[40];
 	std::string		rx_text;
 	std::string		toprint;
+	bool			valid_callsign(std::string s);
 	void			parse_rx_text();
-	void			parse_space();
-	void			parse_qmark();
+	void			parse_space(bool);
+	void			parse_qmark(std::string relay = "");
 	void			parse_star();
-	void			parse_excl();
-	void			parse_tilda();
-	void			parse_pound();
-	void			parse_dollar();
-	void			parse_at();
-	void			parse_amp();
-	void			parse_carat();
+	void			parse_repeat();
+	void			parse_delayed_repeat();
+	void			parse_pound(std::string relay = "");
+	void			parse_dollar(std::string relay = "");
+	void			parse_at(std::string relay = "");
+	void			parse_amp(std::string relay = "");
+	void			parse_carat(std::string relay = "");
 	void			parse_pcnt();
-	void			parse_vline();
-	void			parse_greater();
-	void			parse_less();
-	void			parse_plus();
+	void			parse_vline(std::string relay = "");
+	void			parse_greater(std::string relay = "");
+	void			parse_less(std::string relay = "");
+	void			parse_plus(std::string relay = "");
 	void			parse_minus();
-	void			parse_semi();
+	void			parse_relay();
+	void			parse_relayed();
 
 	bool			b_bot;
 	bool			b_eol;
 	bool			b_eot;
 
 // Tx
-	double			*keyshape;
+//	C_FIR_filter	*xmtfilt;
 	int				tone;
 	int				prevtone;
 	double			txphase;
@@ -123,9 +133,20 @@ protected:
 	std::string		xmt_string;
 	double			xmtdelay();
 	void			reply(std::string);
+	void			delayed_reply(std::string, int delay);
+	void			send_ack(std::string relay = "");
+
+// Sounder
+	double			sounder_interval;
+	void			start_sounder(int); // 0, 1, 2, 3
+	void			stop_sounder();
+
+// Aging
+	void			start_aging();
+	void			stop_aging();
 
 // RxTx
-	double			center_freq;
+	int				fsq_frequency;  // 0 / 1
 	int				spacing;
 	int				basetone;
 	double			speed;
@@ -134,22 +155,24 @@ protected:
 	CRC8			crc;
 	std::string		station_calling;
 	std::string		mycall;
+	std::string		heard_log_fname;
+	std::string		audit_log_fname;
+	std::ofstream	heard_log;
+	std::ofstream	audit_log;
 
 	void			show_mode();
 	void			adjust_for_speed();
 	void			process_tones();
 
-	void			start_thread ();
-	void			stop_thread ();
-	void			increment_symbol_count();
-	void			clear_symbol_count();
-	int				get_symbol_count();
+	void			set_freq(double);
 
 	bool			valid_char(int);
 
 	static const char *FSQBOL;
 	static const char *FSQEOL;
 	static const char *FSQEOT;
+
+	STATE			state;
 
 public:
 	fsq (trx_mode md);
@@ -161,6 +184,44 @@ public:
 	int		rx_process (const double *buf, int len);
 
 	int		tx_process ();
+
+	const char *fsq_mycall() { return mycall.c_str(); }
+
+	bool	fsq_squelch_open();
+
+// support for fsq image transfers
+private:
+	double amplitude;
+	double pixel;
+	bool    TX_IMAGE;
+	unsigned char tx_pixel;
+	int tx_pixelnbr;
+	int image_mode;
+
+public:
+	int		byte;
+	double	picf;
+	double picpeak;
+
+	C_FIR_filter *picfilter;
+	double phidiff;
+	double phase;
+	cmplx	prevz;
+	cmplx	currz;
+
+	double image_freq[10];
+	int		image_counter;
+	int		picW;
+	int		picH;
+	int		row;
+	int		col;
+	int		rgb;
+	int		pixelnbr;
+	int		RXspp;
+	int		TXspp;
+	void	recvpic(double smpl);
+	void	send_image();
+	void	fsq_send_image();
 
 };
 

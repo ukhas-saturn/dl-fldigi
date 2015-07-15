@@ -506,6 +506,7 @@ dl_fldigi_SOURCES += \
 	include/Viewer.h \
 	include/viterbi.h \
 	include/waterfall.h \
+	include/fsq.h \
 	include/wwv.h \
 	include/xmlreader.h \
 	include/adif_def.h \
@@ -653,6 +654,8 @@ dl_fldigi_SOURCES += \
 	widgets/psk_browser.cxx \
 	widgets/smeter.cxx \
 	widgets/pwrmeter.cxx \
+	fsq/fsq.cxx \
+	fsq/fsq_monitor.cxx \
 	wwv/analysis.cxx \
 	wwv/fftscan.cxx \
 	wwv/wwv.cxx \
@@ -698,9 +701,13 @@ EXTRA_dl_fldigi_SOURCES += \
 	feld/FeldStyl-14.cxx \
 	feld/FeldVert-14.cxx \
 	feld/FeldWide-14.cxx \
+	fsq/fsq_varicode.cxx \
+	include/crc8.h \
 	include/Fl_Text_Buffer_mod.H \
 	include/Fl_Text_Display_mod.H \
 	include/Fl_Text_Editor_mod.H \
+	fsq/fsq-pic.cxx \
+	fsq/bitmaps.cxx \
 	mfsk/mfsk-pic.cxx \
 	mt63/alias_1k.dat \
 	mt63/alias_2k.dat \

@@ -151,6 +151,11 @@ public:
 	virtual void		send_color_image(std::string) {}
 	virtual void		send_Grey_image(std::string) {}
 
+	virtual void		fsq_send_image(){}
+	virtual const char *fsq_mycall() {return "";}
+	virtual bool		fsq_squelch_open() {return false;}
+	virtual void		fsq_transmit(void *) {}
+
 	void		set_stopflag(bool b) { stopflag = b;};
 	bool		get_stopflag() const { return stopflag; };
 
@@ -248,6 +253,9 @@ public:
 	virtual void stop_csv() {}
 	virtual int is_csv() { return true;}
 	virtual double track_freq() { return 0;}
+
+// fsq mode
+	virtual void send_ack(std::string relay) {};
 };
 
 extern modem *null_modem;
