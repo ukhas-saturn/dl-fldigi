@@ -7695,6 +7695,7 @@ void create_fl_digi_main_dl_fldigi() {
 	wf->UI_select(progStatus.WF_UI);
 
 	createConfig();
+	createRecordLoader();
 	if (withnoise)
 		grpNoise->show();
 }
