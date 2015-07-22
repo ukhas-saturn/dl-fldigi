@@ -8227,7 +8227,8 @@ void put_Status1(const char *msg, double timeout, status_timeout action)
 	m[sizeof(m) - 1] = '\0';
 
 	info1msg = msg;
-	if (progStatus.NO_RIGLOG && !(active_modem->get_mode() == MODE_FSQ)) return;
+	if (progStatus.NO_RIGLOG) // && !(active_modem && active_modem->get_mode() == MODE_FSQ))
+		return;
 	REQ(put_status_msg, Status1, m, timeout, action);
 }
 
