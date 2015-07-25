@@ -376,14 +376,15 @@ static fre_t call("([[:alnum:]]?[[:alpha:]/]+[[:digit:]]+[[:alnum:]/]+)", REG_EX
 
 bool fsq::valid_callsign(std::string s)
 {
-	static char sz[21];
-	if (s.empty()) return false;
+	if (s.length() < 3) return false;
 	if (s.length() > 20) return false;
+//	if (s.find(' ') != std::string::npos) return false;
+
 	if (s == allcall) return true;
 	if (s == cqcqcq) return true;
 	if (s == mycall) return true;
-	if (s.find(' ') != std::string::npos) return false;
 
+	static char sz[21];
 	memset(sz, 0, 21);
 	strcpy(sz, s.c_str());
 	bool matches = call.match(sz);
@@ -410,7 +411,7 @@ void fsq::parse_rx_text()
 	}
 
 	state = TEXT;
-	size_t p = rx_text.rfind(':');
+	size_t p = rx_text.find(':');
 	if (p == std::string::npos ||
 		p == 0 ||
 		rx_text.length() < p + 2) {
@@ -423,13 +424,15 @@ void fsq::parse_rx_text()
 	station_calling.clear();
 
 	int max = p+1;
+	std::string substr;
 	for (int i = 1; (i < 10) && (i < max); i++) {
 		if (rx_text[p-i] <= ' ' || rx_text[p-i] > 'z') {
 			rx_text.clear();
 			return;
 		}
-		if (crc.sval(rx_text.substr(p-i, i)) == rxcrc) {
-			station_calling = rx_text.substr(p-i, i);
+		substr = rx_text.substr(p-i, i);
+		if ((crc.sval(substr) == rxcrc) && valid_callsign(substr)) {
+			station_calling = substr;
 			break;
 		}
 	}
@@ -544,6 +547,8 @@ void fsq::parse_rx_text()
 
 void fsq::parse_space(bool all)
 {
+std::cout << rx_text << "\n";
+
 	if (all)
 		display_fsq_rx_text(toprint.append(rx_text).append("\n"), FTextBase::CTRL);
 	else
@@ -687,17 +692,18 @@ void fsq::parse_pound(std::string relay)
 		else fname = station_calling;
 		fname.append(".txt");
 	}
+	if (fname.find(".txt") == std::string::npos) fname.append(".txt");
+	if (rx_text[rx_text.length() -1] != '\n') rx_text.append("\n");
 
 	std::ofstream rxfile;
 	fname.insert(0, TempDir);
-	if (!named_file) {
+	if (named_file) {
 		rxfile.open(fname.c_str(), ios::app);
 	} else {
 		rxfile.open(fname.c_str(), ios::out);
 	}
 	if (!rxfile) return;
 	rxfile << rx_text.substr(p2+1);
-	if (!named_file) rxfile << "\n";
 	rxfile.close();
 
 	display_fsq_rx_text(toprint.append(rx_text).append("\n"));
@@ -1003,7 +1009,7 @@ void fsq::process_symbol(int sym)
 				if (rx_text.length() > 32768) rx_text.clear();
 				if ( fsq_squelch_open() || !progStatus.sqlonoff ) {
 					rx_text += curr_ch;
-					if (b_eol || b_eot) {
+					if (b_eot) {
 						parse_rx_text();
 						if (state == TEXT)
 							ch_sqlch_open = false;
@@ -1426,7 +1432,7 @@ double fsq::xmtdelay() // in seconds
 	return delay;
 }
 
-static int xmt_tries = 8;
+static float xmt_tries = 6.0; // timeout in nn seconds
 
 void fsq_repeat_last_command()
 {
@@ -1444,52 +1450,53 @@ void timed_xmt(void *who)
 	fsq		*me = (fsq *)who;
 	if (me != active_modem) return;
 
-	if (trx_state == STATE_TX) {
-		Fl::repeat_timeout(me->xmtdelay(), timed_xmt, me);
-		return;
-	}
-	if (me->fsq_squelch_open() && xmt_tries) {
-		xmt_tries--;
+	if ((trx_state == STATE_TX  || me->fsq_squelch_open()) && xmt_tries > 0) {
+		float delay = me->xmtdelay();
+		xmt_tries -= delay;
 		if (xmt_tries <= 0) {
 			std::string failed = "\nTimed out waiting to transmit:\n    \"";
 			failed.append(me->xmt_string).append("\"\n");
 			display_fsq_rx_text(failed);
+			fsq_que_clear();
 			return;
 		}
-		Fl::repeat_timeout(me->xmtdelay(), timed_xmt, me);
+		Fl::repeat_timeout(delay, timed_xmt, me);
 		return;
 	}
+	fsq_que_clear();
 	if (fsq_tx_text->eot()) fsq_transmit_string(me->xmt_string);
 }
 
-static double secs = 0;
+static float secs = 0;
 
 void fsq_add_tx_timeout(void *who)
 {
 	fsq	*me = (fsq *)who;
 	if (me != active_modem) return;
-	Fl::add_timeout(secs + me->xmtdelay(), timed_xmt, me);
+	Fl::add_timeout(secs, timed_xmt, me);
 }
 
 void fsq::reply(std::string s)
 {
+	write_fsq_que(std::string("REPLY: ").append(s));
 	xmt_string = s;
 	xmt_string.append("^r");
-	xmt_tries = 16;
+	xmt_tries = progdefaults.fsq_time_out;
 	secs = 0.1;
 	Fl::awake(fsq_add_tx_timeout, this);
 }
 
 void fsq::delayed_reply(std::string s, int delay)
 {
+	write_fsq_que(std::string("DELAYED REPLY: ").append(s));
 	xmt_string = s;
 	xmt_string.append("^r");
-	xmt_tries = 16;
+	xmt_tries = progdefaults.fsq_time_out;
 	secs = delay;
 	Fl::awake(fsq_add_tx_timeout, this);
 }
 
-static int try_tries = 8;
+static float try_tries = 6.0;
 
 void try_transmit(void *who)
 {
@@ -1500,13 +1507,14 @@ void try_transmit(void *who)
 		display_fsq_rx_text("\nWait for Rx!\n", FTextBase::ALTR);
 		return;
 	}
-	if (me->fsq_squelch_open() && try_tries) {
-		try_tries--;
+	if (me->fsq_squelch_open() && try_tries > 0) {
+		float delay = me->xmtdelay();
+		try_tries -= delay;
 		if (try_tries <= 0) {
 			display_fsq_rx_text("\nSquelch open.  Transmit timed out!\n", FTextBase::ALTR);
 			return;
 		}
-		Fl::repeat_timeout(me->xmtdelay(), try_transmit, me);
+		Fl::repeat_timeout(delay, try_transmit, me);
 		return;
 	}
 	fsq_tx_text->add("^r");
@@ -1516,8 +1524,8 @@ void try_transmit(void *who)
 void fsq_transmit(void *who)
 {
 	fsq *me = (fsq *)who;
-	try_tries = 16;
-	Fl::add_timeout(0, try_transmit, me);//me->xmtdelay(), try_transmit, me);
+	try_tries = progdefaults.fsq_time_out;
+	Fl::add_timeout(0, try_transmit, me);
 }
 
 //==============================================================================
