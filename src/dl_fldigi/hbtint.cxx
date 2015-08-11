@@ -286,7 +286,7 @@ static void set_jvalue(Fl_Output *widget, const Json::Value &value)
     {
         widget->value(value.asCString());
     }
-    else if (value.isBool() || value.isIntegral())
+    else if (value.isBool() || value.isNumeric())
     {
         ostringstream tmp;
 
