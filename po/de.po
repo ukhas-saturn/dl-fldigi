@@ -6468,9 +6468,6 @@ msgstr "QSO Datum"
 #~ msgid "View/Hide Smeter"
 #~ msgstr "Kanäle anzeigen/verbergen"
 
-#~ msgid "FFT latency (scan merging)"
-#~ msgstr "FFT Latenz (scan merging)"
-
 #, fuzzy
 #~ msgid "Use cross-hair scope"
 #~ msgstr "Fadenkreuz verwenden"
