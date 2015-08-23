@@ -252,35 +252,28 @@ void fftfilt::rtty_filter(double f)
 
         double dht;
         for( int i = 0; i < flen2; ++i ) {
-            double x = (double)i/(double)(flen2);	
-
-    // raised cosine response (changed for -1.0...+1.0 times Nyquist-f
-    // instead of books versions ranging from -1..+1 times samplerate)
-
+            double x = (double)i/(double)(flen2);
+            
+            // raised cosine response (changed for -1.0...+1.0 times Nyquist-f
+            // instead of books versions ranging from -1..+1 times samplerate)
+            
             dht =
-                x <= 0 ? 1.0 :
-                x > 2.0 * f ? 0.0 :
-                cos((M_PI * x) / (f * 4.0));
-
+            x <= 0 ? 1.0 :
+            x > 2.0 * f ? 0.0 :
+            cos((M_PI * x) / (f * 4.0));
+            
             dht *= dht; // cos^2
-
-    // amplitude equalized nyquist-channel response
+            
+            // amplitude equalized nyquist-channel response
             dht /= sinc(2.0 * i * f);
-
-// amplitude equalized nyquist-channel response
-		dht /= sinc(2.0 * i * f);
-
-		filter[i] = 
-			cmplx(	dht*cos((double)i* - 0.5*M_PI), 
-					dht*sin((double)i* - 0.5*M_PI) );
-
-		filter[(flen-i)%flen] = 
-			cmplx(	dht*cos((double)i*+0.5*M_PI),
-					dht*sin((double)i*+0.5*M_PI) );
-	}
-
-            filter[(flen-i)%flen].real() = dht*cos((double)i*+0.5*M_PI);
-            filter[(flen-i)%flen].imag() = dht*sin((double)i*+0.5*M_PI);
+            
+            filter[i] =
+            cmplx(	dht*cos((double)i* - 0.5*M_PI),
+                  dht*sin((double)i* - 0.5*M_PI) );
+            
+            filter[(flen-i)%flen] = 
+            cmplx(	dht*cos((double)i*+0.5*M_PI),
+                  dht*sin((double)i*+0.5*M_PI) );
         }
     }
     else{
