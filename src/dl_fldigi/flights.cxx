@@ -776,7 +776,7 @@ static void autoconfigure_rtty_shift(const Json::Value &value)
         /* I love floats :-( */
         if (diff < 0.1 && diff > -0.1)
         {
-            selShift->value(search);
+            selShift->index(search);
             selCustomShift->deactivate();
             progdefaults.rtty_shift = search;
             return;
@@ -785,7 +785,7 @@ static void autoconfigure_rtty_shift(const Json::Value &value)
 
     /* If not found (i.e., we found the terminating 0, and haven't returned)
      * then search == the index of the "Custom" menu item */
-    selShift->value(search);
+    selShift->index(search);
     selCustomShift->activate();
     progdefaults.rtty_shift = -1;
     selCustomShift->value(shift);
@@ -804,7 +804,7 @@ static void autoconfigure_rtty_baud(const Json::Value &value)
         double diff = rtty::BAUD[search] - baud;
         if (diff < 0.01 && diff > -0.01)
         {
-            selBaud->value(search);
+            selBaud->index(search);
             progdefaults.rtty_baud = search;
             return;
         }
@@ -829,14 +829,14 @@ static void autoconfigure_rtty_encoding(const Json::Value &value)
     else
         return;
 
-    selBits->value(select);
+    selBits->index(select);
     progdefaults.rtty_bits = select;
 
     /* From selBits' callback */
     if (select == 0)
     {
         progdefaults.rtty_parity = RTTY_PARITY_NONE;
-        selParity->value(RTTY_PARITY_NONE);
+        selParity->index(RTTY_PARITY_NONE);
     }
 }
 
@@ -865,7 +865,7 @@ static void autoconfigure_rtty_parity(const Json::Value &value)
     else
         return;
 
-    selParity->value(select);
+    selParity->index(select);
     progdefaults.rtty_parity = select;
 }
 
@@ -899,7 +899,7 @@ static void autoconfigure_rtty_stop(const Json::Value &value)
         return;
 
     progdefaults.rtty_stop = select;
-    selStopBits->value(select);
+    selStopBits->index(select);
 }
 
 static void autoconfigure_dominoex(const Json::Value &settings)
