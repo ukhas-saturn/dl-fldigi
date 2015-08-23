@@ -19,9 +19,9 @@
 // You should have received a copy of the GNU General Public License
 // along with fldigi.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Please report all bugs and problems to fldigi-devel@lists.berlios.de.
 // 
 // Modified by UKHAS
+// Please report all upstream bugs and problems to fldigi-devel@lists.sourceforge.net.
 // ----------------------------------------------------------------------------
 
 #include <config.h>
@@ -96,6 +96,7 @@
 #include "newinstall.h"
 #include "Viewer.h"
 #include "kmlserver.h"
+#include "data_io.h"
 
 #if USE_HAMLIB
 	#include "rigclass.h"
@@ -124,7 +125,6 @@ string appname;
 
 string scDevice[2];
 
-bool NBEMSapps_dir = false;
 string BaseDir = "";
 string HomeDir = "";
 string RigsDir = "";
@@ -210,74 +210,120 @@ static void fatal_error(string);
 void start_process(string executable)
 {
 	if (!executable.empty()) {
-#ifndef __MINGW32__
-		switch (fork()) {
-		case -1:
-			LOG_PERROR("fork");
-			// fall through
-		default:
-			break;
-		case 0:
-#endif
 #ifdef __MINGW32__
-			char* cmd = strdup(executable.c_str());
-			STARTUPINFO si;
-			PROCESS_INFORMATION pi;
-			memset(&si, 0, sizeof(si));
-			si.cb = sizeof(si);
-			memset(&pi, 0, sizeof(pi));
-			if (!CreateProcess(NULL, cmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
-				LOG_ERROR("CreateProcess failed with error code %ld", GetLastError());
-			CloseHandle(pi.hProcess);
-			CloseHandle(pi.hThread);
-			free(cmd);
+		char* cmd = strdup(executable.c_str());
+		STARTUPINFO si;
+		PROCESS_INFORMATION pi;
+		memset(&si, 0, sizeof(si));
+		si.cb = sizeof(si);
+		memset(&pi, 0, sizeof(pi));
+		if (!CreateProcess(NULL, cmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+			LOG_ERROR("CreateProcess failed with error code %ld", GetLastError());
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+		free(cmd);
 #else
-			execl("/bin/sh", "sh", "-c", executable.c_str(), (char *)NULL);
-			perror("execl");
-			exit(EXIT_FAILURE);
+		switch (fork()) {
+			case -1:
+				LOG_PERROR("fork");
+				// fall through
+			default:
+				break;
+
+			case 0:
+				execl("/bin/sh", "sh", "-c", executable.c_str(), (char *)NULL);
+				perror("execl");
+				exit(EXIT_FAILURE);
 		}
 #endif
 	}
 }
 
+void toggle_io_port_selection(int io_mode)
+{
+	switch(io_mode) {
+		case ARQ_IO:
+			btnEnable_kiss->do_callback();
+			btnEnable_arq->do_callback();
+			progdefaults.changed = false;
+			break;
+
+		case KISS_IO:
+			btnEnable_arq->do_callback();
+			btnEnable_kiss->do_callback();
+			progdefaults.changed = false;
+			break;
+
+		default:
+			LOG_INFO("Unknown data io mode");
+	}
+}
+
 static void auto_start()
 {
+	bool run_flamp = false;
+
+	// Make sure we are in ARQ_IO mode if executing FLAMP
+	if (!progdefaults.auto_flamp_pathname.empty() &&
+		 progdefaults.flamp_auto_enable) {
+		 toggle_io_port_selection(ARQ_IO);
+		 run_flamp = true;
+	}
+
+	// A general wait to ensure FLDIGI initialization of
+	// io ports. 1/4 to 3/4 second delay.
+	int nloops = 0;
+	while(nloops++ < 3) {
+		MilliSleep(250);
+		if(arq_state() && data_io_enabled == ARQ_IO)
+			break; // Exit early if verified.
+	}
+
 	if (!progdefaults.auto_flrig_pathname.empty() &&
 		 progdefaults.flrig_auto_enable)
 		start_process(progdefaults.auto_flrig_pathname);
-		
-	if (!progdefaults.auto_flamp_pathname.empty() &&
-		 progdefaults.flamp_auto_enable)
+
+	if (run_flamp)
 		start_process(progdefaults.auto_flamp_pathname);
-		
+
 	if (!progdefaults.auto_fllog_pathname.empty() &&
 		 progdefaults.fllog_auto_enable)
 		start_process(progdefaults.auto_fllog_pathname);
-		
+
 	if (!progdefaults.auto_flnet_pathname.empty() &&
 		 progdefaults.flnet_auto_enable)
 		start_process(progdefaults.auto_flnet_pathname);
-		
+
 	if (!progdefaults.auto_prog1_pathname.empty() &&
 		 progdefaults.prog1_auto_enable)
 		start_process(progdefaults.auto_prog1_pathname);
-		
+
 	if (!progdefaults.auto_prog2_pathname.empty() &&
 		 progdefaults.prog2_auto_enable)
 		start_process(progdefaults.auto_prog2_pathname);
-		
+
 	if (!progdefaults.auto_prog3_pathname.empty() &&
 		 progdefaults.prog3_auto_enable)
 		start_process(progdefaults.auto_prog3_pathname);
 }
 
+// reset those default values that have been overriden by a command line parameter
+void check_overrides()
+{
+	if (xmlrpc_address_override_flag) 
+		progdefaults.xmlrpc_address = override_xmlrpc_address;
+	if (xmlrpc_port_override_flag)
+		progdefaults.xmlrpc_port = override_xmlrpc_port;
+	if (arq_address_override_flag)
+		progdefaults.arq_address = override_arq_address;
+	if (arq_port_override_flag)
+		progdefaults.arq_port = override_arq_port;
+}
+
 // these functions are all started after Fl::run() is executing
 void delayed_startup(void *)
 {
-
 	connect_to_log_server();
-
-	arq_init();
 
 #ifdef __WIN32__
 	if (progdefaults.auto_talk) open_talker();
@@ -286,6 +332,15 @@ void delayed_startup(void *)
 #endif
 
 	XML_RPC_Server::start(progdefaults.xmlrpc_address.c_str(), progdefaults.xmlrpc_port.c_str());
+
+	FLRIG_start_flrig_thread();
+
+	data_io_enabled = DISABLED_IO;
+	arq_init();
+	kiss_init();
+	data_io_enabled = progStatus.data_io_enabled;
+
+	toggle_io_port_selection(data_io_enabled);
 
 	notify_start();
 
@@ -302,45 +357,84 @@ void delayed_startup(void *)
 
 int main(int argc, char ** argv)
 {
-//	null_modem = new NULLMODEM;
-//	active_modem = null_modem;
+	// for KISS_IO status information
+	program_start_time = time(0);
+
 	active_modem = new NULLMODEM;
 
-	appname = argv[0];
-	string appdir;
+	string appdir = appname = argv[0];
 	string test_file_name;
-	FILE *test_file = NULL;
-	{
-		char apptemp[FL_PATH_MAX];
-		fl_filename_expand(apptemp, sizeof(apptemp), appname.c_str());
-		appdir.assign(apptemp);
+
+	BaseDir.clear();
+	HomeDir.clear();
+	NBEMS_dir.clear();
+	FLMSG_dir.clear();
 
 #ifdef __WOE32__
-		size_t p = appdir.rfind("dl-fldigi.exe");
-		appdir.erase(p);
+	size_t p = appdir.rfind("dl_fldigi.exe");
+	appdir.erase(p);
+	p = appdir.find("FL_APPS\\");
+	if (p != string::npos) {
+		BaseDir.assign(appdir.substr(0, p + 8));
+		progdefaults.flmsg_pathname.assign(BaseDir).append("flmsg.exe");
+	} else {
+		BaseDir.clear();
+		HomeDir.clear();
+		NBEMS_dir.clear();
+		FLMSG_dir.clear();
+	}
 #else
-		size_t p = appdir.rfind("dl-fldigi");
-		if (appdir.find("./dl-fldigi") != std::string::npos) {
-			if (getcwd(apptemp, sizeof(apptemp)))
-				appdir.assign(apptemp).append("/");
-		} else
-			appdir.erase(p);
-#endif
-
-		if (p != std::string::npos) {
-			test_file_name.assign(appdir).append("NBEMS.DIR");
-#ifdef __WOE32__
-			while ((p = test_file_name.find("\\")) != std::string::npos)
-				test_file_name[p] = '/';
-#endif
-			test_file = fopen(test_file_name.c_str(),"r");
-			if (test_file != NULL) {
-				fclose(test_file);
-				BaseDir = appdir;
-				NBEMSapps_dir = true;
+	char apptemp[FL_PATH_MAX + 1];
+	fl_filename_absolute(apptemp, sizeof(apptemp), argv[0]);
+	appdir.assign(apptemp);
+	size_t p = appdir.rfind("dl_fldigi");
+	if (p != string::npos)
+		appdir.erase(p);
+	p = appdir.find("FL_APPS/");
+	if (p != string::npos) {
+		BaseDir.assign(appdir.substr(0, p + 8));
+		progdefaults.flmsg_pathname.assign(BaseDir).append("flmsg");
+		string test_dir;
+		test_dir.assign(BaseDir).append("dl_fldigi.files/");
+		DIR *isdir = opendir(test_dir.c_str());
+		if (isdir) {
+			HomeDir = test_dir;
+			closedir(isdir);
+		} else {
+			test_dir.assign(BaseDir).append(".dl_fldigi/");
+			isdir = opendir(test_dir.c_str());
+			if (isdir) {
+				HomeDir = test_dir;
+			} else {
+				HomeDir.clear();
 			}
 		}
+		if (!HomeDir.empty()) {
+			test_dir.assign(BaseDir).append("NBEMS.files/");
+			isdir = opendir(test_dir.c_str());
+			if (isdir) {
+				NBEMS_dir = test_dir;
+				FLMSG_dir = test_dir;
+				closedir(isdir);
+			} else {
+				test_dir.assign(BaseDir).append(".nbems/");
+				isdir = opendir(test_dir.c_str());
+				if (isdir) {
+					NBEMS_dir = test_dir;
+					FLMSG_dir = test_dir;
+				} else {
+					NBEMS_dir.clear();
+					FLMSG_dir.clear();
+				}
+			}
+		}
+	} else {
+		BaseDir.clear();
+		HomeDir.clear();
+		NBEMS_dir.clear();
+		FLMSG_dir.clear();
 	}
+#endif
 
 	debug_exec(argv);
 
@@ -349,7 +443,58 @@ int main(int argc, char ** argv)
 
 	for (int i = 0; i < NUM_QRUNNER_THREADS; i++) {
 		cbq[i] = new qrunner;
-		cbq[i]->attach();
+		switch(i) {
+			case TRX_TID:
+				cbq[i]->attach(i, "TRX_TID");
+				break;
+
+			case QRZ_TID:
+				cbq[i]->attach(i, "QRZ_TID");
+				break;
+
+			case RIGCTL_TID:
+				cbq[i]->attach(i, "RIGCTL_TID");
+				break;
+
+			case NORIGCTL_TID:
+				cbq[i]->attach(i, "NORIGCTL_TID");
+				break;
+
+			case EQSL_TID:
+				cbq[i]->attach(i, "EQSL_TID");
+				break;
+
+			case ADIF_RW_TID:
+				cbq[i]->attach(i, "ADIF_RW_TID");
+				break;
+
+			case XMLRPC_TID:
+				cbq[i]->attach(i, "XMLRPC_TID");
+				break;
+
+			case ARQ_TID:
+				cbq[i]->attach(i, "ARQ_TID");
+				break;
+
+			case ARQSOCKET_TID:
+				cbq[i]->attach(i, "ARQSOCKET_TID");
+				break;
+
+			case KISS_TID:
+				cbq[i]->attach(i, "KISS_TID");
+				break;
+
+			case KISSSOCKET_TID:
+				cbq[i]->attach(i, "KISSSOCKET_TID");
+				break;
+
+			case FLMAIN_TID:
+				cbq[i]->attach(i, "FLMAIN_TID");
+				break;
+
+		    default:
+		    	break;
+		}
 	}
 
 	set_unexpected(handle_unexpected);
@@ -377,23 +522,6 @@ int main(int argc, char ** argv)
 		}
 #endif
 	}
-	{
-#ifdef __WOE32__
-		if (HomeDir.empty()) HomeDir.assign(BaseDir).append("dl-fldigi.files/");
-		if (PskMailDir.empty()) PskMailDir = BaseDir;
-//		if (DATA_dir.empty()) DATA_dir.assign(BaseDir).append("DATA.files/");
-		if (NBEMS_dir.empty()) NBEMS_dir.assign(BaseDir).append("NBEMS.files/");
-		if (FLMSG_dir.empty()) FLMSG_dir_default = NBEMS_dir;
-#else
-		if (HomeDir.empty()) HomeDir.assign(BaseDir).append(".dl-fldigi/");
-		if (PskMailDir.empty()) PskMailDir = BaseDir;
-//		if (DATA_dir.empty()) DATA_dir.assign(BaseDir).append("data/");
-		if (NBEMS_dir.empty()) NBEMS_dir.assign(BaseDir).append(".nbems/");
-		if (FLMSG_dir.empty()) FLMSG_dir_default = NBEMS_dir;
-#endif
-	}
-
-	dl_fldigi::init();
 
 	generate_option_help();
 
@@ -401,11 +529,26 @@ int main(int argc, char ** argv)
 	if (Fl::args(argc, argv, arg_idx, parse_args) != argc)
 		arg_error(argv[0], NULL, false);
 
-
 	if (main_window_title.empty())
 		main_window_title = PACKAGE_TARNAME;
 
-	{
+#ifdef __WOE32__
+	if (HomeDir.empty()) HomeDir.assign(BaseDir).append("dl_fldigi.files/");
+	if (PskMailDir.empty()) PskMailDir = BaseDir;
+	if (DATA_dir.empty()) DATA_dir.assign(BaseDir).append("DATA.files/");
+	if (NBEMS_dir.empty()) NBEMS_dir.assign(BaseDir).append("NBEMS.files/");
+	if (FLMSG_dir.empty()) FLMSG_dir = FLMSG_dir_default = NBEMS_dir;
+#else
+	if (HomeDir.empty()) HomeDir.assign(BaseDir).append(".dl_fldigi/");
+	if (PskMailDir.empty()) PskMailDir = BaseDir;
+	if (DATA_dir.empty()) DATA_dir.assign(BaseDir).append("DATA.files/");
+	if (NBEMS_dir.empty()) NBEMS_dir.assign(BaseDir).append(".nbems/");
+	if (FLMSG_dir.empty()) FLMSG_dir = FLMSG_dir_default = NBEMS_dir;
+#endif
+
+	dl_fldigi::init();
+
+	if (!FLMSG_dir_default.empty()) {
 		char dirbuf[FL_PATH_MAX + 1];
 		if (FLMSG_dir_default[FLMSG_dir_default.length()-1] != '/')
 			FLMSG_dir_default += '/';
@@ -428,10 +571,6 @@ int main(int argc, char ** argv)
 	}
 
 	LOG_INFO("appname: %s", appname.c_str());
-	if (NBEMSapps_dir)
-		LOG_INFO("%s present", test_file_name.c_str());
-	else
-		LOG_INFO("%s not present", test_file_name.c_str());
 	LOG_INFO("HomeDir: %s", HomeDir.c_str());
 	LOG_INFO("RigsDir: %s", RigsDir.c_str());
 	LOG_INFO("ScriptsDir: %s", ScriptsDir.c_str());
@@ -471,9 +610,10 @@ int main(int argc, char ** argv)
 	LOG_INFO("FLMSG_ICS_tmp_dir: %s", FLMSG_ICS_tmp_dir.c_str());
 
 	bool have_config = progdefaults.readDefaultsXML();
+	check_overrides();
 
 	xmlfname = HomeDir;
-	xmlfname.append("rig.xml");
+	xmlfname.append(DEFAULT_RIGXML_FILENAME);
 
 	checkTLF();
 
@@ -612,6 +752,7 @@ void exit_process() {
 
 	KmlServer::Exit();
 	arq_close();
+	kiss_close();
 	XML_RPC_Server::stop();
 
 	if (progdefaults.usepskrep)
@@ -677,6 +818,23 @@ void generate_option_help(void) {
 	     << " or 0x" << hex << progdefaults.tx_msgid << dec << "\n\n"
 #endif
 
+		 << "  --enable-io-port <" << ARQ_IO << "|" << KISS_IO << "> ARQ=" << ARQ_IO << " KISS=" << KISS_IO << "\n"
+         << "    Select the active IO Port\n"
+         << "    The default is: " << progdefaults.data_io_enabled << "\n\n"
+
+         << "  --kiss-server-address HOSTNAME\n"
+         << "    Set the KISS UDP server address\n"
+         << "    The default is: " << progdefaults.kiss_address << "\n\n"
+         << "  --kiss-server-port-io I/O PORT\n"
+         << "    Set the KISS UDP server I/O port\n"
+         << "    The default is: " << progdefaults.kiss_io_port << "\n\n"
+         << "  --kiss-server-port-o Output PORT\n"
+         << "    Set the KISS UDP server output port\n"
+         << "    The default is: " << progdefaults.kiss_out_port << "\n\n"
+         << "  --kiss-server-dual-port Dual Port Use (0=disable / 1=enable)\n"
+         << "    Set the KISS UDP server dual port flag\n"
+         << "    The default is: " << progdefaults.kiss_dual_port_enabled << "\n\n"
+
 	     << "  --arq-server-address HOSTNAME\n"
 	     << "    Set the ARQ TCP server address\n"
 	     << "    The default is: " << progdefaults.arq_address << "\n\n"
@@ -687,8 +845,8 @@ void generate_option_help(void) {
 	     << "    Look for flmsg files in DIRECTORY\n"
 	     << "    The default is " << FLMSG_dir_default << "\n\n"
 	     << "  --auto-dir DIRECTORY\n"
-	     << "    Look for wrap_auto_file files in DIRECTORY\n"
-	     << "    The default is " << FLMSG_dir_default << "WRAP/auto/" << "\n\n"
+	     << "    Look for auto-send files in DIRECTORY\n"
+	     << "    The default is " << HomeDir << "/autosend" << "\n\n"
 
 	     << "  --xmlrpc-server-address HOSTNAME\n"
 	     << "    Set the XML-RPC server address\n"
@@ -857,6 +1015,8 @@ int parse_args(int argc, char **argv, int& idx)
 
 	       OPT_CONFIG_XMLRPC_ADDRESS, OPT_CONFIG_XMLRPC_PORT,
 	       OPT_CONFIG_XMLRPC_ALLOW, OPT_CONFIG_XMLRPC_DENY, OPT_CONFIG_XMLRPC_LIST,
+		OPT_CONFIG_KISS_ADDRESS, OPT_CONFIG_KISS_PORT_IO, OPT_CONFIG_KISS_PORT_O,
+		OPT_CONFIG_KISS_DUAL_PORT, OPT_ENABLE_IO_PORT,
 
 #if BENCHMARK_MODE
 	       OPT_BENCHMARK_MODEM, OPT_BENCHMARK_AFC, OPT_BENCHMARK_SQL, OPT_BENCHMARK_SQLEVEL,
@@ -867,6 +1027,7 @@ int parse_args(int argc, char **argv, int& idx)
                OPT_FONT, OPT_WFALL_HEIGHT,
                OPT_WINDOW_WIDTH, OPT_WINDOW_HEIGHT, OPT_WFALL_ONLY,
                OPT_HAB,
+               OPT_RX_ONLY,
 #if USE_PORTAUDIO
                OPT_FRAMES_PER_BUFFER,
 #endif
@@ -889,6 +1050,13 @@ int parse_args(int argc, char **argv, int& idx)
 		{ "auto-dir", 1, 0, OPT_AUTOSEND_DIR },
 
 		{ "cpu-speed-test", 0, 0, OPT_SHOW_CPU_CHECK },
+
+		{ "enable-io-port",   1, 0, OPT_ENABLE_IO_PORT },
+
+		{ "kiss-server-address",   1, 0, OPT_CONFIG_KISS_ADDRESS },
+		{ "kiss-server-port-io",   1, 0, OPT_CONFIG_KISS_PORT_IO },
+		{ "kiss-server-port-o",    1, 0, OPT_CONFIG_KISS_PORT_O },
+		{ "kiss-server-dual-port", 1, 0, OPT_CONFIG_KISS_DUAL_PORT },
 
 		{ "xmlrpc-server-address", 1, 0, OPT_CONFIG_XMLRPC_ADDRESS },
 		{ "xmlrpc-server-port",    1, 0, OPT_CONFIG_XMLRPC_PORT },
@@ -916,6 +1084,8 @@ int parse_args(int argc, char **argv, int& idx)
 		{ "wfall-only",    0, 0, OPT_WFALL_ONLY },
 		{ "hab",		   0, 0, OPT_HAB },
 		{ "wo",            0, 0, OPT_WFALL_ONLY },
+		{ "rx-only",       0, 0, OPT_RX_ONLY },
+		{ "ro",            0, 0, OPT_RX_ONLY },
 
 #if USE_PORTAUDIO
 		{ "frames-per-buffer",1, 0, OPT_FRAMES_PER_BUFFER },
@@ -979,37 +1149,74 @@ int parse_args(int argc, char **argv, int& idx)
 			break;
 
 		case OPT_ARQ_ADDRESS:
-			progdefaults.arq_address = optarg;
+			override_arq_address = optarg;
+			arq_address_override_flag = true;
 			break;
 		case OPT_ARQ_PORT:
-			progdefaults.arq_port = optarg;
+			override_arq_port = optarg;
+			arq_address_override_flag = true;
 			break;
 
 		case OPT_FLMSG_DIR:
-		{
-			char buf[FL_PATH_MAX + 1];
-			fl_filename_absolute(buf, sizeof(buf) - 1, optarg);
-			FLMSG_dir_default = buf;
-			if (*FLMSG_dir_default.rbegin() != '/')
-				FLMSG_dir_default += '/';
-		}
+			FLMSG_dir_default = optarg;
 			break;
 
 		case OPT_AUTOSEND_DIR:
-		{
-			char buf[FL_PATH_MAX + 1];
-			fl_filename_absolute(buf, sizeof(buf) - 1, optarg);
-			FLMSG_WRAP_auto_dir = buf;
-			if (*FLMSG_WRAP_auto_dir.rbegin() != '/')
-				FLMSG_WRAP_auto_dir += '/';
-		}
+			FLMSG_WRAP_auto_dir = optarg;
+			break;
+
+		case OPT_ENABLE_IO_PORT:
+			if(optarg) {
+				switch(atoi(optarg)) {
+					case ARQ_IO:
+						progdefaults.data_io_enabled = ARQ_IO;
+						override_data_io_enabled = ARQ_IO;
+						arq_address_override_flag = true;
+						break;
+
+					case KISS_IO:
+						progdefaults.data_io_enabled = KISS_IO;
+						override_data_io_enabled = KISS_IO;
+						kiss_address_override_flag = true;
+						break;
+				}
+			}
+			break;
+
+		case OPT_CONFIG_KISS_ADDRESS:
+			progdefaults.kiss_address = optarg;
+			override_kiss_address = optarg;
+			kiss_address_override_flag = true;
+			break;
+		case OPT_CONFIG_KISS_PORT_IO:
+			progdefaults.kiss_io_port = optarg;
+			override_kiss_io_port = optarg;
+			kiss_address_override_flag = true;
+			break;
+		case OPT_CONFIG_KISS_PORT_O:
+			progdefaults.kiss_out_port = optarg;
+			override_kiss_out_port = optarg;
+			kiss_address_override_flag = true;
+			break;
+		case OPT_CONFIG_KISS_DUAL_PORT:
+			if((optarg) && atoi(optarg)) {
+				progdefaults.kiss_dual_port_enabled = true;
+				override_kiss_dual_port_enabled = true;
+				kiss_address_override_flag = true;
+			} else {
+				progdefaults.kiss_dual_port_enabled = false;
+				override_kiss_dual_port_enabled = false;
+				kiss_address_override_flag = true;
+			}
 			break;
 
 		case OPT_CONFIG_XMLRPC_ADDRESS:
-			progdefaults.xmlrpc_address = optarg;
+			override_xmlrpc_address = optarg;
+			xmlrpc_address_override_flag = true;
 			break;
 		case OPT_CONFIG_XMLRPC_PORT:
-			progdefaults.xmlrpc_port = optarg;
+			override_xmlrpc_port = optarg;
+			xmlrpc_port_override_flag = true;
 			break;
 		case OPT_CONFIG_XMLRPC_ALLOW:
 			progdefaults.xmlrpc_allow = optarg;
@@ -1082,18 +1289,17 @@ int parse_args(int argc, char **argv, int& idx)
 			Fl::set_font(FL_HELVETICA, optarg);
 			break;
 
-		case OPT_WFALL_HEIGHT:
-			progdefaults.wfheight = strtol(optarg, NULL, 10);
-			break;
+//		case OPT_WFALL_HEIGHT:
+//			progdefaults.wfheight = strtol(optarg, NULL, 10);
+//			break;
 
-		case OPT_WINDOW_WIDTH:
-			WNOM = strtol(optarg, NULL, 10);
-			HAB_width = WNOM;
-			break;
+//		case OPT_WINDOW_WIDTH:
+//			WNOM = strtol(optarg, NULL, 10);
+//			break;
 
-		case OPT_WINDOW_HEIGHT:
-			HNOM = strtol(optarg, NULL, 10);
-			break;
+//		case OPT_WINDOW_HEIGHT:
+//			HNOM = strtol(optarg, NULL, 10);
+//			break;
 
 #if USE_PORTAUDIO
 		case OPT_FRAMES_PER_BUFFER:
@@ -1111,6 +1317,8 @@ int parse_args(int argc, char **argv, int& idx)
 
 		case OPT_HAB:
 			bHAB = true;
+		case OPT_RX_ONLY:
+			rx_only = true;
 			break;
 
 		case OPT_NOISE:
@@ -1397,8 +1605,8 @@ static void checkdirectories(void)
 	for (size_t i = 0; i < sizeof(fldigi_dirs)/sizeof(*fldigi_dirs); i++) {
 		if (fldigi_dirs[i].suffix)
 			fldigi_dirs[i].dir.assign(HomeDir).append(fldigi_dirs[i].suffix).append(PATH_SEP);
-
-		if ((r = mkdir(fldigi_dirs[i].dir.c_str(), 0777)) == -1 && errno != EEXIST) {
+		r  = mkdir(fldigi_dirs[i].dir.c_str(), 0777);
+		if (r == -1 && errno != EEXIST) {
 			string s = _("Could not make directory ");
 			s.append(fldigi_dirs[i].dir);
 			fatal_error(s);
@@ -1442,7 +1650,7 @@ void check_nbems_dirs(void)
 
 		if ((r = mkdir(NBEMS_dirs[i].dir.c_str(), 0777)) == -1 && errno != EEXIST) {
 			string s = _("Could not make directory ");
-			s.append(NBEMS_dirs[i].dir);
+			s.append(NBEMS_dirs[i].dir).append(", ").append(strerror(errno));
 			fatal_error(s);
 		}
 		else if (r == 0 && NBEMS_dirs[i].new_dir_func)
@@ -1462,7 +1670,7 @@ void check_nbems_dirs(void)
 
 	for (size_t i = 0; i < sizeof(FLMSG_dirs)/sizeof(*FLMSG_dirs); i++) {
 		if (FLMSG_dirs[i].dir.empty() && FLMSG_dirs[i].suffix)
-			FLMSG_dirs[i].dir.assign(FLMSG_dir).append(FLMSG_dirs[i].suffix).append(PATH_SEP);
+			FLMSG_dirs[i].dir.assign(FLMSG_dir).append(FLMSG_dirs[i].suffix).append("/");
 
 		if ((r = mkdir(FLMSG_dirs[i].dir.c_str(), 0777)) == -1 && errno != EEXIST) {
 			string s = _("Could not make directory ");

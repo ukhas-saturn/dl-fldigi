@@ -8,10 +8,10 @@
 // This file is part of fldigi.
 //
 // This code bears some resemblance to code contained in gmfsk from which
-// it originated.  Much has been changed, but credit should still be 
+// it originated.  Much has been changed, but credit should still be
 // given to Tomi Manninen (oh2bns@sral.fi), who so graciously distributed
 // his gmfsk modem under the GPL.
-// 
+//
 // Fldigi is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -37,10 +37,11 @@
 #include "filters.h"
 #include "fftfilt.h"
 #include "digiscope.h"
+#include "view_rtty.h"
 
-#define	RTTY_SampleRate	8000
+//#define	RTTY_SampleRate	8000
 //#define RTTY_SampleRate 11025
-//#define RTTY_SampleRate 12000
+#define RTTY_SampleRate 12000
 
 #define MAXPIPE			1024
 #define MAXBITS			(2 * RTTY_SampleRate / 23 + 1)
@@ -49,23 +50,6 @@
 #define	FIGURES	0x200
 
 #define dispwidth 100
-
-enum RTTY_RX_STATE {
-	RTTY_RX_STATE_IDLE = 0,
-	RTTY_RX_STATE_START,
-	RTTY_RX_STATE_DATA,
-	RTTY_RX_STATE_PARITY,
-	RTTY_RX_STATE_STOP,
-	RTTY_RX_STATE_STOP2
-};
-
-enum RTTY_PARITY {
-	RTTY_PARITY_NONE = 0,
-	RTTY_PARITY_EVEN,
-	RTTY_PARITY_ODD,
-	RTTY_PARITY_ZERO,
-	RTTY_PARITY_ONE
-};
 
 // simple oscillator-class
 class Oscillator
@@ -84,7 +68,7 @@ class SymbolShaper
 {
 public:
 	SymbolShaper(double baud = 45.45, double sr = 8000.0);
-	~SymbolShaper() {}
+	~SymbolShaper();
 	void reset();
 	void Preset(double baud, double sr);
 	void print_sinc_table();
@@ -112,15 +96,35 @@ private:
 
 	double		baudrate;
 	double		samplerate;
+
 };
 
 //enum TTY_MODE { LETTERS, FIGURES };
 
 class rtty : public modem {
 public:
-	static const double SHIFT[];
-	static const double BAUD[];
-	static const int	BITS[];
+enum RTTY_RX_STATE {
+	RTTY_RX_STATE_IDLE = 0,
+	RTTY_RX_STATE_START,
+	RTTY_RX_STATE_DATA,
+	RTTY_RX_STATE_PARITY,
+	RTTY_RX_STATE_STOP,
+	RTTY_RX_STATE_STOP2
+};
+enum RTTY_PARITY {
+	RTTY_PARITY_NONE = 0,
+	RTTY_PARITY_EVEN,
+	RTTY_PARITY_ODD,
+	RTTY_PARITY_ZERO,
+	RTTY_PARITY_ONE
+};
+
+	static const double	SHIFT[];
+	static const double	BAUD[];
+	static const int		BITS[];
+	static const int		FILTLEN[];
+	static const int		numshifts;
+	static const int		numbauds;
 
 private:
 
@@ -131,7 +135,6 @@ private:
 
 	double shift;
 	int symbollen;
-	int bytelen;
 	int nbits;
 	int stoplen;
 	int msb;
@@ -159,6 +162,7 @@ private:
 	double space_phase;
 	fftfilt *mark_filt;
 	fftfilt *space_filt;
+	int filter_length;
 
 	double *pipe;
 	double *dsppipe;
@@ -174,12 +178,14 @@ private:
 	int rxdata;
 	double cfreq; // center frequency between MARK/SPACE tones
 	double shift_offset; // 1/2 rtty_shift
-    //For SSDV
-    double posfreq, negfreq;
-    double freqerrhi, freqerrlo;
-    double poserr, negerr;
-    int poscnt, negcnt;
-    int lost;
+
+	//For SSDV
+	double posfreq, negfreq;
+	double freqerrhi, freqerrlo;
+	double poserr, negerr;
+	double poscnt, negcnt;
+	int lost;
+	int bytelen;
 
 	double prevsymbol;
 	cmplx prevsmpl;
@@ -223,6 +229,9 @@ private:
 	int decode_char();
 	int rttyparity(unsigned int);
 	bool rx(bool bit);
+
+	view_rtty *rttyviewer;
+
 // transmit
 	double nco(double freq);
 	void send_symbol(int symbol, int len);
@@ -248,6 +257,10 @@ public:
 	int rx_process(const double *buf, int len);
 	int tx_process();
 	void flush_stream();
+
+	void clear_viewer() { rttyviewer->clear(); }
+	void clear_ch(int n) { rttyviewer->clearch(n); }
+	int  viewer_get_freq(int n) { return rttyviewer->get_freq(n); }
 
 	void searchDown();
 	void searchUp();

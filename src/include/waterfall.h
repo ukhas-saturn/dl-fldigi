@@ -77,7 +77,6 @@ enum WFmode {
 #define MAG_2 2
 #define MAG_4 3
 
-//enum WFspeed {FAST = 1, NORMAL = 2, SLOW = 8};
 enum WFspeed { PAUSE = 0, FAST = 1, NORMAL = 2, SLOW = 4 };
 
 extern void do_qsy(bool);
@@ -192,7 +191,8 @@ private:
 	int		carrierfreq;
 	int		bandwidth;
 	int		wfspdcnt;
-	int		dispcnt;
+	float	dispcnt;
+	float	dispdec;
 	int 	ampspan;
     double  peakaudio;
 	int 	reflevel;
@@ -357,11 +357,11 @@ public:
 	Digiscope	*wfscope;
 
 private:
-	bool		ishidden;
+	//bool		ishidden;
 	int			wf_dim;
-	Fl_Box		*bezel;
+	//Fl_Box		*bezel;
 	WFdisp		*wfdisp;
-	Fl_Group	*rs1, *rs2, *hidden;
+	Fl_Group	*rs1; //, *rs2, *hidden;
 	Fl_Button	*mode;
 	Fl_Button	*x1;
 	Fl_Button	*left;

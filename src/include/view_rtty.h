@@ -26,7 +26,7 @@
 #ifndef VIEW_RTTY_H
 #define VIEW_RTTY_H
 
-#include "rtty.h"
+//#include "rtty.h"
 #include "complex.h"
 #include "modem.h"
 #include "globals.h"
@@ -36,11 +36,39 @@
 
 #define	VIEW_RTTY_SampleRate	8000
 
+#define VIEW_MAXPIPE 1024
 #define	VIEW_RTTY_MAXBITS	(2 * VIEW_RTTY_SampleRate / 23 + 1)
 
 #define MAX_CHANNELS 30
 
+class view_rtty : public modem {
+public:
 enum CHANNEL_STATE {IDLE, SRCHG, RCVNG, WAITING};
+enum RTTY_RX_STATE {
+	RTTY_RX_STATE_IDLE = 0,
+	RTTY_RX_STATE_START,
+	RTTY_RX_STATE_DATA,
+	RTTY_RX_STATE_PARITY,
+	RTTY_RX_STATE_STOP,
+	RTTY_RX_STATE_STOP2
+};
+enum RTTY_PARITY {
+	RTTY_PARITY_NONE = 0,
+	RTTY_PARITY_EVEN,
+	RTTY_PARITY_ODD,
+	RTTY_PARITY_ZERO,
+	RTTY_PARITY_ONE
+};
+
+	static const double	SHIFT[];
+	static const double	BAUD[];
+	static const int		BITS[];
+	static const int		FILTLEN[];
+	static const int		numshifts;
+	static const int		numbauds;
+	int		filter_length;
+
+private:
 
 struct RTTY_CHANNEL {
 
@@ -55,7 +83,7 @@ struct RTTY_CHANNEL {
 	bool		nubit;
 	bool		bit;
 
-	bool		bit_buf[MAXBITS];
+	bool		bit_buf[VIEW_RTTY_MAXBITS];
 
 	double mark_phase;
 	double space_phase;
@@ -97,20 +125,11 @@ struct RTTY_CHANNEL {
 	int			rxdata;
 	int			inp_ptr;
 
-	cmplx		mark_history[MAXPIPE];
-	cmplx		space_history[MAXPIPE];
+	cmplx		mark_history[VIEW_MAXPIPE];
+	cmplx		space_history[VIEW_MAXPIPE];
 
 	int			sigsearch;
 };
-
-
-class view_rtty : public modem {
-public:
-	static const double SHIFT[];
-	static const double BAUD[];
-	static const int    BITS[];
-
-private:
 
 	double shift;
 	int symbollen;
@@ -170,6 +189,6 @@ public:
 
 };
 
-extern view_rtty *rttyviewer;
+//extern view_rtty *rttyviewer;
 
 #endif

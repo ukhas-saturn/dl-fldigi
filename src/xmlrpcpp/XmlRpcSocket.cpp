@@ -1,21 +1,15 @@
 // ----------------------------------------------------------------------------
 //
+// flxmlrpc Copyright (c) 2015 by W1HKJ, Dave Freese <iam_w1hkj@w1hkj.com>
+//    
 // XmlRpc++ Copyright (c) 2002-2008 by Chris Morley
-//
-// Copyright (C) 2014
-//              David Freese, W1HKJ
 //
 // This file is part of fldigi
 //
-// fldigi is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
+// flxmlrpc is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-//
-// fldigi is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -38,6 +32,8 @@
 
 typedef int socklen_t;
 
+#include "compat.h"
+
 #else
 extern "C" {
 # include <unistd.h>
@@ -53,13 +49,9 @@ extern "C" {
 }
 #endif  // _WINDOWS
 
-
 using namespace XmlRpc;
-
-
 // One-time initializations
 static bool initialized = false;
-  
 
 static void initialize()
 {
@@ -67,9 +59,10 @@ static void initialize()
 
 #if defined(_WINDOWS)
     {
-        WORD wVersionRequested = MAKEWORD( 2, 0 );
+        WORD wVersionRequested = MAKEWORD( WSA_MAJOR, WSA_MINOR );
         WSADATA wsaData;
         WSAStartup(wVersionRequested, &wsaData);
+       	atexit((void(*)(void)) WSACleanup);
     }
 #else
     {
@@ -78,8 +71,6 @@ static void initialize()
     }
 #endif // _WINDOWS
 }
-
-
 
 // These errors are not considered fatal for an IO operation; the operation will be re-tried.
 bool
@@ -103,7 +94,6 @@ XmlRpcSocket::socket()
   if ( ! initialized) initialize();
   return ::socket(AF_INET, SOCK_STREAM, 0);
 }
-
 
 void
 XmlRpcSocket::close(XmlRpcSocket::Socket fd)
@@ -141,7 +131,7 @@ XmlRpcSocket::setReuseAddr(XmlRpcSocket::Socket fd)
 
 
 // Bind to a specified port
-bool 
+bool
 XmlRpcSocket::bind(XmlRpcSocket::Socket fd, int port)
 {
   struct sockaddr_in saddr;
@@ -154,7 +144,7 @@ XmlRpcSocket::bind(XmlRpcSocket::Socket fd, int port)
 
 
 // Set socket in listen mode
-bool 
+bool
 XmlRpcSocket::listen(XmlRpcSocket::Socket fd, int backlog)
 {
   return (::listen(fd, backlog) == 0);
@@ -171,7 +161,7 @@ XmlRpcSocket::accept(XmlRpcSocket::Socket fd)
 }
 
 
-    
+
 // Connect a socket to a server (from a client)
 bool
 XmlRpcSocket::connect(XmlRpcSocket::Socket fd, std::string& host, int port)
@@ -215,7 +205,7 @@ XmlRpcSocket::getPort(XmlRpcSocket::Socket socket)
 
 
 // Returns last errno
-int 
+int
 XmlRpcSocket::getError()
 {
 #if defined(_WINDOWS)
@@ -227,14 +217,14 @@ XmlRpcSocket::getError()
 
 
 // Returns message corresponding to last errno
-std::string 
+std::string
 XmlRpcSocket::getErrorMsg()
 {
   return getErrorMsg(getError());
 }
 
 // Returns message corresponding to errno... well, it should anyway
-std::string 
+std::string
 XmlRpcSocket::getErrorMsg(int error)
 {
   char err[60];

@@ -90,8 +90,6 @@ protected:
 
 	unsigned cap;
 
-	double track_freq(double freq);
-
 public:
 	modem();
 	virtual ~modem(){};
@@ -118,9 +116,11 @@ public:
 	/// Inlined const getters are faster and smaller.
 	trx_mode	get_mode() const { return mode; };
 	const char	*get_mode_name() const { return mode_info[get_mode()].sname;}
+	unsigned int iface_io() const { return mode_info[get_mode()].iface_io;}
 	virtual void	set_freq(double);
 	/// Inlining small formulas is still faster and shorter.
 	int		get_freq() const { return (int)( frequency + 0.5 ); }
+	double		track_freq(double freq);
 	void		init_freqlock();
 	void		set_freqlock(bool);
 	void		set_sigsearch(int n) { sigsearch = n; freqerr = 0.0;};
@@ -140,12 +140,21 @@ public:
 	void		init_queues();
 
 	void		ModulateXmtr(double *, int);
-	void		ModulateStereo(double *, double *, int);
+	void		ModulateStereo(double *, double *, int, bool sample_flag = true);
+
+	void		ModulateVideo(double *, int);
+	void		ModulateVideoStereo(double *, double *, int, bool sample_flag = true);
 
 	void		videoText();
 	void		pretone();
 
-	virtual void		send_image(std::string) {}
+	virtual void		send_color_image(std::string) {}
+	virtual void		send_Grey_image(std::string) {}
+
+	virtual void		fsq_send_image(){}
+	virtual const char *fsq_mycall() {return "";}
+	virtual bool		fsq_squelch_open() {return false;}
+	virtual void		fsq_transmit(void *) {}
 
 	void		set_stopflag(bool b) { stopflag = b;};
 	bool		get_stopflag() const { return stopflag; };
@@ -156,6 +165,7 @@ public:
 	       CAP_TX = 1 << 6
 	};
 
+// UKHAS frequency tracking
 	unsigned char track_freq_lock;
 
 // for CW modem use only
@@ -166,6 +176,7 @@ public:
 	double		get_cwXmtWPM();
 	void		set_cwXmtWPM(double);
 	double		get_cwRcvWPM();
+
 	virtual	void		incWPM() {};
 	virtual void		decWPM() {};
 	virtual void		toggleWPM() {};
@@ -205,6 +216,16 @@ public:
 	void	cwid_sendtext (const std::string& s);
 	void	cwid();
 
+// for fft scan modem
+public:
+	virtual void	refresh_scope() {}
+
+// for multi-channel modems
+public:
+	virtual void clear_viewer() {}
+	virtual void clear_ch(int n) {}
+	virtual int  viewer_get_freq(int n) {return 0; }
+
 // for noise tests
 private:
 	void	add_noise(double *, int);
@@ -227,6 +248,14 @@ public:
 	int  xmt_samples;
 	int  ovhd_samples;
 
+// analysis mode
+	virtual void start_csv() {}
+	virtual void stop_csv() {}
+	virtual int is_csv() { return true;}
+	virtual double track_freq() { return 0;}
+
+// fsq mode
+	virtual void send_ack(std::string relay) {};
 };
 
 extern modem *null_modem;
@@ -282,6 +311,20 @@ extern modem *qpsk125_modem;
 extern modem *qpsk250_modem;
 extern modem *qpsk500_modem;
 
+extern modem *_8psk125_modem;
+extern modem *_8psk250_modem;
+extern modem *_8psk500_modem;
+extern modem *_8psk1000_modem;
+extern modem *_8psk1200_modem;
+extern modem *_8psk1333_modem;
+
+extern modem *_8psk125f_modem;
+extern modem *_8psk250f_modem;
+extern modem *_8psk500f_modem;
+extern modem *_8psk1000f_modem;
+extern modem *_8psk1200f_modem;
+extern modem *_8psk1333f_modem;
+
 extern modem *psk125r_modem;
 extern modem *psk250r_modem;
 extern modem *psk500r_modem;
@@ -321,7 +364,7 @@ extern modem *psk500r_c3_modem;
 extern modem *psk500r_c4_modem;
 
 extern modem *rtty_modem;
-extern modem *pkt_modem;
+//extern modem *pkt_modem;
 
 extern modem *olivia_modem;
 extern modem *olivia_4_250_modem;
@@ -365,7 +408,9 @@ extern modem *throbx4_modem;
 
 extern modem *wwv_modem;
 extern modem *anal_modem;
+extern modem *fftscan_modem;
 extern modem *ssb_modem;
 
+extern modem *fsq_modem;
 
 #endif

@@ -26,9 +26,10 @@
 
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Browser.H>
-#include <FL/Fl_Output.H>
 #include <FL/Fl_Pack.H>
+#include <FL/Fl_Output.H>
 #include <FL/Fl_Choice.H>
+#include <string>
 
 #include "combo.h"
 //#include "Fl_Tile_Check.h"
@@ -38,13 +39,15 @@
 #include "waterfall.h"
 #include "digiscope.h"
 #include "globals.h"
-#include "mixer.h"
 #include "progress.h"
 #include "FreqControl.h"
 #include "flinput2.h"
 #include "flslider2.h"
 #include "psk_browser.h"
 #include "re.h"
+#include "smeter.h"
+#include "pwrmeter.h"
+#include "picture.h"
 
 extern fre_t seek_re;
 
@@ -54,7 +57,7 @@ extern Fl_Double_Window *scopeview;
 
 extern Fl_Double_Window *dlgRecordLoader;
 
-extern bool				NBEMSapps_dir;
+extern bool first_use;
 
 extern FTextRX			*ReceiveText;
 extern FTextTX			*TransmitText;
@@ -62,6 +65,9 @@ extern pskBrowser		*mainViewer;
 extern Fl_Input2		*txtInpSeek;
 extern Fl_Box			*hideViewer;
 extern Fl_Group		*mvgroup;
+
+extern Fl_Group		*text_group;
+extern Fl_Group		*wefax_group;
 
 extern Panel			*text_panel;
 extern Fl_Box			*minbox;
@@ -74,6 +80,8 @@ extern Fl_Counter2		*cntTxLevel;
 extern Fl_Button		*MODEstatus;
 extern Fl_Slider2		*sldrSquelch;
 extern Progress		*pgrsSquelch;
+extern Smeter			*smeter;
+extern PWRmeter		*pwrmeter;
 extern Fl_Button 		*btnMacro[];
 extern Fl_Button		*btnAltMacros1;
 extern Fl_Button		*btnAltMacros2;
@@ -110,6 +118,29 @@ extern Fl_Input2		*inpCall3;
 extern Fl_Input2		*inpCall4;
 extern Fl_Input2		*inpName1;
 
+extern bool		bHAB;
+extern Fl_Group		*TopFrameHAB;
+extern Fl_Choice	*habFlight;
+extern Fl_Button	*habOpenBrowser;
+extern Fl_Choice	*habCHPayload;
+extern Fl_Choice	*habCHTransmission;
+extern Fl_Button	*habConfigureButton;
+extern Fl_Button	*habSwitchModes;
+extern Fl_Output	*habRXPayload;
+extern Fl_Output	*habTime;
+extern Fl_Output	*habLat;
+extern Fl_Output	*habLon;
+extern Fl_Output	*habAlt;
+extern Fl_Output	*habChecksum;
+extern Fl_Output	*habBearing;
+extern Fl_Output	*habDistance;
+extern Fl_Output	*habElevation;
+extern Fl_Output	*habTimeSinceLastRx;
+extern Fl_Output	*habString;
+
+extern int		HAB_height;
+extern int		HAB_width;
+
 extern Fl_Group		*QsoInfoFrame1B;
 extern Fl_Group		*qsoFrameView;
 extern Fl_Group		*QsoInfoFrame;
@@ -119,42 +150,116 @@ extern Fl_ComboBox		*qso_opBW;
 extern Fl_Button		*qso_opPICK;
 extern Fl_Browser		*qso_opBrowser;
 
+extern Fl_Group		*fsq_group;
+extern FTextRX			*fsq_rx_text;
+extern FTextTX			*fsq_tx_text;
+extern Fl_Browser		*fsq_heard;
+
+extern Fl_Double_Window	*fsqMonitor;
+extern FTextRX				*fsq_monitor;
+extern FTextRX				*fsq_que;
+extern Fl_Double_Window	*create_fsqMonitor();
+extern void				open_fsqMonitor();
+extern void				close_fsqMonitor();
+
+extern Fl_Double_Window	*fsqDebug;
+extern Fl_Double_Window	*create_fsqDebug();
+extern void				open_fsqDebug();
+extern void				close_fsqDebug();
+extern void				write_fsqDebug(int ch, int style = FTextBase::RECV);
+extern void				write_fsqDebug(std::string s, int style = FTextBase::RECV);
+extern void				fsq_que_clear();
+extern void				write_fsq_que(std::string s);
+
+extern void fsq_disableshift();
+extern void fsq_enableshift();
+extern void fsq_updateRxPic(unsigned char data, int pos);
+extern void fsq_createRxViewer();
+extern void fsq_showRxViewer(int W, int H, char c);
+extern int  fsq_load_image(const char *n, int W = 320, int H = 240);
+extern void fsq_updateTxPic(unsigned char data, int pos);
+extern void cb_fsqpicTxLoad(Fl_Widget *, void *);
+extern void cb_fsqpicTxClose( Fl_Widget *w, void *);
+extern int  fsqpic_TxGetPixel(int pos, int color);
+extern void cb_fsqpicTxSendColor( Fl_Widget *w, void *);
+extern void cb_fsqpicTxSendGrey( Fl_Widget *w, void *);
+extern void cb_fsqpicTxSendAbort( Fl_Widget *w, void *);
+extern void cb_fsqpicTxSPP( Fl_Widget *w, void *);
+extern void fsq_createTxViewer();
+extern void fsq_TxViewerResize(int W, int H);
+extern void fsq_showTxViewer(char c);
+extern void fsq_deleteTxViewer();
+extern void fsq_deleteRxViewer();
+extern int  fsq_print_time_left(float time_sec, char *str, size_t len,
+				const char *prefix, const char *suffix);
+extern void fsq_transmit(void *);
+
+extern Fl_Light_Button		*btn_FSQCALL;
+extern Fl_Light_Button		*btn_SELCAL;
+extern Fl_Light_Button		*btn_MONITOR;
+extern Fl_Button			*btn_FSQQTH;
+extern Fl_Button			*btn_FSQQTC;
+extern Progress			*ind_fsq_speed;
+extern Progress			*ind_fsq_s2n;
+
+extern Fl_Double_Window	*fsqpicRxWin;
+extern Fl_Double_Window	*fsqpicTxWin;
+
+extern std::string		fsq_selected_call;
+extern bool			in_heard(std::string);
+extern void			cb_fsq_heard(Fl_Browser*, void*);
+extern std::string		heard_list();
+extern void			clear_heard_list();
+extern void			age_heard_list();
+extern void			add_to_heard_list(std::string, std::string);
+extern void			fsq_transmit_string(std::string s);
+extern void			fsq_repeat_last_heard();
+extern void			fsq_repeat_last_command();
+extern void 			display_fsq_rx_text(std::string text, int style = FTextBase::SKIP);
+extern void			display_fsq_mon_text(std::string text, int style = FTextBase::SKIP);
+
+extern void			enableSELCAL();
+
+extern void			cbFSQQTC(Fl_Widget *w, void *d);
+extern void			cbFSQQTH(Fl_Widget *w, void *d);
+extern void			cbMONITOR(Fl_Widget *w, void *d);
+extern void			cbSELCAL(Fl_Widget *w, void *d);
+extern void			cbFSQCALL(Fl_Widget *w, void *d);
+
+#include <FL/Fl_Bitmap.H>
+extern Fl_Bitmap image_s2n;
+
+//------------------------------------------------------------------------------
+// fsq images
+//------------------------------------------------------------------------------
+extern	Fl_Double_Window	*picRxWin;
+extern	picture				*picRx;
+extern	Fl_Button			*btnpicRxSave;
+extern	Fl_Button			*btnpicRxAbort;
+extern	Fl_Button			*btnpicRxClose;
+
+extern	Fl_Double_Window	*picTxWin;
+extern	picture				*picTx;
+extern	Fl_Button			*btnpicTxSPP;
+extern	Fl_Button			*btnpicTxSendColor;
+extern	Fl_Button			*btnpicTxSendGrey;
+extern	Fl_Button			*btnpicTxSendAbort;
+extern	Fl_Button			*btnpicTxLoad;
+extern	Fl_Button			*btnpicTxClose;
+
+//------------------------------------------------------------------------------
 extern Fl_Value_Slider2	*mvsquelch;
-extern Fl_Value_Slider2	*valRcvMixer;
-extern Fl_Value_Slider2	*valXmtMixer;
-extern Fl_Button			*btnAFC;
-extern Fl_Button			*btnSQL;
+extern Fl_Light_Button		*btnAFC;
+extern Fl_Light_Button		*btnSQL;
+extern Fl_Light_Button		*btnPSQL;
 extern Fl_Light_Button		*btnRSID;
 extern Fl_Light_Button		*btnTxRSID;
 extern Fl_Light_Button		*btnTune;
+extern Fl_Light_Button		*btnAutoSpot;
 
 extern bool			bWF_only;
-
-extern bool					bHAB;
-extern Fl_Group				*TopFrameHAB;
-extern Fl_Choice			*habFlight;
-extern Fl_Button			*habOpenBrowser;
-extern Fl_Choice			*habCHPayload;
-extern Fl_Choice			*habCHTransmission;
-extern Fl_Button			*habConfigureButton;
-extern Fl_Button			*habSwitchModes;
-extern Fl_Output			*habRXPayload;
-extern Fl_Output			*habTime;
-extern Fl_Output			*habLat;
-extern Fl_Output			*habLon;
-extern Fl_Output			*habAlt;
-extern Fl_Output			*habChecksum;
-extern Fl_Output			*habBearing;
-extern Fl_Output			*habDistance;
-extern Fl_Output			*habElevation;
-extern Fl_Output			*habTimeSinceLastRx;
-extern Fl_Output			*habString;
-
 extern bool			withnoise;
 extern int				altMacros;
-
-extern int			HAB_height;
-extern int			HAB_width;
 
 extern waterfall		*wf;
 extern Digiscope		*digiscope;
@@ -163,6 +268,7 @@ extern std::string		main_window_title;
 
 extern int Qwait_time;
 extern int Qidle_time;
+extern bool idling;
 
 extern void toggleRSID();
 
@@ -196,6 +302,7 @@ extern void set_phase(double phase, double quality, bool highlight);
 extern void set_rtty(double, double, double);
 extern void set_video(double *, int, bool = true);
 extern void set_zdata(cmplx *, int);
+extern void update_scope();
 
 extern void set_scope_xaxis_1(double y1);
 extern void set_scope_xaxis_2(double y2);
@@ -205,14 +312,22 @@ extern void set_scope_clear_axis();
 
 extern void set_CWwpm();
 extern void put_rx_char(unsigned int data, int style = FTextBase::RECV, bool extracted = false);
-extern void put_rx_ssdv(unsigned int data, int lost);
+extern void put_rx_processed_char(unsigned int data, int style = FTextBase::RECV);
 extern void put_sec_char( char chr );
+
+// dl-fldigi
+extern void put_rx_ssdv(unsigned int data, int lost);
+void set_menu_dl_online(bool val);
+void set_menu_dl_refresh_active(bool active);
 
 enum status_timeout {
 	STATUS_CLEAR,
 	STATUS_DIM,
 	STATUS_NUM
 };
+
+extern const char *zshowtime();
+
 extern void put_status(const char *msg, double timeout = 0.0, status_timeout action = STATUS_CLEAR);
 extern void put_status_safe(const char *msg, double timeout = 0.0, status_timeout action = STATUS_CLEAR);
 extern void clear_StatusMessages();
@@ -244,8 +359,28 @@ extern void put_WARNstatus(double);
 extern void qsoSave_cb(Fl_Widget *b, void *);
 
 extern bool que_ok;
+extern bool tx_queue_done;
 extern void post_queue_execute(void*);
 extern void queue_execute_after_rx(void*);
+
+extern time_t program_start_time;
+
+extern bool xmlrpc_address_override_flag;
+extern bool xmlrpc_port_override_flag;
+
+extern bool arq_address_override_flag;
+extern bool arq_port_override_flag;
+
+extern bool kiss_address_override_flag;
+extern std::string override_xmlrpc_address;
+extern std::string override_xmlrpc_port;
+extern std::string override_arq_address;
+extern std::string override_arq_port;
+extern std::string override_kiss_address;
+extern std::string override_kiss_io_port;
+extern std::string override_kiss_out_port;
+extern int override_kiss_dual_port_enabled;
+extern int override_data_io_enabled;
 
 extern int rxtx_charset;
 extern void put_rx_data(int *data, int len);
@@ -257,20 +392,24 @@ extern void put_rx_data(int *data, int len);
 #define GET_TX_CHAR_NODATA -1	// no data available
 #define GET_TX_CHAR_ETX -3	// end of transmission requested
 
+// Last single macro bar option index
+#define MACRO_SINGLE_BAR_MAX 2
+
 extern int get_tx_char();
 extern int  get_secondary_char();
 extern void put_echo_char(unsigned int data, int style = FTextBase::XMIT);
 extern char *get_rxtx_data();
 extern char *get_rx_data();
-extern char *get_tx_data(); 
+extern char *get_tx_data();
 
 extern void resetRTTY();
 extern void resetOLIVIA();
 extern void resetCONTESTIA();
 extern void resetTHOR();
 extern void resetDOMEX();
+extern void updatePACKET();
 extern void resetSoundCard();
-extern void restoreFocus(Fl_Widget* w = 0);
+extern void restoreFocus(int n = 0);
 extern void setReverse(int);
 extern void clearQSO();
 extern void closeRigDialog();
@@ -287,6 +426,8 @@ extern void init_modem_squelch(trx_mode mode, int freq = 0);
 
 extern void start_tx();
 extern void abort_tx();
+extern void set_rx_tx();
+extern void set_rx_only();
 
 extern void LOGGING_colors_font();
 extern void LOGBOOK_colors_font();
@@ -357,6 +498,10 @@ extern int  notch_frequency;
 extern void notch_on(int);
 extern void notch_off();
 
+// Set IO port
+extern void enable_kiss(void);
+extern void enable_arq(void);
+
 // thread terminators
 extern void ADIF_RW_close(void);
 extern void EQSL_close(void);
@@ -367,9 +512,16 @@ extern Fl_Double_Window *dxcc_window;
 
 extern void cb_mnuCheckUpdate(Fl_Widget *, void *);
 
-// dl-fldigi
-void set_menu_dl_online(bool val);
-void set_menu_dl_refresh_active(bool active);
 bool ask_dir_creation( const std::string & dir );
+
+extern void set_CSV(int how);
+
+extern void set_freq_control_lsd();
+
+extern void set_smeter_colors();
+
+extern void log_callback(Fl_Input2 *);
+
+extern void set599();
 
 #endif

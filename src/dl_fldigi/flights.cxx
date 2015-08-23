@@ -787,7 +787,7 @@ static void autoconfigure_rtty_shift(const Json::Value &value)
      * then search == the index of the "Custom" menu item */
     selShift->index(search);
     selCustomShift->activate();
-    progdefaults.rtty_shift = -1;
+    progdefaults.rtty_shift = search;
     selCustomShift->value(shift);
     progdefaults.rtty_custom_shift = shift;
 }

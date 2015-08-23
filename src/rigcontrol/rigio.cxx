@@ -48,8 +48,6 @@
 #include "confdialog.h"
 #include "status.h"
 
-#include "dl_fldigi/hbtint.h"
-
 LOG_FILE_SOURCE(debug::LOG_RIGCONTROL);
 
 using namespace std;
@@ -1321,11 +1319,7 @@ static void *rigCAT_loop(void *args)
 			wf->rfcarrier(freq);
 		}
 
-		if (freq > 0)
-			dl_fldigi::hbtint::rig_set_freq(freq);
-
 		sWidth = rigCAT_getwidth();
-
 		if (sWidth.size() && sWidth != sRigWidth) {
 			sRigWidth = sWidth;
 			show_bw(sWidth);
@@ -1340,9 +1334,6 @@ static void *rigCAT_loop(void *args)
 				wf->USB(true);
 			show_mode(sMode);
 		}
-
-		if (sMode.size())
-			dl_fldigi::hbtint::rig_set_mode(sMode);
 	}
 
 	return NULL;

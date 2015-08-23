@@ -1,8 +1,9 @@
 // ----------------------------------------------------------------------------
 // soundconf.cxx
 //
-// Copyright (C) 2008-2010
-//		Stelios Bounanos, M0GLD
+// Copyright (C) 2008-2010, Stelios Bounanos, M0GLD
+// Copyright (C) 2014       David Freese, W1HKJ
+// Copyright (C) 2015       Robert Stiles, KK5VD
 //
 // This file is part of fldigi.
 //
@@ -29,6 +30,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #if USE_OSS
 #  include <glob.h>
 #endif
@@ -39,13 +41,14 @@
 #include "configuration.h"
 #include "confdialog.h"
 #include "debug.h"
+#include "util.h"
 
 LOG_FILE_SOURCE(debug::LOG_AUDIO);
 
 using namespace std;
 
 double std_sample_rates[] = { 8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0,
-			      32000.0, 44100.0, 48000.0, 88200.0, 96000.0, 192000.0, -1.0 };
+	32000.0, 44100.0, 48000.0, 88200.0, 96000.0, 192000.0, -1.0 };
 
 static void init_oss(void)
 {
@@ -58,17 +61,6 @@ static void init_oss(void)
 		progdefaults.OSSdevice = gbuf.gl_pathv[0];
 	menuOSSDev->value(progdefaults.OSSdevice.c_str());
 	globfree(&gbuf);
-
-	glob("/dev/mixer*", 0, NULL, &gbuf);
-	for (size_t i = 0; i < gbuf.gl_pathc; i++)
-		menuMix->add(gbuf.gl_pathv[i]);
-	if (progdefaults.MXdevice.length() == 0 && gbuf.gl_pathc)
-		progdefaults.MXdevice = gbuf.gl_pathv[0];
-	globfree(&gbuf);
-	menuMix->value(progdefaults.MXdevice.c_str());
-#else
-	progdefaults.EnableMixer = false;
-	tabMixer->parent()->remove(*tabMixer);
 #endif // USE_OSS
 }
 
@@ -81,13 +73,13 @@ struct padev
 {
 public:
 	padev(const PaDeviceInfo* dev_, PaDeviceIndex idx_, PaHostApiTypeId api_)
-		: dev(dev_), idx(idx_), api(api_) { }
+	: dev(dev_), idx(idx_), api(api_) { }
 
 	bool operator<(const padev& rhs) const
 	{
 		return pa_api_prio.find(api) != pa_api_prio.end() &&
-			pa_api_prio.find(rhs.api) != pa_api_prio.end() &&
-			pa_api_prio[api] < pa_api_prio[rhs.api];
+		pa_api_prio.find(rhs.api) != pa_api_prio.end() &&
+		pa_api_prio[api] < pa_api_prio[rhs.api];
 	}
 
 	const PaDeviceInfo* dev;
@@ -111,7 +103,7 @@ static PaDeviceIndex get_default_portaudio_device(int dir)
 		goto ret_def;
 
 	LOG_DEBUG("Default host API is %s, trying default ALSA %s device instead",
-		  host_api->name, (dir == 0 ? "input" : "output"));
+			  host_api->name, (dir == 0 ? "input" : "output"));
 	api_idx = Pa_GetHostApiCount();
 	if (api_idx < 0)
 		goto ret_def;
@@ -135,7 +127,7 @@ static void init_portaudio(void)
 		if (e.error() == ENODEV) // don't complain if there are no devices
 			return;
 		LOG_ERROR("%s", e.what());
-	       	AudioPort->deactivate();
+		AudioPort->deactivate();
 		btnAudioIO[SND_IDX_PORT]->deactivate();
 		if (progdefaults.btnAudioIOis == SND_IDX_PORT)
 			progdefaults.btnAudioIOis = SND_IDX_NULL;
@@ -159,14 +151,14 @@ static void init_portaudio(void)
 
 	list<padev> devlist;
 	for (SoundPort::device_iterator idev = SoundPort::devices().begin();
-	     idev != SoundPort::devices().end(); ++idev)
+		 idev != SoundPort::devices().end(); ++idev)
 		devlist.push_back( padev(*idev, idev - SoundPort::devices().begin(),
-					 Pa_GetHostApiInfo((*idev)->hostApi)->type) );
+								 Pa_GetHostApiInfo((*idev)->hostApi)->type) );
 	devlist.sort();
 
 	PaHostApiTypeId first_api = devlist.begin()->api;
 	for (list<padev>::const_iterator ilist = devlist.begin();
-	     ilist != devlist.end(); ilist++) {
+		 ilist != devlist.end(); ilist++) {
 		string menu_item;
 		string::size_type i = 0;
 		if (ilist->api != first_api) { // add a submenu
@@ -180,12 +172,16 @@ static void init_portaudio(void)
 			i += 2;
 		}
 		// add to menu
-		if (ilist->dev->maxInputChannels > 0)
+		if (ilist->dev->maxInputChannels > 0) {
 			menuPortInDev->add(menu_item.c_str(), 0, NULL,
-					   reinterpret_cast<void *>(ilist->idx), 0);
-		if (ilist->dev->maxOutputChannels > 0)
+							   reinterpret_cast<void *>(ilist->idx), 0);
+		}
+
+		if (ilist->dev->maxOutputChannels > 0) {
 			menuPortOutDev->add(menu_item.c_str(), 0, NULL,
-					    reinterpret_cast<void *>(ilist->idx), 0);
+								reinterpret_cast<void *>(ilist->idx), 0);
+LOG_INFO("%s", menu_item.c_str());
+		}
 	}
 
 	if (progdefaults.PortInDevice.length() == 0) {
@@ -213,43 +209,41 @@ static void init_portaudio(void)
 	}
 
 	// select the correct menu items
-
-	const Fl_Menu_Item* menu;
-	int size;
-	int idx;
-
-	idx = -1;
-	menu = menuPortInDev->menu();
-	size = menuPortInDev->size();
-	for (int i = 0; i < size - 1; i++, menu++) {
-		if (menu->label() && progdefaults.PortInDevice == menu->label()) {
-			idx = i; // near match
-			if (reinterpret_cast<intptr_t>(menu->user_data()) == progdefaults.PortInIndex ||
-			    progdefaults.PortInIndex == -1) // exact match, or index was never saved
-				break;
-		}
-	}
-	if (idx >= 0) {
-		menuPortInDev->value(idx);
-		menuPortInDev->set_changed();
-	}
-
-	idx = -1;
-	menu = menuPortOutDev->menu();
-	size = menuPortOutDev->size();
-	for (int i = 0; i < size - 1; i++, menu++) {
-		if (menu->label() && progdefaults.PortOutDevice == menu->label()) {
-			idx = i;
-			if (reinterpret_cast<intptr_t>(menu->user_data()) == progdefaults.PortOutIndex ||
-			    progdefaults.PortOutIndex == -1)
-				break;
-		}
-	}
-	if (idx >= 0) {
-		menuPortOutDev->value(idx);
-		menuPortOutDev->set_changed();
-	}
+	pa_set_dev(menuPortInDev,  progdefaults.PortInDevice,  progdefaults.PortInIndex);
+	pa_set_dev(menuPortOutDev, progdefaults.PortOutDevice, progdefaults.PortOutIndex);
 }
+
+int pa_set_dev(Fl_Choice *loc_choice, std::string loc_dev_name, int loc_dev_index)
+{
+	const Fl_Menu_Item *loc_menu = (Fl_Menu_Item *)0;
+	int loc_size = 0;
+	int loc_dev_found = PA_DEV_NOT_FOUND;
+	int loc_idx = -1;
+
+	if(!loc_choice) return loc_dev_found;
+
+	loc_menu = loc_choice->menu();
+	loc_size = loc_choice->size();
+
+	for (int loc_i = 0; loc_i < loc_size - 1; loc_i++, loc_menu++) {
+		if (loc_menu->label() && loc_dev_name == loc_menu->label()) {
+			loc_idx = loc_i;
+			loc_dev_found = PA_DEV_FOUND;
+			if (reinterpret_cast<intptr_t>(loc_menu->user_data()) == loc_dev_index ||
+				loc_dev_found == -1) { // exact match, or index was never saved
+				loc_dev_found = PA_EXACT_DEV_FOUND;
+			}
+		}
+	}
+
+	if (loc_idx > 0) {
+		loc_choice->value(loc_idx);
+		loc_choice->set_changed();
+	}
+
+	return loc_dev_found;
+}
+
 #else
 static void init_portaudio(void) { }
 #endif // USE_PORTAUDIO
@@ -282,9 +276,9 @@ int sample_rate_converters[FLDIGI_NUM_SRC] = {
 static void sound_init_options(void)
 {
 	build_srate_listbox(menuInSampleRate, std_sample_rates,
-			 sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1);
+						sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1);
 	build_srate_listbox(menuOutSampleRate, std_sample_rates,
-			 sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1);
+						sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1);
 
 	for (int i = 0; i < FLDIGI_NUM_SRC; i++)
 		menuSampleConverter->add(src_get_name(sample_rate_converters[i]));
@@ -292,14 +286,14 @@ static void sound_init_options(void)
 	if (progdefaults.sample_converter == SRC_ZERO_ORDER_HOLD) {
 		progdefaults.sample_converter = SRC_LINEAR;
 		LOG_WARN("The Zero Order Hold sample rate converter should not be used! "
-			 "Your setting has been changed to Linear.");
+				 "Your setting has been changed to Linear.");
 	}
 #if defined(__ppc__) || defined(__powerpc__) || defined(__PPC__)
 	// SRC_LINEAR may crash with 11025Hz modems. Change to SINC_FASTEST.
 	if (progdefaults.sample_converter == SRC_LINEAR) {
 		progdefaults.sample_converter = SRC_SINC_FASTEST;
 		LOG_WARN("Linear sample rate converter may not work on this architecture. "
-			 "Your setting has been changed to Fastest Sinc");
+				 "Your setting has been changed to Fastest Sinc");
 	}
 #endif
 	for (int i = 0; i < FLDIGI_NUM_SRC; i++) {
@@ -310,46 +304,37 @@ static void sound_init_options(void)
 		}
 	}
 
-	valPCMvolume->value(progdefaults.PCMvolume);
-	btnMicIn->value(progdefaults.MicIn);
-	btnLineIn->value(progdefaults.LineIn);
-
-	menuOSSDev->value(progdefaults.OSSdevice.c_str());
+	//menuOSSDev->value(progdefaults.OSSdevice.c_str());
 	inpPulseServer->value(progdefaults.PulseServer.c_str());
-
-	btnMixer->value(progdefaults.EnableMixer);
-	menuMix->value(progdefaults.MXdevice.c_str());
-
-	enableMixer(progdefaults.EnableMixer);
 
 	char sr[6+1];
 	if (progdefaults.in_sample_rate == SAMPLE_RATE_UNSET &&
 		(progdefaults.in_sample_rate = progdefaults.sample_rate) == SAMPLE_RATE_UNSET)
 		progdefaults.in_sample_rate = SAMPLE_RATE_NATIVE;
-	else if (progdefaults.in_sample_rate > SAMPLE_RATE_OTHER)
-		snprintf(sr, sizeof(sr), "%d", progdefaults.in_sample_rate);
-	if (progdefaults.in_sample_rate <= SAMPLE_RATE_NATIVE)
+	else if (progdefaults.in_sample_rate < SAMPLE_RATE_OTHER)
 		menuInSampleRate->index(progdefaults.in_sample_rate);
-	else
-		for (int i = 1; i <= menuInSampleRate->lsize(); i++) {
+	else {
+		snprintf(sr, sizeof(sr), "%d", progdefaults.in_sample_rate);
+		for (int i = SAMPLE_RATE_NATIVE + 1; i < menuInSampleRate->lsize(); i++) {
 			menuInSampleRate->index(i);
 			if (strstr(menuInSampleRate->value(), sr))
 				break;
 		}
+	}
 
 	if (progdefaults.out_sample_rate == SAMPLE_RATE_UNSET &&
 		(progdefaults.out_sample_rate = progdefaults.sample_rate) == SAMPLE_RATE_UNSET)
 		progdefaults.out_sample_rate = SAMPLE_RATE_NATIVE;
-	else if (progdefaults.out_sample_rate > SAMPLE_RATE_OTHER)
-		snprintf(sr, sizeof(sr), "%d", progdefaults.out_sample_rate);
-	if (progdefaults.out_sample_rate <= SAMPLE_RATE_NATIVE)
+	else if (progdefaults.out_sample_rate < SAMPLE_RATE_OTHER)
 		menuOutSampleRate->index(progdefaults.out_sample_rate);
-	else
-		for (int i = 1; i <= menuOutSampleRate->lsize(); i++) {
+	else {
+		snprintf(sr, sizeof(sr), "%d", progdefaults.out_sample_rate);
+		for (int i = SAMPLE_RATE_NATIVE + 1; i < menuOutSampleRate->lsize(); i++) {
 			menuOutSampleRate->index(i);
 			if (strstr(menuOutSampleRate->value(), sr))
 				break;
 		}
+	}
 
 	cntRxRateCorr->value(progdefaults.RX_corr);
 	cntTxRateCorr->value(progdefaults.TX_corr);
@@ -364,7 +349,7 @@ static void sound_init_options(void)
 #  if PA_API_VERSION < 12
 static inline int PA_CONTEXT_IS_GOOD(pa_context_state_t x) {
 	return  x == PA_CONTEXT_CONNECTING || x == PA_CONTEXT_AUTHORIZING ||
-		x == PA_CONTEXT_SETTING_NAME || x == PA_CONTEXT_READY;
+	x == PA_CONTEXT_SETTING_NAME || x == PA_CONTEXT_READY;
 }
 #  endif
 
@@ -380,7 +365,7 @@ static bool probe_pulseaudio(void)
 		pa_context_state_t state;
 		do { // iterate main loop until the context connection fails or becomes ready
 			if (!(ok = (pa_mainloop_iterate(loop, 1, NULL) >= 0 &&
-				    PA_CONTEXT_IS_GOOD(state = pa_context_get_state(context)))))
+						PA_CONTEXT_IS_GOOD(state = pa_context_get_state(context)))))
 				break;
 		} while (state != PA_CONTEXT_READY);
 	}
@@ -403,8 +388,8 @@ void sound_init(void)
 
 	init_portaudio();
 
-// set the Sound Card configuration tab to the correct initial values
-#if !USE_OSS
+	// set the Sound Card configuration tab to the correct initial values
+#if 0
 	AudioOSS->deactivate();
 	btnAudioIO[SND_IDX_OSS]->deactivate();
 #endif
@@ -417,8 +402,8 @@ void sound_init(void)
 	btnAudioIO[SND_IDX_PULSE]->deactivate();
 #endif
 	if (progdefaults.btnAudioIOis == SND_IDX_UNKNOWN ||
-	    !btnAudioIO[progdefaults.btnAudioIOis]->active()) { // or saved sound api now disabled
-		int io[4] = { SND_IDX_PORT, SND_IDX_PULSE, SND_IDX_OSS, SND_IDX_NULL };
+		!btnAudioIO[progdefaults.btnAudioIOis]->active()) { // or saved sound api now disabled
+		int io[5] = { SND_IDX_PORT, SND_IDX_PULSE, SND_IDX_NULL, SND_IDX_TCP, SND_IDX_UDP };
 		if (probe_pulseaudio()) { // prefer pulseaudio
 			io[0] = SND_IDX_PULSE;
 			io[1] = SND_IDX_PORT;
@@ -434,8 +419,6 @@ void sound_init(void)
 	sound_init_options();
 
 	sound_update(progdefaults.btnAudioIOis);
-
-	resetMixerControls();
 }
 
 void sound_close(void)
@@ -452,10 +435,12 @@ void sound_update(unsigned idx)
 		btnAudioIO[i]->value(i == idx);
 
 	// devices
-	menuOSSDev->deactivate();
+	//menuOSSDev->deactivate();
 	menuPortInDev->deactivate();
 	menuPortOutDev->deactivate();
 	inpPulseServer->deactivate();
+	inpIPServerHost->deactivate();
+	inpIPServerPort->deactivate();
 
 	// settings
 	menuInSampleRate->deactivate();
@@ -463,21 +448,32 @@ void sound_update(unsigned idx)
 
 	progdefaults.btnAudioIOis = idx;
 	switch (idx) {
-#if USE_OSS
-	case SND_IDX_OSS:
-		menuOSSDev->activate();
-		scDevice[0] = scDevice[1] = menuOSSDev->value();
-		break;
+		case SND_IDX_TCP:
+			inpIPServerHost->activate();
+			if (inpIPServerHost->value())
+				scDevice[0] = inpIPServerHost->value();
+			//no break;
+		case SND_IDX_UDP:
+			inpIPServerPort->activate();
+			if (inpIPServerPort->value())
+				scDevice[1] = inpIPServerPort->value();
+			menuInSampleRate->activate();
+			break;
+#if 0
+		case SND_IDX_OSS:
+			menuOSSDev->activate();
+			scDevice[0] = scDevice[1] = menuOSSDev->value();
+			break;
 #endif
 
 #if USE_PORTAUDIO
-	case SND_IDX_PORT:
-		menuPortInDev->activate();
-		menuPortOutDev->activate();
-		if (menuPortInDev->text())
-			scDevice[0] = menuPortInDev->text();
-		if (menuPortOutDev->text())
-			scDevice[1] = menuPortOutDev->text();
+		case SND_IDX_PORT:
+			menuPortInDev->activate();
+			menuPortOutDev->activate();
+			if (menuPortInDev->text())
+				scDevice[0] = menuPortInDev->text();
+			if (menuPortOutDev->text())
+				scDevice[1] = menuPortOutDev->text();
 
 		{
 			Fl_ListBox* listbox[2] = { menuInSampleRate, menuOutSampleRate };
@@ -486,21 +482,21 @@ void sound_update(unsigned idx)
 				const vector<double>& srates = SoundPort::get_supported_rates(scDevice[i], i);
 
 				switch (srates.size()) {
-				case 0: // startup; no devices initialised yet
-					build_srate_listbox(listbox[i], std_sample_rates,
-							 sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1);
-					break;
-				case 1: // default sample rate only, build menu with all std rates
-					build_srate_listbox(listbox[i], std_sample_rates,
-							 sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1, srates[0]);
+					case 0: // startup; no devices initialised yet
+						build_srate_listbox(listbox[i], std_sample_rates,
+											sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1);
+						break;
+					case 1: // default sample rate only, build menu with all std rates
+						build_srate_listbox(listbox[i], std_sample_rates,
+											sizeof(std_sample_rates)/sizeof(*std_sample_rates) - 1, srates[0]);
 
-					break;
-				default: // first element is default sample rate, build menu with rest
-					build_srate_listbox(listbox[i], &srates[0] + 1, srates.size() - 1, srates[0]);
-					break;
+						break;
+					default: // first element is default sample rate, build menu with rest
+						build_srate_listbox(listbox[i], &srates[0] + 1, srates.size() - 1, srates[0]);
+						break;
 				}
 
-				for (int j = 1; j < listbox[i]->lsize(); j++) {
+				for (int j = 0; j < listbox[i]->lsize(); j++) {
 					listbox[i]->index(j);
 					if (strstr(listbox[i]->value(), label))
 						break;
@@ -510,19 +506,19 @@ void sound_update(unsigned idx)
 				listbox[i]->activate();
 			}
 		}
-		break;
+			break;
 #endif
 
 #if USE_PULSEAUDIO
-	case SND_IDX_PULSE:
-		inpPulseServer->activate();
-		scDevice[0] = scDevice[1] = inpPulseServer->value();
-		break;
+		case SND_IDX_PULSE:
+			inpPulseServer->activate();
+			scDevice[0] = scDevice[1] = inpPulseServer->value();
+			break;
 #endif
 
-	case SND_IDX_NULL:
-		scDevice[0] = scDevice[1] = "";
-		break;
+		case SND_IDX_NULL:
+			scDevice[0] = scDevice[1] = "";
+			break;
 	};
 }
 

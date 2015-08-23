@@ -27,20 +27,30 @@
 #include "status.h"
 #include "mt63.h"
 
+//------------------------------------------------------------------------------
+#include "threads.h"
+
+static pthread_mutex_t mt63_mutex = PTHREAD_MUTEX_INITIALIZER;
+//------------------------------------------------------------------------------
+
 using namespace std;
 bool startflag = true;
 
 void mt63::tx_init(SoundBase *sb)
 {
+	guard_lock dsp_lock(&mt63_mutex);
+
 	scard = sb;
-	Tx->Preset(frequency, (int)bandwidth, Interleave == 64 ? 1 : 0);
+	Tx->Preset(get_txfreq_woffset(), (int)bandwidth, Interleave == 64 ? 1 : 0);
 	flush = Tx->DataInterleave;
 	videoText();
-    startflag = true;
+	startflag = true;
 }
 
 void mt63::rx_init()
 {
+	guard_lock dsp_lock(&mt63_mutex);
+
 	Rx->Preset( frequency,
 				(int)bandwidth,
 				Interleave == 64 ? 1 : 0,
@@ -49,31 +59,43 @@ void mt63::rx_init()
 	escape = 0;
 }
 
-double peak = 0.0;
-
 int mt63::tx_process()
 {
-	int c;
-	double maxval = 0;
-
 	rx_flush();
+// do not put above rx_flush()
 
-    if (startflag == true) {
-        startflag = false;
-        if (progdefaults.mt63_usetones) {
-            double maxval = 0.0;
-            for (int i = 0; i < (bandwidth * progdefaults.mt63_tone_duration / 96); i++) {
-                Tx->SendTune( progdefaults.mt63_twotones );
-                for (int i = 0; i < Tx->Comb.Output.Len; i++)
-                    if (fabs(Tx->Comb.Output.Data[i]) > maxval)
-                        maxval = fabs(Tx->Comb.Output.Data[i]);
-                for (int i = 0; i < Tx->Comb.Output.Len; i++)
-                    Tx->Comb.Output.Data[i] /= maxval;
-                ModulateXmtr((Tx->Comb.Output.Data), Tx->Comb.Output.Len);
-            }
-        }
-        for (int i = 0; i < Tx->DataInterleave; i++) Tx->SendChar(0);
-    }
+	guard_lock dsp_lock(&mt63_mutex);
+
+	int c;
+
+	if (startflag == true) {
+		startflag = false;
+		maxval = 0.0;
+		if (progdefaults.mt63_usetones) {
+			double w1 = 2.0 * M_PI * (get_txfreq_woffset() - bandwidth / 2.0) / samplerate;
+			double w2 = 2.0 * M_PI * (get_txfreq_woffset() + 31.0 * bandwidth / 64.0) / samplerate;
+			double phi1 = 0.0;
+			double phi2 = 0.0;
+			double buff[samplerate];
+			for (int i = 0; i < progdefaults.mt63_tone_duration; i++) {
+				for (int j = 0; j < samplerate; j++) {
+					buff[j] = TONE_AMP * (progdefaults.mt63_twotones ? 0.5 : 1.0) * cos(phi1) +
+							  TONE_AMP * (progdefaults.mt63_twotones ? 0.5 : 0.0) * cos(phi2);
+					phi1 += w1;
+					phi2 += w2;
+					if (i == 0) buff[j] *= (1.0 - exp(-1.0 * j / 40.0));
+					if (i == progdefaults.mt63_tone_duration - 1)
+						buff[j] *= (1.0 - exp(-1.0 * (samplerate - j) / 40.0));
+				}
+				Fl::awake();
+				ModulateXmtr(buff, samplerate);
+			}
+		}
+		for (int i = 0; i < Tx->DataInterleave; i++) {
+			Tx->SendChar(0);
+			Fl::awake();
+		}
+	}
 
 	c = get_tx_char();
 	if (c == GET_TX_CHAR_ETX)  {
@@ -87,21 +109,23 @@ int mt63::tx_process()
 		stopflag = false;
 		while (--flush) {
 			Tx->SendChar(0);
+			double buff[Tx->Comb.Output.Len];
 			for (int i = 0; i < Tx->Comb.Output.Len; i++)
 				if (fabs(Tx->Comb.Output.Data[i]) > maxval)
 					maxval = fabs(Tx->Comb.Output.Data[i]);
-			for (int i = 0; i < Tx->Comb.Output.Len; i++) {
-				Tx->Comb.Output.Data[i] /= maxval;
-			}
-			ModulateXmtr((Tx->Comb.Output.Data), Tx->Comb.Output.Len);
+			for (int i = 0; i < Tx->Comb.Output.Len; i++)
+				buff[i] = Tx->Comb.Output.Data[i] /= maxval;
+			ModulateXmtr(buff,Tx->Comb.Output.Len);
 		}
 		Tx->SendJam();
+		maxval = 0.0;
+		double buff[Tx->Comb.Output.Len];
 		for (int i = 0; i < Tx->Comb.Output.Len; i++)
 			if (fabs(Tx->Comb.Output.Data[i]) > maxval)
 				maxval = fabs(Tx->Comb.Output.Data[i]);
 		for (int i = 0; i < Tx->Comb.Output.Len; i++)
-			Tx->Comb.Output.Data[i] /= maxval;
-		ModulateXmtr((Tx->Comb.Output.Data), Tx->Comb.Output.Len);
+			buff[i] = Tx->Comb.Output.Data[i] * 1.0 / maxval;
+		ModulateXmtr(buff,Tx->Comb.Output.Len);
 		cwid();
 		return -1;	/* we're done */
 	}
@@ -114,22 +138,26 @@ int mt63::tx_process()
 	if (sendc > 127) {
 		sendc &= 127;
 		Tx->SendChar(127);
+		double buff[Tx->Comb.Output.Len];
 		for (int i = 0; i < Tx->Comb.Output.Len; i++)
 			if (fabs(Tx->Comb.Output.Data[i]) > maxval)
 				maxval = fabs(Tx->Comb.Output.Data[i]);
 		for (int i = 0; i < Tx->Comb.Output.Len; i++)
-			Tx->Comb.Output.Data[i] /= maxval;
-		ModulateXmtr((Tx->Comb.Output.Data), Tx->Comb.Output.Len);
+			buff[i] = Tx->Comb.Output.Data[i] * 1.0 / maxval;
+		ModulateXmtr(buff,Tx->Comb.Output.Len);
 	}
 
 	Tx->SendChar(sendc);
-	for (int i = 0; i < Tx->Comb.Output.Len; i++)
-		if (fabs(Tx->Comb.Output.Data[i]) > maxval)
-			maxval = fabs(Tx->Comb.Output.Data[i]);
-	for (int i = 0; i < Tx->Comb.Output.Len; i++) {
-		Tx->Comb.Output.Data[i] /= maxval;
+	double buff[Tx->Comb.Output.Len];
+	int len = Tx->Comb.Output.Len;
+	for (int i = 0; i < len; i++) {
+		buff[i] = Tx->Comb.Output.Data[i];
+		if (maxval < fabs(buff[i])) maxval = fabs(buff[i]);
 	}
-	ModulateXmtr((Tx->Comb.Output.Data), Tx->Comb.Output.Len);
+	for (int i = 0; i < len; i++) {
+		buff[i] *= 1.0 / maxval;
+	}
+	ModulateXmtr(buff,len);
 
 	put_echo_char(c);
 
@@ -143,11 +171,8 @@ int mt63::rx_process(const double *buf, int len)
 	int i;
 	static char msg1[20];
 	static char msg2[20];
+	double f_offset;
 
-//	if (Interleave != progdefaults.mt63_interleave) {
-//		Interleave = progdefaults.mt63_interleave;
-//		restart();
-//	}
 	if (long_integral != progdefaults.mt63_rx_integration) {
 		long_integral = progdefaults.mt63_rx_integration;
 		restart();
@@ -161,54 +186,56 @@ int mt63::rx_process(const double *buf, int len)
 	for (i = 0; i < len; i++)
 		InpBuff->Data[i] = buf[i];
 
-    InpBuff->Len = len;
-	InpLevel->Process(InpBuff);
+	{ // critical section
+		guard_lock dsp_lock(&mt63_mutex);
 
-	Rx->Process(InpBuff);
+		InpBuff->Len = len;
+		InpLevel->Process(InpBuff);
 
-	snr = Rx->FEC_SNR();
+		Rx->Process(InpBuff);
 
-	if (progStatus.sqlonoff && snr < progStatus.sldrSquelchValue) {
-	    put_Status1("");
-	    put_Status2("");
-	    display_metric(0);
-		return 0;
-    }
+		snr = Rx->FEC_SNR();
+		if (progStatus.sqlonoff && snr < progStatus.sldrSquelchValue) {
+			put_Status1("");
+			put_Status2("");
+			display_metric(0);
+			return 0;
+		}
 
-	if (snr > 99.9)
-		snr = 99.9;
+		for (i = 0; i < Rx->Output.Len; i++) {
+			c = Rx->Output.Data[i];
+			if (!progdefaults.mt63_8bit) {
+				put_rx_char(c);
+				continue;
+			}
+			if ((c < 8) && (escape == 0))
+				continue;
+			if (c == 127) {
+				escape = 1;
+				continue;
+			}
+			if (escape) {
+				c += 128;
+				escape = 0;
+			}
+			put_rx_char(c);
+		}
+
+		f_offset = Rx->TotalFreqOffset();
+
+	} // end critical section
+
+	if (snr > 99.9) snr = 99.9;
+
 	display_metric(snr);
 
 	double s2n = 10.0*log10( snr == 0 ? 0.001 : snr);
 	snprintf(msg1, sizeof(msg1), "s/n %2d dB", (int)(floor(s2n)));
-    put_Status1(msg1);
+	put_Status1(msg1);
 
-    snprintf(msg2, sizeof(msg2), "f/o %+4.1f Hz", Rx->TotalFreqOffset());
-    put_Status2(msg2, 5, STATUS_CLEAR);
+	snprintf(msg2, sizeof(msg2), "f/o %+4.1f Hz", f_offset);
+	put_Status2(msg2, 5, STATUS_CLEAR);
 
-	for (i = 0; i < Rx->Output.Len; i++) {
-		c = Rx->Output.Data[i];
-
-		if (!progdefaults.mt63_8bit) {
-			put_rx_char(c);
-			continue;
-		}
-
-		if ((c < 8) && (escape == 0))
-			continue;
-
-		if (c == 127) {
-			escape = 1;
-			continue;
-		}
-
-		if (escape) {
-			c += 128;
-			escape = 0;
-		}
-
-		put_rx_char(c);
-	}
 	flushbuffer = true;
 
 	return 0;
@@ -216,6 +243,8 @@ int mt63::rx_process(const double *buf, int len)
 
 void mt63::rx_flush()
 {
+	guard_lock dsp_lock(&mt63_mutex);
+
 	unsigned int c;
 	int len = 512;
 	int dlen = 0;
@@ -272,14 +301,18 @@ void mt63::restart()
 	put_MODEstatus(mode);
 	set_scope_mode(Digiscope::BLANK);
 
-	err = Tx->Preset(frequency, (int)bandwidth, Interleave == 64 ? 1 : 0);
-	if (err)
-		fprintf(stderr, "mt63_txinit: init failed\n");
-	flush = Tx->DataInterleave;
+	{ // critical section
+		guard_lock dsp_lock(&mt63_mutex);
 
-	err = Rx->Preset( frequency, (int)bandwidth,
-                      Interleave == 64 ? 1 : 0,
-                      long_integral ? 32 : 16);
+		err = Tx->Preset(get_txfreq_woffset(), (int)bandwidth, Interleave == 64 ? 1 : 0);
+		if (err)
+			fprintf(stderr, "mt63_txinit: init failed\n");
+		flush = Tx->DataInterleave;
+
+		err = Rx->Preset( frequency, (int)bandwidth,
+					  Interleave == 64 ? 1 : 0,
+					  long_integral ? 32 : 16);
+	} // end critical section
 	if (err)
 		fprintf(stderr, "mt63_rxinit: init failed\n");
 	InpLevel->Preset(64.0, 0.75);
@@ -291,6 +324,7 @@ void mt63::init()
 	modem::init();
 	restart();
 	flushbuffer = false;
+	maxval = 0.0;
 }
 
 mt63::mt63 (trx_mode mt63_mode) : modem()
@@ -322,8 +356,8 @@ mt63::mt63 (trx_mode mt63_mode) : modem()
 		bandwidth = 2000;
 		break;
 	}
-//	Interleave = progdefaults.mt63_interleave;
-    long_integral = progdefaults.mt63_rx_integration;
+
+	long_integral = progdefaults.mt63_rx_integration;
 
 	Tx = new MT63tx;
 	Rx = new MT63rx;
@@ -339,6 +373,8 @@ mt63::mt63 (trx_mode mt63_mode) : modem()
 
 mt63::~mt63()
 {
+	guard_lock dsp_lock(&mt63_mutex);
+
 	if (Tx) delete Tx;
 	if (Rx) delete Rx;
 

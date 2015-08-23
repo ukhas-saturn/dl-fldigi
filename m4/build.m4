@@ -8,14 +8,19 @@ AC_DEFUN([AC_FLDIGI_BUILD_INFO], [
   FLDIGI_BUILD_CPPFLAGS="-I\$(srcdir) -I\$(srcdir)/include \
 -I\$(srcdir)/irrxml \
 -I\$(srcdir)/libtiniconv \
--I\$(srcdir)/fileselector \
--I\$(srcdir)/xmlrpcpp"
+-I\$(srcdir)/fileselector"
+  if test "x$ac_cv_flxmlrpc" != "xyes"; then
+    FLDIGI_BUILD_CPPFLAGS="$FLDIGI_BUILD_CPPFLAGS -I\$(srcdir)/xmlrpcpp"
+  fi
 # CXXFLAGS
   FLDIGI_BUILD_CXXFLAGS="$PORTAUDIO_CFLAGS $FLTK_CFLAGS $X_CFLAGS $SNDFILE_CFLAGS $SAMPLERATE_CFLAGS \
 $PULSEAUDIO_CFLAGS $HAMLIB_CFLAGS $PNG_CFLAGS $CURL_CFLAGS $XMLRPC_CFLAGS $MAC_UNIVERSAL_CFLAGS \
 $INTL_CFLAGS $PTW32_CFLAGS $BFD_CFLAGS -pipe -Wall -fexceptions $OPT_CFLAGS $DEBUG_CFLAGS $SSL_CFLAGS"
   if test "x$target_mingw32" = "xyes"; then
       FLDIGI_BUILD_CXXFLAGS="-mthreads $FLDIGI_BUILD_CXXFLAGS"
+  fi
+  if test "x$ac_cv_flxmlrpc" != "xyes"; then
+    FLDIGI_BUILD_CXXFLAGS="$FLDIGI_BUILD_CXXFLAGS -I\$(srcdir)/xmlrpcpp"
   fi
 # LDFLAGS
   FLDIGI_BUILD_LDFLAGS="$MAC_UNIVERSAL_LDFLAGS"
@@ -24,8 +29,8 @@ $INTL_CFLAGS $PTW32_CFLAGS $BFD_CFLAGS -pipe -Wall -fexceptions $OPT_CFLAGS $DEB
   fi
 # LDADD
   FLDIGI_BUILD_LDADD="$PORTAUDIO_LIBS $FLTK_LIBS $X_LIBS $SNDFILE_LIBS $SAMPLERATE_LIBS \
-$PULSEAUDIO_LIBS $HAMLIB_LIBS $PNG_LIBS $CURL_LIBS $XMLRPC_LIBS $INTL_LIBS $PTW32_LIBS $BFD_LIBS $EXTRA_LIBS \
-$SSL_LIBS"
+$PULSEAUDIO_LIBS $HAMLIB_LIBS $PNG_LIBS $XMLRPC_LIBS $INTL_LIBS $PTW32_LIBS $BFD_LIBS \
+$EXTRA_LIBS $FLXMLRPC_LIBS $CURL_LIBS $SSL_LIBS"
 
 # CPPFLAGS
   FLARQ_BUILD_CPPFLAGS="-I\$(srcdir) -I\$(srcdir)/include -I\$(srcdir)/fileselector \
@@ -76,13 +81,19 @@ $BFD_CFLAGS -pipe -Wall -fexceptions $OPT_CFLAGS $DEBUG_CFLAGS"
   AC_FLDIGI_SH_DQ([echo $ac_configure_args])
   AC_DEFINE_UNQUOTED([BUILD_CONFIGURE_ARGS], [$ac_sh_dq], [Configure arguments])
 
-  AC_FLDIGI_SH_DQ([date])
+# Allow BUILD_DATE, BUILD_USER, BUILD_HOST to be externally overridden by
+# environment variables.
+
+  ac_sh_dq="\"$BUILD_DATE\""
+  test "x$BUILD_DATE" = "x" && AC_FLDIGI_SH_DQ([date])
   AC_DEFINE_UNQUOTED([BUILD_DATE], [$ac_sh_dq], [Build date])
 
-  AC_FLDIGI_SH_DQ([whoami])
+  ac_sh_dq="\"$BUILD_USER\""
+  test "x$BUILD_USER" = "x" && AC_FLDIGI_SH_DQ([whoami])
   AC_DEFINE_UNQUOTED([BUILD_USER], [$ac_sh_dq], [Build user])
 
-  AC_FLDIGI_SH_DQ([hostname])
+  ac_sh_dq="\"$BUILD_HOST\""
+  test "x$BUILD_HOST" = "x" && AC_FLDIGI_SH_DQ([hostname])
   AC_DEFINE_UNQUOTED([BUILD_HOST], [$ac_sh_dq], [Build host])
 
   AC_FLDIGI_SH_DQ([$CXX -v 2>&1 | tail -1])

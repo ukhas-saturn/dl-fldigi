@@ -80,9 +80,9 @@ void  mfsk::tx_init(SoundBase *sc)
 	bitstate = 0;
 
 	double bw2 = (numtones + 1) * samplerate / symlen / 2.0;
-	double flo = (frequency - bw2) / samplerate;
+	double flo = (get_txfreq_woffset() - bw2) / samplerate;
 	if (flo <= 0) flo = 0;
-	double fhi = (frequency + bw2) / samplerate;
+	double fhi = (get_txfreq_woffset() + bw2) / samplerate;
 	xmtfilt->init_bandpass (127, 1, flo, fhi);
 
 	videoText();
@@ -223,7 +223,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		cap |= CAP_IMG;
 		preamble = 214;
 		break;
-		
+
 	case MODE_MFSK64L:
 		samplerate = 8000;
 		symlen =  128;
@@ -241,7 +241,7 @@ mfsk::mfsk(trx_mode mfsk_mode) : modem()
 		preamble = 5000;
 		basetone = 8;
 		numtones = 16;
-		break;	
+		break;
 
 	case MODE_MFSK11:
 		samplerate = 11025;
@@ -455,7 +455,6 @@ void mfsk::recvchar(int c)
 
 	if (check_picture_header(c) == true) {
 		counter = tracepair.delay;
-printf("symbolbit = %d, symbits = %d\n", symbolbit, symbits);
 		switch (mode) {
 			case MODE_MFSK16:
 				if (symbolbit == symbits) counter += symlen;
@@ -536,35 +535,37 @@ void mfsk::decodesymbol(unsigned char symbol)
 		if (symcounter) {
 			if ((c = dec1->decode(symbolpair, &met)) == -1)
 				return;
-			met1 = decayavg(met1, met, 32);
+			met1 = decayavg(met1, met, 50);//32);
 			if (met1 < met2)
 				return;
-			metric = met1 / 1.5;
+			metric = met1;
 		} else {
 			if ((c = dec2->decode(symbolpair, &met)) == -1)
 				return;
-			met2 = decayavg(met2, met, 32);
+			met2 = decayavg(met2, met, 50);//32);
 			if (met2 < met1)
 				return;
-			metric = met2 / 1.5;
+			metric = met2;
 		}
 	} else {
 		if (symcounter) return;
 		if ((c = dec2->decode(symbolpair, &met)) == -1)
 			return;
-		met2 = decayavg(met2, met, 32);
-		metric = met2 / 1.5;
+		met2 = decayavg(met2, met, 50);//32);
+		metric = met2;
 	}
 
 	if (progdefaults.Pskmails2nreport && (mailserver || mailclient)) {
 		// s2n reporting: re-calibrate
-		s2n_metric = metric * 3 - 42;
+		s2n_metric = metric * 4.5 - 42;
 		s2n_metric = CLAMP(s2n_metric, 0.0, 100.0);
 	}
 
 	// Re-scale the metric and update main window
-	metric -= 32.0;
-	if (metric <= 5.0) metric = 5.0;
+	metric -= 60.0;
+	metric *= 0.5;
+
+	metric = CLAMP(metric, 0.0, 100.0);
 	display_metric(metric);
 
 	if (progStatus.sqlonoff && metric < progStatus.sldrSquelchValue)
@@ -620,7 +621,7 @@ void mfsk::softdecode(cmplx *bins)
 	          if (CWIcounter[k] > CWI_MAXCOUNT) CWIcounter[k] = CWI_MAXCOUNT + 1;
 	}
 
-// gray decode and form soft decision samples
+// Grey decode and form soft decision samples
 	for (i = 0; i < numtones; i++) {
 		j = graydecode(i);
 
@@ -677,8 +678,7 @@ cmplx mfsk::mixer(cmplx in, double f)
 	z = in * cmplx( cos(phaseacc), sin(phaseacc) );
 
 	phaseacc -= TWOPI * f / samplerate;
-	if (phaseacc > TWOPI) phaseacc -= TWOPI;
-	if (phaseacc < -TWOPI) phaseacc += TWOPI;
+	if (phaseacc < 0) phaseacc += TWOPI;
 
 	return z;
 }
@@ -918,10 +918,7 @@ void mfsk::sendsymbol(int sym)
 	for (int i = 0; i < symlen; i++) {
 		outbuf[i] = cos(phaseacc);
 		phaseacc -= phaseincr;
-		if (phaseacc > M_PI)
-			phaseacc -= TWOPI;
-		else if (phaseacc < M_PI)
-			phaseacc += TWOPI;
+		if (phaseacc < 0) phaseacc += TWOPI;
 	}
 	transmit (outbuf, symlen);
 }
@@ -994,8 +991,7 @@ void mfsk::sendpic(unsigned char *data, int len)
 		for (j = 0; j < TXspp; j++) {
 			*ptr++ = cos(phaseacc);
 			phaseacc += TWOPI * f / samplerate;
-			if (phaseacc > M_PI)
-				phaseacc -= 2.0 * M_PI;
+			if (phaseacc > TWOPI) phaseacc -= TWOPI;
 		}
 	}
 
@@ -1011,8 +1007,7 @@ void mfsk::flush_xmt_filter(int n)
 	for (int i = 0; i < n; i++) {
 		outbuf[i] = cos(phaseacc);
 		phaseacc += TWOPI * (reverse ? f2 : f1) / samplerate;
-		if (phaseacc > M_PI)
-			phaseacc -= 2.0 * M_PI;
+		if (phaseacc > TWOPI) phaseacc -= TWOPI;
 	}
 	transmit (outbuf, tracepair.delay);
 }
@@ -1153,10 +1148,18 @@ int mfsk::tx_process()
 	return 0;
 }
 
-void mfsk::send_image(std::string s)
+void mfsk::send_color_image(std::string s)
 {
-	load_image(s.c_str());
-	pic_TxSendColor();
+	if (load_image(s.c_str())) {
+		pic_TxSendColor();
+	}
+}
+
+void mfsk::send_Grey_image(std::string s)
+{
+	if (load_image(s.c_str())) {
+		pic_TxSendGrey();
+	}
 }
 
 

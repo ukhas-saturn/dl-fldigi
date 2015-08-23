@@ -2,9 +2,9 @@
 // configuration.h
 //
 // Copyright (C) 2006-2010
-//		Dave Freese, W1HKJ
+//      Dave Freese, W1HKJ
 // Copyright (C) 2008-2010
-//		Stelios Bounanos, M0GLD
+//      Stelios Bounanos, M0GLD
 //
 // This file is part of fldigi.
 //
@@ -65,6 +65,7 @@
 //
 // No preprocessor directives or C++ comments inside this macro!
 // Indent with spaces only.
+// The 'comments' field should not contain either '<' or '>' characters!
 
 #ifdef ELEM_
 #  error ELEM_ should not be defined at this point
@@ -73,14 +74,14 @@
 #define CONFIG_LIST                                                                     \
     ELEM_(bool, confirmExit, "CONFIRMEXIT",                                             \
           "Ensure user wants to leave flgidi",                                          \
-          false)                                                                        \
+          true)                                                                         \
         ELEM_(bool, SaveConfig, "SAVECONFIG",                                           \
               "Save current configuration on exit",                                     \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, noise, "NOISETEST",                                                 \
               "Noise test on/off",                                                      \
               false)                                                                    \
-        ELEM_(double, s2n, "SIGNAL2NOISE",                                              \
+        ELEM_(double, s2n, "SIGNAL2NOISE",                                             \
               "Signal to Noise ratio for test",                                         \
               +20.0)                                                                    \
         ELEM_(bool, rsidWideSearch, "RSIDWIDESEARCH",                                   \
@@ -127,9 +128,9 @@
         ELEM_(bool, disable_rsid_freq_change, "DISABLERSIDFREQCHANGE",                  \
               "disable changing frequency on rsid modem change/reset",                  \
               false)                                                                    \
-		ELEM_(bool, retain_freq_lock, "RETAINFREQLOCK",                                 \
-			 "retain frequency lock on rsid modem change/reset",                   \
-			 false)                                                                     \
+        ELEM_(bool, retain_freq_lock, "RETAINFREQLOCK",                                 \
+             "retain frequency lock on rsid modem change/reset",                   \
+             false)                                                                     \
         ELEM_(bool, changed, "", "",  false)                                            \
                                                                                         \
         ELEM_(double, wfRefLevel, "WFREFLEVEL",                                         \
@@ -144,6 +145,9 @@
         ELEM_(bool, WF_UIx1, "WF_UIX1",                                                 \
               "WF_UI - enable scale multiplication button",                             \
               false)                                                                    \
+        ELEM_(int, drop_speed, "DROP_SPEED",                                            \
+              "DROP_SPEED - slow rate waterfall drop speed",                            \
+              8)                                                                        \
         ELEM_(bool, WF_UIwfcarrier, "WF_UIWFCARRIER",                                   \
               "WF_UI - enable wf carrier button",                                       \
               false)                                                                    \
@@ -233,7 +237,13 @@
         ELEM_(int, SearchRange, "PSKSEARCHRANGE",                                       \
               "PSK signal acquisition search range (Hz)",                               \
               50)                                                                       \
-        ELEM_(double, ACQsn, "ACQSN",                                                   \
+        ELEM_(bool, pskpilot, "PSKPILOT",                                               \
+              "Vestigial pilot tone on = 1, off = 0",                                   \
+              false)                                                                    \
+        ELEM_(double, pilot_power, "PILOT_POWER",                                      \
+              "Pilot tone relative power level",                                        \
+              -30.0)                                                                    \
+        ELEM_(double, ACQsn, "ACQSN",                                                  \
               "PSK signal acquisition S/N (dB)",                                        \
               9.0)                                                                      \
         ELEM_(bool, Pskmails2nreport, "PSKMAILS2NREPORT",                               \
@@ -307,7 +317,7 @@
         ELEM_(int, rtty_parity, "RTTYPARITY",                                           \
               "Parity. Values are as folows:\n"                                         \
               "  0: none; 1: even; 2: odd: 3: zero; 4: one",                            \
-              RTTY_PARITY_NONE)                                                         \
+              rtty::RTTY_PARITY_NONE)                                                   \
         ELEM_(int, rtty_stop, "RTTYSTOP",                                               \
               "Stop bits. Values are as folows:\n"                                      \
               "  0: 1; 1: 1.5; 2: 2",                                                   \
@@ -410,9 +420,6 @@
         ELEM_(int, CWupperlimit, "CWUPPERLIMIT",                                        \
               "Upper TX limit (WPM)",                                                   \
               50)                                                                       \
-        ELEM_(double, CWrisetime, "CWRISETIME",                                         \
-              "Leading and trailing edge rise times (milliseconds)",                    \
-              4.0)                                                                      \
         ELEM_(double, CWdash2dot, "CWDASH2DOT",                                         \
               "Dash to dot ratio",                                                      \
               3.0)                                                                      \
@@ -442,9 +449,19 @@
               0)                                                                        \
         ELEM_(int, QSKshape, "QSKSHAPE",                                                \
               "QSK edge shape. Values are as follows:\n"                                \
-              "  0: Hanning; 1: Blackman.\n"                                            \
-              "Raised cosine = Hanning.\n",                                             \
+              "  0: Hanning; 1: Blackman;"                                              \
+              "Raised cosine = Hanning.",                                               \
               0)   /* Hanning */                                                        \
+        ELEM_(double, CWrisetime, "CWRISETIME",                                        \
+              "Leading and trailing edge rise times (milliseconds)",                    \
+              4.0)                                                                      \
+        ELEM_(bool, CW_bpf_on, "CW_BPF_ON",                                             \
+              "Enable filtering of transmit audio",                                     \
+              false)                                                                    \
+        ELEM_(double, CW_bpf, "CW_BPF",                                                \
+              "Transmit filter hi cutoff frequency\n"                                   \
+              "f0 +/- CW_bpf/2",                                                        \
+              100.0)                                                                    \
         ELEM_(bool, CWnarrow, "CWNARROW",                                               \
               "Weight decreases with increasing edge timing",                           \
               false)                                                                    \
@@ -518,9 +535,9 @@
         ELEM_(bool, contestia8bit, "CONTESTIA8BIT",                                     \
               "8-bit extended characters",                                              \
               true)                                                                     \
-		ELEM_(bool, contestia_reset_fec, "CONTESTIARESETFEC",                           \
-		      "Force Integration (FEC) depth to be reset when new BW/Tones selected",   \
-			  false)                                                                    \
+        ELEM_(bool, contestia_reset_fec, "CONTESTIARESETFEC",                           \
+              "Force Integration (FEC) depth to be reset when new BW/Tones selected",   \
+              false)                                                                    \
         /* THOR */                                                                      \
         ELEM_(double, THOR_BW, "THORBW",                                                \
               "Filter bandwidth factor (bandwidth relative to signal width)",           \
@@ -546,29 +563,6 @@
         ELEM_(bool, THOR_SOFTBITS, "THORSOFTBITS",                                      \
               "Enable Soft-bit decoding",                                               \
               true)                                                                     \
-        /* PACKET */                                                                    \
-        ELEM_(int, PKT_BAUD_SELECT, "PKTBAUDSELECT",                                    \
-              "Packet baud rate. Values are as follows:\n"                              \
-              "  0: 1200 (V/UHF); 1: 300 (HF); 2: 2400 (V/UHF)",                        \
-              0)   /* 1200 baud (V/UHF) default. */                                     \
-        ELEM_(double, PKT_LOSIG_RXGAIN, "LOSIGRXGAIN",                                  \
-              "Signal gain for lower frequency (Mark) tone (in dB)",                    \
-              0.0)                                                                      \
-        ELEM_(double, PKT_HISIG_RXGAIN, "HISIGRXGAIN",                                  \
-              "Signal gain for higher frequency (Space) tone (in dB)",                  \
-              0.0)                                                                      \
-        ELEM_(double, PKT_LOSIG_TXGAIN, "LOSIGTXGAIN",                                  \
-              "Signal gain for Mark (lower frequency) tone (in dB)",                    \
-              0.0)                                                                      \
-        ELEM_(double, PKT_HISIG_TXGAIN, "HISIGTXGAIN",                                  \
-              "Signal gain for Space (higher frequency) tone (in dB)",                  \
-              0.0)                                                                      \
-        ELEM_(bool, PKT_PreferXhairScope, "PKTPREFERXHAIRSCOPE",                        \
-              "Default to syncscope (detected symbol scope)",                           \
-              false)                                                                    \
-        ELEM_(bool, PKT_AudioBoost, "PKTAUDIOBOOST",                                    \
-              "No extra input gain (similar to Mic Boost) by default",                  \
-              false)                                                                    \
                                                                                         \
         ELEM_(bool, PKT_RXTimestamp, "PKTRXTIMESTAMP",                                  \
               "No timestamps on RX packets by default",                                 \
@@ -630,6 +624,63 @@
         ELEM_(bool, mt63_at500, "MT63AT500",                                            \
               "Always transmit lowest tone at 500 Hz",                                  \
               false)                                                                    \
+        /* FSQ */                                                                       \
+        ELEM_(int, fsq_frequency, "FSQFREQUENCY",                                       \
+              "0 - 1150 Hz, 1 - 1500 Hz, 2 - Variable",                                 \
+              1)                                                                        \
+        ELEM_(int, fsq_movavg, "FSQMOVAVG",                                             \
+              "size of moving average filter for bin filtering\n"                       \
+              "value 2 to 8",                                                           \
+              4)                                                                        \
+        ELEM_(double, fsq_img_filter, "FSQIMGFILTER",                                  \
+              "0 - 300 Hz, 1 - 400 Hz, 2 - 500 Hz (default)",                           \
+              2)                                                                        \
+        ELEM_(double, fsqbaud, "FSQBAUD",                                              \
+              "6, 4.5, 3 or 2 baud",                                                    \
+              4.5)                                                                      \
+        ELEM_(int, fsqhits, "FSQHITS",                                                  \
+              "3 / 6",                                                                  \
+              3)                                                                        \
+        ELEM_(bool, fsq_directed, "FSQDIRECTED",                                        \
+              "FSQCALL directed mode",                                                  \
+              false)                                                                    \
+        ELEM_(bool, fsq_show_monitor, "FSQSHOWMONITOR",                                 \
+              "Show fsq monitor text panel",                                            \
+              false)                                                                    \
+        ELEM_(bool, fsq_fastavg, "FSQFASTAVG",                                          \
+              "Symbol averaging: true = fast, false = slow",                            \
+              true)                                                                     \
+        ELEM_(std::string, fsqQTCtext, "FSQQTCTEXT",                                    \
+              "QTC text string",                                                        \
+              "cq cq cq de nocall")                                                     \
+        ELEM_(int, fsq_heard_aging, "FSQHEARDAGING",                                   \
+              "0 - NEVER (default)\n"                                                   \
+              "1 - 1 minute, 2 - 5 minutes, 3 - 10 minutes\n"                           \
+              "4 - 20 minutes, 5 - 30 minutes",                                         \
+              0)                                                                        \
+        ELEM_(int, fsq_sounder, "FSQSOUNDER",                                           \
+              "0 - OFF (default)\n"                                                     \
+              "1 - 1 minute, 2 - 10 minutes, 3 - 30 minutes",                           \
+              0)                                                                        \
+        ELEM_(bool, fsq_lowercase, "FSQLOWERCASE",                                      \
+              "0 - NO, 1 - YES\n"                                                       \
+              "convert operator MYCALL to lower case for directed call triggers",       \
+              0)                                                                        \
+        ELEM_(int, fsq_time_out, "FSQTIMEOUT",                                          \
+              "Time out auto replies after XX seconds",                                 \
+              6)                                                                        \
+        ELEM_(bool, fsq_enable_heard_log, "FSQ_ENABLE_HEARD_LOG",                       \
+              "FSQ enable heard log file",                                              \
+              1)                                                                        \
+        ELEM_(std::string, fsq_heard_log, "FSQ_HEARD_LOG",                              \
+              "FSQ heard log pathname",                                                 \
+              "fsq_heard_log.txt")                                                      \
+        ELEM_(bool, fsq_enable_audit_log, "FSQ_ENABLE_AUDIT_LOG",                       \
+              "FSQ enable audit log file",                                              \
+              1)                                                                        \
+        ELEM_(std::string, fsq_audit_log, "FSQ_AUDIT_LOG",                              \
+              "FSQ audit log pathname",                                                 \
+              "fsq_audit_log.txt")                                                      \
         /* Waterfall & UI */                                                            \
         ELEM_(uchar, red, "", "",  0)                                                   \
         ELEM_(uchar, green, "", "",  255)                                               \
@@ -683,7 +734,7 @@
               4)                                                                        \
         ELEM_(bool, viewXmtSignal, "VIEWXMTSIGNAL",                                     \
               "Show transmit signal on waterfall",                                      \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, sendid, "SENDID",                                                   \
               "Send video ID containing modem name",                                    \
               false)                                                                    \
@@ -731,7 +782,7 @@
               true)                                                                     \
         ELEM_(bool, NagMe, "NAGME",                                                     \
               "Prompt to save log",                                                     \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, ClearOnSave, "CLEARONSAVE",                                         \
               "Clear log fields on save",                                               \
               false)                                                                    \
@@ -760,10 +811,10 @@
               "Convert callsign field to upper case",                                   \
               true)                                                                     \
         ELEM_(bool, RSTdefault, "RSTDEFAULT",                                           \
-              "Default outgoing RST to 599",                                            \
+              "Default outgoing RST to 599/59",                                         \
               false)                                                                    \
         ELEM_(bool, RSTin_default, "RSTINDEFAULT",                                      \
-              "Default incoming RST to 599",                                            \
+              "Default incoming RST to 599/59",                                         \
               false)                                                                    \
         ELEM_(bool, autoextract, "AUTOEXTRACT",                                         \
               "Enable detection and extraction of \"wrapped\" text",                    \
@@ -1003,11 +1054,17 @@
         /* Sound card */                                                                \
         ELEM_(int, btnAudioIOis, "AUDIOIO",                                             \
               "Audio subsystem.  Values are as follows:\n"                              \
-              "  0: OSS; 1: PortAudio; 2: PulseAudio; 3: File I/O",                     \
+              "  0: TCP; 1: PortAudio; 2: PulseAudio; 3: File I/O",                     \
               SND_IDX_NULL)                                                             \
         ELEM_(std::string, OSSdevice, "OSSDEVICE",                                      \
               "OSS device name",                                                        \
               "")                                                                       \
+        ELEM_(std::string, IPServerHost, "IPHOST",                                      \
+              "IP stream host",                                                         \
+              "localhost")                                                              \
+        ELEM_(std::string, IPServerPort, "IPPORT",                                      \
+              "IP stream port",                                                         \
+              "7355")                                                                   \
         ELEM_(std::string, PAdevice, "PADEVICE",                                        \
               "For compatibility with older versions",                                  \
               "")                                                                       \
@@ -1027,17 +1084,14 @@
         ELEM_(std::string, PulseServer, "PULSESERVER",                                  \
               "PulseAudio server string",                                               \
               "")                                                                       \
-        ELEM_(int, in_channels, "INCHANNELS",                                           \
-              "Number of audio input channels",                                         \
-              1)                                                                        \
-        ELEM_(bool, mono_audio, "MONOAUDIO",                                            \
-              "Force use of mono audio output",                                         \
-              false)                                                                    \
         ELEM_(bool, sig_on_right_channel, "SIGONRIGHTCHANNEL",                          \
               "Duplicate modem signal on left & right",                                 \
               false)                                                                    \
         ELEM_(bool, ReverseAudio, "REVERSEAUDIO",                                       \
-              "Reverse left-right audio channels",                                      \
+              "Reverse left-right rx audio channels",                                   \
+              false)                                                                    \
+        ELEM_(bool, ReverseRxAudio, "REVERSERXAUDIO",                                   \
+              "Reverse left-right rx audio channels",                                   \
               false)                                                                    \
         ELEM_(int, sample_rate, "SAMPLERATE",                                           \
               "For compatibility with older versions",                                  \
@@ -1154,46 +1208,30 @@
         ELEM_(bool, UseLastMacro, "USELASTMACRO",                                       \
               "Load last used macro file on startup",                                   \
               false)                                                                    \
+        ELEM_(double, mbw, "MBW",                                                      \
+              "Delay between execution of RIGMODE and FILWID\n"                         \
+              "when in the same macro definition\n"                                     \
+              "range 0.1 to 2.0, default = 0.5",                                        \
+              0.5)                                                                      \
         ELEM_(bool, DisplayMacroFilename, "DISPLAYMACROFILENAME",                       \
               "Display macro filename on startup",                                      \
               false)                                                                    \
         ELEM_(bool, SaveMacros, "SAVEMACROS",                                           \
               "Save current macros on exit",                                            \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, macro_wheel, "MACROWHEEL",                                          \
               "Enable mouse wheel rotation to control visible macro set",               \
               false)                                                                    \
-        ELEM_(bool, mbar1_pos, "MBAR1POS",                                              \
-              "Principal macro bar position, true=above wf, false=below",               \
-              true)                                                                     \
-        ELEM_(int, mbar2_pos, "MBAR2POS",                                               \
-              "Position second macro button above data stream panesl",                  \
-              0)                                                                        \
-        /* Mixer */                                                                     \
-        ELEM_(std::string, MXdevice, "MXDEVICE",                                        \
-              "Mixer device",                                                           \
-              "")                                                                       \
-        ELEM_(bool, MicIn, "MICIN",                                                     \
-              "Control the microphone mixer channel",                                   \
-              false)                                                                    \
-        ELEM_(bool, LineIn, "LINEIN",                                                   \
-              "Control the line-in mixer channel",                                      \
-              true)                                                                     \
-        ELEM_(bool, EnableMixer, "ENABLEMIXER",                                         \
-              "Enable mixer controls",                                                  \
-              false)                                                                    \
-        ELEM_(double, PCMvolume, "PCMVOLUME",                                           \
-              "PCM channel level",                                                      \
-              0.8)                                                                      \
+        ELEM_(int, mbar_scheme, "MBARSCHEME",                                           \
+              "# and position of macro bars\n"                                          \
+              "0..12, 1 = default",                                                     \
+              1)                                                                        \
         ELEM_(double, txlevel, "TXATTEN",                                               \
               "TX attenuator (db) -30 .. 0",                                            \
               -3.0)                                                                     \
-        ELEM_(bool, MuteInput, "MUTEINPUT",                                             \
-              "This setting is currently unused",                                       \
-              true)                                                                     \
         ELEM_(double, TxMonitorLevel, "TXMONITORLEVEL",                                 \
               "Level for monitored (on waterfall) transmit signal",                     \
-              0.5)                                                                      \
+              0.2)                                                                      \
         /* Waterfall palette */                                                         \
         ELEM_(std::string, PaletteName, "PALETTENAME",                                  \
               "Waterfall color palette file name",                                      \
@@ -1253,13 +1291,25 @@
               true)                                                                     \
         ELEM_(Fl_Font, RxFontnbr, "RXFONTNBR",                                          \
               "RX text font index",                                                     \
-              FL_COURIER)                                                               \
+              FL_HELVETICA)                                                             \
         ELEM_(int, RxFontsize, "RXFONTSIZE",                                            \
               "RX text font size",                                                      \
               16)                                                                       \
         ELEM_(Fl_Color, RxFontcolor, "RXFNTCOLOR",                                      \
               "RX text font color",                                                     \
               FL_BLACK)                                                                 \
+        ELEM_(std::string, MacroBtnFontname, "MACROBTNFONTNAME",                        \
+              "Macro Btn Font Name",                                                    \
+              "")                                                                       \
+        ELEM_(Fl_Font, MacroBtnFontnbr, "MACROBTNFONTNBR",                              \
+              "Macro Btn font index",                                                   \
+              FL_HELVETICA)                                                             \
+        ELEM_(int, MacroBtnFontsize, "MACROBTNFONTSIZE",                                \
+              "Macro btn font size",                                                    \
+              12)                                                                       \
+        ELEM_(Fl_Color, MacroBtnFontcolor, "MACROBTNFONTCOLOR",                         \
+              "Macro btn font color",                                                   \
+              FL_WHITE)                                                                 \
         ELEM_(Fl_Color, RxTxSelectcolor, "RXTXSELCOLOR",                                \
               "RX/TX text select color",                                                \
               FL_MAGENTA)                                                               \
@@ -1271,7 +1321,7 @@
               true)                                                                     \
         ELEM_(Fl_Font, TxFontnbr, "TXFONTNBR",                                          \
               "TX text font index",                                                     \
-              FL_COURIER)                                                               \
+              FL_HELVETICA)                                                             \
         ELEM_(int, TxFontsize, "TXFONTSIZE",                                            \
               "TX text font size",                                                      \
               16)                                                                       \
@@ -1313,7 +1363,7 @@
               "")                                                                       \
         ELEM_(Fl_Font, WaterfallFontnbr, "WATERFALLFONTNBR",                            \
               "Waterfall font number",                                                  \
-              FL_COURIER)                                                               \
+              FL_HELVETICA)                                                             \
         ELEM_(int, WaterfallFontsize, "WATERFALLFONTSIZE",                              \
               "Waterfall font size",                                                    \
               12)                                                                       \
@@ -1346,7 +1396,7 @@
               "")                                                                       \
         ELEM_(Fl_Font, FreqControlFontnbr, "FREQCONTROLFONTNBR",                        \
               "Frequency Control font number",                                          \
-              FL_COURIER)                                                               \
+              FL_HELVETICA)                                                             \
         ELEM_(std::string, ui_scheme, "UISCHEME",                                       \
               "FLTK UI scheme (none or base, gtk+, plastic)",                           \
               "gtk+")                                                                   \
@@ -1359,10 +1409,33 @@
         /* Freq Display colors */                                                       \
         ELEM_(RGB, FDbackground, "FDBACKGROUND",                                        \
               "Frequency display background color",                                     \
-              { 0, 0, 0 })                                                              \
+              { 255, 253, 222 })                                                        \
         ELEM_(RGB, FDforeground, "FDFOREGROUND",                                        \
               "Frequency display foreground color",                                     \
+              { 0, 0, 0 })                                                              \
+        /* S-meter and Power-meter */                                                   \
+        ELEM_(RGB, Smeter_bg_color, "SMETERBG",                                         \
+              "S-meter background color",                                               \
+              { 255, 253, 222 })                                                        \
+        ELEM_(RGB, Smeter_scale_color, "SMETERSCALECOLOR",                              \
+              "S-meter scale color",                                                    \
+              { 0, 0, 0 })                                                              \
+        ELEM_(RGB, Smeter_meter_color, "SMETERMETERCOLOR",                              \
+              "S-meter meter color",                                                    \
               { 0, 200, 0 })                                                            \
+        ELEM_(RGB, PWRmeter_bg_color, "PWRMETERBGD",                                    \
+              "Power meter background color",                                           \
+              { 255, 253, 222 })                                                        \
+        ELEM_(RGB, PWRmeter_scale_color, "PWRMETERSCALECOLOR",                          \
+              "Power meter scale color",                                                \
+              { 0, 0, 0 })                                                              \
+        ELEM_(RGB, PWRmeter_meter_color, "PWRMETERMETERCOLOR",                          \
+              "Power meter meter color",                                                \
+              { 200, 0, 0 })                                                            \
+        ELEM_(int, PWRselect, "PWRSELECT",                                              \
+              "Power meter type:\n"                                                     \
+              " 0: 25 W, 1: 50 W, 2: 100 W, 3: 200 W, 4: AUTO",                         \
+              4)                                                                        \
         /* Tab selection color */                                                       \
         ELEM_(Fl_Color, TabsColor, "TABSCOLOR",                                         \
               "UI tabs color",                                                          \
@@ -1401,7 +1474,7 @@
               "")                                                                       \
         ELEM_(Fl_Font, ViewerFontnbr, "VIEWERFONTNBR",                                  \
               "Signal Viewer font index",                                               \
-              FL_COURIER)                                                               \
+              FL_HELVETICA)                                                             \
         ELEM_(int, ViewerFontsize, "VIEWERFONTSIZE",                                    \
               "Signal Viewer font size",                                                \
               FL_NORMAL_SIZE)                                                           \
@@ -1447,19 +1520,116 @@
         ELEM_(std::string, xmllog_port, "XMLLOG_PORT",                                  \
               "Logbook server port",                                                    \
               "8421")                                                                   \
+                                                                                         \
+         /* Extra dl-fldigi operator information */                                      \
+         ELEM_(std::string, myRadio, "MYRADIO", "Short radio description", "")           \
+         ELEM_(std::string, myLat, "MYLAT", "Stationary listener latitude", "")          \
+         ELEM_(std::string, myLon, "MYLON", "Stationary listener longitude", "")         \
+         ELEM_(std::string, myAlt, "MYALT", "Stationary listener altitude", "")          \
+                                                                                         \
+         /* habitat Flight selection stuff */                                            \
+         ELEM_(int, tracking_type, "TRACKING_WHAT",                                      \
+                 "Tracking 0: nothing, 1: a flight, 2: a testing payload", 0)            \
+         ELEM_(std::string, tracking_doc, "TRACKING_DOCID",                              \
+                 "The selected flight or payload document id", "")                       \
+         ELEM_(int, tracking_flight_payload, "TRACKING_FLIGHT_PAYLOAD",                  \
+                 "The selected payload (belonging to the tracked filght) (index)", -1)   \
+         ELEM_(int, tracking_transmission, "TRACKING_TRANSMISSION",                      \
+                 "The selected transmission (index)", -1)                                \
+                                                                                         \
+         /* dl-fldigi GPS Device Info */                                                 \
+         ELEM_(bool, gps_start_enabled, "GPSENABLED", "GPS Enabled on startup?", false)  \
+         ELEM_(std::string, gps_device, "GPSDEVICE", "GPS Serial port", "")              \
+         ELEM_(int, gps_speed, "GPSSPEED", "GPS Serial baud", 0)                         \
+         ELEM_(int, gps_period, "GPSPERIOD", "GPS Upload period", 30)                    \
+                                                                                         \
+         /* dl-fldigi Misc config stuff */                                               \
+         ELEM_(int, png_wfall, "PNG_WFALL", "", 0)                                       \
+         ELEM_(std::string, waterfall_png_location, "PNG_WFALL_LOC",                     \
+                 "Save location for PNG", "dl-fldigi-waterfall.png")                     \
+         ELEM_(bool, ssdv_save_image, "SSDV_SAVE_IMAGES", "", false)                     \
+         ELEM_(std::string, ssdv_save_dir, "SSDV_SAVE_DIR",                              \
+                 "Save location for received images", "")                                \
+         ELEM_(bool, track_freq, "TRACK_FREQ",                                           \
+                 "Adjust the RF frequency to match frequency drift", false)              \
+         ELEM_(int, track_freq_min, "TRACK_FREQ_MIN",                                    \
+                 "Minimum waterfall frequency", 1000)                                    \
+         ELEM_(int, track_freq_max, "TRACK_FREQ_MAX",                                    \
+                 "Maximum waterfall frequency", 2000)                                    \
+                                                                                         \
+         /* dl-fldigi network config stuff */                                            \
+         ELEM_(std::string, habitat_uri, "HABITAT_URI",                                  \
+                 "habitat CouchDB URI", "http://habitat.habhub.org")                     \
+         ELEM_(std::string, habitat_db, "HABITAT_DB",                                    \
+                 "habitat CouchDB databse", "habitat")                                   \
+                                                                                         \
+         /* TODO HABITAT LATER: swap to habitat! Give SSDV the UploaderThread object */  \
+         ELEM_(std::string, ssdv_packet_url, "SSDV_BLOCK_URL",                           \
+                 "Remote URL", "http://www.sanslogic.co.uk/ssdv/data.php")               \
+         ELEM_(std::string, ssdv_block_user, "SSDV_BLOCK_USER",                          \
+                 "Username for remote URL", "")                                          \
+         ELEM_(std::string, ssdv_block_pass, "SSDV_BLOCK_PASS",                          \
+                 "Password for remote URL", "")                                          \
                                                                                         \
-        ELEM_(bool, check_for_updates, "DL_CHECK_FOR_UPDATES",                          \
+        ELEM_(bool, check_for_updates, "CHECK_FOR_UPDATES",                             \
               "Check for updates when starting program",                                \
-              true)                                                                     \
-        /* XML-RPC/ARQ servers */                                                       \
-        ELEM_(std::string, xmlrpc_address, "", "",  "127.0.0.1")                        \
-        ELEM_(std::string, xmlrpc_port, "", "",  "7362")                                \
+              false)                                                                    \
+        /* XML-RPC/ARQ/KISS servers */                                                  \
+        ELEM_(std::string, xmlrpc_address, "XMLRPC_ADDRESS",                            \
+              "IP Address of XMLRPC Socket",                                            \
+              DEFAULT_XMLPRC_IP_ADDRESS)                                                \
+        ELEM_(std::string, xmlrpc_port,    "XMLRPC_PORT",                               \
+              "IP port number of XMLRPC socket",                                        \
+              DEFAULT_XMLRPC_IP_PORT)                                                   \
         ELEM_(std::string, xmlrpc_allow, "", "",  "")                                   \
         ELEM_(std::string, xmlrpc_deny, "", "",  "")                                    \
         ELEM_(int, rx_msgid, "", "",  9876)                                             \
         ELEM_(int, tx_msgid, "", "",  6789)                                             \
-        ELEM_(std::string, arq_address, "", "",  "127.0.0.1")                           \
-        ELEM_(std::string, arq_port, "", "",  "7322")                                   \
+        ELEM_(std::string, arq_address, "ARQ_ADDRESS",                                  \
+              "IP Address of ARQ socket",                                               \
+              DEFAULT_ARQ_IP_ADDRESS)                                                   \
+        ELEM_(std::string, arq_port, "ARQ_PORT",                                        \
+              "IP port number of ARQ socket",                                           \
+              DEFAULT_ARQ_IP_PORT)                                                      \
+        ELEM_(std::string, kiss_address, "KISS_ADDRESS",                                \
+              "IP Address of KISS socket",                                              \
+              DEFAULT_KISS_IP_ADDRESS)                                                  \
+        ELEM_(std::string, kiss_io_port, "KISS_IO_PORT",                                \
+              "IP port number of KISS socket",                                          \
+              DEFAULT_KISS_IP_IO_PORT)                                                  \
+        ELEM_(std::string, kiss_out_port, "KISS_OUT_PORT",                              \
+              "Out udp port used when ip address is the same",                          \
+              DEFAULT_KISS_IP_OUT_PORT)                                                 \
+        ELEM_(int, kiss_dual_port_enabled, "KISS_DUAL_PORT_ENABLED",                    \
+              "Required when same IP address is used.",                                 \
+              0)                                                                        \
+        ELEM_(int, data_io_enabled, "DATA_IO_ENABLED",                                  \
+              "Disabled (0) ARQ socket enabled (1) KISS socket enabled (2)",            \
+              1)                                                                        \
+        ELEM_(bool, ax25_decode_enabled, "AX25_DECODE_ENABLED",                         \
+              "Dissasemble AX25 packet into human readable form",                       \
+              false)                                                                    \
+        ELEM_(bool, enableBusyChannel, "ENABLE_BUSY_CHANNEL",                           \
+              "Detect busy channel and wait for a period of time before txing",         \
+              false)                                                                    \
+        ELEM_(int, busyChannelSeconds, "BUSY_CHANNEL_SECONDS",                          \
+              "Number of seconds to wait before transmit resume",                       \
+              3)                                                                        \
+        ELEM_(int, kpsql_attenuation, "KPSQL_ATTENUATION",                              \
+        "KPSQL Attenuation in 1/n of 1:1 Gain",                                         \
+        2)                                                                              \
+        ELEM_(bool, csma_enabled, "CSMA_ENABLED",                                       \
+              "Use CSMA on heavy traffic channels (AX25)",                              \
+              true)                                                                     \
+        ELEM_(std::string, flrig_ip_address, "FLRIG_IP_ADDRESS",                        \
+              "IP Address of flrig server",                                             \
+              DEFAULT_FLRIG_IP_ADDRESS)                                                 \
+        ELEM_(std::string, flrig_ip_port,    "FLRIG_IP_PORT",                           \
+              "IP port number of flrig server",                                         \
+              DEFAULT_FLRIG_IP_PORT)                                                    \
+        ELEM_(bool, show_all_codes, "SHOW_ALL_CODES",                                   \
+              "Display all rx char's using ascii3 table",                               \
+              false)                                                                    \
         /* PSK reporter */                                                              \
         ELEM_(bool, usepskrep, "USEPSKREP",                                             \
               "(Set by fldigi)",                                                        \
@@ -1482,57 +1652,6 @@
         ELEM_(std::string, pskrep_port, "PSKREPPORT",                                   \
               "Reception report server port",                                           \
               "4739")                                                                   \
-                                                                                        \
-        /* Extra dl-fldigi operator information */                                      \
-        ELEM_(std::string, myRadio, "MYRADIO", "Short radio description", "")           \
-        ELEM_(std::string, myLat, "MYLAT", "Stationary listener latitude", "")          \
-        ELEM_(std::string, myLon, "MYLON", "Stationary listener longitude", "")         \
-        ELEM_(std::string, myAlt, "MYALT", "Stationary listener altitude", "")          \
-                                                                                        \
-        /* habitat Flight selection stuff */                                            \
-        ELEM_(int, tracking_type, "TRACKING_WHAT",                                      \
-                "Tracking 0: nothing, 1: a flight, 2: a testing payload", 0)            \
-        ELEM_(std::string, tracking_doc, "TRACKING_DOCID",                              \
-                "The selected flight or payload document id", "")                       \
-        ELEM_(int, tracking_flight_payload, "TRACKING_FLIGHT_PAYLOAD",                  \
-                "The selected payload (belonging to the tracked filght) (index)", -1)   \
-        ELEM_(int, tracking_transmission, "TRACKING_TRANSMISSION",                      \
-                "The selected transmission (index)", -1)                                \
-                                                                                        \
-        /* dl-fldigi GPS Device Info */                                                 \
-        ELEM_(bool, gps_start_enabled, "GPSENABLED", "GPS Enabled on startup?", false)  \
-        ELEM_(std::string, gps_device, "GPSDEVICE", "GPS Serial port", "")              \
-        ELEM_(int, gps_speed, "GPSSPEED", "GPS Serial baud", 0)                         \
-        ELEM_(int, gps_period, "GPSPERIOD", "GPS Upload period", 30)                    \
-                                                                                        \
-        /* dl-fldigi Misc config stuff */                                               \
-        ELEM_(int, png_wfall, "PNG_WFALL", "", 0)                                       \
-        ELEM_(std::string, waterfall_png_location, "PNG_WFALL_LOC",                     \
-                "Save location for PNG", "dl-fldigi-waterfall.png")                     \
-        ELEM_(bool, ssdv_save_image, "SSDV_SAVE_IMAGES", "", false)                     \
-        ELEM_(std::string, ssdv_save_dir, "SSDV_SAVE_DIR",                              \
-                "Save location for received images", "")                                \
-        ELEM_(bool, track_freq, "TRACK_FREQ",                                           \
-                "Adjust the RF frequency to match frequency drift", false)              \
-        ELEM_(int, track_freq_min, "TRACK_FREQ_MIN",                                    \
-                "Minimum waterfall frequency", 1000)                                    \
-        ELEM_(int, track_freq_max, "TRACK_FREQ_MAX",                                    \
-                "Maximum waterfall frequency", 2000)                                    \
-                                                                                        \
-        /* dl-fldigi network config stuff */                                            \
-        ELEM_(std::string, habitat_uri, "HABITAT_URI",                                  \
-                "habitat CouchDB URI", "http://habitat.habhub.org")                     \
-        ELEM_(std::string, habitat_db, "HABITAT_DB",                                    \
-                "habitat CouchDB databse", "habitat")                                   \
-                                                                                        \
-        /* TODO HABITAT LATER: swap to habitat! Give SSDV the UploaderThread object */  \
-        ELEM_(std::string, ssdv_packet_url, "SSDV_BLOCK_URL",                           \
-                "Remote URL", "http://www.sanslogic.co.uk/ssdv/data.php")               \
-        ELEM_(std::string, ssdv_block_user, "SSDV_BLOCK_USER",                          \
-                "Username for remote URL", "")                                          \
-        ELEM_(std::string, ssdv_block_pass, "SSDV_BLOCK_PASS",                          \
-                "Password for remote URL", "")                                          \
-                                                                                        \
        /* WEFAX configuration items */                                                  \
        ELEM_(double, wefax_slant, "WEFAXSLANT",                                         \
              "Slant correction for wefax Rx",                                           \
@@ -1615,7 +1734,7 @@
         ELEM_(bool, wx_station_name, "WX_STATION_NAME",                                 \
               "Report station noun name",                                               \
               true)                                                                     \
-	/* KML Keyhole Markup Language */                                               \
+    /* KML Keyhole Markup Language */                                               \
         ELEM_(bool, kml_purge_on_startup, "KML_PURGE_ON_STARTUP",                       \
               "Purge KML data at startup",                                              \
               false)                                                                    \
@@ -1637,7 +1756,16 @@
        ELEM_(int, kml_balloon_style, "KML_BALLOON_STYLE",                               \
              "KML balloons data displayed as text, HTML tables, HTML single matrix",    \
              2)                                                                         \
-        ELEM_(std::string, auto_flrig_pathname, "AUTO_FLRIG_PATHNAME",                  \
+       ELEM_(double, cnt_dft_range, "cnt_dft_range",                                   \
+             "Display range in dB for dft scan modem",                                  \
+             60.0)                                                                      \
+       ELEM_(int, cnt_dft_scans, "cnt_dft_scans",                                       \
+             "Number of scans over which the average signal level is measured.",        \
+             100)                                                                       \
+       ELEM_(bool, dft_relative, "dft_relative",                                        \
+             "Plot vertical scale as dB relative to maximum value",                     \
+             false)                                                                     \
+       ELEM_(std::string, auto_flrig_pathname, "AUTO_FLRIG_PATHNAME",                  \
               "Full pathname to the flrig executable",                                  \
               "")                                                                       \
         ELEM_(std::string, auto_flamp_pathname, "AUTO_FLAMP_PATHNAME",                  \
@@ -1679,6 +1807,32 @@
         ELEM_(bool, prog3_auto_enable, "PROG3_AUTO_ENABLE",                             \
               "Enable on program start",                                                \
               false)                                                                    \
+        ELEM_(int, sel_lsd, "SEL_LSD",                                                  \
+              "Frequency control by keyboard arrow keys\n"                              \
+              "Least significant digit are left/right keys\n"                           \
+              "0 : 1 Hz, 1 : 10 Hz, 2 : 100 Hz, 3 : 1000 Hz",                           \
+              0)                                                                        \
+        ELEM_(int, macro_height, "MACRO_HEIGHT",                                        \
+              "Height of macro bar\n"                                                   \
+              "22 .. 66, default = 22, step size 2",                                    \
+              22)                                                                       \
+        ELEM_(bool, rxtx_swap, "RXTX_SWAP",                                             \
+              "Enabled, Tx above Rx panel\n"                                            \
+              "Disable, Rx above Tx panel (default",                                    \
+              false)                                                                    \
+        ELEM_(bool, view_smeter, "VIEW_SMETER",                                         \
+              "Enabled, View smeter & power meter\n"                                    \
+              "Disable, (default)",                                                     \
+              false)                                                                    \
+        ELEM_(Fl_Font, MacroEditFontnbr, "MACROEDITFONTNBR",                            \
+              "RX text font index",                                                     \
+              FL_HELVETICA)                                                             \
+        ELEM_(bool, us_units, "US_UNITS",                                               \
+              "Use US units of distance for QRB",                                       \
+              false)                                                                    \
+        ELEM_(int, MacroEditFontsize, "MACROEDITFONTSIZE",                             \
+              "RX text font size",                                                      \
+              16)
 
 
 // declare the struct
@@ -1687,30 +1841,27 @@
 #define ELEM_ ELEM_DECLARE_CONFIGURATION
 struct configuration
 {
-	CONFIG_LIST
+    CONFIG_LIST
 
-	void writeDefaultsXML();
-	void storeDefaults();
-	bool readDefaultsXML();
-	void loadDefaults();
-	void saveDefaults();
-	int  setDefaults();
-	void resetDefaults(void);
-	static void reset(void);
+    void writeDefaultsXML();
+    void storeDefaults();
+    bool readDefaultsXML();
+    void loadDefaults();
+    void saveDefaults();
+    int  setDefaults();
+    void resetDefaults(void);
+    static void reset(void);
 
-	void initInterface();
-	void initMixerDevices();
-	void testCommPorts();
-	const char* strBaudRate();
-	int  BaudRate(size_t);
-	int  nBaudRate(const char *);
-	void initFonts(void);
+    void initInterface();
+    void testCommPorts();
+    const char* strBaudRate();
+    int  BaudRate(size_t);
+    int  nBaudRate(const char *);
+    void initFonts(void);
 };
 
 extern configuration progdefaults;
 
-extern void mixerInputs();
-extern void enableMixer(bool);
 extern Fl_Font font_number(const char* name);
 
 enum { SAMPLE_RATE_UNSET = -1, SAMPLE_RATE_AUTO, SAMPLE_RATE_NATIVE, SAMPLE_RATE_OTHER };

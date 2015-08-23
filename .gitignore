@@ -4,11 +4,13 @@
 *Makefile.in
 aclocal.m4
 autom4te.cache/
+build-aux/compile
 build-aux/config.guess
 build-aux/config.sub
 build-aux/depcomp
 build-aux/install-sh
 build-aux/missing
+build-aux/test-driver
 config.log
 config.status
 configure
@@ -17,9 +19,11 @@ doc/guide.html
 po/POTFILES
 po/*.gmo
 po/stamp-po
-src/.deps/
+src/.deps
+src/*/.deps
 src/config.h
 src/config.h.in*
+src/*/.dirstamp
 src/flarq
 src/fldigi
 src/dl-fldigi

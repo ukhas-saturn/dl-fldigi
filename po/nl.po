@@ -1,0 +1,7213 @@
+# Dutch translations for fldigi package
+# Copyright (C) 2014 Dave Freese, Stelios Bounanos, Leigh Klotz, and others
+# This file is distributed under the same license as the fldigi package.
+# Peter van der Post <pa1pos@outlook.com>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: fldigi 3.22.01\n"
+"Report-Msgid-Bugs-To: w1hkj AT w1hkj DOT com\n"
+"POT-Creation-Date: 2015-05-10 09:57-0500\n"
+"PO-Revision-Date: 2014-11-10 20:14-0600\n"
+"Last-Translator: Peter van der Post <pa1pos@outlook.com>\n"
+"Language-Team: Dutch\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: src/main.cxx:559
+#, c-format
+msgid "%s log started on %s"
+msgstr "%s log gestart op %s"
+
+#: src/main.cxx:1222
+msgid "Bad modem id"
+msgstr "Ongeldig modem ID"
+
+#: src/main.cxx:1229
+msgid "Bad frequency"
+msgstr "Ongeldige frequentie"
+
+#: src/main.cxx:1364
+msgid ""
+"License GPLv3+: GNU GPL version 3 or later <http://www.gnu.org/licenses/"
+"gpl-3.0.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law.\n"
+msgstr ""
+"License GPLv3+: GNU GPL versie 3 of nieuwer <http://www.gnu.org/licenses/"
+"gpl-3.0.html>\n"
+"Dit is gratis software. Het staat je vrij om het te wijzigen en te "
+"verspreiden.\n"
+"Er is GEEN GARANTIE op deze software.\n"
+
+#: src/main.cxx:1589 src/main.cxx:1631 src/main.cxx:1655 src/main.cxx:1669
+msgid "Could not make directory "
+msgstr "Kon map niet aanmaken"
+
+#: src/dialogs/fl_digi.cxx:165
+msgid "Log all RX/TX text"
+msgstr "Log alle RX/TX tekst"
+
+#: src/dialogs/fl_digi.cxx:166 src/misc/debug.cxx:103
+msgid "Rig control"
+msgstr "TRX besturen"
+
+#: src/dialogs/fl_digi.cxx:167 src/dialogs/fl_digi.cxx:6311
+msgid "Op &Mode"
+msgstr "&Mode"
+
+#: src/dialogs/fl_digi.cxx:168
+msgid "Show fewer modes"
+msgstr "Toon minder modes"
+
+#: src/dialogs/fl_digi.cxx:169
+msgid "Show all modes"
+msgstr "Toon alle modes"
+
+#: src/dialogs/fl_digi.cxx:173
+msgid "&View"
+msgstr "B&eeld"
+
+#: src/dialogs/fl_digi.cxx:174
+msgid "&MFSK Image"
+msgstr "&MFSK Beeld"
+
+#: src/dialogs/fl_digi.cxx:175
+msgid "&Weather Fax Image RX"
+msgstr "&Weerfax-afbeelding RX"
+
+#: src/dialogs/fl_digi.cxx:176
+msgid "&Weather Fax Image TX"
+msgstr "&Weerfax-afbeelding TX"
+
+#: src/dialogs/fl_digi.cxx:177 src/dialogs/confdialog.cxx:5714
+msgid "Contest"
+msgstr "Contest"
+
+#: src/dialogs/fl_digi.cxx:178
+msgid "&Contest fields"
+msgstr "&Contest velden"
+
+#: src/dialogs/fl_digi.cxx:179
+msgid "C&ountries"
+msgstr "&Landen"
+
+#: src/dialogs/fl_digi.cxx:180
+msgid "&UI"
+msgstr "&Interface"
+
+#: src/dialogs/fl_digi.cxx:181
+msgid "Full"
+msgstr "Alles"
+
+#: src/dialogs/fl_digi.cxx:182 src/waterfall/waterfall.cxx:2148
+#: src/dialogs/confdialog.cxx:5624 src/dialogs/confdialog.cxx:10606
+#: src/dialogs/confdialog.cxx:10636
+msgid "None"
+msgstr "Geen"
+
+#: src/dialogs/fl_digi.cxx:183
+msgid "Rig control and logging"
+msgstr "TRX besturing en log"
+
+#: src/dialogs/fl_digi.cxx:184
+msgid "Rig control and contest"
+msgstr "TRX besturing en contest"
+
+#: src/dialogs/fl_digi.cxx:185
+msgid "Docked scope"
+msgstr "Vaste scope"
+
+#: src/dialogs/fl_digi.cxx:186
+msgid "Minimal controls"
+msgstr "Minimaal aantal knoppen"
+
+#: src/dialogs/fl_digi.cxx:187
+msgid "Show channels"
+msgstr "Toon kanalen"
+
+#: src/dialogs/fl_digi.cxx:189
+msgid "Connect to server"
+msgstr "Verbind met server"
+
+#: src/dialogs/fl_digi.cxx:669 src/dialogs/fl_digi.cxx:684
+#: src/dialogs/fl_digi.cxx:693 src/dialogs/fl_digi.cxx:3755
+#: src/dialogs/fl_digi.cxx:3819 src/dialogs/fl_digi.cxx:3894
+#: src/dialogs/fl_digi.cxx:6326 src/dialogs/fl_digi.cxx:6370
+#: src/dialogs/fl_digi.cxx:6413
+msgid "Custom..."
+msgstr "Aangepast..."
+
+#: src/dialogs/fl_digi.cxx:1083 src/dialogs/fl_digi.cxx:3065
+msgid "Save changed macros?"
+msgstr "Gewijzigde macro's opslaan?"
+
+#: src/dialogs/fl_digi.cxx:1083 src/dialogs/fl_digi.cxx:2711
+#: src/dialogs/fl_digi.cxx:2772 src/dialogs/fl_digi.cxx:4319
+#: src/logbook/logsupport.cxx:599 src/misc/configuration.cxx:692
+#: src/dialogs/font_browser.cxx:137 src/logbook/lgbook.cxx:447
+#: src/logbook/lgbook.cxx:1056
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: src/dialogs/fl_digi.cxx:1083 src/dialogs/fl_digi.cxx:4007
+#: src/dialogs/fl_digi.cxx:5267 src/dialogs/fl_digi.cxx:5453
+#: src/dialogs/fl_digi.cxx:5558 src/logbook/logsupport.cxx:598
+#: src/dialogs/confdialog.cxx:11380
+msgid "Save"
+msgstr "Bewaren"
+
+#: src/dialogs/fl_digi.cxx:1083
+msgid "Don't save"
+msgstr "Niet niet bewaren"
+
+#: src/dialogs/fl_digi.cxx:1976
+msgid "No file name given"
+msgstr "Geen bestandsnaam opgegeven"
+
+#: src/dialogs/fl_digi.cxx:1979
+msgid "Unsupported format"
+msgstr "Formaat niet ondersteund"
+
+#: src/dialogs/fl_digi.cxx:1982
+msgid "channels != 1"
+msgstr "channels != 1"
+
+#: src/dialogs/fl_digi.cxx:1985
+msgid "unknown wave file error"
+msgstr "onbekende fout in WAVE bestand"
+
+#: src/dialogs/fl_digi.cxx:1992
+msgid "Spotting disabled"
+msgstr "Spotting uitgeschakeld"
+
+#: src/dialogs/fl_digi.cxx:2041
+#, c-format
+msgid ""
+"Could not run a web browser:\n"
+"%s\n"
+"\n"
+"Open this URL manually:\n"
+"%s"
+msgstr ""
+"Kan geen webbrowser starten:\n"
+"%s\n"
+"\n"
+"Open dit URL handmatig:\n"
+"%s"
+
+#: src/dialogs/fl_digi.cxx:2054
+#, c-format
+msgid ""
+"Could not open url:\n"
+"%s\n"
+msgstr ""
+"Kon URL niet openen:\n"
+"%s\n"
+
+#: src/dialogs/fl_digi.cxx:2105
+msgid "Checking for updates..."
+msgstr "Controleren op updates..."
+
+#: src/dialogs/fl_digi.cxx:2120
+#, c-format
+msgid ""
+"Could not check for updates:\n"
+"%s"
+msgstr ""
+"Fout bij controle op updates:\n"
+"%s"
+
+#: src/dialogs/fl_digi.cxx:2124
+#, c-format
+msgid ""
+"Version %s is available at\n"
+"\n"
+"%s\n"
+"\n"
+"What would you like to do?"
+msgstr ""
+"Versie %s is beschikbaar via\n"
+"\n"
+"%s\n"
+"\n"
+"Wat wilt u doen?"
+
+#: src/dialogs/fl_digi.cxx:2125 src/dialogs/Viewer.cxx:300
+#: src/misc/macroedit.cxx:439 src/misc/newinstall.cxx:391
+#: src/mfsk/mfsk-pic.cxx:352 src/spot/notify.cxx:520 src/spot/notify.cxx:524
+#: src/dialogs/confdialog.cxx:11383
+msgid "Close"
+msgstr "Sluiten"
+
+#: src/dialogs/fl_digi.cxx:2125
+msgid "Visit URL"
+msgstr "Bezoek URL"
+
+#: src/dialogs/fl_digi.cxx:2125
+msgid "Copy URL"
+msgstr "Kopieer URL"
+
+#: src/dialogs/fl_digi.cxx:2137
+msgid "You are running the latest version"
+msgstr "U gebruikt de nieuwste versie"
+
+#: src/dialogs/fl_digi.cxx:2203
+msgid "Sunspot creation underway!"
+msgstr "Sunspot creation underway!"
+
+#: src/dialogs/fl_digi.cxx:2210
+msgid "Audio device information is only available for the PortAudio backend"
+msgstr ""
+"Informatie over de geluidskaart is alleen beschikbaar voor de PortAudio "
+"component"
+
+#: src/dialogs/fl_digi.cxx:2219
+msgid "Capture device"
+msgstr "Opname-apparaat"
+
+#: src/dialogs/fl_digi.cxx:2220
+msgid "Playback device"
+msgstr "Afspeelapparaat"
+
+#: src/dialogs/fl_digi.cxx:2224
+msgid "Capture and playback devices"
+msgstr "Opname- en afspeelapparaten"
+
+#: src/dialogs/fl_digi.cxx:2270
+#, c-format
+msgid "%s: Do not exist, create?"
+msgstr "%s: Bestaan niet, maken?"
+
+#: src/dialogs/fl_digi.cxx:2270 src/dialogs/fl_digi.cxx:3057
+#: src/dialogs/fl_digi.cxx:3065 src/dialogs/fl_digi.cxx:3073
+#: src/dialogs/fl_digi.cxx:3087 src/dialogs/fl_digi.cxx:3096
+#: src/dialogs/fl_digi.cxx:3109 src/dialogs/fl_digi.cxx:8328
+#: src/logbook/logbook.cxx:63 src/logbook/logsupport.cxx:232
+#: src/logbook/logsupport.cxx:1061 src/misc/configuration.cxx:694
+#: src/soundcard/sound.cxx:305
+msgid "No"
+msgstr "Nee"
+
+#: src/dialogs/fl_digi.cxx:2270 src/dialogs/fl_digi.cxx:3057
+#: src/dialogs/fl_digi.cxx:3065 src/dialogs/fl_digi.cxx:3073
+#: src/dialogs/fl_digi.cxx:3087 src/dialogs/fl_digi.cxx:3096
+#: src/dialogs/fl_digi.cxx:3109 src/dialogs/fl_digi.cxx:8328
+#: src/logbook/logbook.cxx:63 src/logbook/logsupport.cxx:232
+#: src/logbook/logsupport.cxx:1061 src/misc/configuration.cxx:694
+#: src/soundcard/sound.cxx:305
+msgid "Yes"
+msgstr "Ja"
+
+#: src/dialogs/fl_digi.cxx:2711
+msgid "Clear log fields?"
+msgstr "Logvelden leeg maken?"
+
+#: src/dialogs/fl_digi.cxx:2711 src/misc/configuration.cxx:692
+#: src/logbook/lgbook.cxx:444 src/logbook/lgbook.cxx:1053
+msgid "OK"
+msgstr "OK"
+
+#: src/dialogs/fl_digi.cxx:2725
+msgid "Enter a CALL !"
+msgstr "Voer een roepnaam in!"
+
+#: src/dialogs/fl_digi.cxx:2772 src/dialogs/fl_digi.cxx:4319
+msgid "Confirm"
+msgstr "Bevestig"
+
+#: src/dialogs/fl_digi.cxx:3057
+msgid "Save changed configuration?"
+msgstr "Configuratiewijzigingen opslaan?"
+
+#: src/dialogs/fl_digi.cxx:3073 src/dialogs/fl_digi.cxx:3096
+msgid "Save log entry?"
+msgstr "Log-invoer opslaan?"
+
+#: src/dialogs/fl_digi.cxx:3087
+msgid "Confirm Quit"
+msgstr "Afsluiten bevestigen"
+
+#: src/dialogs/fl_digi.cxx:3109
+msgid "Confirm quit?"
+msgstr "Afsluiten bevestigen?"
+
+#: src/dialogs/fl_digi.cxx:3706 src/dialogs/fl_digi.cxx:6307
+msgid "&File"
+msgstr "&Bestand"
+
+#: src/dialogs/fl_digi.cxx:3708
+msgid "Folders"
+msgstr "Mappen"
+
+#: src/dialogs/fl_digi.cxx:3709
+msgid "Fldigi config..."
+msgstr "Fldigi instellingen..."
+
+#: src/dialogs/fl_digi.cxx:3710
+msgid "FLMSG files..."
+msgstr "FLMSG bestanden..."
+
+#: src/dialogs/fl_digi.cxx:3711
+msgid "NBEMS files..."
+msgstr "NBEMS bestanden..."
+
+#: src/dialogs/fl_digi.cxx:3712
+msgid "Data files..."
+msgstr "Databestanden..."
+
+#: src/dialogs/fl_digi.cxx:3715 src/dialogs/confdialog.cxx:6124
+msgid "Macros"
+msgstr "Macro's"
+
+#: src/dialogs/fl_digi.cxx:3716
+msgid "Open ..."
+msgstr "Open ..."
+
+#: src/dialogs/fl_digi.cxx:3717
+msgid "Save ..."
+msgstr "Opslaan ..."
+
+#: src/dialogs/fl_digi.cxx:3720
+#, fuzzy
+msgid "Config Scripts"
+msgstr "Afsluiten bevestigen"
+
+#: src/dialogs/fl_digi.cxx:3721
+msgid "Execute"
+msgstr ""
+
+#: src/dialogs/fl_digi.cxx:3722
+#, fuzzy
+msgid "Generate"
+msgstr "Algemeen"
+
+#: src/dialogs/fl_digi.cxx:3725
+msgid "Text Capture"
+msgstr "Tekst opslaan"
+
+#: src/dialogs/fl_digi.cxx:3730 src/misc/debug.cxx:101
+#: src/dialogs/confdialog.cxx:9500
+msgid "Audio"
+msgstr "Audio"
+
+#: src/dialogs/fl_digi.cxx:3731
+msgid "RX capture"
+msgstr "RX opslaan"
+
+#: src/dialogs/fl_digi.cxx:3732
+msgid "TX generate"
+msgstr "TX genereren"
+
+#: src/dialogs/fl_digi.cxx:3733 src/dialogs/confdialog.cxx:9600
+msgid "Playback"
+msgstr "Afspelen"
+
+#: src/dialogs/fl_digi.cxx:3737 src/dialogs/fl_digi.cxx:6308
+msgid "Exit"
+msgstr "Afsluiten"
+
+#: src/dialogs/fl_digi.cxx:3945 src/dialogs/fl_digi.cxx:6453
+msgid "&Configure"
+msgstr "&Instellingen"
+
+#: src/dialogs/fl_digi.cxx:3946 src/dialogs/confdialog.cxx:5457
+msgid "Operator"
+msgstr "Operator"
+
+#: src/dialogs/fl_digi.cxx:3947
+msgid "Colors && Fonts"
+msgstr "Kleuren && lettertypes"
+
+#: src/dialogs/fl_digi.cxx:3948 src/dialogs/confdialog.cxx:5569
+msgid "User Interface"
+msgstr "Gebruikersinterface"
+
+#: src/dialogs/fl_digi.cxx:3949 src/dialogs/fl_digi.cxx:3984
+#: src/dialogs/fl_digi.cxx:6454 src/dialogs/confdialog.cxx:6751
+msgid "Waterfall"
+msgstr "Waterval"
+
+#: src/dialogs/fl_digi.cxx:3950
+msgid "Waterfall controls"
+msgstr "Waterval-instellingen"
+
+#: src/dialogs/fl_digi.cxx:3952 src/dialogs/fl_digi.cxx:6457
+#: src/dialogs/confdialog.cxx:7145
+msgid "Modems"
+msgstr "Modems"
+
+#: src/dialogs/fl_digi.cxx:3954 src/dialogs/fl_digi.cxx:6456
+msgid "Sound Card"
+msgstr "Geluidskaart"
+
+#: src/dialogs/fl_digi.cxx:3955 src/dialogs/fl_digi.cxx:6458
+msgid "IDs"
+msgstr "IDs"
+
+#: src/dialogs/fl_digi.cxx:3956 src/dialogs/confdialog.cxx:10019
+msgid "Misc"
+msgstr "Diversen"
+
+#: src/dialogs/fl_digi.cxx:3957 src/dialogs/confdialog.cxx:10837
+msgid "Autostart"
+msgstr "Autostart"
+
+#: src/dialogs/fl_digi.cxx:3958 src/dialogs/confdialog.cxx:11046
+msgid "IO"
+msgstr "IO"
+
+#: src/dialogs/fl_digi.cxx:3959 src/dialogs/fl_digi.cxx:6459
+#: src/dialogs/notifydialog.cxx:104
+msgid "Notifications"
+msgstr "Notificaties"
+
+#: src/dialogs/fl_digi.cxx:3961
+msgid "QRZ/eQSL"
+msgstr "QRZ/eQSL"
+
+#: src/dialogs/fl_digi.cxx:3962 src/dialogs/fl_digi.cxx:6460
+msgid "Save Config"
+msgstr "Instellingen opslaan"
+
+#: src/dialogs/fl_digi.cxx:3967
+msgid "View/Hide Channels"
+msgstr "Kanalen tonen/verbergen"
+
+#: src/dialogs/fl_digi.cxx:3969
+msgid "Floating scope"
+msgstr "Oscilloscoop"
+
+#: src/dialogs/fl_digi.cxx:3973
+msgid "Signal browser"
+msgstr "Signaalverkenner"
+
+#: src/dialogs/fl_digi.cxx:3976
+msgid "Controls"
+msgstr "Instellingen"
+
+#: src/dialogs/fl_digi.cxx:3991
+msgid "&Logbook"
+msgstr "&Logboek"
+
+#: src/dialogs/fl_digi.cxx:3992
+msgid "View"
+msgstr "Toon"
+
+#: src/dialogs/fl_digi.cxx:3994
+msgid "ADIF"
+msgstr "ADIF"
+
+#: src/dialogs/fl_digi.cxx:3995
+msgid "Merge..."
+msgstr "Samenvoegen..."
+
+#: src/dialogs/fl_digi.cxx:3996
+msgid "Export..."
+msgstr "Exporteren..."
+
+#: src/dialogs/fl_digi.cxx:3999
+msgid "Reports"
+msgstr "Rapporten"
+
+#: src/dialogs/fl_digi.cxx:4000
+msgid "Text..."
+msgstr "Tekst..."
+
+#: src/dialogs/fl_digi.cxx:4001
+msgid "CSV..."
+msgstr "CSV..."
+
+#: src/dialogs/fl_digi.cxx:4002
+msgid "Cabrillo..."
+msgstr "Cabrillo..."
+
+#: src/dialogs/fl_digi.cxx:4005 src/logbook/logsupport.cxx:607
+#: src/logbook/lgbook.cxx:960
+msgid "New"
+msgstr "Nieuw"
+
+#: src/dialogs/fl_digi.cxx:4006 src/dialogs/confdialog.cxx:9030
+msgid "Open..."
+msgstr "Openen..."
+
+#: src/dialogs/fl_digi.cxx:4014
+msgid "&Help"
+msgstr "&Help"
+
+#: src/dialogs/fl_digi.cxx:4017
+msgid "Create sunspots"
+msgstr "Create sunspots"
+
+#: src/dialogs/fl_digi.cxx:4019
+msgid "Beginners' Guide"
+msgstr "Beginnersgids (Engels)"
+
+#: src/dialogs/fl_digi.cxx:4020
+msgid "Online documentation..."
+msgstr "Online documentatie... (Engels)"
+
+#: src/dialogs/fl_digi.cxx:4021
+msgid "Fldigi web site..."
+msgstr "Fldigi web site..."
+
+#: src/dialogs/fl_digi.cxx:4022
+msgid "Reception reports..."
+msgstr "Ontvangstrapporten..."
+
+#: src/dialogs/fl_digi.cxx:4023
+msgid "Command line options"
+msgstr "Command line opties"
+
+#: src/dialogs/fl_digi.cxx:4024
+msgid "Audio device info"
+msgstr "Informatie geluidskaart"
+
+#: src/dialogs/fl_digi.cxx:4025
+msgid "Build info"
+msgstr "Build info (Engels)"
+
+#: src/dialogs/fl_digi.cxx:4026 src/misc/debug.cxx:138
+msgid "Event log"
+msgstr "Logboek"
+
+#: src/dialogs/fl_digi.cxx:4027
+msgid "Check for updates..."
+msgstr "Controleer op updates..."
+
+#: src/dialogs/fl_digi.cxx:4028
+msgid "&About"
+msgstr "&Over"
+
+#: src/dialogs/fl_digi.cxx:4264
+msgid "waterfall-only mode"
+msgstr "alleen-waterval modus"
+
+#: src/dialogs/fl_digi.cxx:4266
+msgid "NO CALLSIGN SET"
+msgstr "GEEN ROEPNAAM INGESTELD"
+
+#: src/dialogs/fl_digi.cxx:4280
+msgid "Close List"
+msgstr "Sluit lijst"
+
+#: src/dialogs/fl_digi.cxx:4288 src/dialogs/fl_digi.cxx:5163
+#: src/dialogs/fl_digi.cxx:5432 src/dialogs/fl_digi.cxx:5544
+msgid "Open List"
+msgstr "Open lijst"
+
+#: src/dialogs/fl_digi.cxx:4319
+msgid "Clear list?"
+msgstr "Lijst wissen?"
+
+#: src/dialogs/fl_digi.cxx:4352
+msgid "report"
+msgstr "rapport"
+
+#: src/dialogs/fl_digi.cxx:4352
+msgid "reports"
+msgstr "rapporten"
+
+#: src/dialogs/fl_digi.cxx:4362
+msgid "Recent activity for grid"
+msgstr "Recente activiteit voor grid"
+
+#: src/dialogs/fl_digi.cxx:5155
+msgid "Toggle smeter / combo controls"
+msgstr ""
+
+#: src/dialogs/fl_digi.cxx:5179 src/spot/notify.cxx:216
+#: src/dialogs/confdialog.cxx:5702
+msgid "Select"
+msgstr "Kies"
+
+#: src/dialogs/fl_digi.cxx:5186
+msgid "Add current frequency"
+msgstr "Voeg huidige frequentie toe"
+
+#: src/dialogs/fl_digi.cxx:5193
+msgid "Clear list"
+msgstr "Wis lijst"
+
+#: src/dialogs/fl_digi.cxx:5200
+msgid "Delete from list"
+msgstr "Verwijder van lijst"
+
+#: src/dialogs/fl_digi.cxx:5224
+msgid "Select operating parameters"
+msgstr "Kies werkinstellingen"
+
+#: src/dialogs/fl_digi.cxx:5255 src/dialogs/fl_digi.cxx:5439
+msgid "QRZ"
+msgstr "QRZ"
+
+#: src/dialogs/fl_digi.cxx:5261 src/dialogs/fl_digi.cxx:5446
+#: src/dialogs/fl_digi.cxx:5551 src/dialogs/fl_digi.cxx:5756
+#: src/dialogs/Viewer.cxx:308 src/widgets/FTextView.cxx:480
+#: src/widgets/FTextView.cxx:647 src/widgets/flinput2.cxx:47
+#: src/dialogs/confdialog.cxx:8326
+msgid "Clear"
+msgstr "Wis"
+
+#: src/dialogs/fl_digi.cxx:5275
+msgid "Frq"
+msgstr "Freq"
+
+#: src/dialogs/fl_digi.cxx:5277
+msgid "frequency kHz"
+msgstr "frequentie kHz"
+
+#: src/dialogs/fl_digi.cxx:5281 src/dialogs/fl_digi.cxx:5455
+#: src/dialogs/fl_digi.cxx:5561
+msgid "On"
+msgstr "Op"
+
+#: src/dialogs/fl_digi.cxx:5282
+msgid "Press to update QSO start time"
+msgstr "Kies om begintijd QSO bij te werken"
+
+#: src/dialogs/fl_digi.cxx:5288
+msgid "QSO start time"
+msgstr "QSO begintijd"
+
+#: src/dialogs/fl_digi.cxx:5293 src/dialogs/fl_digi.cxx:5468
+#: src/dialogs/fl_digi.cxx:5562
+msgid "Off"
+msgstr "Uit"
+
+#: src/dialogs/fl_digi.cxx:5294
+msgid "QSO end time"
+msgstr "QSO eindtijd"
+
+#: src/dialogs/fl_digi.cxx:5299 src/dialogs/fl_digi.cxx:5485
+#: src/logbook/lgbook.cxx:620
+msgid "In"
+msgstr "In"
+
+#: src/dialogs/fl_digi.cxx:5304 src/dialogs/fl_digi.cxx:5493
+#: src/logbook/lgbook.cxx:706
+msgid "Out"
+msgstr "Uit"
+
+#: src/dialogs/fl_digi.cxx:5311 src/dialogs/fl_digi.cxx:5477
+#: src/dialogs/fl_digi.cxx:5563 src/widgets/FTextRXTX.cxx:104
+#: src/logbook/lgbook.cxx:459 src/logbook/lgbook.cxx:596
+#: src/logbook/lgbook.cxx:1075
+msgid "Call"
+msgstr "Call"
+
+#: src/dialogs/fl_digi.cxx:5312
+msgid "call sign"
+msgstr "roepnaam"
+
+#: src/dialogs/fl_digi.cxx:5318
+msgid "Op"
+msgstr "Op"
+
+#: src/dialogs/fl_digi.cxx:5319
+msgid "Operator name"
+msgstr "Naam operator"
+
+#: src/dialogs/fl_digi.cxx:5324
+msgid "Azimuth"
+msgstr "Azimuth"
+
+#: src/dialogs/fl_digi.cxx:5331
+msgid "City"
+msgstr "Stad"
+
+#: src/dialogs/fl_digi.cxx:5336
+msgid "US State"
+msgstr "Staat (US)"
+
+#: src/dialogs/fl_digi.cxx:5341
+msgid "Can. Province"
+msgstr "Provincie (CA)"
+
+#: src/dialogs/fl_digi.cxx:5346
+msgid "Maidenhead Locator"
+msgstr "Maidenhead Locator"
+
+#: src/dialogs/fl_digi.cxx:5359 src/dialogs/fl_digi.cxx:5612
+msgid "Sent serial number (read only)"
+msgstr "Stuur volgnummer (alleen-lezen)"
+
+#: src/dialogs/fl_digi.cxx:5365 src/dialogs/fl_digi.cxx:5603
+msgid "Received serial number"
+msgstr "Ontvangen serienummer"
+
+#: src/dialogs/fl_digi.cxx:5370 src/dialogs/fl_digi.cxx:5594
+msgid "Contest exchange in"
+msgstr "Contest uitwisseling in"
+
+#: src/dialogs/fl_digi.cxx:5385 src/spot/notify.cxx:570
+#: src/widgets/FTextRXTX.cxx:109 src/logbook/lgbook.cxx:521
+#: src/logbook/lgbook.cxx:767
+msgid "Country"
+msgstr "Land"
+
+#: src/dialogs/fl_digi.cxx:5391 src/logbook/lgbook.cxx:524
+#: src/logbook/lgbook.cxx:791
+msgid "Notes"
+msgstr "Notitie"
+
+#: src/dialogs/fl_digi.cxx:5459 src/dialogs/fl_digi.cxx:5618
+msgid "Press to update"
+msgstr "Klik om bij te werken"
+
+#: src/dialogs/fl_digi.cxx:5465 src/dialogs/fl_digi.cxx:5624
+#: src/logbook/lgbook.cxx:584
+msgid "Time On"
+msgstr "Begintijd"
+
+#: src/dialogs/fl_digi.cxx:5474 src/dialogs/fl_digi.cxx:5632
+#: src/logbook/lgbook.cxx:658
+msgid "Time Off"
+msgstr "Eindtijd"
+
+#: src/dialogs/fl_digi.cxx:5483 src/dialogs/fl_digi.cxx:5579
+#: src/dialogs/fl_digi.cxx:6103
+msgid "Other call"
+msgstr "Andere roepnaam"
+
+#: src/dialogs/fl_digi.cxx:5491
+msgid "Received RST"
+msgstr "RST ontvangen"
+
+#: src/dialogs/fl_digi.cxx:5499
+msgid "Sent RST"
+msgstr "RST verzonden"
+
+#: src/dialogs/fl_digi.cxx:5501
+msgid "Nm"
+msgstr "Naam"
+
+#: src/dialogs/fl_digi.cxx:5508
+msgid "Other name"
+msgstr "Andere naam"
+
+#: src/dialogs/fl_digi.cxx:5564
+msgid "# S"
+msgstr "# S"
+
+#: src/dialogs/fl_digi.cxx:5565
+msgid "# R"
+msgstr "# R"
+
+#: src/dialogs/fl_digi.cxx:5566
+msgid "Ex"
+msgstr "Ex"
+
+#: src/dialogs/fl_digi.cxx:5677
+msgid ""
+"Left Click - execute\n"
+"Shift-Fkey - execute\n"
+"Right Click - edit"
+msgstr ""
+"Klik links - uitvoeren\n"
+"Shift-Functietoets - uitvoeren\n"
+"Klik rechts - bewerken"
+
+#: src/dialogs/fl_digi.cxx:5685
+msgid "Shift-key macro set"
+msgstr "Shift-toets macro instellen"
+
+#: src/dialogs/fl_digi.cxx:5709
+msgid ""
+"Left click - select\n"
+"Right click - clear line"
+msgstr ""
+"Klik links - selecteer\n"
+"Klik rechts - wis regel"
+
+#: src/dialogs/fl_digi.cxx:5727
+msgid "seek - regular expression"
+msgstr "zoek - regular expression"
+
+#: src/dialogs/fl_digi.cxx:5750 src/dialogs/Viewer.cxx:318
+msgid "Set Viewer Squelch"
+msgstr "Stel squelch in voor Viewer"
+
+#: src/dialogs/fl_digi.cxx:5887
+#, fuzzy
+msgid "Select FSQ station"
+msgstr "Kies regel"
+
+#: src/dialogs/fl_digi.cxx:5970
+#, fuzzy
+msgid "Detected FSQ baud rate"
+msgstr "Kies snelheid (baud)"
+
+#: src/dialogs/fl_digi.cxx:6017
+msgid ""
+"Left Click - execute\n"
+"Fkey - execute\n"
+"Right Click - edit"
+msgstr ""
+"Klik links - uitvoeren\n"
+"Functietoets - uitvoeren\n"
+"Klik rechts - bewerken"
+
+#: src/dialogs/fl_digi.cxx:6026
+msgid "Primary macro set"
+msgstr "Primaire set macro's"
+
+#: src/dialogs/fl_digi.cxx:6043 src/dialogs/fl_digi.cxx:6677
+msgid "Detected signal level"
+msgstr "Gedetecteerd signaalniveau"
+
+#: src/dialogs/fl_digi.cxx:6054 src/dialogs/fl_digi.cxx:6689
+#: src/waterfall/waterfall.cxx:2149
+msgid "Squelch level"
+msgstr "Squelch-niveau"
+
+#: src/dialogs/fl_digi.cxx:6068 src/dialogs/fl_digi.cxx:6703
+msgid ""
+"Left click: change mode\n"
+"Right click: configure"
+msgstr ""
+"Klik links: wijzig mode\n"
+"Klik rechts: instellen"
+
+#: src/dialogs/fl_digi.cxx:6078 src/dialogs/fl_digi.cxx:6710
+msgid "CW transmit WPM"
+msgstr "CW zenden WPM"
+
+#: src/dialogs/fl_digi.cxx:6084 src/dialogs/fl_digi.cxx:6717
+msgid "Default WPM"
+msgstr "Standaard WPM"
+
+#: src/dialogs/fl_digi.cxx:6140 src/dialogs/fl_digi.cxx:6749
+msgid "Tx level attenuator (dB)"
+msgstr "Tx niveau verzwakker (dB)"
+
+#: src/dialogs/fl_digi.cxx:6169 src/dialogs/fl_digi.cxx:6778
+msgid "Automatic Frequency Control"
+msgstr "Automatic Frequency Control"
+
+#: src/dialogs/fl_digi.cxx:6173 src/dialogs/fl_digi.cxx:6781
+msgid "Squelch"
+msgstr "Squelch"
+
+#: src/dialogs/fl_digi.cxx:6178 src/dialogs/fl_digi.cxx:6785
+msgid "Monitor KISS Pwr Squelch"
+msgstr "Monitor KISS Pwr Squelch"
+
+#: src/dialogs/fl_digi.cxx:6230 src/dialogs/fl_digi.cxx:6587
+msgid "Scope"
+msgstr "Oscilloscoop"
+
+#: src/dialogs/fl_digi.cxx:6469 src/dialogs/Viewer.cxx:275
+msgid "Signal Browser"
+msgstr "Signaalverkenner"
+
+#: src/dialogs/fl_digi.cxx:8328
+#, fuzzy
+msgid "Delete entry?"
+msgstr "Log-invoer opslaan?"
+
+#: src/dialogs/fl_digi.cxx:8328 src/spot/notify.cxx:220
+#: src/spot/notify.cxx:226
+msgid "All"
+msgstr "Alles"
+
+#: src/dialogs/Viewer.cxx:279
+msgid "Find: "
+msgstr "Zoek: "
+
+#: src/dialogs/Viewer.cxx:312
+msgid ""
+"Left click to clear text\n"
+"Right click to reset frequencies"
+msgstr ""
+"Klik links om tekst te wissen\n"
+"Klik rechts voor begininstelling frequenties"
+
+#: src/logbook/adif_io.cxx:229
+#, c-format
+msgid "Empty ADIF logbook file %s"
+msgstr "Leeg ADIF logboekbestand %s"
+
+#: src/logbook/adif_io.cxx:245
+#, c-format
+msgid "Error reading %s"
+msgstr "Fout bij lezen van %s"
+
+#: src/logbook/logbook.cxx:63 src/logbook/logsupport.cxx:232
+msgid "Save changed Logbook?"
+msgstr "Gewijzigd logboek opslaan?"
+
+#: src/logbook/logsupport.cxx:141
+msgid "Export to CSV file"
+msgstr "Exporteer naar CSV bestand"
+
+#: src/logbook/logsupport.cxx:167
+msgid "Export to fixed field text file"
+msgstr "Exporteer naar tekstbestand met vaste veldgrootte"
+
+#: src/logbook/logsupport.cxx:194
+msgid "Export to ADIF file"
+msgstr "Exporteer naar ADIF bestand"
+
+#: src/logbook/logsupport.cxx:277
+msgid "Open logbook file"
+msgstr "Open logboekbestand"
+
+#: src/logbook/logsupport.cxx:304
+msgid "Save logbook file"
+msgstr "Logboekbestand opslaan"
+
+#: src/logbook/logsupport.cxx:506
+msgid "Merge ADIF file"
+msgstr "ADIF bestand samenvoegen"
+
+#: src/logbook/logsupport.cxx:608 src/spot/notify.cxx:204
+#: src/spot/notify.cxx:518 src/dialogs/record_browse.cxx:47
+#: src/logbook/lgbook.cxx:967
+msgid "Update"
+msgstr "Bijwerken"
+
+#: src/logbook/logsupport.cxx:1060
+#, c-format
+msgid "Really delete record for \"%s\"?"
+msgstr "Registratie voor \"%s\" echt verwijderen?"
+
+#: src/logbook/logsupport.cxx:1474
+msgid "Create cabrillo report"
+msgstr "Cabrillo rapport maken"
+
+#: src/logger/rx_extract.cxx:54
+msgid ""
+"Detect the occurance of [WRAP:beg] and [WRAP:end]\n"
+"Save tags and all enclosed text to date-time stamped file, ie:\n"
+"    NBEMS.files\\WRAP\\recv\\extract-20090127-092515.wrap"
+msgstr ""
+"Detect the occurance of [WRAP:beg] and [WRAP:end]\n"
+"Save tags and all enclosed text to date-time stamped file, ie:\n"
+"    NBEMS.files\\WRAP\\recv\\extract-20090127-092515.wrap"
+
+#: src/logger/rx_extract.cxx:59
+msgid ""
+"Detect the occurance of [WRAP:beg] and [WRAP:end]\n"
+"Save tags and all enclosed text to date-time stamped file, ie:\n"
+"    ~/.nbems/WRAP/recv/extract-20090127-092515.wrap"
+msgstr ""
+"Detect the occurance of [WRAP:beg] and [WRAP:end]\n"
+"Save tags and all enclosed text to date-time stamped file, ie:\n"
+"    ~/.nbems/WRAP/recv/extract-20090127-092515.wrap"
+
+#: src/logger/rx_extract.cxx:269
+msgid "Could not start flmsg"
+msgstr "Kon flmsg niet starten"
+
+#: src/logger/rx_extract.cxx:333 src/logger/rx_extract.cxx:336
+#: src/dialogs/confdialog.cxx:10086
+msgid "Locate flmsg executable"
+msgstr "Bepaal locatie flmsg executable"
+
+#: src/logger/rx_extract.cxx:333
+msgid "flmsg.exe\t*.exe"
+msgstr "flmsg.exe\t*.exe"
+
+#: src/logger/rx_extract.cxx:336
+msgid "flmsg\t*"
+msgstr "flmsg\t*"
+
+#: src/logger/rx_extract.cxx:408
+msgid "Locate executable"
+msgstr "Bepaal locatie Flmsg executable"
+
+#: src/logger/rx_extract.cxx:408
+msgid "*.exe"
+msgstr "*.exe"
+
+#: src/logger/rx_extract.cxx:411
+msgid "Locate binary"
+msgstr "Locatie 'Flmsg'"
+
+#: src/logger/rx_extract.cxx:411
+msgid "*"
+msgstr "*"
+
+#: src/logger/speak.cxx:42
+msgid ""
+"Save all received text, one character at a time to the following file:\n"
+"\n"
+"    fldigi.files\\talk\\textout.txt (Windows)\n"
+"    ~/.fldigi/talk/textout.txt (Linux, OS X, Free BSD)"
+msgstr ""
+"Alle ontvangen tekst opslaan, één karakter tegelijk, naar het bestand:\n"
+"\n"
+"    fldigi.files\\talk\\textout.txt (Windows)\n"
+"    ~/.fldigi/talk/textout.txt (Linux, OS X, Free BSD)"
+
+#: src/misc/configuration.cxx:510
+msgid "Rig mode"
+msgstr "TRX mode"
+
+#: src/misc/configuration.cxx:511
+msgid "Always LSB"
+msgstr "Altijd LSB"
+
+#: src/misc/configuration.cxx:512
+msgid "Always USB"
+msgstr "Altijd USB"
+
+#: src/misc/configuration.cxx:689
+msgid ""
+"Reset all options to their default values?\n"
+"\n"
+"Reset options will take effect at the next start\n"
+"Files: fldigi_def.xml and fldigi.prefs will be deleted!\n"
+msgstr ""
+"Alle instellingen terugzetten naar de beginwaarden?\n"
+"\n"
+"Dit krijgt effect bij de volgende programmastart.\n"
+"Bestanden fldigi_def.xml en fldigi.prefs zullen worden verwijderd.\n"
+
+#: src/misc/configuration.cxx:694
+msgid "Confirm RESET"
+msgstr "Bevestig RESET"
+
+#: src/misc/debug.cxx:91
+msgid "Quiet"
+msgstr "Quiet"
+
+#: src/misc/debug.cxx:91
+msgid "Error"
+msgstr "Error"
+
+#: src/misc/debug.cxx:91
+msgid "Warning"
+msgstr "Warning"
+
+#: src/misc/debug.cxx:91
+msgid "Info"
+msgstr "Info"
+
+#: src/misc/debug.cxx:91
+msgid "Verbose"
+msgstr "Verbose"
+
+#: src/misc/debug.cxx:91
+msgid "Debug"
+msgstr "Debug"
+
+#: src/misc/debug.cxx:100
+msgid "ARQ control"
+msgstr "ARQ control"
+
+#: src/misc/debug.cxx:102 src/waterfall/waterfall.cxx:2150
+msgid "Modem"
+msgstr "Modem"
+
+#: src/misc/debug.cxx:104
+msgid "RPC"
+msgstr "RPC"
+
+#: src/misc/debug.cxx:105
+msgid "Spotter"
+msgstr "Spotter"
+
+#: src/misc/debug.cxx:106
+msgid "KISS control"
+msgstr "KISS instellingen"
+
+#: src/misc/debug.cxx:107
+msgid "Other"
+msgstr "Other"
+
+#: src/misc/debug.cxx:142
+msgid "Log sources"
+msgstr "Log sources"
+
+#: src/misc/debug.cxx:147
+msgid "Change log level"
+msgstr "Wijzig log-niveau"
+
+#: src/misc/macroedit.cxx:71
+msgid "<FREQ>\tmy frequency"
+msgstr "<FREQ>\tmijn frequentie"
+
+#: src/misc/macroedit.cxx:72
+msgid "<MODE>\tmode"
+msgstr "<MODE>\tmode"
+
+#: src/misc/macroedit.cxx:73
+msgid "<MYCALL>\tmy call"
+msgstr "<MYCALL>\tmijn roepnaam"
+
+#: src/misc/macroedit.cxx:74
+msgid "<MYLOC>\tmy locator"
+msgstr "<MYLOC>\tmijn locator"
+
+#: src/misc/macroedit.cxx:75
+msgid "<MYNAME>\tmy name"
+msgstr "<MYNAME>\tmijn naam"
+
+#: src/misc/macroedit.cxx:76
+msgid "<MYQTH>\tmy QTH"
+msgstr "<MYQTH>\tmijn QTH"
+
+#: src/misc/macroedit.cxx:77
+msgid "<MYRST>\tmy RST"
+msgstr "<MYRST>\tmijn RST"
+
+#: src/misc/macroedit.cxx:78
+msgid "<ANTENNA>\tmy antenna"
+msgstr "<ANTENNA>\tmijn antenne"
+
+#: src/misc/macroedit.cxx:79
+msgid "<BAND>\toperating band"
+msgstr "<XEND>\texchange end"
+
+#: src/misc/macroedit.cxx:80
+msgid "<VER>\tFldigi version"
+msgstr "<VER>\tFldigi versie"
+
+#: src/misc/macroedit.cxx:83
+msgid "<CALL>\tother call"
+msgstr "<CALL>\troepnaam tegenstation"
+
+#: src/misc/macroedit.cxx:84
+msgid "<INFO1>\tS/N etc."
+msgstr "<INFO1>\tS/N etc."
+
+#: src/misc/macroedit.cxx:85
+msgid "<INFO2>\tIMD etc."
+msgstr "<INFO2>\tIMD etc."
+
+#: src/misc/macroedit.cxx:86
+msgid "<LOC>\tother locator"
+msgstr "<LOC>\tlocator tegenstation"
+
+#: src/misc/macroedit.cxx:87
+msgid "<NAME>\tother name"
+msgstr "<NAME>\tnaam tegenstation"
+
+#: src/misc/macroedit.cxx:88
+msgid "<QTH>\tother QTH"
+msgstr "<QTH>\tQTH tegenstation"
+
+#: src/misc/macroedit.cxx:89
+msgid "<RST>\tother RST"
+msgstr "<RST>\tRST tegenstation"
+
+#: src/misc/macroedit.cxx:90
+msgid "<QSONBR>\t# QSO recs"
+msgstr "<QSONBR>\t# QSO recs"
+
+#: src/misc/macroedit.cxx:91
+msgid "<NXTNBR>\tnext QSO rec #"
+msgstr "<NXTNBR>\tVolgend QSO rec #"
+
+#: src/misc/macroedit.cxx:92
+msgid "<MAPIT>\tmap on google"
+msgstr "<MAPIT>\ttoon kaart op Google"
+
+#: src/misc/macroedit.cxx:93
+msgid "<MAPIT:adr/lat/loc>\tmap by value"
+msgstr "<MAPIT:adr/lat/loc>\ttoon kaart op basis van coördinaten"
+
+#: src/misc/macroedit.cxx:96
+msgid "<CLRRX>\tclear RX pane"
+msgstr "<CLRRX>\twis RX scherm"
+
+#: src/misc/macroedit.cxx:97
+msgid "<CLRTX>\tclear TX pane"
+msgstr "<CLRTX>\twis TX scherm"
+
+#: src/misc/macroedit.cxx:100
+msgid "<GET>\ttext to NAME/QTH"
+msgstr "<GET>\ttekst naar NAME/QTH"
+
+#: src/misc/macroedit.cxx:104
+msgid "<TALK:on|off|t>\tDigitalk On, Off, Toggle"
+msgstr "<TALK:on|off|t>\tDigitalk aan (on), uit (off), wissel (toggle)"
+
+#: src/misc/macroedit.cxx:108
+msgid "<CLRLOG>\tclear log fields"
+msgstr "<CLRLOG>\twis logvelden"
+
+#: src/misc/macroedit.cxx:109
+msgid "<LOG>\tsave QSO data"
+msgstr "<LOG>\tbewaar QSO gegevens"
+
+#: src/misc/macroedit.cxx:110
+msgid "<LOG:msg>\tsaveQSO data, append msg to notes"
+msgstr "<LOG:msg>\tBewaar QSO gegevens, voeg bericht toe aan notities"
+
+#: src/misc/macroedit.cxx:111
+msgid "<LNW>\tlog at xmt time"
+msgstr "<LNW>\tlog tijdens zenden"
+
+#: src/misc/macroedit.cxx:112
+msgid "<LNW:msg>\tsaveQSO data, append msg to notes"
+msgstr "<LNW:msg>\tBewaar QSO gegevens, voeg bericht toe aan notities"
+
+#: src/misc/macroedit.cxx:113
+msgid "<EQSL>\tlog eQSL"
+msgstr "<EQSL>\tlog eQSL"
+
+#: src/misc/macroedit.cxx:114
+msgid "<EQSL:[msg]>\tlog eQSL optional msg"
+msgstr "<EQSL:[msg]>\tlog eQSL optioneel bericht"
+
+#: src/misc/macroedit.cxx:117
+msgid "<QSOTIME>\tQSO time (HHMM))"
+msgstr "<QSOTIME>\tQSO tijd (UUMM))"
+
+#: src/misc/macroedit.cxx:118
+msgid "<ILDT>\tLDT in iso-8601 format"
+msgstr "<ILDT>\tLDT in iso-8601 opmaak"
+
+#: src/misc/macroedit.cxx:119
+msgid "<LDT>\tLocal datetime"
+msgstr "<LDT>\tlokale datum en tijd"
+
+#: src/misc/macroedit.cxx:120
+msgid "<IZDT>\tZDT in iso-8601 format"
+msgstr "<IZDT>\tZDT in iso-8601 opmaak"
+
+#: src/misc/macroedit.cxx:121
+msgid "<ZDT>\tUTC datetime"
+msgstr "<ZDT>\tUTC datum en tijd"
+
+#: src/misc/macroedit.cxx:122
+msgid "<LT>\tlocal time HHMM"
+msgstr "<LT>\tlokale tijd UUMM"
+
+#: src/misc/macroedit.cxx:123
+msgid "<ZT>\tzulu time HHMMZ"
+msgstr "<ZT>\tzulu tijd UUMMZ"
+
+#: src/misc/macroedit.cxx:124
+msgid "<LD>\tlocal date YYYY-MM-DD"
+msgstr "<LD>\tlokale datum JJJJ-MM-DD"
+
+#: src/misc/macroedit.cxx:125
+msgid "<ZD>\tzulu date YYYY-MM-DD Z"
+msgstr "<ZD>\tzulu datum JJJJ-MM-DD Z"
+
+#: src/misc/macroedit.cxx:126
+msgid "<WX>\tget weather data"
+msgstr "<WX>\tweer-informatie ophalen"
+
+#: src/misc/macroedit.cxx:127
+msgid "<WX:xxxx>\tget weather data for station"
+msgstr "<WX:xxxx>\tweer-informatie ophalen van specifiek METAR station"
+
+#: src/misc/macroedit.cxx:130
+msgid "<CNTR>\tcontest counter"
+msgstr "<CNTR>\tcontest-teller"
+
+#: src/misc/macroedit.cxx:131
+msgid "<DECR>\tdecrement counter"
+msgstr "<DECR>\tcontest-teller verlagen"
+
+#: src/misc/macroedit.cxx:132
+msgid "<INCR>\tincrement counter"
+msgstr "<INCR>\tcontest-teller ophogen"
+
+#: src/misc/macroedit.cxx:133
+msgid "<XIN>\texchange in"
+msgstr "<XIN>\texchange in"
+
+#: src/misc/macroedit.cxx:134
+msgid "<XOUT>\texchange out"
+msgstr "<XOUT>\texchange out"
+
+#: src/misc/macroedit.cxx:135
+msgid "<XBEG>\texchange begin"
+msgstr "<XBEG>\texchange begin"
+
+#: src/misc/macroedit.cxx:136
+msgid "<XEND>\texchange end"
+msgstr "<XEND>\texchange end"
+
+#: src/misc/macroedit.cxx:137
+msgid "<SAVEXCHG>\tsave contest out"
+msgstr "<SAVEXCHG>\tbewaar contest uit"
+
+#: src/misc/macroedit.cxx:140
+msgid "<RX>\treceive"
+msgstr "<RX>\tontvangen"
+
+#: src/misc/macroedit.cxx:141
+msgid "<TX>\ttransmit"
+msgstr "<TX>\tzenden"
+
+#: src/misc/macroedit.cxx:142
+msgid "<TX/RX>\ttoggle T/R"
+msgstr "<TX/RX>\twissel zenden/ontvangen"
+
+#: src/misc/macroedit.cxx:143
+msgid "<SRCHUP>\tsearch UP for signal"
+msgstr "<SRCHUP>\tzoek VERDER naar signaal"
+
+#: src/misc/macroedit.cxx:144
+msgid "<SRCHDN>\tsearch DOWN for signal"
+msgstr "<SRCHDN>\tzoek TERUG naar signaal"
+
+#: src/misc/macroedit.cxx:145
+msgid "<GOHOME>\treturn to sweet spot"
+msgstr "<GOHOME>\tkeer terug naar 'sweet spot' (meest gunstige frequentie)"
+
+#: src/misc/macroedit.cxx:146
+msgid "<GOFREQ:NNNN>\tmove to freq NNNN Hz"
+msgstr "<GOFREQ:NNNN>\tga naar frequentie NNNN Hz"
+
+#: src/misc/macroedit.cxx:147
+msgid "<QSYTO>\tleft-clk QSY button"
+msgstr "<QSYTO>\tklik links op QSY knop"
+
+#: src/misc/macroedit.cxx:148
+msgid "<QSYFM>\tright-clk QSY button"
+msgstr "<QSYFM>\tklik rechts op QSY knop"
+
+#: src/misc/macroedit.cxx:149
+msgid "<QSY:FFF.F[:NNNN]>\tqsy to kHz, Hz"
+msgstr "<QSY:FFF.F[:NNNN]>\tQSY naar kHz, Hz"
+
+#: src/misc/macroedit.cxx:150
+msgid "<QSY+:+/-n.nnn>\tincr/decr xcvr freq"
+msgstr "<QSY+:+/-n.nnn>\tomhoog/omlaag TRX frequentie"
+
+#: src/misc/macroedit.cxx:151
+msgid "<RIGMODE:mode>\tvalid xcvr mode"
+msgstr "<RIGMODE:mode>\tschakel TRX naar mode"
+
+#: src/misc/macroedit.cxx:152
+msgid "<FILWID:width>\tvalid xcvr filter width"
+msgstr "<FILWID:width>\tstel TRX filter in"
+
+#: src/misc/macroedit.cxx:153
+msgid "<FOCUS>\trig freq has kbd focus"
+msgstr "<FOCUS>\tTRX frequentie heeft toetsenbordfocus"
+
+#: src/misc/macroedit.cxx:156
+msgid "<QRG:text>\tinsert QRG into Rx text"
+msgstr "<QRG:text>\tQRG invoegen in RX tekst"
+
+#: src/misc/macroedit.cxx:159
+msgid "<FILE:>\tinsert text file"
+msgstr "<FILE:>\ttekstbestand invoegen"
+
+#: src/misc/macroedit.cxx:160
+msgid "<IMAGE:>\tinsert MFSK image"
+msgstr "<IMAGE:>\tMFSK afbeelding invoegen"
+
+#: src/misc/macroedit.cxx:163
+msgid "<PAUSE>\tpause transmit"
+msgstr "<PAUSE>\tpauzeer uitzending"
+
+#: src/misc/macroedit.cxx:164
+msgid "<IDLE:NN.nn>\tidle signal for NN.nn sec"
+msgstr "<IDLE:NN.nn>\t'idle' signaal gedurende NN,nn seconden"
+
+#: src/misc/macroedit.cxx:165
+msgid "<TIMER:NN>\trepeat every NN sec"
+msgstr "<TIMER:NN>\therhaal elke NN seconden"
+
+#: src/misc/macroedit.cxx:166
+msgid "<TUNE:NN>\ttune signal for NN sec"
+msgstr "<TUNE:NN>\t'tune' signaal gedurende NN seconden"
+
+#: src/misc/macroedit.cxx:167
+msgid "<WAIT:NN>\tdelay xmt for NN sec"
+msgstr "<WAIT:NN>\twacht met zenden gedurende NN seconden"
+
+#: src/misc/macroedit.cxx:168
+msgid "<REPEAT>\trepeat macro continuously"
+msgstr "<REPEAT>\therhaal macro doorlopend"
+
+#: src/misc/macroedit.cxx:169
+msgid "<SKED:hhmm[ss][:YYYYMMDD]>\tschedule execution"
+msgstr "<SKED:hhmm[ss][:YYYYMMDD]>\tplan uitvoering"
+
+#: src/misc/macroedit.cxx:172
+msgid "<TXATTEN:nn.n>\t set xmt attenuator"
+msgstr "<TXATTEN:nn.n>\tTX verzwakker instellen"
+
+#: src/misc/macroedit.cxx:175
+msgid "<CWID>\tCW identifier"
+msgstr "<CWID>\tzend CW id"
+
+#: src/misc/macroedit.cxx:176
+#, fuzzy
+msgid "<ID>\tsend mode ID; TX start only"
+msgstr "<ID>\tzend mode ID als videotekst"
+
+#: src/misc/macroedit.cxx:177
+msgid "<TEXT>\ttext at start of TX"
+msgstr ""
+
+#: src/misc/macroedit.cxx:178
+msgid "<VIDEO:\tvideo text in TX stream"
+msgstr ""
+
+#: src/misc/macroedit.cxx:179
+msgid "<TXRSID:on|off|t>\tTx RSID on,off,toggle"
+msgstr "<TXRSID:on|off|t>\tTx RsID aan,uit,wissel"
+
+#: src/misc/macroedit.cxx:180
+msgid "<RXRSID:on|off|t>\tRx RSID on,off,toggle"
+msgstr "<RXRSID:on|off|t>\tRx RsID aan,uit,wissel"
+
+#: src/misc/macroedit.cxx:181
+msgid "<NRSID:NN>\tTransmit |NN| successive RsID bursts"
+msgstr "<NRSID:NN>\tVerstuur |NN| opeenvolgende RsID uitzendingen"
+
+#: src/misc/macroedit.cxx:182
+msgid "<DTMF:[Wn:][Ln:]chrs>\t[Wait][Len](ms)"
+msgstr "<DTMF:[Wn:][Ln:]chrs>\t[Wacht][Lengte](ms)"
+
+#: src/misc/macroedit.cxx:185
+msgid "<POST:+/-nn.n>\tCW QSK post-timing"
+msgstr "<POST:+/-nn.n>\tCW QSK tijd achteraf (ms)"
+
+#: src/misc/macroedit.cxx:186
+msgid "<PRE:nn.n>\tCW QSK pre-timing"
+msgstr "<PRE:nn.n>\tCW QSK tijd vooraf (ms)"
+
+#: src/misc/macroedit.cxx:187
+msgid "<RISE:nn.n>\tCW rise time"
+msgstr "<RISE:nn.n>\tCW stijgtijd"
+
+#: src/misc/macroedit.cxx:188
+msgid "<WPM:NN:FF>\tCW WPM:Farnsworth"
+msgstr "<WPM:NN:FF>\tCW WPM:Farnsworth"
+
+#: src/misc/macroedit.cxx:191
+msgid "<RIGCAT:[\"text\"][hex ...]:ret>\tsend CAT cmd"
+msgstr "<RIGCAT:[\"text\"][hex ...]:ret>\tVerzend CAT commando"
+
+#: src/misc/macroedit.cxx:194
+msgid "<AFC:on|off|t>\tAFC  on,off,toggle"
+msgstr "<AFC:on|off|t>\tAFC aan,uit,wissel"
+
+#: src/misc/macroedit.cxx:195
+msgid "<LOCK:on|off|t>\tLOCK on,off,toggle"
+msgstr "<LOCK:on|off|t>\tLOCK aan,uit,wissel"
+
+#: src/misc/macroedit.cxx:196
+msgid "<REV:on|off|t>\tRev on,off,toggle"
+msgstr "<REV:on|off|t>\tReverse aan,uit,wissel"
+
+#: src/misc/macroedit.cxx:199
+msgid "<MACROS:>\tchange macro defs file"
+msgstr "<MACROS:>\twissel van bestand met macrodefinities"
+
+#: src/misc/macroedit.cxx:200
+msgid "<SAVE>\tsave current macro file"
+msgstr "<SAVE>\tBewaar huidig macro bestand"
+
+#: src/misc/macroedit.cxx:203
+msgid "<COMMENT:comment text>\tignore all comment text"
+msgstr "<COMMENT:comment text>\tNegeer alle commentaartekst"
+
+#: src/misc/macroedit.cxx:206
+msgid "<CPS_TEST:nn>\tmodem char/sec test on nn chars"
+msgstr "<CPS_TEST:nn>\tmodem char/sec test on nn chars"
+
+#: src/misc/macroedit.cxx:207
+msgid "<CPS_N:n>\tmodem timing test, 'n' random 5 char groups"
+msgstr "<CPS_N:n>\tmodem timing test, 'n' random 5 char groups"
+
+#: src/misc/macroedit.cxx:208
+msgid "<CPS_FILE:>\tmodem timing test, spec' file"
+msgstr "<CPS_FILE:>\tmodem timing test, spec' file"
+
+#: src/misc/macroedit.cxx:209
+msgid "<CPS_STRING:s>\tmodem timing test, string 's'"
+msgstr "<CPS_STRING:s>\tmodem timing test, string 's'"
+
+#: src/misc/macroedit.cxx:212
+msgid "<WAV_TEST>\tWAV file; internal string"
+msgstr "<WAV_TEST>\tWAV file; internal string"
+
+#: src/misc/macroedit.cxx:213
+msgid "<WAV_N:n>\tWAV file; 'n' random 5 char groups"
+msgstr ""
+
+#: src/misc/macroedit.cxx:214
+msgid "<WAV_FILE:>\tWAV file; spec' file"
+msgstr "<WAV_FILE:>\tWAV bestand; spec' file"
+
+#: src/misc/macroedit.cxx:215
+msgid "<WAV_STRING:s>\tWAV file; string 's'"
+msgstr "<WAV_STRING:s>\tWAV bestand; string 's'"
+
+#: src/misc/macroedit.cxx:218
+msgid "<CSV:on|off|t>\tAnalysis CSV on,off,toggle"
+msgstr "<CSV:on|off|t>\tCSV analyse aan, uit, wissel (toggle)"
+
+#: src/misc/macroedit.cxx:338
+msgid "Text file to insert"
+msgstr "In te voegen tekstbestand"
+
+#: src/misc/macroedit.cxx:348
+msgid "Test text file"
+msgstr "Test tekstbestand"
+
+#: src/misc/macroedit.cxx:358
+msgid "MFSK image file"
+msgstr "Bestand MFSK afbeelding"
+
+#: src/misc/macroedit.cxx:368
+msgid "Change to Macro file"
+msgstr "Wissel naar macrobestand"
+
+#: src/misc/macroedit.cxx:380
+msgid "Executable file to insert"
+msgstr "In te voegen uitvoerbaar bestand"
+
+#: src/misc/macroedit.cxx:411
+msgid "Macro Text"
+msgstr "Macro Tekst"
+
+#: src/misc/macroedit.cxx:416
+msgid "Select Tag"
+msgstr "Kies label"
+
+#: src/misc/macroedit.cxx:428
+msgid "Macro Button Label"
+msgstr "Label macroknop"
+
+#: src/misc/macroedit.cxx:436
+msgid "Apply"
+msgstr "Toepassen"
+
+#: src/misc/macroedit.cxx:463
+msgid "Macro editor - "
+msgstr "Macro editor - "
+
+#: src/misc/macros.cxx:3258
+msgid "Open macro file"
+msgstr "Open macrobestand"
+
+#: src/misc/macros.cxx:3259 src/misc/macros.cxx:3298
+msgid "Fldigi macro definition file\t*.{mdf}"
+msgstr "Fldigi macro-definitiebestand\t*.{mdf}"
+
+#: src/misc/macros.cxx:3297
+msgid "Save macro file"
+msgstr "Bewaar macrobestand"
+
+#: src/misc/network.cxx:170
+msgid "Aborted"
+msgstr "Afgebroken"
+
+#: src/misc/network.cxx:170
+msgid "Timed out"
+msgstr "Wachttijd verstreken"
+
+#: src/misc/newinstall.cxx:387
+msgid "Finish"
+msgstr "Voltooien"
+
+#: src/misc/newinstall.cxx:388
+msgid "Next"
+msgstr "Volgende"
+
+#: src/misc/newinstall.cxx:389
+msgid "Back"
+msgstr "Terug"
+
+#: src/misc/newinstall.cxx:519
+msgid "The wizard will guide you through the basic fldigi settings"
+msgstr "Deze wizard helpt je bij de basisinstellingen voor Fldigi"
+
+#: src/misc/newinstall.cxx:522
+msgid "Feel free to skip any pages or exit the wizard at any time"
+msgstr "Je kunt op elk moment schermen overslaan of de wizard verlaten"
+
+#: src/misc/newinstall.cxx:523
+msgid "All settings shown here can be changed later via the Configure menu"
+msgstr ""
+"Alle getoonde instellingen kunnen later worden gewijzigd via het "
+"Instellingen menu"
+
+#: src/misc/newinstall.cxx:538
+msgid "Fldigi configuration wizard"
+msgstr "Fldigi configuratie-wizard"
+
+#: src/mfsk/mfsk-pic.cxx:147 src/mfsk/mfsk-pic.cxx:151
+#: src/mfsk/mfsk-pic.cxx:315 src/mfsk/mfsk-pic.cxx:318
+msgid "Time needed: "
+msgstr "Benodigde tijd: "
+
+#: src/mfsk/mfsk-pic.cxx:181
+msgid "Load image file"
+msgstr "Afbeelding inlezen"
+
+#: src/mfsk/mfsk-pic.cxx:326
+msgid "Send image"
+msgstr "Stuur afbeelding"
+
+#: src/mfsk/mfsk-pic.cxx:333
+msgid ""
+"Load or drop an image file\n"
+"Supported types: PNG, JPEG, BMP"
+msgstr ""
+"Laad of sleep een afbeelding\n"
+"Ondersteunde formaten: PNG, JPEG, BMP"
+
+#: src/mfsk/mfsk-pic.cxx:337
+msgid "Transfer speed, X1-normal"
+msgstr "Snelheid, X1-normaal"
+
+#: src/mfsk/mfsk-pic.cxx:349
+msgid "Load"
+msgstr "Laden"
+
+#: src/waterfall/waterfall.cxx:1592
+msgid "Waterfall / FFT / Scope"
+msgstr "Waterval / Spectrum / Oscilloscoop"
+
+#: src/waterfall/waterfall.cxx:1602
+msgid "Upper signal level (dB)"
+msgstr "Hoogste signaalniveau (dB)"
+
+#: src/waterfall/waterfall.cxx:1613
+msgid "Signal range (dB)"
+msgstr "Signaalbereik (dB)"
+
+#: src/waterfall/waterfall.cxx:1619
+msgid "Change waterfall scale"
+msgstr "Wijzig schaal waterval"
+
+#: src/waterfall/waterfall.cxx:1624
+msgid "Slew display lower in frequency"
+msgstr "Verschuif weergave naar lagere frequentie"
+
+#: src/waterfall/waterfall.cxx:1629
+msgid "Center display on signal"
+msgstr "Centreer weergave op signaal"
+
+#: src/waterfall/waterfall.cxx:1634
+msgid "Slew display higher in frequency"
+msgstr "Verschuif weergave naar hogere frequentie"
+
+#: src/waterfall/waterfall.cxx:1639
+msgid "Waterfall drop speed"
+msgstr "Snelheid waterval"
+
+#: src/waterfall/waterfall.cxx:1649
+msgid "Adjust cursor frequency"
+msgstr "Cursorfrequentie aanpassen"
+
+#: src/waterfall/waterfall.cxx:1654
+msgid ""
+"Center in passband\n"
+"Right click to undo"
+msgstr ""
+"Centreer in doorlaatband\n"
+"Klik rechts om ongedaan te maken"
+
+#: src/waterfall/waterfall.cxx:1660
+msgid ""
+"Store mode and frequency\n"
+"Right click for list"
+msgstr ""
+"Mode en frequentie opslaan\n"
+"Klik rechts voor lijst"
+
+#: src/waterfall/waterfall.cxx:1670
+msgid "Lock transmit frequency"
+msgstr "Zet zendfrequentie vast"
+
+#: src/waterfall/waterfall.cxx:1679 src/dialogs/confdialog.cxx:6252
+msgid "Reverse"
+msgstr "Reverse"
+
+#: src/waterfall/waterfall.cxx:1686
+msgid "Transmit/Receive"
+msgstr "Zenden/Ontvangen"
+
+#: src/waterfall/waterfall.cxx:2148
+msgid "AFC range or BW"
+msgstr "AFC bereik of bandbreedte"
+
+#: src/waterfall/waterfall.cxx:2149
+msgid "Signal search"
+msgstr "Signaal zoeken"
+
+#: src/waterfall/waterfall.cxx:2150
+msgid "Modem carrier"
+msgstr "Modem carrier"
+
+#: src/waterfall/waterfall.cxx:2150
+msgid "Scroll"
+msgstr "Verschuiven"
+
+#: src/rigcontrol/rigxml.cxx:946
+msgid "Open rig xml file"
+msgstr "Open TRX XML bestand"
+
+#: src/rigcontrol/rigxml.cxx:946
+msgid "Fldigi rig xml definition file\t*.xml"
+msgstr "Fldigi TRX XML definitiebestand\t*.xml"
+
+#: src/soundcard/sound.cxx:150
+msgid ""
+"Waveform Audio Format\t*.wav\n"
+"AU\t*.{au,snd}\n"
+msgstr ""
+"Waveform Audio Opmaak\t*.wav\n"
+"AU\t*.{au,snd}\n"
+
+#: src/soundcard/sound.cxx:153
+msgid "Free Lossless Audio Codec\t*.flac"
+msgstr "Free Lossless Audio Codec\t*.flac"
+
+#: src/soundcard/sound.cxx:159 src/soundcard/sound.cxx:161
+msgid "Audio file"
+msgstr "Geluidsbestand"
+
+#: src/soundcard/sound.cxx:305
+msgid "Playback continuous loop?"
+msgstr "Continu afspelen in een lus?"
+
+#: src/spot/notify.cxx:192
+msgid "My callsign de CALL"
+msgstr "Mijn roepnaam de CALL"
+
+#: src/spot/notify.cxx:193
+msgid "Station heard twice"
+msgstr "Station tweemaal gehoord"
+
+#: src/spot/notify.cxx:194
+msgid "Custom text search"
+msgstr "Zoeken op tekst"
+
+#: src/spot/notify.cxx:195
+msgid "RSID reception"
+msgstr "RsID ontvangst"
+
+#: src/spot/notify.cxx:203
+msgid "Toggle"
+msgstr "Wissel"
+
+#: src/spot/notify.cxx:205 src/spot/notify.cxx:517
+msgid "Remove"
+msgstr "Verwijder"
+
+#: src/spot/notify.cxx:217 src/spot/notify.cxx:223 src/spot/notify.cxx:571
+#: src/logbook/lgbook.cxx:548 src/logbook/lgbook.cxx:853
+msgid "Continent"
+msgstr "Continent"
+
+#: src/spot/notify.cxx:218 src/spot/notify.cxx:224 src/logbook/lgbook.cxx:841
+msgid "ITU zone"
+msgstr "ITU zone"
+
+#: src/spot/notify.cxx:219 src/spot/notify.cxx:225 src/logbook/lgbook.cxx:829
+msgid "CQ zone"
+msgstr "CQ zone"
+
+#: src/spot/notify.cxx:222
+msgid "Deselect"
+msgstr "Deselecteren"
+
+#: src/spot/notify.cxx:516
+msgid "Add"
+msgstr "Toevoegen"
+
+#: src/spot/notify.cxx:519
+msgid "Test..."
+msgstr "Test..."
+
+#: src/spot/notify.cxx:522 src/widgets/FTextView.cxx:481
+#: src/widgets/flinput2.cxx:48
+msgid "Select All"
+msgstr "Alles selecteren"
+
+#: src/spot/notify.cxx:523 src/logbook/lgbook.cxx:403
+#: src/logbook/lgbook.cxx:453 src/logbook/lgbook.cxx:1045
+#: src/logbook/lgbook.cxx:1119
+msgid "Clear All"
+msgstr "Alles wissen"
+
+#: src/spot/notify.cxx:1096
+msgid "The regular expression field must not be empty."
+msgstr "Het veld met de reguliere expressie mag niet leeg zijn."
+
+#: src/spot/notify.cxx:1102
+msgid "The regular expression must be valid."
+msgstr "De reguliere expressie moet geldig zijn."
+
+#: src/spot/notify.cxx:1109
+msgid "Please set your callsign first."
+msgstr "Voer eerst de roepnaam in."
+
+#: src/spot/notify.cxx:1246
+msgid "Run program"
+msgstr "Start programma"
+
+#: src/spot/notify.cxx:1279
+msgid ""
+"Default test string is:\n"
+"  \""
+msgstr ""
+"Standaard testtekst is:\n"
+"  \""
+
+#: src/spot/notify.cxx:1280
+msgid "Enter test string or leave blank for default:"
+msgstr "Voer testtekst in of laat leeg voor standaardtekst:"
+
+#: src/spot/notify.cxx:1291
+msgid "This event's regular expression is invalid."
+msgstr "De reguliere expressie van deze gebeurtenis is ongeldig."
+
+#: src/spot/notify.cxx:1298
+msgid "The test string did not match this event's search pattern."
+msgstr ""
+"De testtekst komt niet overeen met het zoekpatroon van deze gebeurtenis."
+
+#: src/spot/notify.cxx:1316
+msgid "Available substrings"
+msgstr "Beschikbare deelteksten"
+
+#: src/spot/notify.cxx:1399 src/logbook/lgbook.cxx:1026
+msgid "Frequency"
+msgstr "Frequentie"
+
+#: src/spot/notify.cxx:1401 src/dialogs/notifydialog.cxx:131
+#: src/logbook/lgbook.cxx:1023
+msgid "Callsign"
+msgstr "Roepnaam"
+
+#: src/waterfall/colorbox.cxx:89
+msgid "Open palette"
+msgstr "Palet openen"
+
+#: src/waterfall/colorbox.cxx:89 src/waterfall/colorbox.cxx:126
+msgid "Fldigi palette\t*.pal"
+msgstr "Fldigi palet\t*.pal"
+
+#: src/waterfall/colorbox.cxx:112 src/waterfall/colorbox.cxx:137
+msgid "Palette: "
+msgstr "Palet: "
+
+#: src/waterfall/colorbox.cxx:126
+msgid "Save palette"
+msgstr "Palet bewaren"
+
+#: src/widgets/FTextRXTX.cxx:103
+msgid "Look up call"
+msgstr "Roepnaam opzoeken"
+
+#: src/widgets/FTextRXTX.cxx:105 src/logbook/lgbook.cxx:463
+#: src/logbook/lgbook.cxx:608 src/logbook/lgbook.cxx:1025
+msgid "Name"
+msgstr "Naam"
+
+#: src/widgets/FTextRXTX.cxx:106
+msgid "QTH"
+msgstr "QTH"
+
+#: src/widgets/FTextRXTX.cxx:107 src/dialogs/confdialog.cxx:5820
+#: src/logbook/lgbook.cxx:512
+msgid "State"
+msgstr "Staat"
+
+#: src/widgets/FTextRXTX.cxx:108 src/logbook/lgbook.cxx:518
+msgid "Province"
+msgstr "Provincie"
+
+#: src/widgets/FTextRXTX.cxx:110
+msgid "Locator"
+msgstr "Locator"
+
+#: src/widgets/FTextRXTX.cxx:111
+msgid "RST(r)"
+msgstr "RST(r)"
+
+#: src/widgets/FTextRXTX.cxx:112 src/dialogs/confdialog.cxx:5826
+#: src/logbook/lgbook.cxx:539 src/logbook/lgbook.cxx:924
+#: src/logbook/lgbook.cxx:1111
+msgid "Exchange In"
+msgstr "Uitwisseling ontv."
+
+#: src/widgets/FTextRXTX.cxx:113 src/dialogs/confdialog.cxx:5751
+msgid "Serial number"
+msgstr "Volgnummer"
+
+#: src/widgets/FTextRXTX.cxx:114
+msgid "Insert marker"
+msgstr "Markering invoegen"
+
+#: src/widgets/FTextRXTX.cxx:122
+msgid "Quick entry"
+msgstr "Snelle toegang"
+
+#: src/widgets/FTextRXTX.cxx:123
+msgid "Scroll hints"
+msgstr "Scroll tips"
+
+#: src/widgets/FTextRXTX.cxx:716
+msgid " in "
+msgstr " in "
+
+#: src/widgets/FTextRXTX.cxx:718
+msgid "Last QSO"
+msgstr "Laatste QSO"
+
+#: src/widgets/FTextRXTX.cxx:763 src/dialogs/confdialog.cxx:7281
+msgid "Transmit"
+msgstr "Zenden"
+
+#: src/widgets/FTextRXTX.cxx:764 src/dialogs/confdialog.cxx:7156
+#: src/dialogs/confdialog.cxx:8564
+msgid "Receive"
+msgstr "Ontvangen"
+
+#: src/widgets/FTextRXTX.cxx:765
+msgid "Abort"
+msgstr "Afbreken"
+
+#: src/widgets/FTextRXTX.cxx:766
+msgid "Send image..."
+msgstr "Afbeelding versturen..."
+
+#: src/widgets/FTextView.cxx:292
+msgid "Insert text"
+msgstr "Tekst invoegen"
+
+#: src/widgets/FTextView.cxx:351
+msgid "Save text as"
+msgstr "Tekst opslaan als"
+
+#: src/widgets/FTextView.cxx:479 src/widgets/FTextView.cxx:645
+#: src/widgets/flinput2.cxx:44
+msgid "Copy"
+msgstr "Kopiëren"
+
+#: src/widgets/FTextView.cxx:482
+msgid "Save as..."
+msgstr "Opslaan als..."
+
+#: src/widgets/FTextView.cxx:483 src/widgets/FTextView.cxx:649
+msgid "Word wrap"
+msgstr "Terugloop"
+
+#: src/widgets/FTextView.cxx:644 src/widgets/flinput2.cxx:43
+msgid "Cut"
+msgstr "Knippen"
+
+#: src/widgets/FTextView.cxx:646 src/widgets/flinput2.cxx:45
+msgid "Paste"
+msgstr "Plakken"
+
+#: src/widgets/FTextView.cxx:648
+msgid "Insert file..."
+msgstr "Bestand invoegen..."
+
+#: src/widgets/flinput2.cxx:42
+msgid "Undo"
+msgstr "Herstel"
+
+#: src/widgets/flinput2.cxx:46 src/logbook/lgbook.cxx:974
+msgid "Delete"
+msgstr "Verwijder"
+
+#: src/config_script/run_scripts.cxx:936
+msgid "Invalid Modem for KISS IO"
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2805
+msgid "Script file name (path) null pointer"
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2812
+msgid "Script file name (path) invalid"
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2819
+#, c-format
+msgid "Script Parsing Class Allocation Fail (%s)"
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2823
+#, fuzzy, c-format
+msgid "Executing script file: %s"
+msgstr "Kies RigCAT definitiebestand"
+
+#: src/config_script/run_scripts.cxx:2828
+#, c-format
+msgid "Issues reported in processing script file: %s"
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2829
+msgid ""
+"Script file contains potential issues\n"
+"See documentation and/or Log file for details."
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2833
+msgid ""
+"Some changes made by the script requires program\n"
+"restart before they become active."
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2869
+#: src/config_script/create_default_script.cxx:236
+msgid "Script Files"
+msgstr ""
+
+#: src/config_script/run_scripts.cxx:2869
+#: src/config_script/create_default_script.cxx:236
+msgid "*.txt"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:358
+#, c-format
+msgid "Missing command %s after line %d"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:402
+#, fuzzy
+msgid "Command Not Found"
+msgstr "Command line opties"
+
+#: src/config_script/script_parsing.cxx:406
+msgid "Not a script file/tag not found"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:410
+msgid "Invalid parameter"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:414
+msgid "Invalid function parameter (internal non-script error)"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:418
+msgid "Missing paired quotes (\")"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:422
+#, fuzzy
+msgid "General Error"
+msgstr "Algemeen"
+
+#: src/config_script/script_parsing.cxx:426
+#, fuzzy
+msgid "No Errors"
+msgstr "Error"
+
+#: src/config_script/script_parsing.cxx:430
+msgid "Character searched not found"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:434
+msgid "End of line reached"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:438
+msgid "File not found"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:442
+msgid "Directory path not found"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:446
+msgid "Unexpected end of parameter (args[]) list found"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:450
+msgid "Unexpected end of parameter check list found"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:454
+msgid "Character count in args[] parameter exceeds expectations"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:458
+msgid "Memory Allocation Error (internal non-script error)"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:462
+msgid "Passed parameter is not of the expected type."
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:466
+msgid "Parameter is not valid."
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:470
+msgid "Command missing ':'."
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:474
+msgid "Maximum open subscripts reached."
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:478
+msgid "Subscript execution fail (internal)."
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:482
+msgid "Script device path not found."
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:486
+msgid "Unexpected end of file reached."
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:490
+msgid "File read error"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:494
+msgid "Undefined error"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:497
+#, c-format
+msgid "Line: %d Error:%d %s (%s)"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:965
+#: src/config_script/script_parsing.cxx:1092
+#: src/config_script/script_parsing.cxx:1805
+#, c-format
+msgid "Buffer allocation Error near File: %s Line %d"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1035
+#: src/config_script/script_parsing.cxx:1151
+#, c-format
+msgid "Call back for script command %s reported an Error"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1041
+#, c-format
+msgid "Command %s ignored, dot notation not supported"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1155
+#, c-format
+msgid "Command %s ignored, structured command not supported"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1238
+msgid "Invalid function parameter 'char *file_name_path' (null)"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1246
+#, c-format
+msgid "Unable to open file %s"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1434
+msgid "1"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1438
+msgid "0"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1655
+#: src/config_script/script_parsing.cxx:1742
+#, c-format
+msgid "cmd_buffer allocation error near line %d"
+msgstr ""
+
+#: src/config_script/script_parsing.cxx:1756
+#, c-format
+msgid "Over writing call back funcion for \"%s\""
+msgstr ""
+
+#: src/config_script/create_default_script.cxx:264
+#, c-format
+msgid "Invalid File Name Pointer (NULL) in function %s:%d"
+msgstr ""
+
+#: src/config_script/create_default_script.cxx:271
+#, c-format
+msgid "Unable to create file %s (Error No=%d) func %s:%d"
+msgstr ""
+
+#: src/config_script/create_default_script.cxx:279
+#, c-format
+msgid ""
+"%s\n"
+"# Fldigi Generated Config Script\n"
+msgstr ""
+
+#: src/config_script/create_default_script.cxx:281
+#, c-format
+msgid "# Created: %s\n"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:4929 src/dialogs/confdialog.cxx:10719
+#: src/dialogs/confdialog.cxx:10764
+msgid "Show"
+msgstr "Toon"
+
+#: src/dialogs/confdialog.cxx:4929
+msgid "Hide"
+msgstr "Verberg"
+
+#: src/dialogs/confdialog.cxx:5448
+msgid "Fldigi configuration"
+msgstr "Fldigi configuratie"
+
+#: src/dialogs/confdialog.cxx:5458 src/dialogs/confdialog.cxx:10838
+msgid "Operator information"
+msgstr "Informatie operator"
+
+#: src/dialogs/confdialog.cxx:5462
+msgid "Station"
+msgstr "Station"
+
+#: src/dialogs/confdialog.cxx:5465
+msgid "Callsign:"
+msgstr "Roepnaam:"
+
+#: src/dialogs/confdialog.cxx:5466
+msgid "Operators callsign"
+msgstr "Roepnaam operator"
+
+#: src/dialogs/confdialog.cxx:5479
+msgid "Name:"
+msgstr "Naam:"
+
+#: src/dialogs/confdialog.cxx:5480
+msgid "Operators name"
+msgstr "Naam operator"
+
+#: src/dialogs/confdialog.cxx:5493
+msgid "QTH:"
+msgstr "QTH:"
+
+#: src/dialogs/confdialog.cxx:5494
+msgid "Operators QTH"
+msgstr "QTH operator"
+
+#: src/dialogs/confdialog.cxx:5507
+msgid "Locator:"
+msgstr "Locator:"
+
+#: src/dialogs/confdialog.cxx:5508
+msgid "Maidenhead locator as in EM64qv"
+msgstr "Maidenhead locator, bijvoorbeeld JO22IA"
+
+#: src/dialogs/confdialog.cxx:5523
+msgid "Antenna:"
+msgstr "Antenne:"
+
+#: src/dialogs/confdialog.cxx:5524
+msgid "Short description of antenna"
+msgstr "Omschrijving antenne"
+
+#: src/dialogs/confdialog.cxx:5537
+msgid "Test Signal - Do NOT use with transmitter"
+msgstr "Testsignaal - NIET gebruiken met zenden"
+
+#: src/dialogs/confdialog.cxx:5541
+msgid "Noise on"
+msgstr "Ruis aan"
+
+#: src/dialogs/confdialog.cxx:5546
+msgid "dB"
+msgstr "dB"
+
+#: src/dialogs/confdialog.cxx:5568
+msgid "UI"
+msgstr "Gebruikersinterface"
+
+#: src/dialogs/confdialog.cxx:5573
+msgid "Browser"
+msgstr "Verkenner"
+
+#: src/dialogs/confdialog.cxx:5574
+msgid "User Interface - Browser"
+msgstr "Gebruikersinterface - Verkenner"
+
+#: src/dialogs/confdialog.cxx:5577
+msgid "Channels, first channel starts at waterfall lower limit"
+msgstr "Kanalen, eerste kanaal begint bij ondergrens waterval"
+
+#: src/dialogs/confdialog.cxx:5578
+msgid "Change # of psk viewer channels"
+msgstr "Wijzig aantal PSK ontvangstkanalen"
+
+#: src/dialogs/confdialog.cxx:5595
+msgid "Inactivity timeout"
+msgstr "Time-out bij inactiviteit"
+
+#: src/dialogs/confdialog.cxx:5596
+msgid ""
+"Clear channel text after\n"
+"# seconds of inactivity"
+msgstr ""
+"Wis tekst na # seconden\n"
+"zonder activiteit"
+
+#: src/dialogs/confdialog.cxx:5612
+msgid "Channel label"
+msgstr "Label kanaal"
+
+#: src/dialogs/confdialog.cxx:5613
+msgid "Appearance of label on each channel"
+msgstr "Weergave label voor elk kanaal"
+
+#: src/dialogs/confdialog.cxx:5624
+msgid "Audio frequency"
+msgstr "Audiofrequentie"
+
+#: src/dialogs/confdialog.cxx:5625
+msgid "Radio frequency"
+msgstr "Radiofrequentie"
+
+#: src/dialogs/confdialog.cxx:5625
+msgid "Channel number"
+msgstr "Kanaalnummer"
+
+#: src/dialogs/confdialog.cxx:5630 src/dialogs/confdialog.cxx:6913
+msgid "Font..."
+msgstr "Lettertype..."
+
+#: src/dialogs/confdialog.cxx:5631
+msgid "select browser font"
+msgstr "Kies lettertype voor verkenner"
+
+#: src/dialogs/confdialog.cxx:5634
+msgid "Fixed Intervals"
+msgstr "Vaste intervallen"
+
+#: src/dialogs/confdialog.cxx:5635
+msgid "Force channel spacing to even 100 Hz increments"
+msgstr "Forceer kanaalafstand op 100 Hz stappen"
+
+#: src/dialogs/confdialog.cxx:5642
+msgid "Continuous scrolling"
+msgstr "Doorlopend scrollen"
+
+#: src/dialogs/confdialog.cxx:5643
+msgid ""
+"ON - Marquee style\n"
+"OFF - Clear & restart"
+msgstr ""
+"ON - Marquee style\n"
+"OFF - Clear & restart"
+
+#: src/dialogs/confdialog.cxx:5648
+msgid "Lowest freq on bottom of viewer"
+msgstr "Laagste frequentie onderaan scherm"
+
+#: src/dialogs/confdialog.cxx:5649
+msgid "Change positions of low to high channels"
+msgstr "Wijzig posities van kanalen laag naar hoog"
+
+#: src/dialogs/confdialog.cxx:5654
+msgid "Play back history when active channel selected"
+msgstr "Speel geschiedenis terug bij kiezen van actief kanaal"
+
+#: src/dialogs/confdialog.cxx:5655
+msgid "Audio stream history decoded on selected signal"
+msgstr "Geschiedenis audio-spoor gedecodeerd voor geselecteerde signaal"
+
+#: src/dialogs/confdialog.cxx:5660
+msgid "Detection Level"
+msgstr "Detectieniveau"
+
+#: src/dialogs/confdialog.cxx:5662
+msgid "Backgnd"
+msgstr "Achtergr."
+
+#: src/dialogs/confdialog.cxx:5663
+msgid "Background color of signal viewer squelch control"
+msgstr "Achtergrondkleur van squelch-knop in signaalvenster"
+
+#: src/dialogs/confdialog.cxx:5668
+msgid "Button"
+msgstr "Knop"
+
+#: src/dialogs/confdialog.cxx:5669
+msgid "Slider hilite color of signal viewer squelch control"
+msgstr "Kleur van squelch knop in signaalscherm"
+
+#: src/dialogs/confdialog.cxx:5676
+msgid "Browser Line Colors"
+msgstr "Lijnkleuren verkenner"
+
+#: src/dialogs/confdialog.cxx:5678
+msgid "HiLite 1"
+msgstr "HiLite 1"
+
+#: src/dialogs/confdialog.cxx:5679
+msgid "PSK/RTTY Viewer HiLite Color 1"
+msgstr "PSK/RTTY Viewer HiLite Color 1"
+
+#: src/dialogs/confdialog.cxx:5684
+msgid "HiLite 2"
+msgstr "HiLite 2"
+
+#: src/dialogs/confdialog.cxx:5685
+msgid "PSK/RTTY Viewer HiLite Color 2"
+msgstr "PSK/RTTY Viewer HiLite Color 2"
+
+#: src/dialogs/confdialog.cxx:5690
+msgid "Even"
+msgstr "Even"
+
+#: src/dialogs/confdialog.cxx:5691
+msgid "Even lines"
+msgstr "Even regels"
+
+#: src/dialogs/confdialog.cxx:5696
+msgid "Odd"
+msgstr "Oneven"
+
+#: src/dialogs/confdialog.cxx:5697
+msgid "Odd lines"
+msgstr "Oneven regels"
+
+#: src/dialogs/confdialog.cxx:5703
+msgid "Select line"
+msgstr "Kies regel"
+
+#: src/dialogs/confdialog.cxx:5715
+msgid "User Interface - Contest"
+msgstr "Gebruikersinterface - Contest"
+
+#: src/dialogs/confdialog.cxx:5717
+msgid "Exchanges"
+msgstr "Uitwisselingen"
+
+#: src/dialogs/confdialog.cxx:5720
+msgid "Send:"
+msgstr "Stuur:"
+
+#: src/dialogs/confdialog.cxx:5722 src/logbook/lgbook.cxx:542
+#: src/logbook/lgbook.cxx:900 src/logbook/lgbook.cxx:1115
+msgid "Exchange Out"
+msgstr "Verz. uitwisseling"
+
+#: src/dialogs/confdialog.cxx:5723
+msgid "free form exchange"
+msgstr "vrije uitwisseling"
+
+#: src/dialogs/confdialog.cxx:5737
+#, fuzzy
+msgid "RST always 599/59"
+msgstr "RST altijd 599"
+
+#: src/dialogs/confdialog.cxx:5738
+#, fuzzy
+msgid "Force RST in/out to 599/59"
+msgstr "RST verzonden/ontvangen altijd 599"
+
+#: src/dialogs/confdialog.cxx:5743
+msgid "Send CW cut numbers"
+msgstr "Verkorte cijfers in CW"
+
+#: src/dialogs/confdialog.cxx:5744
+msgid "0 = T; 9 = N"
+msgstr "0 = T; 9 = N"
+
+#: src/dialogs/confdialog.cxx:5754
+msgid "Use leading zeros"
+msgstr "Gebruik voorloopnullen"
+
+#: src/dialogs/confdialog.cxx:5755
+msgid "Insert leading zeros into Xmtd serial number"
+msgstr "Voeg voorloopnullen toe aan verzonden volgnummer"
+
+#: src/dialogs/confdialog.cxx:5760
+msgid "Start"
+msgstr "Start"
+
+#: src/dialogs/confdialog.cxx:5761
+msgid "Starting number"
+msgstr "Eerste getal"
+
+#: src/dialogs/confdialog.cxx:5776
+msgid "Digits"
+msgstr "Cijfers"
+
+#: src/dialogs/confdialog.cxx:5777
+msgid "Number of digits in serial number"
+msgstr "Aantal cijfers in volgnummer"
+
+#: src/dialogs/confdialog.cxx:5793 src/dialogs/record_browse.cxx:51
+msgid "Reset"
+msgstr "Reset"
+
+#: src/dialogs/confdialog.cxx:5794
+msgid "Initialize the QSO logging fields"
+msgstr "Initialiseer QSO logvelden"
+
+#: src/dialogs/confdialog.cxx:5799
+msgid "Duplicate check, CALL plus"
+msgstr "Controle dubbel gewerkt, roepnaam plus..."
+
+#: src/dialogs/confdialog.cxx:5802
+msgid "On/Off"
+msgstr "Aan/Uit"
+
+#: src/dialogs/confdialog.cxx:5803
+msgid "Check for duplicates"
+msgstr "Controleer op duplicaten"
+
+#: src/dialogs/confdialog.cxx:5808 src/dialogs/notifydialog.cxx:188
+#: src/logbook/lgbook.cxx:471
+msgid "Band"
+msgstr "Band"
+
+#: src/dialogs/confdialog.cxx:5809
+msgid "Bands must match"
+msgstr "'Band' moet overeenkomen"
+
+#: src/dialogs/confdialog.cxx:5814 src/dialogs/notifydialog.cxx:191
+#: src/logbook/lgbook.cxx:474 src/logbook/lgbook.cxx:682
+#: src/logbook/lgbook.cxx:1028 src/logbook/lgbook.cxx:1083
+msgid "Mode"
+msgstr "Mode"
+
+#: src/dialogs/confdialog.cxx:5815
+msgid "Mode must match"
+msgstr "'Mode' moet overeenkomen"
+
+#: src/dialogs/confdialog.cxx:5821
+msgid "State must match"
+msgstr "'Staat' moet overeenkomen"
+
+#: src/dialogs/confdialog.cxx:5827
+msgid "free form 1 must match"
+msgstr "vrije vorm 1 moet overeenkomen"
+
+#: src/dialogs/confdialog.cxx:5832
+msgid "Time span over"
+msgstr "Time span over"
+
+#: src/dialogs/confdialog.cxx:5833
+msgid "QSO must not occur within a time period of"
+msgstr "QSO mag niet voorkomen binnen tijdspanne van"
+
+#: src/dialogs/confdialog.cxx:5838
+msgid "minutes"
+msgstr "minuten"
+
+#: src/dialogs/confdialog.cxx:5839
+msgid "Enter time span in minutes"
+msgstr "Tijdspanne in minuten"
+
+#: src/dialogs/confdialog.cxx:5855
+msgid "Dup Color"
+msgstr "Duplicaat"
+
+#: src/dialogs/confdialog.cxx:5856
+msgid "Left click to select dup color"
+msgstr "Klik links om de kleur voor duplicaten te kiezen"
+
+#: src/dialogs/confdialog.cxx:5868 src/dialogs/confdialog.cxx:7153
+#: src/dialogs/confdialog.cxx:8264 src/dialogs/confdialog.cxx:10202
+msgid "General"
+msgstr "Algemeen"
+
+#: src/dialogs/confdialog.cxx:5869
+msgid "User Interface - General"
+msgstr "Gebruikersinterface - Algemeen"
+
+#: src/dialogs/confdialog.cxx:5873
+msgid "Show tooltips"
+msgstr "Toon tips"
+
+#: src/dialogs/confdialog.cxx:5874
+msgid "Enable / disable tooltips"
+msgstr "Tips in- of uitschakelen"
+
+#: src/dialogs/confdialog.cxx:5880
+msgid "Show menu icons"
+msgstr "Toon icons in menu's"
+
+#: src/dialogs/confdialog.cxx:5881
+msgid "Enable / disable icons on menus"
+msgstr "Icons in menu's in- of uitschakelen"
+
+#: src/dialogs/confdialog.cxx:5886
+msgid "UI scheme"
+msgstr "Gebruikersinterfaceprofiel"
+
+#: src/dialogs/confdialog.cxx:5887
+msgid "Change application look and feel"
+msgstr "Wijzig 'look and feel' van applicatie"
+
+#: src/dialogs/confdialog.cxx:5905
+msgid "Visible modes"
+msgstr "Getoonde modes"
+
+#: src/dialogs/confdialog.cxx:5906
+msgid "Select modes for menu access"
+msgstr "Kies modes voor menutoegang"
+
+#: src/dialogs/confdialog.cxx:5909
+msgid "UI language"
+msgstr "Taal programma"
+
+#: src/dialogs/confdialog.cxx:5910 src/dialogs/confdialog.cxx:7059
+msgid "Changes take effect on next program startup"
+msgstr "Krijgt effect bij de volgende programmastart"
+
+#: src/dialogs/confdialog.cxx:5929
+msgid "Print CW / RTTY / THROB / CONTESTIA in lowercase"
+msgstr "Ontvangen tekst in kleine letters voor CW, RTTY, THROB en CONTESTIA"
+
+#: src/dialogs/confdialog.cxx:5939
+msgid "Transmit all text in lower case"
+msgstr "Verzend alle tekst als kleiner letters"
+
+#: src/dialogs/confdialog.cxx:5946
+msgid "Exit prompts"
+msgstr "Vragen bij afsluiten"
+
+#: src/dialogs/confdialog.cxx:5949
+msgid "Prompt to save Configuration"
+msgstr "Vraag om instellingen op te slaan"
+
+#: src/dialogs/confdialog.cxx:5954
+msgid "Prompt to save macro file"
+msgstr "Vraag om macrobestand op te slaan"
+
+#: src/dialogs/confdialog.cxx:5955 src/dialogs/confdialog.cxx:6234
+msgid "Write current macro set on program exit"
+msgstr "Bewaar huidige macro set bij afsluiten programma"
+
+#: src/dialogs/confdialog.cxx:5960
+msgid "Prompt to save log"
+msgstr "Vraag om logboek op te slaan"
+
+#: src/dialogs/confdialog.cxx:5961 src/dialogs/confdialog.cxx:5992
+msgid "Bug me about saving log entries"
+msgstr "Dring aan op het opslaan van ingevoerde logs"
+
+#: src/dialogs/confdialog.cxx:5966
+msgid "Confirm exit"
+msgstr "Bevestig afsluiten"
+
+#: src/dialogs/confdialog.cxx:5973
+msgid "Check for updates"
+msgstr "Controleer op updates"
+
+#: src/dialogs/confdialog.cxx:5976
+msgid "Check for updates when starting program"
+msgstr "Controleer op updates bij programmastart"
+
+#: src/dialogs/confdialog.cxx:5985 src/dialogs/confdialog.cxx:6503
+msgid "Log"
+msgstr "Log"
+
+#: src/dialogs/confdialog.cxx:5986
+msgid "User Interface - Logging"
+msgstr "Gebruikersinterface - Logboek"
+
+#: src/dialogs/confdialog.cxx:5988
+msgid "QSO logging"
+msgstr "QSO loggen"
+
+#: src/dialogs/confdialog.cxx:5991
+msgid "Prompt to save log on exit"
+msgstr "Vraag om log op te slaan bij afsluiten"
+
+#: src/dialogs/confdialog.cxx:5997
+msgid "Clear on save"
+msgstr "Leegmaken na opslaan"
+
+#: src/dialogs/confdialog.cxx:5998
+msgid "Clear log entries after saving or using macro <LOG>"
+msgstr "Wis log velden na opslaan of <LOG> macro"
+
+#: src/dialogs/confdialog.cxx:6003
+msgid "Convert callsign to upper case"
+msgstr "Sla roepnaam op in hoofdletters"
+
+#: src/dialogs/confdialog.cxx:6004
+msgid "Force callsign field to UPPERCASE"
+msgstr "Maakt van roepnaam HOOFDLETTERS"
+
+#: src/dialogs/confdialog.cxx:6009
+msgid "Auto-fill Country and Azimuth"
+msgstr "Land+antennehoek autom. invullen"
+
+#: src/dialogs/confdialog.cxx:6010
+msgid "Fill in Country / Azimuth using cty.dat information"
+msgstr "Land en antennehoek invullen op basis van cty.dat bestand"
+
+#: src/dialogs/confdialog.cxx:6015
+msgid "Sort by Date/Time OFF"
+msgstr "Sorteren op datum/tijd UIT"
+
+#: src/dialogs/confdialog.cxx:6016
+msgid "Sort by date/time OFF - effects all ADIF/Cabrillo reports"
+msgstr "Sorteren op datum/tijd UIT - beïnvloedt alle ADIF/Cabrillo rapporten"
+
+#: src/dialogs/confdialog.cxx:6021
+msgid "Date time ON == OFF"
+msgstr "Datum tijd AAN == UIT"
+
+#: src/dialogs/confdialog.cxx:6022
+msgid "Force date/time ON == date/time OFF"
+msgstr "Forceer datijd/tijd AAN == datum/tijd UIT"
+
+#: src/dialogs/confdialog.cxx:6027
+#, fuzzy
+msgid "Default RST in to 599/59"
+msgstr "RST ontvangen standaard 599"
+
+#: src/dialogs/confdialog.cxx:6028
+#, fuzzy
+msgid "Clear log controls sets RST in to 599/59"
+msgstr "Maak logvelden leeg en zet RST ontvangen op 599"
+
+#: src/dialogs/confdialog.cxx:6033
+#, fuzzy
+msgid "Default RST out to 599/59"
+msgstr "RST verzonden standaard 599"
+
+#: src/dialogs/confdialog.cxx:6034
+#, fuzzy
+msgid "Clear log controls sets RST out to 599/59"
+msgstr "Maak logvelden leeg en zet RST verzonden op 599"
+
+#: src/dialogs/confdialog.cxx:6039
+msgid "cty.dat folder"
+msgstr "Zoek naar cty.dat bestand"
+
+#: src/dialogs/confdialog.cxx:6040
+msgid "Enter full path-name for cty.dat folder"
+msgstr "Voer het volledige pad in voor cty.dat"
+
+#: src/dialogs/confdialog.cxx:6053
+msgid "Browse"
+msgstr "Bladeren"
+
+#: src/dialogs/confdialog.cxx:6054
+msgid "Locate cty.dat file"
+msgstr "Zoek naar cty.dat bestand"
+
+#: src/dialogs/confdialog.cxx:6057 src/dialogs/confdialog.cxx:6520
+#: src/dialogs/confdialog.cxx:6540 src/dialogs/confdialog.cxx:7305
+#: src/dialogs/confdialog.cxx:11099 src/dialogs/confdialog.cxx:11236
+#: src/dialogs/confdialog.cxx:11254 src/dialogs/confdialog.cxx:11302
+#: src/dialogs/confdialog.cxx:11368
+msgid "Default"
+msgstr "Standaard"
+
+#: src/dialogs/confdialog.cxx:6058
+msgid "Restore cty.dat default folder"
+msgstr "Herstel standaardmap voor cty.dat"
+
+#: src/dialogs/confdialog.cxx:6061
+msgid "Reload"
+msgstr "Herladen"
+
+#: src/dialogs/confdialog.cxx:6062
+msgid "Reload cty.dat"
+msgstr "cty.dat opnieuw laden"
+
+#: src/dialogs/confdialog.cxx:6065
+msgid "Transmit Power"
+msgstr "Zendvermogen"
+
+#: src/dialogs/confdialog.cxx:6066
+msgid "Tx power used for logbook entries"
+msgstr "Zendvermogen voor vermelding in logboek"
+
+#: src/dialogs/confdialog.cxx:6082
+#, fuzzy
+msgid "Rx Text"
+msgstr "Ontvangen tekst opslaan"
+
+#: src/dialogs/confdialog.cxx:6085
+msgid "Single-click to capture"
+msgstr "Eén klik om op te slaan"
+
+#: src/dialogs/confdialog.cxx:6086 src/dialogs/confdialog.cxx:6115
+msgid "Enable for single click capure of text in Rx panel"
+msgstr ""
+"Schakel in om met één klik ontvangen tekst vast te leggen in het RX scherm"
+
+#: src/dialogs/confdialog.cxx:6091
+msgid "callsign tooltips in received text"
+msgstr "Toon roepnaam tips in ontvangen tekst"
+
+#: src/dialogs/confdialog.cxx:6092
+msgid "Popup info after a 2 second hover on a callsign"
+msgstr "Toon informatie na twee seconden met de muis zweven boven een roepnaam"
+
+#: src/dialogs/confdialog.cxx:6097
+msgid "Word delimiters"
+msgstr "Scheidingstekens voor woorden"
+
+#: src/dialogs/confdialog.cxx:6098
+msgid ""
+"RX text QSO data entry is bounded by the non-word characters\n"
+"defined here. Tab and newline are automatically included."
+msgstr ""
+"QSO gegevensinvoer wordt begrensd door de scheidingstekens, die hier\n"
+"gedefinieerd zijn. Tab en 'nieuwe regel' tekens worden automatisch "
+"meegenomen."
+
+#: src/dialogs/confdialog.cxx:6114
+msgid "US units of distance (QRB)"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:6125
+msgid "User Interface - Macros"
+msgstr "Gebruikersinterface - Macro's"
+
+#: src/dialogs/confdialog.cxx:6129
+msgid "Mouse wheel active on macro buttons"
+msgstr "Muiswiel actief voor macroknoppen"
+
+#: src/dialogs/confdialog.cxx:6130
+msgid "enable mouse wheel control of macro bar"
+msgstr ""
+"Maakt het mogelijk om de regel met macrobalk te bedienen met het muiswiel"
+
+#: src/dialogs/confdialog.cxx:6137
+msgid "Number and position of macro bars"
+msgstr "Aantal en positie van macrobalken"
+
+#: src/dialogs/confdialog.cxx:6140
+msgid "Button Height"
+msgstr "Knophoogte"
+
+#: src/dialogs/confdialog.cxx:6141
+msgid "Height of macro bar"
+msgstr "Hoogte macrobalk"
+
+#: src/dialogs/confdialog.cxx:6151
+msgid "One above Rx/Tx"
+msgstr "Eén boven RX/TX"
+
+#: src/dialogs/confdialog.cxx:6152
+msgid ""
+"Single macro bar below logging panel\n"
+"variable height"
+msgstr ""
+"Eén macrobalk onder logscherm\n"
+"variabele hoogte"
+
+#: src/dialogs/confdialog.cxx:6157
+msgid "One above waterfall"
+msgstr "Eén boven waterval"
+
+#: src/dialogs/confdialog.cxx:6162
+msgid "One below waterfall"
+msgstr "Eén onder waterval"
+
+#: src/dialogs/confdialog.cxx:6167
+msgid "Two scheme 1"
+msgstr "Twee schema 1"
+
+#: src/dialogs/confdialog.cxx:6172
+msgid "Two scheme 3"
+msgstr "Twee schema 3"
+
+#: src/dialogs/confdialog.cxx:6177
+msgid "Two scheme 5"
+msgstr "Twee schema 5"
+
+#: src/dialogs/confdialog.cxx:6182
+msgid "Two scheme 7"
+msgstr "Twee schema 7"
+
+#: src/dialogs/confdialog.cxx:6187
+msgid "Two scheme 9"
+msgstr "Twee schema 9"
+
+#: src/dialogs/confdialog.cxx:6192
+msgid "Two scheme 2"
+msgstr "Twee schema 2"
+
+#: src/dialogs/confdialog.cxx:6197
+msgid "Two scheme 4"
+msgstr "Twee schema 4"
+
+#: src/dialogs/confdialog.cxx:6202
+msgid "Two scheme 6"
+msgstr "Twee schema 6"
+
+#: src/dialogs/confdialog.cxx:6207
+msgid "Two scheme 8"
+msgstr "Twee schema 8"
+
+#: src/dialogs/confdialog.cxx:6212
+msgid "Two scheme 10"
+msgstr "Twee schema 10"
+
+#: src/dialogs/confdialog.cxx:6221
+msgid "Load last used macro file on startup"
+msgstr "Laatst gebruikte macrobestand inlezen bij programmastart"
+
+#: src/dialogs/confdialog.cxx:6222
+msgid ""
+"ON - use last set of macros\n"
+"OFF - use default set"
+msgstr ""
+"AAN - laatst gebruikte set macro's\n"
+"UIT - standaardset"
+
+#: src/dialogs/confdialog.cxx:6227
+msgid "Display macro filename on startup"
+msgstr "Toon naam macrobestand bij programmastart"
+
+#: src/dialogs/confdialog.cxx:6228
+msgid "The filename is written to the RX text area"
+msgstr "De bestandsnaam wordt getoond in het RX scherm"
+
+#: src/dialogs/confdialog.cxx:6233
+msgid "Prompt to save macro file when closing"
+msgstr "Vraag om macrobestand op te slaan bij afsluiten"
+
+#: src/dialogs/confdialog.cxx:6243
+msgid "WF Ctrls"
+msgstr "Waterval"
+
+#: src/dialogs/confdialog.cxx:6244
+msgid "User Interface - Waterfall controls"
+msgstr "Gebruikersinterface - Waterval"
+
+#: src/dialogs/confdialog.cxx:6248
+msgid "Enable check box to show each respective operator control"
+msgstr "Vink de gewenste knoppen aan"
+
+#: src/dialogs/confdialog.cxx:6258
+msgid "WF Magnification"
+msgstr "Watervalvergroting"
+
+#: src/dialogs/confdialog.cxx:6264
+msgid "WF carrier"
+msgstr "Waterval carrier"
+
+#: src/dialogs/confdialog.cxx:6270
+msgid "WF Shift Controls"
+msgstr "Waterval verschuiven"
+
+#: src/dialogs/confdialog.cxx:6276
+msgid "WF ref level"
+msgstr "Waterval referentieniveau"
+
+#: src/dialogs/confdialog.cxx:6282
+msgid "WF drop rate"
+msgstr "Waterval snelheid"
+
+#: src/dialogs/confdialog.cxx:6288
+msgid "WF amp span"
+msgstr "Waterval bereik versterking"
+
+#: src/dialogs/confdialog.cxx:6294
+msgid "WF Store"
+msgstr "Waterval opslaan"
+
+#: src/dialogs/confdialog.cxx:6300
+msgid "WF mode"
+msgstr "Waterval modus"
+
+#: src/dialogs/confdialog.cxx:6306
+msgid "QSY"
+msgstr "QSY"
+
+#: src/dialogs/confdialog.cxx:6312
+msgid "XMT lock"
+msgstr "XMT vast"
+
+#: src/dialogs/confdialog.cxx:6318
+msgid "Enable all"
+msgstr "Alles aan"
+
+#: src/dialogs/confdialog.cxx:6321
+msgid "Disable all"
+msgstr "Alles uit"
+
+#: src/dialogs/confdialog.cxx:6328
+msgid "Clrs/Fnts"
+msgstr "Kleuren/lettertypes"
+
+#: src/dialogs/confdialog.cxx:6329
+msgid "User Interface - Colors / Fonts"
+msgstr "Gebruikersinterface - Kleuren / Lettertypes"
+
+#: src/dialogs/confdialog.cxx:6332
+msgid "Rx/Tx"
+msgstr "RX/TX"
+
+#: src/dialogs/confdialog.cxx:6333
+msgid "Rx/Tx Character set"
+msgstr "RX/TX karakterset"
+
+#: src/dialogs/confdialog.cxx:6334
+msgid "Select Rx/Tx Character Set"
+msgstr "Kies RX/TX karakterset"
+
+#: src/dialogs/confdialog.cxx:6354
+msgid "Rx bkgnd"
+msgstr "Achtergr."
+
+#: src/dialogs/confdialog.cxx:6357
+msgid "Tx bkgnd"
+msgstr "Achtergr."
+
+#: src/dialogs/confdialog.cxx:6366
+msgid "Rx font"
+msgstr "RX font"
+
+#: src/dialogs/confdialog.cxx:6369
+msgid "Tx font"
+msgstr "TX font"
+
+#: src/dialogs/confdialog.cxx:6378
+#, fuzzy
+msgid "Macro Edit Font"
+msgstr "Macro editor - "
+
+#: src/dialogs/confdialog.cxx:6381
+msgid "Text Highlighting"
+msgstr "Tekst markeren"
+
+#: src/dialogs/confdialog.cxx:6384
+msgid "XMIT"
+msgstr "XMIT"
+
+#: src/dialogs/confdialog.cxx:6385
+msgid "Sent chars in Rx/Tx pane"
+msgstr "Verzonden tekst in RX/TX scherm"
+
+#: src/dialogs/confdialog.cxx:6390
+msgid "CTRL"
+msgstr "CTRL"
+
+#: src/dialogs/confdialog.cxx:6391
+msgid "Control chars in Rx/Tx pane"
+msgstr "Control karakters in RX/TX scherm"
+
+#: src/dialogs/confdialog.cxx:6396
+msgid "SKIP"
+msgstr "SKIP"
+
+#: src/dialogs/confdialog.cxx:6397
+msgid ""
+"Skipped chars in Tx pane\n"
+"(Tx on/off in CW)"
+msgstr ""
+"Overgeslagen tekens in TX scherm\n"
+"(TX aan/uit in CW)"
+
+#: src/dialogs/confdialog.cxx:6402
+msgid "ALTR"
+msgstr "ALTR"
+
+#: src/dialogs/confdialog.cxx:6403
+msgid "Alternate character color in Rx panelr"
+msgstr "Alternatieve kleur RX scherm"
+
+#: src/dialogs/confdialog.cxx:6408
+msgid "SEL"
+msgstr "SEL"
+
+#: src/dialogs/confdialog.cxx:6409
+msgid "Selection background color in Rx Tx panels"
+msgstr "Achtergrondkleur selectie RX/TX scherm"
+
+#: src/dialogs/confdialog.cxx:6414 src/dialogs/confdialog.cxx:6585
+msgid "System"
+msgstr "Systeem"
+
+#: src/dialogs/confdialog.cxx:6417 src/dialogs/confdialog.cxx:6572
+#: src/logbook/lgbook.cxx:563
+msgid "Defaults"
+msgstr "Standaard"
+
+#: src/dialogs/confdialog.cxx:6422
+msgid "display Rx control chars as ascii string"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:6429
+msgid "FreqDisp / Meters"
+msgstr "Frequentieweergave / meters"
+
+#: src/dialogs/confdialog.cxx:6433
+msgid "14070.150"
+msgstr "14.070,150"
+
+#: src/dialogs/confdialog.cxx:6442 src/dialogs/confdialog.cxx:6517
+#: src/dialogs/confdialog.cxx:6537
+msgid "Font"
+msgstr "Lettertype"
+
+#: src/dialogs/confdialog.cxx:6445 src/dialogs/confdialog.cxx:6459
+#: src/dialogs/confdialog.cxx:6473 src/dialogs/confdialog.cxx:6514
+#: src/dialogs/confdialog.cxx:6534
+msgid "Bg Color"
+msgstr "Achtergr.kleur"
+
+#: src/dialogs/confdialog.cxx:6448
+msgid "Digit Color"
+msgstr "Kleur cijfers"
+
+#: src/dialogs/confdialog.cxx:6451
+msgid "Sys Colors"
+msgstr "Syst.kleuren"
+
+#: src/dialogs/confdialog.cxx:6456
+msgid "S-meter"
+msgstr "S-meter"
+
+#: src/dialogs/confdialog.cxx:6462 src/dialogs/confdialog.cxx:6476
+msgid "Scale Color"
+msgstr "Kleur schaal"
+
+#: src/dialogs/confdialog.cxx:6465 src/dialogs/confdialog.cxx:6479
+msgid "Meter Color"
+msgstr "Kleur meter"
+
+#: src/dialogs/confdialog.cxx:6470
+msgid "PWR-meter"
+msgstr "PWR-meter"
+
+#: src/dialogs/confdialog.cxx:6482
+msgid "Power scale"
+msgstr "Vermogensmeter"
+
+#: src/dialogs/confdialog.cxx:6483 src/dialogs/confdialog.cxx:6982
+msgid "Select the type of FFT prefilter"
+msgstr "Kies FFT pre-filter type"
+
+#: src/dialogs/confdialog.cxx:6494
+msgid "25 W"
+msgstr "25 W"
+
+#: src/dialogs/confdialog.cxx:6505
+msgid "Logging Panel Controls"
+msgstr "Knoppen logboekscherm"
+
+#: src/dialogs/confdialog.cxx:6525
+msgid "Logbook Dialog"
+msgstr "Logboekscherm"
+
+#: src/dialogs/confdialog.cxx:6547
+msgid "F_keys"
+msgstr "Functietoetsen"
+
+#: src/dialogs/confdialog.cxx:6549
+msgid "Use colored buttons"
+msgstr "Gebruik gekleurde knoppen"
+
+#: src/dialogs/confdialog.cxx:6554
+msgid "Group 1"
+msgstr "Groep 1"
+
+#: src/dialogs/confdialog.cxx:6555
+msgid "Background color for Function key group 1"
+msgstr "Achtergrondkleur voor functietoets groep 1"
+
+#: src/dialogs/confdialog.cxx:6560
+msgid "Group 2"
+msgstr "Groep 2"
+
+#: src/dialogs/confdialog.cxx:6561
+msgid "Background color for Function key group 2"
+msgstr "Achtergrondkleur voor functietoets groep 2"
+
+#: src/dialogs/confdialog.cxx:6566
+msgid "Group 3"
+msgstr "Groep 3"
+
+#: src/dialogs/confdialog.cxx:6567
+msgid "Background color for Function key group 3"
+msgstr "Achtergrondkleur voor functietoets groep 3"
+
+#: src/dialogs/confdialog.cxx:6575
+msgid "Font/Color"
+msgstr "Lettertype/Kleur"
+
+#: src/dialogs/confdialog.cxx:6580
+msgid "Tabs"
+msgstr "Tabs"
+
+#: src/dialogs/confdialog.cxx:6582
+msgid "Tab Color"
+msgstr "Tabkleur"
+
+#: src/dialogs/confdialog.cxx:6590
+msgid "Buttons"
+msgstr "Knoppen"
+
+#: src/dialogs/confdialog.cxx:6592
+msgid "Spot"
+msgstr "Spot"
+
+#: src/dialogs/confdialog.cxx:6595
+msgid "RxID"
+msgstr "RxID"
+
+#: src/dialogs/confdialog.cxx:6598
+msgid "TxID"
+msgstr "TxID"
+
+#: src/dialogs/confdialog.cxx:6601
+msgid "Tune"
+msgstr "Tunen"
+
+#: src/dialogs/confdialog.cxx:6604
+msgid "Lk"
+msgstr "Lock"
+
+#: src/dialogs/confdialog.cxx:6607
+msgid "Rev"
+msgstr "Rev"
+
+#: src/dialogs/confdialog.cxx:6610
+msgid "T/R"
+msgstr "T/R"
+
+#: src/dialogs/confdialog.cxx:6613
+msgid "AFC"
+msgstr "AFC"
+
+#: src/dialogs/confdialog.cxx:6616
+msgid "SQL-1"
+msgstr "SQL-1"
+
+#: src/dialogs/confdialog.cxx:6619
+msgid "SQL-2"
+msgstr "SQL-2"
+
+#: src/dialogs/confdialog.cxx:6665
+msgid "Lighted button enabled colors"
+msgstr "Lighted button enabled colors"
+
+#: src/dialogs/confdialog.cxx:6670
+msgid "SigLvl"
+msgstr "SigLvl"
+
+#: src/dialogs/confdialog.cxx:6672 src/dialogs/confdialog.cxx:9822
+msgid "Low"
+msgstr "Laag"
+
+#: src/dialogs/confdialog.cxx:6680 src/dialogs/confdialog.cxx:9822
+msgid "High"
+msgstr "Hoog"
+
+#: src/dialogs/confdialog.cxx:6688
+msgid "Normal"
+msgstr "Normaal"
+
+#: src/dialogs/confdialog.cxx:6696
+msgid "Over"
+msgstr "Over"
+
+#: src/dialogs/confdialog.cxx:6704
+msgid "Signal Level Colors"
+msgstr "Kleuren signaalniveau's"
+
+#: src/dialogs/confdialog.cxx:6712
+msgid "Touch"
+msgstr "Aanraakscherm"
+
+#: src/dialogs/confdialog.cxx:6714
+msgid ""
+"Note:\n"
+"These configuration items are useful for but not unique to using fldigi on "
+"a\n"
+"touch screen device such as a tablet."
+msgstr ""
+"Opmerking:\n"
+"Deze instellingen zijn relevant maar niet uniek voor het gebruik van Fldigi\n"
+"op een aanraakscherm, zoals een tablet."
+
+#: src/dialogs/confdialog.cxx:6718
+msgid "Arrow Key Control of Frequency Entry"
+msgstr "Frequentie-invoer met pijltjestoetsen"
+
+#: src/dialogs/confdialog.cxx:6721
+msgid ""
+"Right/Left = 1 x LSD\n"
+"Up/Dn= 10 x LSD\n"
+"Shift - Right/Left = 100 x LSD\n"
+"Shift - Up/Dn = 1000 x LSD"
+msgstr ""
+"Rechts/Links = 1 x LSD\n"
+"Omhoog/Omlaag= 10 x LSD\n"
+"Shift - Rechts/Links = 100 x LSD\n"
+"Shift - Omhoog/Omlaag = 1000 x LSD"
+
+#: src/dialogs/confdialog.cxx:6725
+msgid ""
+"Right/Left\n"
+"Select Least Signficant Digit"
+msgstr ""
+"Rechts/Links\n"
+"Kies minst significante cijfer"
+
+#: src/dialogs/confdialog.cxx:6734
+msgid "Rx / Tx Panels"
+msgstr "RX/TX schermen"
+
+#: src/dialogs/confdialog.cxx:6737
+msgid "Tx above Rx"
+msgstr "TX boven RX"
+
+#: src/dialogs/confdialog.cxx:6738
+msgid "Enable to put Tx panel above Rx panel"
+msgstr "Vink aan om TX scherm boven RX scherm te plaatsen"
+
+#: src/dialogs/confdialog.cxx:6756
+msgid "Display"
+msgstr "Toon"
+
+#: src/dialogs/confdialog.cxx:6757
+msgid "Colors and cursors"
+msgstr "Kleuren en cursors"
+
+#: src/dialogs/confdialog.cxx:6760
+msgid "aa"
+msgstr "aa"
+
+#: src/dialogs/confdialog.cxx:6775 src/dialogs/confdialog.cxx:6779
+#: src/dialogs/confdialog.cxx:6783 src/dialogs/confdialog.cxx:6787
+#: src/dialogs/confdialog.cxx:6791 src/dialogs/confdialog.cxx:6795
+#: src/dialogs/confdialog.cxx:6799 src/dialogs/confdialog.cxx:6803
+#: src/dialogs/confdialog.cxx:6807 src/dialogs/confdialog.cxx:6828
+#: src/dialogs/confdialog.cxx:6852 src/dialogs/confdialog.cxx:6876
+#: src/dialogs/confdialog.cxx:6894
+msgid "Change color"
+msgstr "Wijzig kleur"
+
+#: src/dialogs/confdialog.cxx:6810
+msgid "Load..."
+msgstr "Laden..."
+
+#: src/dialogs/confdialog.cxx:6811
+msgid "Load a new palette"
+msgstr "Nieuw palet inlezen"
+
+#: src/dialogs/confdialog.cxx:6814
+msgid "Save..."
+msgstr "Opslaan..."
+
+#: src/dialogs/confdialog.cxx:6815
+msgid "Save this palette"
+msgstr "Dit palet opslaan"
+
+#: src/dialogs/confdialog.cxx:6818 src/dialogs/confdialog.cxx:8077
+#: src/dialogs/confdialog.cxx:8173
+msgid "Bandwidth"
+msgstr "Bandbreedte"
+
+#: src/dialogs/confdialog.cxx:6821 src/dialogs/confdialog.cxx:6845
+#: src/dialogs/confdialog.cxx:6869
+msgid "ON"
+msgstr "AAN"
+
+#: src/dialogs/confdialog.cxx:6822
+msgid "Show cursor with bandwidth lines"
+msgstr "Toon cursor met bandbreedte-lijnen"
+
+#: src/dialogs/confdialog.cxx:6827 src/dialogs/confdialog.cxx:6851
+#: src/dialogs/confdialog.cxx:6875 src/dialogs/confdialog.cxx:6893
+#: src/dialogs/font_browser.cxx:141
+msgid "Color"
+msgstr "Kleur"
+
+#: src/dialogs/confdialog.cxx:6834 src/dialogs/confdialog.cxx:6858
+#: src/dialogs/confdialog.cxx:6882
+msgid "Wide"
+msgstr "Breed"
+
+#: src/dialogs/confdialog.cxx:6835 src/dialogs/confdialog.cxx:6859
+#: src/dialogs/confdialog.cxx:6870 src/dialogs/confdialog.cxx:6883
+msgid "Show bandwidth tracks on waterfall"
+msgstr "Toont bandbreedte-sporen in waterval"
+
+#: src/dialogs/confdialog.cxx:6842
+msgid "Center line"
+msgstr "Middenlijn"
+
+#: src/dialogs/confdialog.cxx:6846
+msgid "Show cursor with center line"
+msgstr "Toon cursor met middenlijn"
+
+#: src/dialogs/confdialog.cxx:6866
+msgid "Signal tracks"
+msgstr "Signaalspoor"
+
+#: src/dialogs/confdialog.cxx:6890
+msgid "Notch"
+msgstr "Notch"
+
+#: src/dialogs/confdialog.cxx:6904
+msgid "Frequency scale"
+msgstr "Frequentieschaal"
+
+#: src/dialogs/confdialog.cxx:6907
+msgid "Always show audio frequencies"
+msgstr "Altijd audiofrequentie tonen"
+
+#: src/dialogs/confdialog.cxx:6908
+msgid "Audio or RF frequencies on waterfall scale"
+msgstr "Audio of RF-frequentie aanduiding bij waterval"
+
+#: src/dialogs/confdialog.cxx:6914
+msgid "Select waterfall scale font"
+msgstr "Kies lettertype watervalschaal"
+
+#: src/dialogs/confdialog.cxx:6919
+msgid "Transmit signal"
+msgstr "Zendsignaal"
+
+#: src/dialogs/confdialog.cxx:6922
+msgid "Monitor transmitted signal"
+msgstr "Toon verzonden signaal"
+
+#: src/dialogs/confdialog.cxx:6923
+msgid "Show transmit signal on waterfall"
+msgstr "Toon zendsignaal in waterval"
+
+#: src/dialogs/confdialog.cxx:6928
+msgid "Signal level"
+msgstr "Signaalniveau"
+
+#: src/dialogs/confdialog.cxx:6929
+msgid "Set level for good viewing"
+msgstr "Kies niveau voor correcte weergave"
+
+#: src/dialogs/confdialog.cxx:6951
+msgid "FFT Processing"
+msgstr "Signaalverwerking (FFT)"
+
+#: src/dialogs/confdialog.cxx:6955 src/dialogs/confdialog.cxx:7325
+msgid "Lower limit"
+msgstr "Ondergrens (Hz)"
+
+#: src/dialogs/confdialog.cxx:6956
+msgid "Low frequency limit in Hz"
+msgstr "Laagste te verwerken frequentie in Hz"
+
+#: src/dialogs/confdialog.cxx:6975
+msgid "FFT averaging"
+msgstr "FFT uitmiddeling"
+
+#: src/dialogs/confdialog.cxx:6976
+msgid "Use averaging to decrease waterfall noise"
+msgstr "Gebruik uitmiddeling om watervalruis te verminderen"
+
+#: src/dialogs/confdialog.cxx:6981
+msgid "FFT prefilter window function"
+msgstr "FFT prefilter window function"
+
+#: src/dialogs/confdialog.cxx:6993
+msgid "Rectangular"
+msgstr "Rectangular"
+
+#: src/dialogs/confdialog.cxx:6995
+msgid "Triangular"
+msgstr "Triangular"
+
+#: src/dialogs/confdialog.cxx:7000 src/dialogs/confdialog.cxx:7337
+msgid "Upper limit"
+msgstr "Bovengrens"
+
+#: src/dialogs/confdialog.cxx:7001
+msgid "High frequency limit in Hz"
+msgstr "Hoogste frequentie in Hz"
+
+#: src/dialogs/confdialog.cxx:7020
+msgid "Latency"
+msgstr "Vertraging"
+
+#: src/dialogs/confdialog.cxx:7021
+msgid ""
+"Signal averaging over time\n"
+"0 - least\n"
+"4 - greatest"
+msgstr ""
+"Bepaling signaalgemiddelde gedurende tijd\n"
+"0 - kortst\n"
+"4 - langst"
+
+#: src/dialogs/confdialog.cxx:7043 src/dialogs/confdialog.cxx:7060
+msgid "Show me more or less waterfall"
+msgstr "Toon grotere of kleinere waterval"
+
+#: src/dialogs/confdialog.cxx:7046
+msgid "Slow drop rate"
+msgstr "Lage snelheid"
+
+#: src/dialogs/confdialog.cxx:7047
+msgid "Normal drop speed / value"
+msgstr "Normale snelheid / waarde"
+
+#: src/dialogs/confdialog.cxx:7063
+msgid "Waterfall height in pixels"
+msgstr "Hoogte van de waterval in pixels"
+
+#: src/dialogs/confdialog.cxx:7064
+msgid "CPU usage increases with waterfall height"
+msgstr "CPU gebruik neemt toe bij een grotere watervalhoogte"
+
+#: src/dialogs/confdialog.cxx:7087
+msgid "Mouse"
+msgstr "Muis"
+
+#: src/dialogs/confdialog.cxx:7091
+msgid "Left or right click always replays audio history"
+msgstr "Links of rechts klikken speelt altijd opnieuw de audio-geschiedenis af"
+
+#: src/dialogs/confdialog.cxx:7092
+msgid "Replay trackline audio"
+msgstr "Herhaal audio van het spoor"
+
+#: src/dialogs/confdialog.cxx:7097
+msgid "Dragging on the waterfall scale changes frequency"
+msgstr "Slepen op de waterval wijzigt de frequentie"
+
+#: src/dialogs/confdialog.cxx:7098
+msgid "Enable drag cursor on waterfall scale"
+msgstr "Slepen op waterval inschakelen"
+
+#: src/dialogs/confdialog.cxx:7103
+msgid "Insert text on single left click"
+msgstr "Tekst invoegen bij enkelvoudige klik linkerknop"
+
+#: src/dialogs/confdialog.cxx:7104
+msgid ""
+"Insert special text in Rx panel\n"
+"when waterfall clicked"
+msgstr ""
+"Voeg speciale tekst in bij Rx scherm\n"
+"wanneer er op de waterval geklikt wordt"
+
+#: src/dialogs/confdialog.cxx:7110
+msgid ""
+"The string <FREQ> is replaced with\n"
+"the current modem and frequency"
+msgstr ""
+"De reeks <FREQ> wordt vervangen door\n"
+"huidige modem en frequentie"
+
+#: src/dialogs/confdialog.cxx:7124
+msgid "Wheel action"
+msgstr "Functie muiswiel"
+
+#: src/dialogs/confdialog.cxx:7125
+msgid ""
+"Select how the mouse wheel\n"
+"behaves inside the waterfall"
+msgstr ""
+"Kies de functie van het muiswiel\n"
+"voor de waterval"
+
+#: src/dialogs/confdialog.cxx:7149 src/dialogs/confdialog.cxx:9976
+#: src/dialogs/confdialog.cxx:10291
+msgid "CW"
+msgstr "CW"
+
+#: src/dialogs/confdialog.cxx:7159
+msgid "Filter bandwidth"
+msgstr "Bandbreedte filter"
+
+#: src/dialogs/confdialog.cxx:7160
+msgid "CW dsp filter bandwidth"
+msgstr "CW DSP filterbandbreedte"
+
+#: src/dialogs/confdialog.cxx:7180
+msgid "Rx WPM"
+msgstr "Rx WPM"
+
+#: src/dialogs/confdialog.cxx:7186
+msgid "Tracked CW speed in WPM"
+msgstr "Gemeten CW snelheid in WPM"
+
+#: src/dialogs/confdialog.cxx:7191
+msgid "SOM decoding"
+msgstr "SOM decoding"
+
+#: src/dialogs/confdialog.cxx:7192
+msgid "Self Organizing Mapping"
+msgstr "Self Organized Mapping"
+
+#: src/dialogs/confdialog.cxx:7198
+msgid "Lower"
+msgstr "Ondergrens"
+
+#: src/dialogs/confdialog.cxx:7199
+msgid "Detector low threshold"
+msgstr "Ondergrens detector"
+
+#: src/dialogs/confdialog.cxx:7218
+msgid "Upper"
+msgstr "Boven"
+
+#: src/dialogs/confdialog.cxx:7219
+msgid "Detector high threshold"
+msgstr "Bovengrens detector"
+
+#: src/dialogs/confdialog.cxx:7238
+msgid "Matched Filter"
+msgstr "Matched Filter"
+
+#: src/dialogs/confdialog.cxx:7239
+msgid "Matched Filter bandwidth"
+msgstr "Matched Filter bandwidth"
+
+#: src/dialogs/confdialog.cxx:7245
+msgid "FFT filter"
+msgstr "FFT filter"
+
+#: src/dialogs/confdialog.cxx:7246
+msgid "FFT / FIR filter"
+msgstr "FFT / FIR filter"
+
+#: src/dialogs/confdialog.cxx:7252
+msgid "Tracking"
+msgstr "Tracking"
+
+#: src/dialogs/confdialog.cxx:7253
+msgid "Automatic Rx speed tracking"
+msgstr "Automatic Rx speed tracking"
+
+#: src/dialogs/confdialog.cxx:7259
+msgid "Range, WPM"
+msgstr "Bereik WPM"
+
+#: src/dialogs/confdialog.cxx:7260
+msgid "Range +/- wpm"
+msgstr "Bereik +/- WPM"
+
+#: src/dialogs/confdialog.cxx:7284
+msgid "TX WPM"
+msgstr "TX WPM"
+
+#: src/dialogs/confdialog.cxx:7285 src/dialogs/confdialog.cxx:7350
+msgid "My transmit CW WPM"
+msgstr "Mijn CW zendsnelheid WPM"
+
+#: src/dialogs/confdialog.cxx:7306
+msgid "The default CW speed"
+msgstr "Standaard CW snelheid"
+
+#: src/dialogs/confdialog.cxx:7326
+msgid "No slower than this"
+msgstr "Niet lager dan deze snelheid"
+
+#: src/dialogs/confdialog.cxx:7338
+msgid "No faster than this"
+msgstr "Niet hoger dan deze snelheid"
+
+#: src/dialogs/confdialog.cxx:7349
+msgid "F-WPM"
+msgstr "F-WPM"
+
+#: src/dialogs/confdialog.cxx:7370
+msgid "Use Farnsworth timing"
+msgstr "Gebruik Farnsworth timing"
+
+#: src/dialogs/confdialog.cxx:7379
+msgid "Timing and QSK"
+msgstr "Timing en QSK"
+
+#: src/dialogs/confdialog.cxx:7381
+msgid "Timing"
+msgstr "Timing"
+
+#: src/dialogs/confdialog.cxx:7384
+msgid "Weight (%)"
+msgstr "Gewicht (%)"
+
+#: src/dialogs/confdialog.cxx:7385
+msgid "Dot to dot-space ratio"
+msgstr "Verhouding punt / punt-spatie"
+
+#: src/dialogs/confdialog.cxx:7404
+msgid "Dash/Dot"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7405
+msgid "Dash to dot ratio"
+msgstr "Verhouding streep / punt"
+
+#: src/dialogs/confdialog.cxx:7423
+msgid "Edge timing"
+msgstr "In-/uitschakel timing"
+
+#: src/dialogs/confdialog.cxx:7424
+msgid "Leading and Trailing edge risetimes (msec)"
+msgstr "In- en uitschakeltijden (msec)"
+
+#: src/dialogs/confdialog.cxx:7442
+msgid "Edge shape"
+msgstr "Puslvorm in-/uitschakelen"
+
+#: src/dialogs/confdialog.cxx:7443
+msgid ""
+"Hanning/Blackman - use edge timing\n"
+"BPF - use BPF bandwidth"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7459
+#, fuzzy
+msgid "Edge decrease"
+msgstr "Inschakelpuls meetellen voor pulsbreedte"
+
+#: src/dialogs/confdialog.cxx:7460
+msgid "Weight decreases with increasing edge timing"
+msgstr "Gewicht verminderen bij verhoogde pulsbreedte"
+
+#: src/dialogs/confdialog.cxx:7465
+#, fuzzy
+msgid "BPF transmit audio"
+msgstr "CW zenden WPM"
+
+#: src/dialogs/confdialog.cxx:7466
+msgid "Enable LO/HI bfp of transmit audio"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7471
+msgid "BPF bw"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7472
+msgid "Low filter cutoff"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7493
+msgid "QSK"
+msgstr "QSK"
+
+#: src/dialogs/confdialog.cxx:7496
+msgid "QSK on right audio channel"
+msgstr "QSK op rechter audiokanaal"
+
+#: src/dialogs/confdialog.cxx:7497
+msgid "Generate square wave signal on right channel"
+msgstr "Genereer blokgolf op rechter audiokanaal"
+
+#: src/dialogs/confdialog.cxx:7502
+msgid "Pre-keydown timing (ms)"
+msgstr "Pre-keydown timing (ms)"
+
+#: src/dialogs/confdialog.cxx:7503
+msgid "Msec pre-keydown (+ is earlier in time)"
+msgstr "Msec pre-keydown (+ is earlier in time)"
+
+#: src/dialogs/confdialog.cxx:7521
+msgid "Post-keydown timing (ms)"
+msgstr "Post-keydown timing (ms)"
+
+#: src/dialogs/confdialog.cxx:7522
+msgid "Msec post-keydown (+ is earlier in time)"
+msgstr "Msec post-keydown (+ is earlier in time)"
+
+#: src/dialogs/confdialog.cxx:7540
+msgid "Send continuously"
+msgstr "Doorlopend zenden"
+
+#: src/dialogs/confdialog.cxx:7541
+msgid "Send a continuous stream of test characters"
+msgstr "Verzend een doorlopende reeks testsymbolen"
+
+#: src/dialogs/confdialog.cxx:7546
+msgid "Test char"
+msgstr "Symbool voor test"
+
+#: src/dialogs/confdialog.cxx:7547
+msgid "Test character for QSK adjustment"
+msgstr "Test symbool op QSK aanpassing"
+
+#: src/dialogs/confdialog.cxx:7567
+msgid "Prosigns"
+msgstr "Professionele symbolen"
+
+#: src/dialogs/confdialog.cxx:7572
+msgid "Use '(' paren not KN"
+msgstr "Gebruik '(', niet KN"
+
+#: src/dialogs/confdialog.cxx:7579
+msgid "<BT>"
+msgstr "<BT>"
+
+#: src/dialogs/confdialog.cxx:7596
+msgid "<AA>"
+msgstr "<AA>"
+
+#: src/dialogs/confdialog.cxx:7613
+msgid "<AS>"
+msgstr "<AS>"
+
+#: src/dialogs/confdialog.cxx:7630
+msgid "<AR>"
+msgstr "<AR>"
+
+#: src/dialogs/confdialog.cxx:7646
+msgid "<SK>"
+msgstr "<SK>"
+
+#: src/dialogs/confdialog.cxx:7663
+msgid "<KN>"
+msgstr "<KN>"
+
+#: src/dialogs/confdialog.cxx:7680
+msgid "<INT>"
+msgstr "<INT>"
+
+#: src/dialogs/confdialog.cxx:7697
+msgid "<HM>"
+msgstr "<HM>"
+
+#: src/dialogs/confdialog.cxx:7714
+msgid "<VE>"
+msgstr "<VE>"
+
+#: src/dialogs/confdialog.cxx:7737
+msgid "Dom"
+msgstr "Dom"
+
+#: src/dialogs/confdialog.cxx:7741 src/dialogs/confdialog.cxx:8697
+msgid "Secondary Text"
+msgstr "Secundaire tekst"
+
+#: src/dialogs/confdialog.cxx:7742 src/dialogs/confdialog.cxx:8698
+msgid "Text to send during keyboard idle times"
+msgstr "Deze tekst wordt verstuurd als het toetsenbord niet wordt gebruikt"
+
+#: src/dialogs/confdialog.cxx:7756 src/dialogs/confdialog.cxx:8712
+msgid "Filtering"
+msgstr "Filter"
+
+#: src/dialogs/confdialog.cxx:7757
+msgid "Use DSP filter before decoder"
+msgstr "Gebruik DSP filter voor het decoderen"
+
+#: src/dialogs/confdialog.cxx:7763 src/dialogs/confdialog.cxx:8719
+msgid "Filter bandwidth factor"
+msgstr "Filter bandbreedtefactor"
+
+#: src/dialogs/confdialog.cxx:7764 src/dialogs/confdialog.cxx:8720
+msgid "Filter bandwidth relative to signal width"
+msgstr "Filterbandbreedte ten opzichte van breedte signaal"
+
+#: src/dialogs/confdialog.cxx:7782
+msgid "FEC"
+msgstr "FEC"
+
+#: src/dialogs/confdialog.cxx:7783
+msgid "Enable MultiPSK-compatible FEC"
+msgstr "Schakel MultiPSK-compatibele FEC in"
+
+#: src/dialogs/confdialog.cxx:7788 src/dialogs/confdialog.cxx:8738
+msgid "CWI threshold"
+msgstr "CWI grens"
+
+#: src/dialogs/confdialog.cxx:7789 src/dialogs/confdialog.cxx:8739
+msgid "CWI detection and suppression"
+msgstr "CWI detectie en onderdrukking"
+
+#: src/dialogs/confdialog.cxx:7805 src/dialogs/confdialog.cxx:8774
+msgid "Paths (hidden)"
+msgstr "Paths (hidden)"
+
+#: src/dialogs/confdialog.cxx:7829
+msgid "Feld"
+msgstr "Feld"
+
+#: src/dialogs/confdialog.cxx:7833
+msgid "Transmit font"
+msgstr "Lettertype voor zenden"
+
+#: src/dialogs/confdialog.cxx:7834
+msgid "Select TX raster font"
+msgstr "Kies rasterlettertype voor zenden"
+
+#: src/dialogs/confdialog.cxx:7850
+msgid "Reverse video"
+msgstr "Reverse video"
+
+#: src/dialogs/confdialog.cxx:7851
+msgid "Display RX in reverse video"
+msgstr "Toon RX in 'reverse video'"
+
+#: src/dialogs/confdialog.cxx:7856
+msgid "Transmit width"
+msgstr "Zendbreedte"
+
+#: src/dialogs/confdialog.cxx:7857
+msgid "# of multiple scans / character line"
+msgstr "Aantal meervoudige scans per regel"
+
+#: src/dialogs/confdialog.cxx:7872
+msgid "Halve receive width"
+msgstr "Halveer ontvangstbreedte"
+
+#: src/dialogs/confdialog.cxx:7873
+msgid "Compress Rx in time"
+msgstr "Comprimeer ontvangst in de tijd"
+
+#: src/dialogs/confdialog.cxx:7878
+msgid "Pulse shape"
+msgstr "Vorm puls"
+
+#: src/dialogs/confdialog.cxx:7879
+msgid "Raised cosine pulse shape factor"
+msgstr "'Raised cosine' pulsvormfactor"
+
+#: src/dialogs/confdialog.cxx:7890
+msgid "Slow (4 msec)"
+msgstr "Langzaam (4 ms)"
+
+#: src/dialogs/confdialog.cxx:7891
+msgid "Fast (2 msec)"
+msgstr "Snel (2 ms)"
+
+#: src/dialogs/confdialog.cxx:7896
+msgid "Receive filter bandwidth"
+msgstr "Bandbreedte ontvangstfilter"
+
+#: src/dialogs/confdialog.cxx:7897
+msgid "Adjust the DSP bandwidth"
+msgstr "Pas DSP bandbreedte aan"
+
+#: src/dialogs/confdialog.cxx:7917
+msgid "Transmit periods (.) when idle"
+msgstr "Zend punten (.) indien 'idle'"
+
+#: src/dialogs/confdialog.cxx:7918
+msgid "Transmits a diddle dot when no keyboard activity"
+msgstr "Verstuur punten wanneer er geen toetsbordactiviteit is"
+
+#: src/dialogs/confdialog.cxx:7924
+msgid "2x Xmt Width (hidden)"
+msgstr "2x Xmt Width (hidden)"
+
+#: src/dialogs/confdialog.cxx:7934
+msgid "FSQ"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7935
+#, fuzzy
+msgid "Center frequency"
+msgstr "Voeg huidige frequentie toe"
+
+#: src/dialogs/confdialog.cxx:7938
+msgid "Variable"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7943
+msgid "1145 Hz fixed"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7948
+#, fuzzy
+msgid "1500 Hz fixed"
+msgstr "500 Hz limiet"
+
+#: src/dialogs/confdialog.cxx:7955
+msgid "Required hits"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7958
+msgid "Minimum:"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7971
+#, fuzzy
+msgid "Baudrate"
+msgstr "Baudrate"
+
+#: src/dialogs/confdialog.cxx:7974
+msgid "2"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7979
+msgid "3"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7984
+msgid "4.5"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7989
+msgid "6"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:7996
+#, fuzzy
+msgid "Operating"
+msgstr "Operator"
+
+#: src/dialogs/confdialog.cxx:7999
+msgid "Shaped symbols"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8000
+msgid "Amplitude shaped symbols"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8005
+msgid "QTC:"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8006
+#, fuzzy
+msgid "Enter QTC text"
+msgstr "Tekst invoegen"
+
+#: src/dialogs/confdialog.cxx:8014
+msgid "MT-63"
+msgstr "MT-63"
+
+#: src/dialogs/confdialog.cxx:8019 src/dialogs/confdialog.cxx:8160
+msgid "8-bit extended characters (UTF-8)"
+msgstr "8-bit uitgebreide karakterset (UTF-8)"
+
+#: src/dialogs/confdialog.cxx:8020
+msgid "Enable this for UTF-8 characters"
+msgstr "Schakel in voor UTF-8 (Unicode) karakters"
+
+#: src/dialogs/confdialog.cxx:8026
+msgid "Long receive integration"
+msgstr "Long receive integration"
+
+#: src/dialogs/confdialog.cxx:8027
+msgid "Enable for very weak signals"
+msgstr "Schakel in voor zeer zwakke signalen"
+
+#: src/dialogs/confdialog.cxx:8037
+msgid "Transmit lower start tone"
+msgstr "Verzend laagste starttoon"
+
+#: src/dialogs/confdialog.cxx:8042
+msgid "Transmit upper start tone"
+msgstr "Verzend hoogste starttoon"
+
+#: src/dialogs/confdialog.cxx:8048
+msgid "Tone Duration (secs)"
+msgstr "Lengte toon (s)"
+
+#: src/dialogs/confdialog.cxx:8064
+msgid "Allow manual tuning"
+msgstr "Handmatig aanpassen"
+
+#: src/dialogs/confdialog.cxx:8073
+msgid "Olivia"
+msgstr "Olivia"
+
+#: src/dialogs/confdialog.cxx:8078 src/dialogs/confdialog.cxx:8174
+msgid "Select bandwidth"
+msgstr "Kies bandbreedte"
+
+#: src/dialogs/confdialog.cxx:8094 src/dialogs/confdialog.cxx:8190
+msgid "Tones"
+msgstr "Tonen"
+
+#: src/dialogs/confdialog.cxx:8095 src/dialogs/confdialog.cxx:8191
+msgid "Select number of tones"
+msgstr "Kies aantal tonen"
+
+#: src/dialogs/confdialog.cxx:8111 src/dialogs/confdialog.cxx:8207
+msgid "Receive synchronizer"
+msgstr "Synchronisatie voor ontvangst"
+
+#: src/dialogs/confdialog.cxx:8114 src/dialogs/confdialog.cxx:8210
+msgid "Tune margin (tone frequency spacing)"
+msgstr "Afstemmarge (afstanden toonfrequenties)"
+
+#: src/dialogs/confdialog.cxx:8115 src/dialogs/confdialog.cxx:8134
+#: src/dialogs/confdialog.cxx:8211 src/dialogs/confdialog.cxx:8230
+msgid "Change ONLY to experiment"
+msgstr "Alleen aanpassen om te experimenteren!"
+
+#: src/dialogs/confdialog.cxx:8133 src/dialogs/confdialog.cxx:8229
+msgid "Integration period (FEC blocks)"
+msgstr "Integratieperiode (FEC blokken)"
+
+#: src/dialogs/confdialog.cxx:8152
+msgid "Reset FEC blocks when changing BW or Tones"
+msgstr "FEC blokken wissen bij wisselen naar BW of tonen"
+
+#: src/dialogs/confdialog.cxx:8153 src/dialogs/confdialog.cxx:8161
+msgid "Enable this for UTF-8 character transmission"
+msgstr "Maak actief om UTF-8 (Unicode) karakters te kunnen verzenden"
+
+#: src/dialogs/confdialog.cxx:8169
+msgid "Cont'"
+msgstr "Cont'"
+
+#: src/dialogs/confdialog.cxx:8250
+msgid "8-bit extended characters"
+msgstr "8-bit uitgebreide karakterset"
+
+#: src/dialogs/confdialog.cxx:8251
+msgid "Enable this for Latin-1 accented characters"
+msgstr "Maak actief voor Latin-1 karakters met diacrieten (é, ü etc.)"
+
+#: src/dialogs/confdialog.cxx:8260
+msgid "PSK"
+msgstr "PSK"
+
+#: src/dialogs/confdialog.cxx:8266
+msgid "AFC behavior"
+msgstr "AFC gedrag"
+
+#: src/dialogs/confdialog.cxx:8269
+msgid "Acquisition search range (Hz)"
+msgstr "Zoekbereik voor acquisitie (Hz)"
+
+#: src/dialogs/confdialog.cxx:8270
+msgid "Capture signals within this frequency range"
+msgstr "Herken signalen binnen gegeven bandbreedte"
+
+#: src/dialogs/confdialog.cxx:8289 src/dialogs/confdialog.cxx:10153
+msgid "Acquisition S/N (dB)"
+msgstr "S/N verhouding voor acquisitie (dB)"
+
+#: src/dialogs/confdialog.cxx:8290 src/dialogs/confdialog.cxx:10154
+msgid "Capture signals over this threshold"
+msgstr "Herken signalen boven deze grens"
+
+#: src/dialogs/confdialog.cxx:8311
+msgid "S/N and IMD behavior"
+msgstr "S/N en IMD gedrag"
+
+#: src/dialogs/confdialog.cxx:8314
+msgid "after"
+msgstr "na"
+
+#: src/dialogs/confdialog.cxx:8315
+msgid "Behavior of s/n imd"
+msgstr "Gedrag van signaalruisverhouding en IMD"
+
+#: src/dialogs/confdialog.cxx:8326
+msgid "Dim"
+msgstr "Verlaag"
+
+#: src/dialogs/confdialog.cxx:8331
+msgid "seconds"
+msgstr "seconden"
+
+#: src/dialogs/confdialog.cxx:8332
+msgid "Will occur after this time in seconds"
+msgstr "Treedt op na verstreken tijd in seconden"
+
+#: src/dialogs/confdialog.cxx:8352
+msgid "Multi-Channel Signal Processing"
+msgstr "Signaalverwerking meerdere kanalen"
+
+#: src/dialogs/confdialog.cxx:8355
+msgid "Multi-channel detector"
+msgstr "Detecteer meerdere kanelen"
+
+#: src/dialogs/confdialog.cxx:8360
+msgid "Disable on very slow CPUs of if signal browser is not used"
+msgstr ""
+"Schakel uit bij zeer langzame CPU of indien de signaalverkenner niet wordt "
+"gebruikt"
+
+#: src/dialogs/confdialog.cxx:8365
+msgid "8 psk"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8368
+msgid "Pilot tone"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8369
+msgid "Enable encode/decode vestigial pilot tone"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8374
+msgid "pilot power (dB)"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8375
+#, fuzzy
+msgid "Pilot tone power relative to signal"
+msgstr "Filterbandbreedte ten opzichte van breedte signaal"
+
+#: src/dialogs/confdialog.cxx:8402 src/dialogs/confdialog.cxx:10310
+msgid "RTTY"
+msgstr "RTTY"
+
+#: src/dialogs/confdialog.cxx:8406
+msgid "Tx"
+msgstr "TX"
+
+#: src/dialogs/confdialog.cxx:8408
+msgid "Carrier shift"
+msgstr "Shift"
+
+#: src/dialogs/confdialog.cxx:8409
+msgid "Select carrier shift"
+msgstr "Kies afstand tussen de tonen"
+
+#: src/dialogs/confdialog.cxx:8424
+msgid "Custom shift"
+msgstr "Aangepaste shift"
+
+#: src/dialogs/confdialog.cxx:8425
+msgid "Input carrier shift"
+msgstr "Input carrier shift"
+
+#: src/dialogs/confdialog.cxx:8443
+msgid "Baud rate"
+msgstr "Baudrate"
+
+#: src/dialogs/confdialog.cxx:8444
+msgid "Select carrier baudrate"
+msgstr "Kies snelheid (baud)"
+
+#: src/dialogs/confdialog.cxx:8460
+msgid "Bits per character"
+msgstr "Aantal bits per karakter"
+
+#: src/dialogs/confdialog.cxx:8461
+msgid "Select # bits / char"
+msgstr "Kies het aantal bits per karakter"
+
+#: src/dialogs/confdialog.cxx:8476
+msgid "Parity"
+msgstr "Pariteit"
+
+#: src/dialogs/confdialog.cxx:8477
+msgid "Select parity"
+msgstr "Kies pariteit"
+
+#: src/dialogs/confdialog.cxx:8492
+msgid "Stop bits"
+msgstr "Aantal stopbits"
+
+#: src/dialogs/confdialog.cxx:8493
+msgid "Select # stop bits"
+msgstr "Kies het aantal stopbits"
+
+#: src/dialogs/confdialog.cxx:8508
+msgid "AutoCRLF"
+msgstr "Automatische terugloop (CR-LF)"
+
+#: src/dialogs/confdialog.cxx:8509
+msgid "Add CRLF after page width characters"
+msgstr "Voegt CR-LF toe na aantal karakters"
+
+#: src/dialogs/confdialog.cxx:8514
+msgid "chars"
+msgstr "karakters"
+
+#: src/dialogs/confdialog.cxx:8515
+msgid "Auto CRLF line length"
+msgstr "Regelbreedte auto CR-LF"
+
+#: src/dialogs/confdialog.cxx:8533
+msgid "CR-CR-LF"
+msgstr "CR-CR-LF"
+
+#: src/dialogs/confdialog.cxx:8534
+msgid "Use \"cr cr lf\" for \"cr lf\""
+msgstr "Gebruik CR-CR-LF bij regel-einde"
+
+#: src/dialogs/confdialog.cxx:8540
+msgid "TX - unshift on space"
+msgstr "TX - lettersymbolen na spatie (UOS)"
+
+#: src/dialogs/confdialog.cxx:8541
+msgid "Revert to Unsifted char's on a space"
+msgstr "Schakel om naar lettersymbolen na ontvangen van een spatie"
+
+#: src/dialogs/confdialog.cxx:8546
+msgid "Shaped Tx"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8547
+msgid "Use wave shaping on Tx signal"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8553
+msgid "Pseudo-FSK - right channel"
+msgstr "Pseudo-FSK - rechterkanaal"
+
+#: src/dialogs/confdialog.cxx:8554
+msgid "Create keyed square wave on right audio channel"
+msgstr "Geschakelde blokgolf op rechter audiokanaal"
+
+#: src/dialogs/confdialog.cxx:8561
+msgid "Rx"
+msgstr "RX"
+
+#: src/dialogs/confdialog.cxx:8567
+msgid "AFC speed"
+msgstr "AFC snelheid"
+
+#: src/dialogs/confdialog.cxx:8568
+msgid "AFC tracking speed"
+msgstr "Snelheid waarmee AFC volgt"
+
+#: src/dialogs/confdialog.cxx:8584
+msgid "RX - unshift on space"
+msgstr "RX - unshift on space"
+
+#: src/dialogs/confdialog.cxx:8585
+msgid "Revert to unshifted char's on a space"
+msgstr "Terug naar karakters zonder shift na spatie"
+
+#: src/dialogs/confdialog.cxx:8590
+msgid "Filter Shape Factor"
+msgstr "Filtervormfactor"
+
+#: src/dialogs/confdialog.cxx:8591
+msgid ""
+"rcos timing coefficient:\n"
+"1.0 ... 2.0\n"
+"W1HKJ best 1.275\n"
+"DO2SMF best 1.500"
+msgstr ""
+"RCOS tijdcoëfficient:\n"
+"1.0 ... 2.0\n"
+"W1HKJ best 1.275\n"
+"DO2SMF best 1.500"
+
+#: src/dialogs/confdialog.cxx:8603
+msgid "Decode (CWI suppression)"
+msgstr "Decoderen (CWI onderdrukking)"
+
+#: src/dialogs/confdialog.cxx:8606
+msgid "Mark-Space"
+msgstr "Mark-Space"
+
+#: src/dialogs/confdialog.cxx:8611
+msgid "Mark only"
+msgstr "Alleen Mark"
+
+#: src/dialogs/confdialog.cxx:8616
+msgid "Space only"
+msgstr "Alleen Space"
+
+#: src/dialogs/confdialog.cxx:8623
+msgid "RTTY Scope Display"
+msgstr "RTTY scope weergave"
+
+#: src/dialogs/confdialog.cxx:8626
+msgid "Use cross hair scope"
+msgstr "Gebruik XY oscilloscoop"
+
+#: src/dialogs/confdialog.cxx:8627
+msgid "Default to cross hair digiscope"
+msgstr "Gebruik standaard XY oscilloscoop"
+
+#: src/dialogs/confdialog.cxx:8632
+msgid "XY - classic scope"
+msgstr "XY - klassieke scope"
+
+#: src/dialogs/confdialog.cxx:8633
+msgid ""
+"Enabled - use Mark/Space filter outputs\n"
+"Disabled - use pseudo signals"
+msgstr ""
+"Ingeschakeld - gebruik Mark/Space filter uitgang\n"
+"Uitgeschakeld - gebruik pseudo signalen"
+
+#: src/dialogs/confdialog.cxx:8640
+msgid "Log RTTY frequency"
+msgstr "Log RTTY frequentie"
+
+#: src/dialogs/confdialog.cxx:8643
+msgid "Use MARK freq'"
+msgstr "Gebruik Mark frequentie"
+
+#: src/dialogs/confdialog.cxx:8644
+msgid ""
+"Enabled - log QSO using Mark frequency\n"
+"Disabled - log QSO using center frequency"
+msgstr ""
+"Ingeschakeld - log QSO met frequentie Mark signaal\n"
+"Uitgeschakeld - log QSO met middenfrequentie"
+
+#: src/dialogs/confdialog.cxx:8651
+msgid "track color"
+msgstr "Kleur spoor"
+
+#: src/dialogs/confdialog.cxx:8652
+msgid "Color of Mark Track"
+msgstr "Kleur van Mark spoor"
+
+#: src/dialogs/confdialog.cxx:8662
+msgid "Synop"
+msgstr "Synop"
+
+#: src/dialogs/confdialog.cxx:8665
+msgid "SYNOP to ADIF"
+msgstr "SYNOP naar ADIF"
+
+#: src/dialogs/confdialog.cxx:8666
+msgid "Decodes SYNOP messages (Ex: Deutsche Wetterdienst) to ADIF log file"
+msgstr ""
+"Decodeert SYNOP berichten (bijv. Deutsche Wetterdienst) naar ADIF logbestand"
+
+#: src/dialogs/confdialog.cxx:8672
+msgid "SYNOP to KML"
+msgstr "SYNOP naar KML"
+
+#: src/dialogs/confdialog.cxx:8673
+msgid ""
+"Decodes SYNOP messages (Ex: Deutsche Wetterdienst) to KML documents (Ex: "
+"Google Earth)"
+msgstr ""
+"Decodeert SYNOP berichten (bijv. Deutsche Wetterdienst) naar KML bestanden"
+"(bijv. Google Earth)"
+
+#: src/dialogs/confdialog.cxx:8680
+msgid "Interleave SYNOP and text"
+msgstr "SYNOP en tekst afwisselen"
+
+#: src/dialogs/confdialog.cxx:8681
+msgid "Interleave text with decoded SYNOP messages, or replacement."
+msgstr "Wissel tekst af met gedecodeerde SYNOP berichten"
+
+#: src/dialogs/confdialog.cxx:8693
+msgid "Thor"
+msgstr "Thor"
+
+#: src/dialogs/confdialog.cxx:8713
+msgid "Enable DSP prior to decoder"
+msgstr "Schakel DSP in voor decoder"
+
+#: src/dialogs/confdialog.cxx:8755
+msgid "Preamble Detection"
+msgstr "Startsignaal-detectie"
+
+#: src/dialogs/confdialog.cxx:8756
+msgid ""
+"Detect the THOR preamble\n"
+"Clear the Rx pipeline"
+msgstr ""
+"Herken THOR startsignaal (preamble)\n"
+"Wis ontvangstbuffer"
+
+#: src/dialogs/confdialog.cxx:8761
+msgid "Soft-symbol decoding"
+msgstr "Soft-symbol decoding"
+
+#: src/dialogs/confdialog.cxx:8762
+msgid ""
+"Use soft-decision decoding for symbol detection\n"
+"Assists soft-bit decoding"
+msgstr ""
+"Gebruik soft-decision decoding voor symbooldetectie\n"
+"Ondersteunt soft-bit decoding"
+
+#: src/dialogs/confdialog.cxx:8767
+msgid "Soft-bit decoding"
+msgstr "Soft-bit decoding"
+
+#: src/dialogs/confdialog.cxx:8768
+msgid ""
+"Use soft-bit viterbi decoding for better Forward Error Correction\n"
+"Works best with soft-symbol decoding enabled"
+msgstr ""
+"Gebruik soft-bit Viterbi decodeeralgoritme voor verbeterde foutcorrectie "
+"(FEC)\n"
+"Werkt het best wanneer soft-symbol decoding ingeschakeld is"
+
+#: src/dialogs/confdialog.cxx:8798
+#, fuzzy
+msgid "Nav"
+msgstr "WAV"
+
+#: src/dialogs/confdialog.cxx:8800
+msgid "Log Navtex messages to Adif file"
+msgstr "Schrijf Navtex berichten naar ADIF bestand"
+
+#: src/dialogs/confdialog.cxx:8805
+msgid "Log Navtex messages to KML"
+msgstr "Schrijf Navtex berichten naar KML bestand"
+
+#: src/dialogs/confdialog.cxx:8806
+msgid ""
+"Logs messages to Keyhole Markup Language (Google Earth, Marble, Gaia, etc...)"
+msgstr ""
+"Schrijft berichten naar bestand met Keyhole Markup Language opmaak (Google "
+"Earth, Marble, Gaia, etc.)"
+
+#: src/dialogs/confdialog.cxx:8813
+msgid "WFax"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:8816
+msgid "Log Wefax messages to Adif file"
+msgstr "Schrijf Wefax berichten naar ADIF bestand"
+
+#: src/dialogs/confdialog.cxx:8817
+msgid "Sent and received faxes are logged to Adif file."
+msgstr ""
+"Verzonden en ontvangen faxberichten worden weggeschreven naar het ADIF "
+"bestand"
+
+#: src/dialogs/confdialog.cxx:8822
+msgid "Embedded Wefax Gui"
+msgstr "Geïntegreerde Wefax interface"
+
+#: src/dialogs/confdialog.cxx:8823
+msgid ""
+"Display tx and rx in main fldigi window.\n"
+"Change requires restart of fldigi"
+msgstr ""
+"Toon TX en RX in Fldigi hoofdscherm.\n"
+"Vereist herstart van Fldigi."
+
+#: src/dialogs/confdialog.cxx:8828
+msgid "Frequency shift (800 Hz)"
+msgstr "Frequentieshift (800 Hz)"
+
+#: src/dialogs/confdialog.cxx:8829
+msgid "Default 800 Hz. Deutsche Wetterdienst 850Hz"
+msgstr "Standaard 800 Hz (Deutsche Wetterdienst gebruikt 850 Hz)"
+
+#: src/dialogs/confdialog.cxx:8843
+msgid "Received fax maximum rows number (5000)"
+msgstr "Maximum aantal regels voor ontvangen fax (5000)"
+
+#: src/dialogs/confdialog.cxx:8844
+msgid "Maximum row number for a received fax image."
+msgstr "Maximum aantal rijen voor een ontvangen faxafbeelding"
+
+#: src/dialogs/confdialog.cxx:8858
+msgid "Fax images destination directory"
+msgstr "Map voor opslaan fax-afbeeldingen"
+
+#: src/dialogs/confdialog.cxx:8863
+msgid "Directory..."
+msgstr "Map..."
+
+#: src/dialogs/confdialog.cxx:8866
+msgid "Hide Transmission window"
+msgstr "Verberg scherm voor zenden"
+
+#: src/dialogs/confdialog.cxx:8867
+msgid "Hide transmission window by default."
+msgstr "Standaard scherm voor zenden verbergen"
+
+#: src/dialogs/confdialog.cxx:8872
+msgid "Save image as monochrome file"
+msgstr "Bewaar afbeelding als monochroom bestand"
+
+#: src/dialogs/confdialog.cxx:8873
+msgid "Save the fax image as a gray-level PNG file."
+msgstr "Bewaar fax-afbeelding als PNG bestand met grijswaarden"
+
+#: src/dialogs/confdialog.cxx:8882
+msgid "Scan"
+msgstr "Scannen"
+
+#: src/dialogs/confdialog.cxx:8884
+msgid "# scans"
+msgstr "Aantal scans"
+
+#: src/dialogs/confdialog.cxx:8893
+msgid "dB Range"
+msgstr "dB bereik"
+
+#: src/dialogs/confdialog.cxx:8902
+msgid "Use relative dB"
+msgstr "Gebruik relatieve dB"
+
+#: src/dialogs/confdialog.cxx:8913
+msgid "Rig"
+msgstr "Trx"
+
+#: src/dialogs/confdialog.cxx:8914
+msgid "Transceiver control"
+msgstr "Besturen zendontvanger"
+
+#: src/dialogs/confdialog.cxx:8918
+msgid "Hardware PTT"
+msgstr "PTT via hardware"
+
+#: src/dialogs/confdialog.cxx:8921 src/dialogs/confdialog.cxx:9712
+msgid "PTT tone on right audio channel "
+msgstr "PTT toon op rechter audiokanaal"
+
+#: src/dialogs/confdialog.cxx:8922
+msgid "Can be used in lieu of or in addition to other PTT types"
+msgstr "Kan samen met andere PTT instellingen gebruikt worden"
+
+#: src/dialogs/confdialog.cxx:8929
+msgid "h/w ptt device-pin"
+msgstr "Hardware PTT aansluiting"
+
+#: src/dialogs/confdialog.cxx:8932
+msgid "Use separate serial port PTT"
+msgstr "Gebruik afzonderlijke seriële poort voor PTT"
+
+#: src/dialogs/confdialog.cxx:8937 src/dialogs/confdialog.cxx:9034
+#: src/dialogs/confdialog.cxx:9244 src/dialogs/confdialog.cxx:9514
+msgid "Device:"
+msgstr "Poort:"
+
+#: src/dialogs/confdialog.cxx:8951
+msgid "Use RTS"
+msgstr "Gebruik RTS"
+
+#: src/dialogs/confdialog.cxx:8952
+msgid "RTS is PTT signal line"
+msgstr "RTS is verbonden met PTT"
+
+#: src/dialogs/confdialog.cxx:8956
+msgid "RTS = +V"
+msgstr "RTS = +V"
+
+#: src/dialogs/confdialog.cxx:8957
+msgid "Initial voltage on RTS"
+msgstr "Startspanning op RTS"
+
+#: src/dialogs/confdialog.cxx:8961
+msgid "Use DTR"
+msgstr "Gebruik DTR"
+
+#: src/dialogs/confdialog.cxx:8962
+msgid "DTR is PTT signal line"
+msgstr "DTR is verbonden met PTT"
+
+#: src/dialogs/confdialog.cxx:8966
+msgid "DTR = +V"
+msgstr "DTR = +V"
+
+#: src/dialogs/confdialog.cxx:8967
+msgid "Initial voltage on DTR"
+msgstr "Startspanning op DTR"
+
+#: src/dialogs/confdialog.cxx:8971 src/dialogs/confdialog.cxx:9135
+#: src/dialogs/confdialog.cxx:9397 src/dialogs/confdialog.cxx:9472
+#: src/dialogs/confdialog.cxx:10274
+msgid "Initialize"
+msgstr "Initialiseren"
+
+#: src/dialogs/confdialog.cxx:8972
+msgid "Initialize the H/W PTT interface"
+msgstr "Initialiseer de hardware PTT interface"
+
+#: src/dialogs/confdialog.cxx:8975
+msgid "Use parallel port PTT"
+msgstr "Gebruik parallelle poort voor PTT"
+
+#: src/dialogs/confdialog.cxx:8980
+msgid "Use uHRouter PTT"
+msgstr "Gebruik uHRouter PTT"
+
+#: src/dialogs/confdialog.cxx:8987
+msgid "PTT delays valid for all CAT/PTT types"
+msgstr "PTT vertraging (geldt voor alle CAT/PTT varianten)"
+
+#: src/dialogs/confdialog.cxx:8990
+msgid "Start of transmit PTT delay"
+msgstr "PTT vertraging bij begin uitzending"
+
+#: src/dialogs/confdialog.cxx:8991
+msgid "Delay NN msec before starting audio"
+msgstr "Wacht NN ms met audio"
+
+#: src/dialogs/confdialog.cxx:9000
+msgid "PTT end of transmit delay"
+msgstr "PTT vertraging bij einde uitzending"
+
+#: src/dialogs/confdialog.cxx:9001
+msgid "Delay NN msec before releasing PTT"
+msgstr "Wacht NN ms voor loslaten PTT"
+
+#: src/dialogs/confdialog.cxx:9014
+msgid "RigCAT"
+msgstr "RigCAT"
+
+#: src/dialogs/confdialog.cxx:9015
+msgid "Rig Control using xml spec file"
+msgstr "Zendontvanger besturen via CAT volgens XML bestand"
+
+#: src/dialogs/confdialog.cxx:9017
+msgid "Use RigCAT"
+msgstr "Gebruik RigCAT"
+
+#: src/dialogs/confdialog.cxx:9018
+msgid "RigCAT used for rig control"
+msgstr "RigCAT gebruiken voor besturing zendontvanger"
+
+#: src/dialogs/confdialog.cxx:9024
+msgid "Rig description file:"
+msgstr "RigCAT bestand met definities:"
+
+#: src/dialogs/confdialog.cxx:9025
+msgid "Use Open to select descriptor file"
+msgstr "Gebruik 'Open' om bestand met omschrijvingen te kiezen"
+
+#: src/dialogs/confdialog.cxx:9031
+msgid "Select rig descriptor file"
+msgstr "Kies RigCAT definitiebestand"
+
+#: src/dialogs/confdialog.cxx:9049 src/dialogs/confdialog.cxx:9259
+msgid "Retries"
+msgstr "Pogingen"
+
+#: src/dialogs/confdialog.cxx:9050
+msgid "# retries before giving up"
+msgstr "Aantal pogingen voordat RigCAT uitgeschakeld wordt"
+
+#: src/dialogs/confdialog.cxx:9066 src/dialogs/confdialog.cxx:9362
+msgid "Retry interval (ms)"
+msgstr "Interval tussen pogingen (ms)"
+
+#: src/dialogs/confdialog.cxx:9067
+msgid "Time between retires in msec"
+msgstr "Tijd tussen pogingen in ms"
+
+#: src/dialogs/confdialog.cxx:9083 src/dialogs/confdialog.cxx:9293
+msgid "Write delay (ms)"
+msgstr "Wachttijd (ms)"
+
+#: src/dialogs/confdialog.cxx:9084
+msgid "Wait for response to subsequent command"
+msgstr "Wacht op reactie op volgende commando"
+
+#: src/dialogs/confdialog.cxx:9100 src/dialogs/confdialog.cxx:9327
+msgid "Baud rate:"
+msgstr "Bitrate (b/s):"
+
+#: src/dialogs/confdialog.cxx:9116 src/dialogs/confdialog.cxx:9343
+msgid "Stopbits"
+msgstr "Aantal stopbits"
+
+#: src/dialogs/confdialog.cxx:9136
+msgid "Initialize RigCAT interface"
+msgstr "Initialiseer RigCAT besturing"
+
+#: src/dialogs/confdialog.cxx:9139
+msgid "Commands are echoed"
+msgstr "Commando's worden herhaald"
+
+#: src/dialogs/confdialog.cxx:9140
+msgid "Rig or interface echos serial data"
+msgstr ""
+"Seriële interface van zendontvanger herhaalt elk karakter dat gestuurd wordt"
+
+#: src/dialogs/confdialog.cxx:9145
+msgid "CAT command for PTT"
+msgstr "CAT commando voor PTT"
+
+#: src/dialogs/confdialog.cxx:9146
+msgid "PTT is a CAT command (not hardware)"
+msgstr "Voor PTT een CAT commando gebruiken (niet via hardware)"
+
+#: src/dialogs/confdialog.cxx:9152
+msgid "Toggle RTS for PTT"
+msgstr "Gebruik RTS voor PTT"
+
+#: src/dialogs/confdialog.cxx:9153
+msgid "RTS is ptt line"
+msgstr "PTT is aangesloten op RTS"
+
+#: src/dialogs/confdialog.cxx:9158
+msgid "Toggle DTR for PTT"
+msgstr "Gebruik DTR voor PTT"
+
+#: src/dialogs/confdialog.cxx:9159
+msgid "DTR is ptt line"
+msgstr "PTT is aangesloten op DTR"
+
+#: src/dialogs/confdialog.cxx:9164
+msgid "RTS +12 v"
+msgstr "RTS +12 V"
+
+#: src/dialogs/confdialog.cxx:9165 src/dialogs/confdialog.cxx:9429
+msgid "Initial state of RTS"
+msgstr "RTS beginwaarde"
+
+#: src/dialogs/confdialog.cxx:9170
+msgid "DTR +12 v"
+msgstr "DTR +12 V"
+
+#: src/dialogs/confdialog.cxx:9171 src/dialogs/confdialog.cxx:9423
+msgid "Initial state of DTR"
+msgstr "DTR beginwaarde"
+
+#: src/dialogs/confdialog.cxx:9176 src/dialogs/confdialog.cxx:9434
+msgid "RTS/CTS flow control"
+msgstr "RTS/CTS flow control"
+
+#: src/dialogs/confdialog.cxx:9177
+msgid "Rig uses RTS/CTS handshake"
+msgstr "Zendontvanger gebruikt RTS/CTS voor pauzeren/hervatten dataverkeer"
+
+#: src/dialogs/confdialog.cxx:9182
+msgid "Restore Settings on Close"
+msgstr "Herstel instellingen bij sluiten"
+
+#: src/dialogs/confdialog.cxx:9183
+msgid "Restore the serial (COM) port settings"
+msgstr "Zet de seriële poort-instellingen terug"
+
+#: src/dialogs/confdialog.cxx:9188 src/dialogs/confdialog.cxx:9447
+msgid "Revert"
+msgstr "Terug"
+
+#: src/dialogs/confdialog.cxx:9189
+msgid "Reset rigCAT interface"
+msgstr "Reset RigCAT besturing"
+
+#: src/dialogs/confdialog.cxx:9194
+msgid "VSP Enable"
+msgstr "VSP inschakelen"
+
+#: src/dialogs/confdialog.cxx:9195
+msgid "Virtual Serial Port Emulator - suppress WARNINGS"
+msgstr "Virtuele Seriële Poort emulator - onderdrukt waarschuwingen"
+
+#: src/dialogs/confdialog.cxx:9200
+msgid "Init delay (ms)"
+msgstr "Wachttijd initialisatie (ms)"
+
+#: src/dialogs/confdialog.cxx:9201
+msgid "Wait for response to first CAT command"
+msgstr "Wacht op reactie op eerste CAT commando"
+
+#: src/dialogs/confdialog.cxx:9221
+msgid "Hamlib"
+msgstr "Hamlib"
+
+#: src/dialogs/confdialog.cxx:9223
+msgid "Use Hamlib"
+msgstr "Gebruik Hamlib"
+
+#: src/dialogs/confdialog.cxx:9224
+msgid "Hamlib used for rig control"
+msgstr "Hamlib gebruiken voor besturing zendontvanger"
+
+#: src/dialogs/confdialog.cxx:9230
+msgid "Rig:"
+msgstr "TRX:"
+
+#: src/dialogs/confdialog.cxx:9260
+msgid "# times to resend command before giving up"
+msgstr "Aantal pogingen voordat besturing gestopt wordt"
+
+#: src/dialogs/confdialog.cxx:9276
+msgid "Retry Interval (ms)"
+msgstr "Interval (ms)"
+
+#: src/dialogs/confdialog.cxx:9277 src/dialogs/confdialog.cxx:9363
+msgid "Msec's between retries"
+msgstr "Wachttijd tussen pogingen in ms"
+
+#: src/dialogs/confdialog.cxx:9294
+msgid "Msec's between sequential commands"
+msgstr "Wachttijd in ms tussen opeenvolgende commando's"
+
+#: src/dialogs/confdialog.cxx:9310
+msgid "Post write delay (ms)"
+msgstr "Wachttijd na commando (ms)"
+
+#: src/dialogs/confdialog.cxx:9311
+msgid "Wait interval (msecs) before reading response"
+msgstr "Wachttijd in ms voordat antwoord gelezen wordt"
+
+#: src/dialogs/confdialog.cxx:9382
+msgid "Advanced configuration:"
+msgstr "Geavanceerde instellingen:"
+
+#: src/dialogs/confdialog.cxx:9383
+msgid ""
+"Optional configuration\n"
+"in format: param=val ..."
+msgstr ""
+"Extra instellingen met\n"
+"opmaak: parameter=waarde ..."
+
+#: src/dialogs/confdialog.cxx:9398
+msgid "Initialize hamlib interface"
+msgstr "Initialiseer Hamlib besturing"
+
+#: src/dialogs/confdialog.cxx:9401
+msgid "Sideband:"
+msgstr "Zijband"
+
+#: src/dialogs/confdialog.cxx:9415
+msgid "PTT via Hamlib command"
+msgstr "PTT via CAT commando"
+
+#: src/dialogs/confdialog.cxx:9416
+msgid "PTT is a hamlib command"
+msgstr "PTT wordt geactiveerd via een CAT commando (niet via hardware)"
+
+#: src/dialogs/confdialog.cxx:9422
+msgid "DTR +12"
+msgstr "DTR +12 V"
+
+#: src/dialogs/confdialog.cxx:9428
+msgid "RTS +12"
+msgstr "RTS +12 V"
+
+#: src/dialogs/confdialog.cxx:9435
+msgid "Rig requires RTS/CTS flow control"
+msgstr "Zendontvanger vereist RTS/CTS flow control"
+
+#: src/dialogs/confdialog.cxx:9441
+msgid "XON/XOFF flow control"
+msgstr "XON/XOFF flow control"
+
+#: src/dialogs/confdialog.cxx:9442
+msgid "Rig requires Xon/Xoff flow control"
+msgstr "Zendontvanger vereist XON/XOFF flow control"
+
+#: src/dialogs/confdialog.cxx:9448
+msgid "Reset hamlib interface"
+msgstr "Reset Hamlib besturing"
+
+#: src/dialogs/confdialog.cxx:9457
+msgid "XML-RPC"
+msgstr "XML-RPC"
+
+#: src/dialogs/confdialog.cxx:9465
+msgid ""
+"Rig control via external\n"
+"program using xmlrpc\n"
+"remote calls."
+msgstr ""
+"Besturing zendontvanger\n"
+"via extern programma\n"
+"met XML-RPC protocol."
+
+#: src/dialogs/confdialog.cxx:9467
+msgid "Use XML-RPC program"
+msgstr "Gebruik XML-RPC besturing"
+
+#: src/dialogs/confdialog.cxx:9468
+msgid "Experimental"
+msgstr "Experimenteel"
+
+#: src/dialogs/confdialog.cxx:9473
+msgid "Initialize XML-RPC rig control"
+msgstr "Initialiseer XML-RPC besturing"
+
+#: src/dialogs/confdialog.cxx:9480
+msgid "Mode/BW delay"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:9481
+msgid ""
+"Delay in seconds between <RIGMODE... and <FILWID...\n"
+"when both in same macro definition"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:9501
+msgid "Audio devices"
+msgstr "Geluidsapparaten"
+
+#: src/dialogs/confdialog.cxx:9505
+msgid "Devices"
+msgstr "Apparaten"
+
+#: src/dialogs/confdialog.cxx:9508
+msgid "OSS"
+msgstr "OSS"
+
+#: src/dialogs/confdialog.cxx:9509
+msgid "Use OSS audio server"
+msgstr "Gebruik OSS audioserver"
+
+#: src/dialogs/confdialog.cxx:9515
+msgid "Select device"
+msgstr "Kies apparaat"
+
+#: src/dialogs/confdialog.cxx:9523
+msgid "PortAudio"
+msgstr "PortAudio"
+
+#: src/dialogs/confdialog.cxx:9524
+msgid "Use Port Audio server"
+msgstr "Gebruik PortAudio server"
+
+#: src/dialogs/confdialog.cxx:9529
+msgid "Capture:"
+msgstr "Opnemen:"
+
+#: src/dialogs/confdialog.cxx:9530
+msgid "Audio input device"
+msgstr "Apparaat voor ontvangst"
+
+#: src/dialogs/confdialog.cxx:9534
+msgid "Playback:"
+msgstr "Afspelen:"
+
+#: src/dialogs/confdialog.cxx:9535
+msgid "Audio output device"
+msgstr "Apparaat voor zenden"
+
+#: src/dialogs/confdialog.cxx:9543
+msgid "PulseAudio"
+msgstr "PulseAudio"
+
+#: src/dialogs/confdialog.cxx:9544
+msgid "Use Pulse Audio server"
+msgstr "Gebruik PulseAudio server"
+
+#: src/dialogs/confdialog.cxx:9549
+msgid "Server string:"
+msgstr "Server tekenreeks:"
+
+#: src/dialogs/confdialog.cxx:9550
+msgid ""
+"Leave this blank or refer to\n"
+"http://www.pulseaudio.org/wiki/ServerStrings"
+msgstr ""
+"Laat veld leeg of kijk op\n"
+"http://www.pulseaudio.org/wiki/ServerStrings"
+
+#: src/dialogs/confdialog.cxx:9568
+msgid "File I/O only"
+msgstr "Alleen file I/O"
+
+#: src/dialogs/confdialog.cxx:9569
+msgid "NO AUDIO DEVICE AVAILABLE (or testing)"
+msgstr "Geen audioapparaat beschikbaar (of test)"
+
+#: src/dialogs/confdialog.cxx:9578
+msgid "Settings"
+msgstr "Instellingen"
+
+#: src/dialogs/confdialog.cxx:9580
+msgid "Sample rate"
+msgstr "Sample snelheid"
+
+#: src/dialogs/confdialog.cxx:9583
+msgid "Capture"
+msgstr "Opnemen"
+
+#: src/dialogs/confdialog.cxx:9584
+msgid ""
+"Force a specific sample rate. Select \"Native\" if \"Auto\"\n"
+"does not work well with your audio device."
+msgstr ""
+"Forceer sample snelheid. Kies \"Native\" als \"Auto\"\n"
+"niet goed werkt met je geluidskaart."
+
+#: src/dialogs/confdialog.cxx:9616
+msgid "Converter"
+msgstr "Converter"
+
+#: src/dialogs/confdialog.cxx:9617
+msgid "Set the type of resampler used of offset correction"
+msgstr "Kies resampler type voor offset correctie"
+
+#: src/dialogs/confdialog.cxx:9633
+msgid "Corrections"
+msgstr "Correcties"
+
+#: src/dialogs/confdialog.cxx:9636
+msgid "RX ppm"
+msgstr "RX ppm"
+
+#: src/dialogs/confdialog.cxx:9637
+msgid "RX sound card correction"
+msgstr "Correctie geluidskaart voor ontvangst"
+
+#: src/dialogs/confdialog.cxx:9653
+msgid "TX ppm"
+msgstr "TX ppm"
+
+#: src/dialogs/confdialog.cxx:9654
+msgid "TX sound card correction"
+msgstr "Correctie geluidskaart voor zenden"
+
+#: src/dialogs/confdialog.cxx:9670
+msgid "TX offset"
+msgstr "TX offset"
+
+#: src/dialogs/confdialog.cxx:9671
+msgid "Difference between Rx & Tx freq (rig offset)"
+msgstr "Verschil tussen Rx & Tx frequenties (TRX offset)"
+
+#: src/dialogs/confdialog.cxx:9691
+msgid "Right channel"
+msgstr "Rechterkanaal"
+
+#: src/dialogs/confdialog.cxx:9693
+#, fuzzy
+msgid "Transmit Usage"
+msgstr "Zendsignaal"
+
+#: src/dialogs/confdialog.cxx:9696
+msgid "Modem signal on left and right channels"
+msgstr "Modemsignaal op linker- en rechterkanaal"
+
+#: src/dialogs/confdialog.cxx:9697
+msgid "Left and right channels both contain modem audio"
+msgstr "De linker- en rechterkanalen bevatten beiden geluid"
+
+#: src/dialogs/confdialog.cxx:9702 src/dialogs/confdialog.cxx:9738
+msgid "Reverse Left/Right channels"
+msgstr "Verwissel linker- en rechterkanaal"
+
+#: src/dialogs/confdialog.cxx:9703 src/dialogs/confdialog.cxx:9739
+msgid "Software reversal of left-right audio channels"
+msgstr "Linker- en rechteraudiokanaal verwisselen in software"
+
+#: src/dialogs/confdialog.cxx:9708
+msgid ""
+"...\n"
+"These controls are on other tabs.\n"
+"They are replicated here for convenience.\n"
+"You may change the state from either location.\n"
+"..."
+msgstr ""
+"...\n"
+"Deze instellingen staan op andere tabbladen.\n"
+"Ze zijn hier weergegeven voor het gemak.\n"
+"De instellingen kunnen op beide plekken worden aangepast.\n"
+"..."
+
+#: src/dialogs/confdialog.cxx:9713
+msgid ""
+"1000 Hz tone when PTT enabled\n"
+"Can be used in lieu of or in addition to other PTT types"
+msgstr ""
+"1000 Hz toon indien PTT is ingeschakeld\n"
+"Kan in combinatie met een andere vorm van PTT besturing worden gebruikt"
+
+#: src/dialogs/confdialog.cxx:9719
+msgid "CW QSK signal on right channel"
+msgstr "CW QSK signaal op rechterkanaal"
+
+#: src/dialogs/confdialog.cxx:9720
+msgid "Generate 1000 Hz square wave signal on right channel"
+msgstr "Genereer 1000 Hz blokgolf op rechterkanaal"
+
+#: src/dialogs/confdialog.cxx:9725
+msgid "Pseudo-FSK on right audio channel"
+msgstr "Pseudo-FSK op rechter audiokanaal"
+
+#: src/dialogs/confdialog.cxx:9726
+msgid "Create 1000 Hz square wave on right channel"
+msgstr "Maak 1000 Hz blokgolf op rechterkanaal"
+
+#: src/dialogs/confdialog.cxx:9735
+#, fuzzy
+msgid "Receive Usage"
+msgstr "Ontvangen"
+
+#: src/dialogs/confdialog.cxx:9748
+msgid "Wav"
+msgstr "WAV"
+
+#: src/dialogs/confdialog.cxx:9750
+msgid "Wav write sample rate"
+msgstr "Samplefrequentie voor WAV schrijven"
+
+#: src/dialogs/confdialog.cxx:9751
+msgid "Pick baud rate from list"
+msgstr "Kies bitrate uit de lijst"
+
+#: src/dialogs/confdialog.cxx:9773
+msgid "ID"
+msgstr "ID"
+
+#: src/dialogs/confdialog.cxx:9776
+msgid "RsID"
+msgstr "RsID"
+
+#: src/dialogs/confdialog.cxx:9777
+msgid "Reed-Solomon ID (Rx)"
+msgstr "Reed-Solomon ID (Rx)"
+
+#: src/dialogs/confdialog.cxx:9780
+msgid "Notify only"
+msgstr "Alleen kennisgeving"
+
+#: src/dialogs/confdialog.cxx:9781
+msgid ""
+"Check this to be notified when an RSID is received\n"
+"without changing modem and frequency"
+msgstr ""
+"Schakel in voor notificatie bij RsID\n"
+"zonder wijziging van modem en frequentie"
+
+#: src/dialogs/confdialog.cxx:9787
+msgid "Receive modes"
+msgstr "Ontvangstmodes"
+
+#: src/dialogs/confdialog.cxx:9790
+msgid "Searches passband"
+msgstr "Doorzoekt doorlaatband"
+
+#: src/dialogs/confdialog.cxx:9791
+msgid ""
+"ON - search over entire waterfall\n"
+"OFF - limit search to +/- 200 Hz"
+msgstr ""
+"AAN - doorzoek gehele audiospectrum\n"
+"OFF - beperk zoeken tot +/- 200 Hz"
+
+#: src/dialogs/confdialog.cxx:9796
+msgid "Mark prev freq/mode"
+msgstr "Markeer vorige freq/mode"
+
+#: src/dialogs/confdialog.cxx:9797
+msgid ""
+"Insert RX text marker before\n"
+"changing frequency and modem"
+msgstr ""
+"Voeg RX markering in voor het\n"
+"wijzigen van frequentie en modem"
+
+#: src/dialogs/confdialog.cxx:9802
+msgid "Disables detector"
+msgstr "Schakelt detector uit"
+
+#: src/dialogs/confdialog.cxx:9803
+msgid "Disable further detection when RSID is received"
+msgstr "Na ontvangst van RsID wordt verdere detectie uitgeschakeld"
+
+#: src/dialogs/confdialog.cxx:9810
+msgid "Allow errors"
+msgstr "Sta fouten toe"
+
+#: src/dialogs/confdialog.cxx:9811
+msgid ""
+"Low = zero errors\n"
+"Medium = 1 error\n"
+"High = 2 errors"
+msgstr ""
+"Laag = 0 fouten\n"
+"Middel = 1 fout\n"
+"Hoog = 2 fouten"
+
+#: src/dialogs/confdialog.cxx:9822
+msgid "Medium"
+msgstr "Middel"
+
+#: src/dialogs/confdialog.cxx:9827
+msgid "Squelch open (sec)"
+msgstr "Squelch open (s)"
+
+#: src/dialogs/confdialog.cxx:9828
+msgid "Open squelch for nn sec if RSID detected"
+msgstr "Open squelch aantal seconden bij RsID detectie"
+
+#: src/dialogs/confdialog.cxx:9846
+msgid "Disable alert dialog"
+msgstr "Schakel waarschuwingsscherm uit"
+
+#: src/dialogs/confdialog.cxx:9847
+msgid "Do not show RsID alert dialog box"
+msgstr "RsID waarschuwing niet tonen"
+
+#: src/dialogs/confdialog.cxx:9852
+msgid "Retain tx freq lock"
+msgstr "TX frequentie-lock behouden"
+
+#: src/dialogs/confdialog.cxx:9853
+msgid "Retain TX lock frequency (Lk) when changing to RX RsID frequency"
+msgstr "TX frequentie vasthouden (Lk) bij wisselen naar RsID RX frequentie"
+
+#: src/dialogs/confdialog.cxx:9858
+msgid "Disable freq change"
+msgstr "Schakel frequentiewijzingen uit"
+
+#: src/dialogs/confdialog.cxx:9859
+msgid "Do not automatically change to RX RsID frequency"
+msgstr "Niet automatisch wisselen naar RsID RX frequentie"
+
+#: src/dialogs/confdialog.cxx:9864
+msgid ""
+"The RsID notification message contents and\n"
+"display characteristics are configured on the\n"
+"\"Notifications\" configure dialog."
+msgstr ""
+"De RsID notificatie kan worden geconfigureerd\n"
+"via het \"Notificaties\" instellingenscherm."
+
+#: src/dialogs/confdialog.cxx:9872
+msgid "Pre-Signal Tone"
+msgstr "Toon vóór signaal"
+
+#: src/dialogs/confdialog.cxx:9875
+msgid "Seconds"
+msgstr "seconden"
+
+#: src/dialogs/confdialog.cxx:9876
+msgid "Use for triggering amplifier carrier detect"
+msgstr "Use for triggering amplifier carrier detect"
+
+#: src/dialogs/confdialog.cxx:9884
+msgid "Reed-Solomon ID (Tx)"
+msgstr "Reed-Solomon ID (Tx)"
+
+#: src/dialogs/confdialog.cxx:9887
+msgid "Transmit modes"
+msgstr "Zendmodes"
+
+#: src/dialogs/confdialog.cxx:9890
+msgid "End of xmt ID"
+msgstr "ID na einde uitzending"
+
+#: src/dialogs/confdialog.cxx:9891
+msgid "Add RsID signal to end of transmission"
+msgstr "Voeg RsID signaal toe achter uitzending"
+
+#: src/dialogs/confdialog.cxx:9900
+msgid "Video"
+msgstr "Video"
+
+#: src/dialogs/confdialog.cxx:9902
+msgid "Video Preamble ID"
+msgstr "Video Preamble ID"
+
+#: src/dialogs/confdialog.cxx:9905
+msgid "Transmit mode ID"
+msgstr "Transmit mode ID"
+
+#: src/dialogs/confdialog.cxx:9906
+msgid "Waterfall video ID"
+msgstr "Waterval video ID"
+
+#: src/dialogs/confdialog.cxx:9910
+msgid "Transmit video text"
+msgstr "Transmit video text"
+
+#: src/dialogs/confdialog.cxx:9911
+msgid "Waterfall video text"
+msgstr "Waterval video text"
+
+#: src/dialogs/confdialog.cxx:9916
+msgid ":"
+msgstr ":"
+
+#: src/dialogs/confdialog.cxx:9917
+msgid ""
+"Limit to a few characters,\n"
+"as in CQEM or IOTA etc."
+msgstr ""
+"Beperkt tot enkele tekens,\n"
+"zoals bij CQEM of IOTA etc."
+
+#: src/dialogs/confdialog.cxx:9931
+msgid "Use small font"
+msgstr "Gebruik klein lettertype"
+
+#: src/dialogs/confdialog.cxx:9932
+msgid ""
+"ON - small font\n"
+"OFF - large font"
+msgstr ""
+"AAN - klein lettertype\n"
+"UIT - groot lettertype"
+
+#: src/dialogs/confdialog.cxx:9938
+msgid "Chars/Row:"
+msgstr "Tekens/rij:"
+
+#: src/dialogs/confdialog.cxx:9939
+msgid "Set the number of characters per row"
+msgstr "Stel het aantal tekens per rij in"
+
+#: src/dialogs/confdialog.cxx:9959
+msgid "500 Hz limit"
+msgstr "500 Hz limiet"
+
+#: src/dialogs/confdialog.cxx:9964
+msgid "Mode width limit"
+msgstr "Mode met beperking"
+
+#: src/dialogs/confdialog.cxx:9969
+msgid "Video ID modes"
+msgstr "Video ID modes"
+
+#: src/dialogs/confdialog.cxx:9978
+msgid "CW Postamble ID"
+msgstr "CW Postamble ID"
+
+#: src/dialogs/confdialog.cxx:9981
+msgid "Transmit callsign"
+msgstr "Verzend roepnaam"
+
+#: src/dialogs/confdialog.cxx:9982
+msgid "Send Callsign in CW at end of every transmission"
+msgstr "Verzend roepnaam in CW na elke uitzending"
+
+#: src/dialogs/confdialog.cxx:9987
+msgid "Speed (WPM):"
+msgstr "Snelheid (WPM):"
+
+#: src/dialogs/confdialog.cxx:9988
+msgid "Send at this WPM"
+msgstr "Zend met deze snelheid"
+
+#: src/dialogs/confdialog.cxx:10008
+msgid "CW ID modes"
+msgstr "CW ID modes"
+
+#: src/dialogs/confdialog.cxx:10023
+msgid "CPU"
+msgstr "CPU"
+
+#: src/dialogs/confdialog.cxx:10027
+msgid "Slow CPU (less than 700MHz)"
+msgstr "Langzame CPU (minder dan 700 MHz)"
+
+#: src/dialogs/confdialog.cxx:10028
+msgid "Enable if you're computer does not decode properly"
+msgstr "Maak actief indien de computer niet goed decodeert"
+
+#: src/dialogs/confdialog.cxx:10037
+msgid "NBEMS"
+msgstr "NBEMS"
+
+#: src/dialogs/confdialog.cxx:10039
+msgid "NBEMS data file interface"
+msgstr "NBEMS databestand interface"
+
+#: src/dialogs/confdialog.cxx:10042
+msgid "Enable"
+msgstr "Actief"
+
+#: src/dialogs/confdialog.cxx:10043
+msgid "Extract files for use with external \"wrap / flmsg\" program"
+msgstr "Bestanden aanmaken voor gebruik met extern programma"
+
+#: src/dialogs/confdialog.cxx:10048
+msgid "Open message folder"
+msgstr "Open berichtenmap"
+
+#: src/dialogs/confdialog.cxx:10049
+msgid "Opens NBEMS file folder upon successful capture"
+msgstr "Open NBEMS map na successvolle herkenning"
+
+#: src/dialogs/confdialog.cxx:10056
+msgid "Reception of flmsg files"
+msgstr "Ontvangst van 'flmsg' bestanden"
+
+#: src/dialogs/confdialog.cxx:10059
+msgid "Open with flmsg"
+msgstr "Open met 'flmsg'"
+
+#: src/dialogs/confdialog.cxx:10060
+msgid "Open message with flmsg"
+msgstr "Open bericht met 'flmsg'"
+
+#: src/dialogs/confdialog.cxx:10065
+msgid "Open in browser"
+msgstr "Open met browser"
+
+#: src/dialogs/confdialog.cxx:10066
+msgid "Open file with default browser"
+msgstr "Open bestand met standaard browser"
+
+#: src/dialogs/confdialog.cxx:10071
+msgid "flmsg:"
+msgstr "flmsg:"
+
+#: src/dialogs/confdialog.cxx:10072
+msgid "Enter full path-filename for flmsg"
+msgstr "Voer het complete pad in voor 'flmsg'"
+
+#: src/dialogs/confdialog.cxx:10085
+msgid "Locate flmsg"
+msgstr "Locatie 'flmsg'"
+
+#: src/dialogs/confdialog.cxx:10089
+msgid "Timeout (secs)"
+msgstr "Timeout (s)"
+
+#: src/dialogs/confdialog.cxx:10090
+msgid "Extract times out after NN seconds of inactivity."
+msgstr "Berichtherkenning stopt na NN seconden inactiviteit"
+
+#: src/dialogs/confdialog.cxx:10107
+msgid "Pskmail"
+msgstr "Pskmail"
+
+#: src/dialogs/confdialog.cxx:10110
+msgid "Mail Server Attributes"
+msgstr "Mail server instellingen"
+
+#: src/dialogs/confdialog.cxx:10113
+msgid "Carrier frequency (Hz)"
+msgstr "Carrier frequentie (Hz)"
+
+#: src/dialogs/confdialog.cxx:10114
+msgid "Default listen / transmit frequency"
+msgstr "Standaard audiofrequentie voor ontvangen/zenden"
+
+#: src/dialogs/confdialog.cxx:10133
+msgid "Search range (Hz)"
+msgstr "Zoekbereik (Hz)"
+
+#: src/dialogs/confdialog.cxx:10134
+msgid "Listen for signals within this range"
+msgstr "Luister naar signalen binnen dit bereik"
+
+#: src/dialogs/confdialog.cxx:10173
+msgid "AFC range (Hz)"
+msgstr "AFC bereik (Hz)"
+
+#: src/dialogs/confdialog.cxx:10174
+msgid "Limit AFC movement to this range"
+msgstr "Beperk AFC tot dit bereik"
+
+#: src/dialogs/confdialog.cxx:10193
+msgid "Reset to Carrier"
+msgstr "Terug naar carrier"
+
+#: src/dialogs/confdialog.cxx:10194
+msgid "When no signal present"
+msgstr "Ga terug naar carrierfrequentie bij geen signaal"
+
+#: src/dialogs/confdialog.cxx:10205
+msgid "Report ARQ frames average S/N"
+msgstr "Rapporteer gemiddelde S/N van ARQ frames"
+
+#: src/dialogs/confdialog.cxx:10214
+msgid "Spotting"
+msgstr "Spotten"
+
+#: src/dialogs/confdialog.cxx:10216
+msgid "PSK Reporter"
+msgstr "PSK Reporter"
+
+#: src/dialogs/confdialog.cxx:10219
+msgid "Automatically spot callsigns in decoded text"
+msgstr "Spot roepnamen in gedecodeerde tekst automatisch"
+
+#: src/dialogs/confdialog.cxx:10220
+msgid "Parse all incoming text"
+msgstr "Controleer alle ontvangen tekst"
+
+#: src/dialogs/confdialog.cxx:10225
+msgid "Send reception report when logging a QSO"
+msgstr "Stuur ontvangstrapport bij loggen QSO"
+
+#: src/dialogs/confdialog.cxx:10226
+msgid "Send report only when QSO is logged"
+msgstr "Stuur rapport alleen als QSO is gelogd"
+
+#: src/dialogs/confdialog.cxx:10231
+msgid "Report rig frequency (enable only if you have rig control!)"
+msgstr "Vermeld frequentie (gebruik alleen bij actieve TRX besturing!)"
+
+#: src/dialogs/confdialog.cxx:10232
+msgid "Include the transmit frequency"
+msgstr "Stuur frequentie van de zendontvanger mee met spot"
+
+#: src/dialogs/confdialog.cxx:10237
+msgid "Disable spotting when signal browser(s) are not visible."
+msgstr "Schakel spotting uit als de signaalverkenner(s) niet zichtbaar zijn."
+
+#: src/dialogs/confdialog.cxx:10238
+msgid "Check to reduce CPU load in PSK and RTTY modes."
+msgstr "Vink aan om CPU gebruik bij PSK en RTTY te beperken."
+
+#: src/dialogs/confdialog.cxx:10244
+msgid "Host:"
+msgstr "Server:"
+
+#: src/dialogs/confdialog.cxx:10245
+msgid "To whom the connection is made"
+msgstr "Serveradres PSK Reporter"
+
+#: src/dialogs/confdialog.cxx:10259
+msgid "Port:"
+msgstr "Poort:"
+
+#: src/dialogs/confdialog.cxx:10260
+msgid "Using UDP port #"
+msgstr "UDP poortnummer"
+
+#: src/dialogs/confdialog.cxx:10275
+msgid "Initialize the socket client"
+msgstr "Initialiseer verbinding"
+
+#: src/dialogs/confdialog.cxx:10278
+msgid "<PSK Reporter error message>"
+msgstr "<PSK Reporter error message>"
+
+#: src/dialogs/confdialog.cxx:10286
+msgid "Sweet Spot"
+msgstr "Sweet Spot"
+
+#: src/dialogs/confdialog.cxx:10292
+msgid "Default CW tracking point"
+msgstr "Ideale audiofrequentie voor CW"
+
+#: src/dialogs/confdialog.cxx:10311
+msgid "Default RTTY tracking point"
+msgstr "Ideale audiofrequentie voor RTTY"
+
+#: src/dialogs/confdialog.cxx:10329
+msgid "PSK et al."
+msgstr "PSK e.a."
+
+#: src/dialogs/confdialog.cxx:10330
+msgid "Default for all other modems"
+msgstr "Ideale audiofrequentie voor PSK en andere modes"
+
+#: src/dialogs/confdialog.cxx:10348
+msgid "Always start new modems at these frequencies"
+msgstr "Start nieuw modem altijd op deze audiofrequenties"
+
+#: src/dialogs/confdialog.cxx:10349
+msgid ""
+"ON - start at default\n"
+"OFF - keep current wf cursor position"
+msgstr ""
+"ON - start at default\n"
+"OFF - keep current wf cursor position"
+
+#: src/dialogs/confdialog.cxx:10357
+msgid "K3 A1A configuation"
+msgstr "K3 A1A configuratie"
+
+#: src/dialogs/confdialog.cxx:10360
+msgid "CW is LSB"
+msgstr "CW is LSB"
+
+#: src/dialogs/confdialog.cxx:10361
+msgid ""
+"Select this for Elecraft K3\n"
+"Other radios should not need it."
+msgstr ""
+"Maak actief voor de Elecraft K3\n"
+"Niet van toepassing voor andere zendontvangers"
+
+#: src/dialogs/confdialog.cxx:10370
+msgid "Text i/o"
+msgstr "Tekst I/O"
+
+#: src/dialogs/confdialog.cxx:10372
+msgid "Talker Socket (MS only)"
+msgstr "Talker Socket (alleen MS)"
+
+#: src/dialogs/confdialog.cxx:10375
+msgid "Talker"
+msgstr "Talker"
+
+#: src/dialogs/confdialog.cxx:10379
+msgid "Connect/disconnect to Talker socket server"
+msgstr "Maak/verbreek verbinding met Talker server"
+
+#: src/dialogs/confdialog.cxx:10382
+msgid "Auto connect when fldigi opens (server must be up)"
+msgstr ""
+"Automatisch verbinden wanneer Fldigi start (server moet beschikbaar zijn)"
+
+#: src/dialogs/confdialog.cxx:10389
+msgid "Capture rx text to external file"
+msgstr "Schrijf ontvangen tekst naar bestand"
+
+#: src/dialogs/confdialog.cxx:10392
+msgid "Enable rx text stream"
+msgstr "Schrijf ontvangen tekst naar bestand"
+
+#: src/dialogs/confdialog.cxx:10393
+msgid "Send rx text to file: textout.txt"
+msgstr "Ontvangen tekst wordt naar bestand 'textout.txt' geschreven"
+
+#: src/dialogs/confdialog.cxx:10402
+msgid "DTMF"
+msgstr "DTMF"
+
+#: src/dialogs/confdialog.cxx:10404
+msgid "Decode DTMF tones"
+msgstr "Decodeer DTMF tonen"
+
+#: src/dialogs/confdialog.cxx:10405
+msgid "Decode received DTMF tones"
+msgstr "Decodeer ontvangen DTMF tonen"
+
+#: src/dialogs/confdialog.cxx:10412
+msgid "WX"
+msgstr "WX"
+
+#: src/dialogs/confdialog.cxx:10414
+msgid "Weather query specification"
+msgstr "Zoekvraag voor weerinformatie"
+
+#: src/dialogs/confdialog.cxx:10417
+msgid "METAR station ID code"
+msgstr "METAR station ID"
+
+#: src/dialogs/confdialog.cxx:10418
+msgid ""
+"for example KMDQ for\n"
+"Huntsville-Madison Executive Airport, AL"
+msgstr ""
+"bijvoorbeeld KMDQ voor\n"
+"Huntsville-Madison Executive Airport, AL (USA)"
+
+#: src/dialogs/confdialog.cxx:10423
+msgid "Full report"
+msgstr "Volledig rapport"
+
+#: src/dialogs/confdialog.cxx:10424
+msgid "Insert full METAR report"
+msgstr "Voeg volledig METAR rapport toe"
+
+#: src/dialogs/confdialog.cxx:10429
+msgid "End of header string:"
+msgstr "Einde van koptekst:"
+
+#: src/dialogs/confdialog.cxx:10430
+msgid ""
+"Text defining end of METAR header\n"
+"Typically 'Connection: close'\n"
+"Used to search for station name"
+msgstr ""
+"Tekst die einde METAR header aangeeft\n"
+"Typisch 'Connection: close'\n"
+"Gebruikt om naam station te vinden"
+
+#: src/dialogs/confdialog.cxx:10436
+msgid "METAR station location"
+msgstr "Locatie METAR station"
+
+#: src/dialogs/confdialog.cxx:10437
+msgid "Add geopolitical name of METAR station"
+msgstr "Voeg geopolitieke naam van het station toe"
+
+#: src/dialogs/confdialog.cxx:10442
+msgid "Conditions"
+msgstr "Omstandigheden"
+
+#: src/dialogs/confdialog.cxx:10443
+msgid "current wx conditions"
+msgstr "Huidige weersomstandigheden"
+
+#: src/dialogs/confdialog.cxx:10448
+msgid "Fahrenheit"
+msgstr "Fahrenheit"
+
+#: src/dialogs/confdialog.cxx:10449
+msgid "report Fahrenheit"
+msgstr "Rapporteer Fahrenheit"
+
+#: src/dialogs/confdialog.cxx:10454
+msgid "Celsius"
+msgstr "Celsius"
+
+#: src/dialogs/confdialog.cxx:10455
+msgid "report Celsius"
+msgstr "Rapporteer Celsius"
+
+#: src/dialogs/confdialog.cxx:10460
+msgid "Miles / Hour"
+msgstr "Mijl/uur"
+
+#: src/dialogs/confdialog.cxx:10461
+msgid "report miles per hour"
+msgstr "Rapporteer mijlen per uur"
+
+#: src/dialogs/confdialog.cxx:10466
+msgid "kilometers / hour"
+msgstr "km/uur"
+
+#: src/dialogs/confdialog.cxx:10467
+msgid "report kilometers per hour"
+msgstr "Rapporteer kilometers per uur"
+
+#: src/dialogs/confdialog.cxx:10472
+msgid "Inches Mg."
+msgstr "Inch Mg"
+
+#: src/dialogs/confdialog.cxx:10473
+msgid "report inches mercury"
+msgstr "Rapporteer aantal inches kwik"
+
+#: src/dialogs/confdialog.cxx:10478
+msgid "mbars"
+msgstr "millibar"
+
+#: src/dialogs/confdialog.cxx:10479
+msgid "report millibars"
+msgstr "Rapporteer millibars"
+
+#: src/dialogs/confdialog.cxx:10484
+msgid "Temperature"
+msgstr "Temperatuur"
+
+#: src/dialogs/confdialog.cxx:10487
+msgid "Wind speed/dir"
+msgstr "Windsnelheid/richting"
+
+#: src/dialogs/confdialog.cxx:10490
+msgid "Barometric pressure"
+msgstr "Luchtdruk"
+
+#: src/dialogs/confdialog.cxx:10493
+msgid "Search on  web"
+msgstr "Zoek op web"
+
+#: src/dialogs/confdialog.cxx:10500
+msgid "KML"
+msgstr "KML"
+
+#: src/dialogs/confdialog.cxx:10502
+msgid "KML files directory"
+msgstr "Map KML bestanden"
+
+#: src/dialogs/confdialog.cxx:10503
+msgid "Where generated KML documents are stored."
+msgstr "Waar gegenereerde KML bestanden worden opgeslagen."
+
+#: src/dialogs/confdialog.cxx:10508
+msgid "KML root file"
+msgstr "KML root bestand"
+
+#: src/dialogs/confdialog.cxx:10512
+msgid "Minimum distance for splitting aliases (Meters)"
+msgstr "Minimum afstand voor splitsen van aliassen (meter)"
+
+#: src/dialogs/confdialog.cxx:10513
+msgid "Minimum distance for splitting alias nodes (Meters)"
+msgstr "Minimum afstand voor splitsen van alias nodes (meters)"
+
+#: src/dialogs/confdialog.cxx:10523
+msgid "Data retention time, in hours (0 for no limit)"
+msgstr "Bewaartermijn voor gegevens in uren (0 voor geen grens)"
+
+#: src/dialogs/confdialog.cxx:10524
+msgid ""
+"Number of hours data is kept for each node. Zero means keeping everything."
+msgstr ""
+"Aantal uren dat gegevens bewaard worden voor elke node. Nul betekent dat "
+"alles bewaard blijft."
+
+#: src/dialogs/confdialog.cxx:10533
+msgid "KML refresh interval (seconds)"
+msgstr "KML verversingsinterval (s)"
+
+#: src/dialogs/confdialog.cxx:10534
+msgid "Refresh time interval written in KML file (Seconds)"
+msgstr "Verversingsinterval gebruikt in KML bestand (seconden)"
+
+#: src/dialogs/confdialog.cxx:10550
+msgid "KML balloon display style"
+msgstr "Weergavestijl KML ballon"
+
+#: src/dialogs/confdialog.cxx:10551
+msgid "KML balloon in plain text, or HTML, in plain tables or matrices."
+msgstr "KML ballon als tekst, HTML, tabellen of matrices."
+
+#: src/dialogs/confdialog.cxx:10566
+msgid "Command run on KML creation"
+msgstr "Gestart commando bij aanmaken KML bestand"
+
+#: src/dialogs/confdialog.cxx:10567
+msgid ""
+"Command started when KML files are generated. Subprocesses are started once, "
+"and restarted if needed."
+msgstr ""
+"Commando gestart zodra KML bestanden gegenereerd worden. Subprocessen worden "
+"eenmaal gestart en herstart indien nodig."
+
+#: src/dialogs/confdialog.cxx:10573
+msgid "Test command"
+msgstr "Testcommando"
+
+#: src/dialogs/confdialog.cxx:10574
+msgid "Execute command on KML files."
+msgstr "Voer commando uit op KML bestanden."
+
+#: src/dialogs/confdialog.cxx:10577
+msgid "Change dir..."
+msgstr "Wijzig map..."
+
+#: src/dialogs/confdialog.cxx:10578
+msgid "Choose directory to store KML documents"
+msgstr "Kies map voor opslag KML documenten"
+
+#: src/dialogs/confdialog.cxx:10581
+msgid "Cleanup KML data now !"
+msgstr "Wis KML gegevens nu !"
+
+#: src/dialogs/confdialog.cxx:10582
+msgid "Cleanups KML documents, empties Google Earth display."
+msgstr "Wist KML documenten en daarmee de Google Earth weergave."
+
+#: src/dialogs/confdialog.cxx:10585
+msgid "Cleanup on startup"
+msgstr "Wis bij starten"
+
+#: src/dialogs/confdialog.cxx:10586
+msgid "Empties KML documents when starting program."
+msgstr "Wist KML bestanden bij starten programma."
+
+#: src/dialogs/confdialog.cxx:10597
+msgid "Web"
+msgstr "Web"
+
+#: src/dialogs/confdialog.cxx:10598
+msgid "Callsign database"
+msgstr "Roepnaamdatabase"
+
+#: src/dialogs/confdialog.cxx:10601
+msgid "Call Lookup"
+msgstr "Roepnamen zoeken"
+
+#: src/dialogs/confdialog.cxx:10603
+msgid "Web Browser lookup"
+msgstr "Opzoeken via web browser"
+
+#: src/dialogs/confdialog.cxx:10607
+msgid "Do not use callsign lookup via web browser"
+msgstr "Geen gebruik maken van roepnaam zoeken via web browser"
+
+#: src/dialogs/confdialog.cxx:10613
+msgid "QRZ online via default Internet Browser"
+msgstr "QRZ online via standaard internet browser"
+
+#: src/dialogs/confdialog.cxx:10614
+msgid "Visit QRZ web site"
+msgstr "Bezoek QRZ website"
+
+#: src/dialogs/confdialog.cxx:10619
+msgid "HamCall online via default Internet Browser"
+msgstr "HamCall online via standaard internet browser"
+
+#: src/dialogs/confdialog.cxx:10620 src/dialogs/confdialog.cxx:10668
+msgid "Visit Hamcall web site"
+msgstr "Bezoek HamCall website"
+
+#: src/dialogs/confdialog.cxx:10625
+msgid "HamQTH via default Internet Browser"
+msgstr "HamQTH via standaard internet browser"
+
+#: src/dialogs/confdialog.cxx:10626
+msgid "Visit hamQTH web site"
+msgstr "Bezoek HamQTH website"
+
+#: src/dialogs/confdialog.cxx:10633
+msgid "Data base lookup"
+msgstr "Opzoeken in database"
+
+#: src/dialogs/confdialog.cxx:10637
+msgid "Do not use callsign database"
+msgstr "Geen gebruik maken van roepnamendatabase"
+
+#: src/dialogs/confdialog.cxx:10643
+msgid "QRZ cdrom"
+msgstr "QRZ CD-ROM"
+
+#: src/dialogs/confdialog.cxx:10644
+msgid "Use CD or hard drive CD image"
+msgstr "Gebruik CD of kopie op harde schijf"
+
+#: src/dialogs/confdialog.cxx:10649
+msgid "QRZ.com"
+msgstr "QRZ.com"
+
+#: src/dialogs/confdialog.cxx:10650
+msgid ""
+"You need a paid QRZ online\n"
+"subscription to access"
+msgstr ""
+"Betaald QRZ online abonnement\n"
+"vereist voor toegang"
+
+#: src/dialogs/confdialog.cxx:10655
+msgid "Hamcall.net"
+msgstr "HamCall.net"
+
+#: src/dialogs/confdialog.cxx:10656
+msgid ""
+"You need a paid Hamcall online\n"
+"subscription to access"
+msgstr ""
+"Betaald HamCall abonnement\n"
+"vereist voor toegang"
+
+#: src/dialogs/confdialog.cxx:10661
+msgid "HamQTH.com (free service http://www.hamqth.com)"
+msgstr "HamQTH.com (gratis dienst http://www.hamqth.com)"
+
+#: src/dialogs/confdialog.cxx:10662
+msgid "Free service courtesy of OK"
+msgstr "Gratis dienst met dank aan OK"
+
+#: src/dialogs/confdialog.cxx:10667
+msgid "Callook.info lookup (free service US callsigns only)"
+msgstr "Zoek met Callook.info (gratis dienst, alleen US roepnamen)"
+
+#: src/dialogs/confdialog.cxx:10673
+msgid "at:"
+msgstr "op:"
+
+#: src/dialogs/confdialog.cxx:10674
+msgid ""
+"ie: /home/dave/CALLBK/ or C:/CALLBK/\n"
+"Leave blank to search for database"
+msgstr ""
+"bijvoorbeeld: /home/dave/CALLBK/ (Linux) of C:/CALLBK/ (Windows)\n"
+"Leeg laten om te zoeken naar de database"
+
+#: src/dialogs/confdialog.cxx:10688
+msgid "User name"
+msgstr "Gebruiker"
+
+#: src/dialogs/confdialog.cxx:10689 src/dialogs/confdialog.cxx:10734
+#: src/dialogs/confdialog.cxx:10769
+msgid "Your login name"
+msgstr "Login naam"
+
+#: src/dialogs/confdialog.cxx:10703 src/dialogs/confdialog.cxx:10748
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: src/dialogs/confdialog.cxx:10704 src/dialogs/confdialog.cxx:10749
+msgid "Your login password"
+msgstr "Login wachtwoord"
+
+#: src/dialogs/confdialog.cxx:10720 src/dialogs/confdialog.cxx:10765
+msgid "Show password in plain text"
+msgstr "Toon wachtwoord"
+
+#: src/dialogs/confdialog.cxx:10723
+msgid "Add address to notes field"
+msgstr "Voeg adres toe aan notities"
+
+#: src/dialogs/confdialog.cxx:10732
+msgid "eQSL"
+msgstr "eQSL"
+
+#: src/dialogs/confdialog.cxx:10733
+msgid "User ID"
+msgstr "Gebruiker"
+
+#: src/dialogs/confdialog.cxx:10768
+msgid "QTH Nickname"
+msgstr "QTH Nickname"
+
+#: src/dialogs/confdialog.cxx:10783
+msgid "Options"
+msgstr "Opties"
+
+#: src/dialogs/confdialog.cxx:10786
+msgid "send when logged (log button, <LOG>, <LNW>)"
+msgstr "Verstuur zodra gelogd (log knop, <LOG>, <LNW>)"
+
+#: src/dialogs/confdialog.cxx:10787
+msgid "automatic data upload"
+msgstr "Automatisch uploaden van gegevens"
+
+#: src/dialogs/confdialog.cxx:10792
+msgid "Default message"
+msgstr "Standaardbericht"
+
+#: src/dialogs/confdialog.cxx:10793
+msgid "default text to send with <LOG> etc"
+msgstr "Bericht om te versturen met <LOG> etc."
+
+#: src/dialogs/confdialog.cxx:10807
+msgid "Text Tags (tags use {} delimiters)"
+msgstr "Tekstlabels ({} scheidingstekens)"
+
+#: src/dialogs/confdialog.cxx:10810
+msgid "  {CALL} other ops call sign"
+msgstr "  {CALL} roepnaam tegenstation"
+
+#: src/dialogs/confdialog.cxx:10813
+msgid "  {MODE} full mode / submode"
+msgstr "  {MODE} volledige mode / submode"
+
+#: src/dialogs/confdialog.cxx:10816
+msgid "{NAME} other ops name"
+msgstr "{NAME} naam operator tegenstation"
+
+#: src/dialogs/confdialog.cxx:10819
+msgid "These tags can also be used in <EQSL:[message]>"
+msgstr "Deze labels kunnen ook worden gebruikt bij <EQSL:[bericht]>"
+
+#: src/dialogs/confdialog.cxx:10823
+msgid "Use date/time off for log entry"
+msgstr "Gebruik datum/tijd einde verbinding voor logboek"
+
+#: src/dialogs/confdialog.cxx:10824
+msgid "default uses date/time on"
+msgstr "Standaard wordt datum/tijd begin gebruikt"
+
+#: src/dialogs/confdialog.cxx:10842
+msgid "Auto start programs with fldigi"
+msgstr "Start programma's automatisch samen met Fldigi"
+
+#: src/dialogs/confdialog.cxx:10845
+msgid "flrig:"
+msgstr "flrig:"
+
+#: src/dialogs/confdialog.cxx:10846
+msgid "Enter full path-filename for flrig"
+msgstr "Voer het volledige pad in voor Flrig"
+
+#: src/dialogs/confdialog.cxx:10859 src/dialogs/confdialog.cxx:10877
+#: src/dialogs/confdialog.cxx:10895 src/dialogs/confdialog.cxx:10913
+#: src/dialogs/confdialog.cxx:10931 src/dialogs/confdialog.cxx:10949
+#: src/dialogs/confdialog.cxx:10967
+msgid "Locate"
+msgstr "Locatie..."
+
+#: src/dialogs/confdialog.cxx:10860
+msgid "Locate flrig executable"
+msgstr "Bepaal locatie Flmsg executable"
+
+#: src/dialogs/confdialog.cxx:10863
+msgid "flamp:"
+msgstr "flamp:"
+
+#: src/dialogs/confdialog.cxx:10864
+msgid "Enter full path-filename for flamp"
+msgstr "Voer het volledige pad in voor Flamp"
+
+#: src/dialogs/confdialog.cxx:10878
+msgid "Locate flamp executable"
+msgstr "Bepaal locatie Flamp executable"
+
+#: src/dialogs/confdialog.cxx:10881
+msgid "flnet:"
+msgstr "flnet:"
+
+#: src/dialogs/confdialog.cxx:10882
+msgid "Enter full path-filename for flnet"
+msgstr "Voer het volledige pad in voor Flnet"
+
+#: src/dialogs/confdialog.cxx:10896
+msgid "Locate flnet executable"
+msgstr "Bepaal locatie Flnet executable"
+
+#: src/dialogs/confdialog.cxx:10899
+msgid "fllog:"
+msgstr "fllog:"
+
+#: src/dialogs/confdialog.cxx:10900
+msgid "Enter full path-filename for fllog"
+msgstr "Voer het volledige pad in voor Fllog"
+
+#: src/dialogs/confdialog.cxx:10914
+msgid "Locate fllog executable"
+msgstr "Bepaal locatie Fllog executable"
+
+#: src/dialogs/confdialog.cxx:10917
+msgid "Prog 1:"
+msgstr "Prog 1:"
+
+#: src/dialogs/confdialog.cxx:10918 src/dialogs/confdialog.cxx:10936
+#: src/dialogs/confdialog.cxx:10954
+msgid "Enter full path-filename for external program"
+msgstr "Voer complete pad in voor externe applicatie"
+
+#: src/dialogs/confdialog.cxx:10932
+msgid "Locate program #1 executable"
+msgstr "Bepaal locatie #1 executable"
+
+#: src/dialogs/confdialog.cxx:10935
+msgid "Prog 2:"
+msgstr "Prog 2:"
+
+#: src/dialogs/confdialog.cxx:10950
+msgid "Locate program #2 executable"
+msgstr "Bepaal locatie #2 executable"
+
+#: src/dialogs/confdialog.cxx:10953
+msgid "Prog 3:"
+msgstr "Prog 3:"
+
+#: src/dialogs/confdialog.cxx:10968
+msgid "Locate program #3 executable"
+msgstr "Bepaal locatie #3 executable"
+
+#: src/dialogs/confdialog.cxx:10971
+msgid ""
+"Enable\n"
+"-"
+msgstr ""
+"Schakel in\n"
+"-"
+
+#: src/dialogs/confdialog.cxx:10972 src/dialogs/confdialog.cxx:10979
+#: src/dialogs/confdialog.cxx:10985 src/dialogs/confdialog.cxx:10991
+#: src/dialogs/confdialog.cxx:10997 src/dialogs/confdialog.cxx:11003
+#: src/dialogs/confdialog.cxx:11009
+msgid "Enable this entry when fldigi first starts"
+msgstr "Schakel in wanneer Fldigi wordt gestart"
+
+#: src/dialogs/confdialog.cxx:11014 src/dialogs/confdialog.cxx:11018
+#: src/dialogs/confdialog.cxx:11022 src/dialogs/confdialog.cxx:11026
+#: src/dialogs/confdialog.cxx:11030 src/dialogs/confdialog.cxx:11034
+#: src/dialogs/confdialog.cxx:11038
+msgid "Test"
+msgstr "Test"
+
+#: src/dialogs/confdialog.cxx:11015
+msgid "Start flrig"
+msgstr "Start Flrig"
+
+#: src/dialogs/confdialog.cxx:11019
+msgid "Start flamp"
+msgstr "Start Flamp"
+
+#: src/dialogs/confdialog.cxx:11023
+msgid "Start flnet"
+msgstr "Start Flnet"
+
+#: src/dialogs/confdialog.cxx:11027
+msgid "Start fllog"
+msgstr "Start Fllog"
+
+#: src/dialogs/confdialog.cxx:11031
+msgid "Start prog1"
+msgstr "Start prog1"
+
+#: src/dialogs/confdialog.cxx:11035
+msgid "Start prog2"
+msgstr "Start prog2"
+
+#: src/dialogs/confdialog.cxx:11039
+msgid "Start prog3"
+msgstr "Start prog3"
+
+#: src/dialogs/confdialog.cxx:11047
+msgid "Program to Program Communications"
+msgstr "Communicatie tussen applicaties"
+
+#: src/dialogs/confdialog.cxx:11053
+msgid "Lock"
+msgstr "Bevriezen"
+
+#: src/dialogs/confdialog.cxx:11054
+msgid "Allow/Disallow Changes"
+msgstr "Vink aan om instellingen te bevriezen"
+
+#: src/dialogs/confdialog.cxx:11059
+msgid "Enable ARQ"
+msgstr "Schakel ARQ in"
+
+#: src/dialogs/confdialog.cxx:11060
+msgid "Used For PSKMail and FLDIGI Suite of Programs"
+msgstr "Gebruikt voor PSKMail en familie van Fldigi programma's"
+
+#: src/dialogs/confdialog.cxx:11067
+msgid "Enable KISS"
+msgstr "Schakel KISS in"
+
+#: src/dialogs/confdialog.cxx:11068 src/dialogs/confdialog.cxx:11083
+msgid "Used for BPQ32"
+msgstr "Gebruikt voor BPQ32"
+
+#: src/dialogs/confdialog.cxx:11075
+msgid "AX25 Decode"
+msgstr "AX.25 decoderen"
+
+#: src/dialogs/confdialog.cxx:11076
+msgid "Decode AX25 Packets into human readable form"
+msgstr "Decodeer AX.25 packets naar leesbare vorm"
+
+#: src/dialogs/confdialog.cxx:11082
+msgid "Enable CSMA"
+msgstr "Schakel CSMA in"
+
+#: src/dialogs/confdialog.cxx:11089
+#, fuzzy
+msgid ""
+"Enable ARQ for programs that support TCP and FLDIGI ARQ protocol.\n"
+"Enable KISS for programs that supports UDP and TNC-2 KISS protocol.\n"
+"Only one interface (ARQ/KISS) can be active at any given time.\n"
+"KISS/ARQ/XML Addr/Port changes require program restart."
+msgstr ""
+"Activeer ARQ voor programma's die TCP en het Fldigi ARQ protocol "
+"ondersteunen.\n"
+"Activeer KISS voor programma's die UDP en het TNC-2 KISS protocol "
+"ondersteunen.\n"
+"Slechts één interface (ARQ/KISS) kan tegelijkertijd actief zijn.\n"
+"Wijziging van IP adres en portnummer vereist een herstart van Fldigi."
+
+#: src/dialogs/confdialog.cxx:11096
+msgid "KISS"
+msgstr "KISS"
+
+#: src/dialogs/confdialog.cxx:11100 src/dialogs/confdialog.cxx:11237
+#: src/dialogs/confdialog.cxx:11255 src/dialogs/confdialog.cxx:11303
+#: src/dialogs/confdialog.cxx:11369
+msgid ""
+"Returns IP Address and port\n"
+"number to the default value."
+msgstr ""
+"Zet IP adres en poortnummer\n"
+"terug naar standaardwaarde."
+
+#: src/dialogs/confdialog.cxx:11104 src/dialogs/confdialog.cxx:11203
+#: src/dialogs/confdialog.cxx:11259 src/dialogs/confdialog.cxx:11307
+#: src/dialogs/confdialog.cxx:11349
+#, fuzzy
+msgid "Addr"
+msgstr "Adres:"
+
+#: src/dialogs/confdialog.cxx:11105
+msgid ""
+"IP Address for KISS interface\n"
+"IP Address format: nnn.nnn.nnn.nnn\n"
+"or name: i.e. localhost"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:11121
+#, fuzzy
+msgid "KPSQL Attenuate"
+msgstr "KPSQL demping"
+
+#: src/dialogs/confdialog.cxx:11122
+#, fuzzy
+msgid "Attenuation"
+msgstr "KPSQL demping"
+
+#: src/dialogs/confdialog.cxx:11134
+msgid "I/O"
+msgstr "I/O"
+
+#: src/dialogs/confdialog.cxx:11135 src/dialogs/confdialog.cxx:11221
+#: src/dialogs/confdialog.cxx:11277 src/dialogs/confdialog.cxx:11325
+#: src/dialogs/confdialog.cxx:11358
+msgid "IP Address Port Number"
+msgstr "IP adres poortnummer"
+
+#: src/dialogs/confdialog.cxx:11150
+#, fuzzy
+msgid "Continue"
+msgstr "Continent"
+
+#: src/dialogs/confdialog.cxx:11151
+#, fuzzy
+msgid "Continue after in seconds"
+msgstr "Ga verder na (s)"
+
+#: src/dialogs/confdialog.cxx:11162
+msgid "Busy"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:11163
+msgid "Enable Busy Channel"
+msgstr "Schakel 'busy channel' in"
+
+#: src/dialogs/confdialog.cxx:11170
+msgid "O"
+msgstr "O"
+
+#: src/dialogs/confdialog.cxx:11171
+msgid "Output port number when same IP address used"
+msgstr "Poortnummer (uit) indien hetzelfde IP adres wordt gebruikt"
+
+#: src/dialogs/confdialog.cxx:11186
+msgid "Dual Port"
+msgstr "Tweevoudige poort"
+
+#: src/dialogs/confdialog.cxx:11187
+msgid "Enable when both programs are using the same IP address"
+msgstr "Schakel in wanneer beide programma's hetzelfde IP adres gebruiken"
+
+#: src/dialogs/confdialog.cxx:11193 src/dialogs/confdialog.cxx:11241
+#: src/dialogs/confdialog.cxx:11292
+#, fuzzy
+msgid "Restart"
+msgstr "Start"
+
+#: src/dialogs/confdialog.cxx:11200
+msgid "ARQ"
+msgstr "ARQ"
+
+#: src/dialogs/confdialog.cxx:11204
+msgid ""
+"IP Address for ARQ interface\n"
+"IP Address format: nnn.nnn.nnn.nnn\n"
+"or name: i.e. localhost"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:11220 src/dialogs/confdialog.cxx:11276
+#: src/dialogs/confdialog.cxx:11324 src/dialogs/confdialog.cxx:11357
+msgid "Port"
+msgstr "Poort"
+
+#: src/dialogs/confdialog.cxx:11251
+#, fuzzy
+msgid "XML"
+msgstr "KML"
+
+#: src/dialogs/confdialog.cxx:11260
+msgid ""
+"IP Address for XMLRPC interface\n"
+"IP Address format: nnn.nnn.nnn.nnn\n"
+"or name: i.e. localhost"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:11299
+#, fuzzy
+msgid "flrig"
+msgstr "flrig:"
+
+#: src/dialogs/confdialog.cxx:11308
+msgid ""
+"IP Address for flrig interface\n"
+"IP Address format: nnn.nnn.nnn.nnn\n"
+"or name: i.e. localhost"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:11340 src/dialogs/confdialog.cxx:11364
+msgid "Reconnect"
+msgstr "Opnieuw verbinden"
+
+#: src/dialogs/confdialog.cxx:11346
+#, fuzzy
+msgid "fllog"
+msgstr "fllog:"
+
+#: src/dialogs/confdialog.cxx:11350
+msgid ""
+"IP Address for fllog interface\n"
+"IP Address format: nnn.nnn.nnn.nnn\n"
+"or name: i.e. localhost"
+msgstr ""
+
+#: src/dialogs/confdialog.cxx:11386
+msgid "Restore defaults"
+msgstr "Beginwaarden"
+
+#: src/dialogs/font_browser.cxx:47
+msgid "Font color"
+msgstr "Tekstkleur"
+
+#: src/dialogs/font_browser.cxx:118
+msgid "Font:"
+msgstr "Lettertype:"
+
+#: src/dialogs/font_browser.cxx:123
+msgid "Size:"
+msgstr "Grootte:"
+
+#: src/dialogs/font_browser.cxx:133
+msgid "&OK"
+msgstr "&OK"
+
+#: src/dialogs/font_browser.cxx:147
+msgid ""
+"That crazy fox jumped over the dog again!\n"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789\n"
+"!\"#$%&'()*+,-./:;<=>?@@[\\]^_`{|}~"
+msgstr ""
+"That crazy fox jumped over the dog again!\n"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789\n"
+"!\"#$%&'()*+,-./:;<=>?@@[\\]^_`{|}~"
+
+#: src/dialogs/font_browser.cxx:283
+msgid "Reading fonts..."
+msgstr "Lettertypes inlezen..."
+
+#: src/dialogs/record_browse.cxx:25 src/dialogs/record_browse.cxx:30
+msgid "Data files sources"
+msgstr "Databestanden"
+
+#: src/dialogs/record_browse.cxx:27
+msgid "Data files update"
+msgstr "Bijwerken databestanden"
+
+#: src/dialogs/record_browse.cxx:29
+msgid "Tabular data sources"
+msgstr "Databestanden in tabelvorm"
+
+#: src/dialogs/record_browse.cxx:43
+msgid "Data source"
+msgstr "Databestand"
+
+#: src/dialogs/record_browse.cxx:44
+msgid "Data files repository"
+msgstr "Opslag databestanden"
+
+#: src/dialogs/record_browse.cxx:48
+msgid "Update selected local data files with repository content"
+msgstr ""
+"Geselecteerde lokale databestanden bijwerken met inhoud uit de bewaarplaats"
+
+#: src/dialogs/record_browse.cxx:52
+msgid "Delete local data files if selected."
+msgstr "Lokale bestanden wordt verwijderd indien geselecteerd"
+
+#: src/dialogs/notifydialog.cxx:106
+msgid "Event"
+msgstr "Gebeurtenis"
+
+#: src/dialogs/notifydialog.cxx:112
+msgid "Enabled"
+msgstr "Actief"
+
+#: src/dialogs/notifydialog.cxx:114
+msgid "RE:"
+msgstr "RE:"
+
+#: src/dialogs/notifydialog.cxx:128
+msgid "Filter"
+msgstr "Filter"
+
+#: src/dialogs/notifydialog.cxx:146
+msgid "DXCC entity"
+msgstr "DXCC entiteit"
+
+#: src/dialogs/notifydialog.cxx:151
+msgid "Show DXCC entities"
+msgstr "Toon DXCC entiteiten"
+
+#: src/dialogs/notifydialog.cxx:153
+msgid "Not worked before"
+msgstr "Niet eerder gewerkt"
+
+#: src/dialogs/notifydialog.cxx:156
+msgid "LotW user"
+msgstr "LotW gebruiker"
+
+#: src/dialogs/notifydialog.cxx:159
+msgid "eQSL user"
+msgstr "eQSL gebruiker"
+
+#: src/dialogs/notifydialog.cxx:164
+msgid "Duplicates"
+msgstr "Duplicaten"
+
+#: src/dialogs/notifydialog.cxx:167
+msgid "Ignore duplicates"
+msgstr "Negeer duplicaten"
+
+#: src/dialogs/notifydialog.cxx:170
+msgid "in:"
+msgstr "in:"
+
+#: src/dialogs/notifydialog.cxx:173
+msgid "Time (s):"
+msgstr "Tijd (s):"
+
+#: src/dialogs/notifydialog.cxx:196
+msgid "Action"
+msgstr "Actie"
+
+#: src/dialogs/notifydialog.cxx:199
+msgid "Trigger limit (s):"
+msgstr "Limiet voor trigger (s):"
+
+#: src/dialogs/notifydialog.cxx:200
+msgid "Minimum time between events"
+msgstr "Minimale verstreken tijd tussen gebeurtenissen"
+
+#: src/dialogs/notifydialog.cxx:214
+msgid "Show alert window:"
+msgstr "Toon waarschuwing:"
+
+#: src/dialogs/notifydialog.cxx:228 src/dialogs/notifydialog.cxx:259
+msgid "Insert default text"
+msgstr "Voeg standaardtekst in"
+
+#: src/dialogs/notifydialog.cxx:230
+msgid "Hide window after (s):"
+msgstr "Verberg scherm na (s):"
+
+#: src/dialogs/notifydialog.cxx:245
+msgid "Append to RX text:"
+msgstr "Voeg toe aan RX tekst:"
+
+#: src/dialogs/notifydialog.cxx:261
+msgid "Append to TX text:"
+msgstr "Voeg toe aan TX tekst:"
+
+#: src/dialogs/notifydialog.cxx:275
+msgid "Show macro editor"
+msgstr "Toon macro editor"
+
+#: src/dialogs/notifydialog.cxx:277
+msgid "Run program:"
+msgstr "Start toepassing:"
+
+#: src/dialogs/notifydialog.cxx:340
+msgid "DXCC entities"
+msgstr "DXCC entiteiten"
+
+#: src/dialogs/notifydialog.cxx:354
+msgid "Find country:"
+msgstr "Zoek land:"
+
+#: src/dialogs/notifydialog.cxx:355
+msgid "Press return to continue the search"
+msgstr "Toets ENTER om zoekopdracht te vervolgen"
+
+#: src/dialogs/notifydialog.cxx:367
+msgid "Find prefix:"
+msgstr "Zoek prefix:"
+
+#: src/logbook/lgbook.cxx:397
+msgid "Export Setup"
+msgstr "Instellingen voor exporteren"
+
+#: src/logbook/lgbook.cxx:398 src/logbook/lgbook.cxx:1040
+msgid "Select Records to Export"
+msgstr "Selecteer records voor export"
+
+#: src/logbook/lgbook.cxx:406 src/logbook/lgbook.cxx:456
+#: src/logbook/lgbook.cxx:1048 src/logbook/lgbook.cxx:1122
+msgid "Check All"
+msgstr "Alles"
+
+#: src/logbook/lgbook.cxx:409
+msgid "Start Date"
+msgstr "Startdatum"
+
+#: src/logbook/lgbook.cxx:410
+msgid "Start date for export"
+msgstr "Startdatum voor export"
+
+#: src/logbook/lgbook.cxx:423
+msgid "Stop Date"
+msgstr "Einddatum"
+
+#: src/logbook/lgbook.cxx:424
+msgid "Inclusive stop date for export"
+msgstr "Einddatum (inclusief) voor export"
+
+#: src/logbook/lgbook.cxx:437
+msgid "select by date"
+msgstr "Selecteer op datum"
+
+#: src/logbook/lgbook.cxx:438
+msgid "Enable to select date range"
+msgstr "Vink aan om datumreeks te selecteren"
+
+#: src/logbook/lgbook.cxx:450
+msgid "Select Fields to Export"
+msgstr "Kies velden voor export"
+
+#: src/logbook/lgbook.cxx:467 src/logbook/lgbook.cxx:1079
+msgid "Freq"
+msgstr "Freq"
+
+#: src/logbook/lgbook.cxx:478
+msgid "QSO Date On"
+msgstr "QSO datum AAN"
+
+#: src/logbook/lgbook.cxx:482
+msgid "QSO Date Off"
+msgstr "QSO datum UIT"
+
+#: src/logbook/lgbook.cxx:486
+msgid "Time ON"
+msgstr "Tijd AAN"
+
+#: src/logbook/lgbook.cxx:490 src/logbook/lgbook.cxx:1091
+msgid "Time OFF"
+msgstr "Tijd UIT"
+
+#: src/logbook/lgbook.cxx:494
+msgid "TX Power"
+msgstr "TX zendvermogen"
+
+#: src/logbook/lgbook.cxx:497 src/logbook/lgbook.cxx:1095
+msgid "RST sent"
+msgstr "RST verzonden"
+
+#: src/logbook/lgbook.cxx:501 src/logbook/lgbook.cxx:1099
+msgid "RST rcvd"
+msgstr "RST ontvangen"
+
+#: src/logbook/lgbook.cxx:505 src/logbook/lgbook.cxx:731
+msgid "Qth"
+msgstr "QTH"
+
+#: src/logbook/lgbook.cxx:508
+msgid "LOC"
+msgstr "LOC"
+
+#: src/logbook/lgbook.cxx:515 src/logbook/lgbook.cxx:876
+msgid "QSL-VIA"
+msgstr "QSL-VIA"
+
+#: src/logbook/lgbook.cxx:527
+msgid "QSL rcvd date"
+msgstr "Dat. QSL ontv."
+
+#: src/logbook/lgbook.cxx:530
+msgid "QSL sent date"
+msgstr "Dat. QSL verz."
+
+#: src/logbook/lgbook.cxx:533 src/logbook/lgbook.cxx:1103
+msgid "Serial # in"
+msgstr "Volgnr. ontvangen"
+
+#: src/logbook/lgbook.cxx:536 src/logbook/lgbook.cxx:1107
+msgid "Serial # out"
+msgstr "Volgnummer verzonden"
+
+#: src/logbook/lgbook.cxx:545 src/logbook/lgbook.cxx:804
+#: src/logbook/lgbook.cxx:805
+msgid "County"
+msgstr "Graafschap (county)"
+
+#: src/logbook/lgbook.cxx:551 src/logbook/lgbook.cxx:828
+msgid "CQZ"
+msgstr "CQZ"
+
+#: src/logbook/lgbook.cxx:554 src/logbook/lgbook.cxx:864
+msgid "DXCC"
+msgstr "DXCC"
+
+#: src/logbook/lgbook.cxx:557 src/logbook/lgbook.cxx:816
+msgid "IOTA"
+msgstr "IOTA"
+
+#: src/logbook/lgbook.cxx:560 src/logbook/lgbook.cxx:840
+msgid "ITUZ"
+msgstr "ITUZ"
+
+#: src/logbook/lgbook.cxx:570
+msgid "Logbook"
+msgstr "Logboek"
+
+#: src/logbook/lgbook.cxx:571
+msgid "Date On"
+msgstr "Datum op"
+
+#: src/logbook/lgbook.cxx:572
+msgid "Date QSO started"
+msgstr "Datum start QSO"
+
+#: src/logbook/lgbook.cxx:585
+msgid "Time QSO started"
+msgstr "Tijd start QSO"
+
+#: src/logbook/lgbook.cxx:597
+msgid "Call sign worked"
+msgstr "Gewerkte roepnaam"
+
+#: src/logbook/lgbook.cxx:609
+msgid "Operator worked"
+msgstr "Gewerkte operator"
+
+#: src/logbook/lgbook.cxx:621
+msgid "Rst received"
+msgstr "RST ontvangen"
+
+#: src/logbook/lgbook.cxx:632
+msgid "QSL-rcvd"
+msgstr "QSL ontvangen"
+
+#: src/logbook/lgbook.cxx:633
+msgid "QSL received on this date"
+msgstr "Datum QSL ontvangen"
+
+#: src/logbook/lgbook.cxx:645
+msgid "Date Off"
+msgstr "Datum van"
+
+#: src/logbook/lgbook.cxx:646
+msgid "Date QSO Ended"
+msgstr "Datum einde QSO"
+
+#: src/logbook/lgbook.cxx:659
+msgid "Time QSO ended"
+msgstr "Tijd einde QSO"
+
+#: src/logbook/lgbook.cxx:670
+msgid "Freq."
+msgstr "Freq."
+
+#: src/logbook/lgbook.cxx:671
+msgid "Frequency in MHz"
+msgstr "Frequenctie in MHz"
+
+#: src/logbook/lgbook.cxx:683
+msgid "Mode in use"
+msgstr "Gebruikte mode"
+
+#: src/logbook/lgbook.cxx:694
+msgid "Pwr"
+msgstr "Pwr"
+
+#: src/logbook/lgbook.cxx:695
+msgid "Transmit power used"
+msgstr "Gebruikte zendvermogen (W)"
+
+#: src/logbook/lgbook.cxx:707
+msgid "Rst sent"
+msgstr "RST verzonden"
+
+#: src/logbook/lgbook.cxx:718
+msgid "QSL-sent"
+msgstr "QSL verzonden"
+
+#: src/logbook/lgbook.cxx:719
+msgid "QSL sent on this date"
+msgstr "QSL verzonden op deze datum"
+
+#: src/logbook/lgbook.cxx:732
+msgid "City of station worked"
+msgstr "Stad gewerkte station"
+
+#: src/logbook/lgbook.cxx:743
+msgid "St"
+msgstr "Staat"
+
+#: src/logbook/lgbook.cxx:744
+msgid "US state of station worked"
+msgstr "Staat (USA) gewerkte station"
+
+#: src/logbook/lgbook.cxx:755
+msgid "Pr"
+msgstr "Prov."
+
+#: src/logbook/lgbook.cxx:756
+msgid "Province of station worked"
+msgstr "Provincie gewerkte station"
+
+#: src/logbook/lgbook.cxx:768
+msgid "Country of station worked"
+msgstr "Land gewerkte station"
+
+#: src/logbook/lgbook.cxx:779
+msgid "Loc"
+msgstr "Locator"
+
+#: src/logbook/lgbook.cxx:780
+msgid "Stations grid square"
+msgstr "Maidenhead locator gewerkte station"
+
+#: src/logbook/lgbook.cxx:792
+msgid "Interesting notes"
+msgstr "Notities"
+
+#: src/logbook/lgbook.cxx:817
+msgid "Islands on the air"
+msgstr "Islands On The Air (IOTA)"
+
+#: src/logbook/lgbook.cxx:852
+msgid "CONT"
+msgstr "CONT"
+
+#: src/logbook/lgbook.cxx:865
+msgid "DXCC designator"
+msgstr "DXCC aanduiding"
+
+#: src/logbook/lgbook.cxx:877
+msgid "QSL route of contacted station"
+msgstr "QSL route van gewerkt station"
+
+#: src/logbook/lgbook.cxx:888
+msgid "Ser out"
+msgstr "Volgnr. uit"
+
+#: src/logbook/lgbook.cxx:889
+msgid "Contest serial # sent"
+msgstr "Verzonden contest volgnr."
+
+#: src/logbook/lgbook.cxx:901
+msgid "Contest exchange sent"
+msgstr "Contest uitwisseling verzonden"
+
+#: src/logbook/lgbook.cxx:912
+msgid "Ser in"
+msgstr "Volgnummer ontvangen"
+
+#: src/logbook/lgbook.cxx:913
+msgid "Contest serial # received"
+msgstr "Ontvangen contest volgnr."
+
+#: src/logbook/lgbook.cxx:925
+msgid "Contest exchange received"
+msgstr "Contest uitwisseling ontvangen"
+
+#: src/logbook/lgbook.cxx:936
+msgid "Call Search"
+msgstr "Zoek call"
+
+#: src/logbook/lgbook.cxx:937
+msgid "Search for this callsign"
+msgstr "Zoek op deze roepnaam"
+
+#: src/logbook/lgbook.cxx:948
+msgid "Recs"
+msgstr "Items"
+
+#: src/logbook/lgbook.cxx:949
+msgid "# Records in logbook"
+msgstr "Aantal items in logboek"
+
+#: src/logbook/lgbook.cxx:961
+msgid "New record / Save record"
+msgstr "Nieuw item / item opslaan"
+
+#: src/logbook/lgbook.cxx:968
+msgid "Update the current record"
+msgstr "Huidige item bijwerken"
+
+#: src/logbook/lgbook.cxx:975
+msgid "Delete the current record"
+msgstr "Verwijder huidige item"
+
+#: src/logbook/lgbook.cxx:981
+msgid "Dial"
+msgstr "Dial"
+
+#: src/logbook/lgbook.cxx:982
+msgid "Retrieve for active modem use"
+msgstr "Ophalen voor actief modem gebruik"
+
+#: src/logbook/lgbook.cxx:989
+msgid "Find previous"
+msgstr "Zoek vorige"
+
+#: src/logbook/lgbook.cxx:997
+msgid "Find next"
+msgstr "Zoek volgende"
+
+#: src/logbook/lgbook.cxx:1020
+msgid "Date"
+msgstr "Datum"
+
+#: src/logbook/lgbook.cxx:1022
+msgid "Time"
+msgstr "Tijd"
+
+#: src/logbook/lgbook.cxx:1039
+msgid "Cabrillo Setup"
+msgstr "Cabrillo instellingen"
+
+#: src/logbook/lgbook.cxx:1059
+msgid "Select Cabrillo Contest & Fields"
+msgstr "Kies Cabrillo contest en velden"
+
+#: src/logbook/lgbook.cxx:1062
+msgid "Contest:"
+msgstr "Contest:"
+
+#: src/logbook/lgbook.cxx:1087
+msgid "QSO Date"
+msgstr "Datum QSO"
+
+#~ msgid "Client/Server Logbook"
+#~ msgstr "Client/server logboek"
+
+#~ msgid "Enter URL address of server"
+#~ msgstr "Geef server URL"
+
+#~ msgid "Enter Port # assigned to server"
+#~ msgstr "Geef poortnummer van de server"
+
+#~ msgid "Navtex"
+#~ msgstr "Navtex"
+
+#~ msgid "Wefax"
+#~ msgstr "Wefax"
+
+#~ msgid "Mono audio output"
+#~ msgstr "Mono audio output"
+
+#~ msgid "Force output audio to single channel"
+#~ msgstr "Audio output geforceerd op één kanaal"
+
+#~ msgid "IP Address"
+#~ msgstr "IP adres"
+
+#~ msgid "IP Address format: nnn.nnn.nnn.nnn"
+#~ msgstr "IP adres opmaak: nnn.nnn.nnn.nnn"
+
+#~ msgid "XMLRPC"
+#~ msgstr "XMLRPC"
+
+#~ msgid "IP Address for KISS interface"
+#~ msgstr "IP adres voor KISS interface"
+
+#~ msgid "<TEXT>\tvideo text"
+#~ msgstr "<TEXT>\tvideotekst"
+
+#~ msgid "Raised cosine = Hanning"
+#~ msgstr "'Hanning' is identiek aan 'raised cosine'"
+
+#~ msgid "View/Hide Smeter"
+#~ msgstr "S-meter tonen/verbergen"
+
+#~ msgid "cty.dat pathname"
+#~ msgstr "pad naar cty.dat"
+
+#~ msgid "Really want to quit?"
+#~ msgstr "Weet u zeker dat u wilt afsluiten?"
+
+#~ msgid "No rig specified"
+#~ msgstr "Geen TRX aangegeven"
+
+#~ msgid "Create New Logbook?"
+#~ msgstr "Nieuw logboek aanmaken?"
+
+#~ msgid "Save image as:"
+#~ msgstr "Bewaar afbeelding als:"
+
+#~ msgid ""
+#~ "Enter frequency or change with\n"
+#~ "Left/Right/Up/Down/Pg_Up/Pg_Down"
+#~ msgstr ""
+#~ "Voer frequentie in of wijzig met\n"
+#~ "Links/Rechts/Omhoog/Omlaag/PageUp/PageDown"
+
+#~ msgid "Enter Xcvr Freq"
+#~ msgstr "Voer TRX frequentie in"
+
+#~ msgid "Memory Mapped Rig"
+#~ msgstr "Memory Mapped Rig"
+
+#~ msgid "Colors and Fonts"
+#~ msgstr "Kleuren en lettertypes"
+
+#~ msgid "Disp"
+#~ msgstr "Toon"
+
+#~ msgid "Label text"
+#~ msgstr "Tekst label"
+
+#~ msgid ""
+#~ "Exit prompts active only when File/Exit menu item selected.\n"
+#~ "Not active if window decoration close button pressed."
+#~ msgstr ""
+#~ "Prompt voor afsluiten alleen actief wanneer Bestand -> Afsluiten menu "
+#~ "item wordt gebruikt.\n"
+#~ "Niet actief wanneer windows sluiten knop wordt gebruikt."
+
+#~ msgid "Logging"
+#~ msgstr "Loggen"
+
+#~ msgid "Enable if you cannot use the middle mouse button"
+#~ msgstr "Schakel in als je de middelste muisknop niet kunt gebruiken"
+
+#~ msgid "One bar (above waterfall)"
+#~ msgstr "Eén balk (boven waterval)"
+
+#~ msgid "One bar (below waterfall)"
+#~ msgstr "Eén balk (onder waterval)"
+
+#~ msgid "FFT latency (scan merging)"
+#~ msgstr "FFT latency (scan merging)"
+
+#~ msgid ""
+#~ "Latency increases frequency resolution,\n"
+#~ "decreases time resolution. 1 = no scan merging"
+#~ msgstr ""
+#~ "Latency increases frequency resolution,\n"
+#~ "decreases time resolution. 1 = no scan merging"
+
+#~ msgid "64-bit (long) interleave"
+#~ msgstr "64-bit (long) interleave"
+
+#~ msgid "characters"
+#~ msgstr "karakters"
+
+#~ msgid "Set page width"
+#~ msgstr "Kies paginabreedte"
+
+#~ msgid "after:"
+#~ msgstr "na:"
+
+#~ msgid "Unshift On Space"
+#~ msgstr "Lettersymbolen na spatie (UOS)"
+
+#~ msgid "RX"
+#~ msgstr "RX"
+
+#~ msgid "TX"
+#~ msgstr "TX"
+
+#~ msgid "track clr"
+#~ msgstr "Volgkleur"
+
+#~ msgid "Create square wave on right channel"
+#~ msgstr "Genereer blokgolf op rechter audiokanaal"
+
+#~ msgid "X-agc (hidden)"
+#~ msgstr "X-agc (hidden)"
+
+#~ msgid "Navtex stations file:"
+#~ msgstr "Bestand Navtex stations:"
+
+#~ msgid "Select serial port"
+#~ msgstr "Kies seriële poort"
+
+#~ msgid "Serial device"
+#~ msgstr "Seriële poort"
+
+#~ msgid "Select the rig by name"
+#~ msgstr "Kies zendontvanger uit de lijst"
+
+#~ msgid "Serial port"
+#~ msgstr "Seriële poort"
+
+#~ msgid "Serial port baud rate"
+#~ msgstr "Bitrate seriële poort"
+
+#~ msgid ""
+#~ "Force the rig sideband. Takes\n"
+#~ "effect when rig mode changes."
+#~ msgstr ""
+#~ "Forceer instelling voor zijband. Krijgt\n"
+#~ "effect nadat zendontvanger van mode wisselt."
+
+#~ msgid "MemMap"
+#~ msgstr "MemMap"
+
+#~ msgid ""
+#~ "Control via Memory Mapped\n"
+#~ "shared variables\n"
+#~ "i.e.: Kachina program"
+#~ msgstr ""
+#~ "Control via Memory Mapped\n"
+#~ "shared variables\n"
+#~ "i.e.: Kachina program"
+
+#~ msgid "Use Memmap"
+#~ msgstr "Gebruik MemMap"
+
+#~ msgid "Rig control via memory mapped Kachina"
+#~ msgstr "Besturing zendontvanger via 'Memory Mapped Kachina'"
+
+#~ msgid "Use Memmap PTT"
+#~ msgstr "Gebruik MemMap PTT"
+
+#~ msgid "Initialize Memmap interface"
+#~ msgstr "Initialiseer MemMap besturing"
+
+#~ msgid "Mixer"
+#~ msgstr "Mixer"
+
+#~ msgid "OSS mixer"
+#~ msgstr "OSS Mixer"
+
+#~ msgid "Manage mixer"
+#~ msgstr "Beheer mixer"
+
+#~ msgid "Add mixer controls to main dialog"
+#~ msgstr "Voeg mixer toe aan hoofdscherm"
+
+#~ msgid "Select Mixer device"
+#~ msgstr "Kies mixerapparaat"
+
+#~ msgid "Mic In"
+#~ msgstr "Microfoon in"
+
+#~ msgid "Use microphone input"
+#~ msgstr "Gebruik microfooningang"
+
+#~ msgid "Line In"
+#~ msgstr "Lijningang"
+
+#~ msgid "Use Line-In device"
+#~ msgstr "Gebruik lijningang"
+
+#~ msgid "PCM"
+#~ msgstr "PCM"
+
+#~ msgid "Set the sound card PCM level"
+#~ msgstr "Stel PCM niveau geluidskaart in"

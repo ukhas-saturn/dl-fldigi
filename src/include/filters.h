@@ -120,6 +120,7 @@ public:
 	double run(double a);
 	void setLength(int filtlen);
 	void reset();
+	double value() { return out / (len > 0 ? len : 1); }
 };
 
 
@@ -138,9 +139,12 @@ private:
 	vrot_bins_pair * __restrict__ vrot_bins ;
 	cmplx * __restrict__ delay;
 	double k2;
+	int count;
 public:
 	sfft(int len, int first, int last);
 	~sfft();
+	bool is_stable();
+	void reset();
 	void run(const cmplx& input, cmplx * __restrict__ result, int stride );
 };
 

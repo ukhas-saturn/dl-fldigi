@@ -41,6 +41,9 @@ decl {\#include "dl_fldigi/flights.h"} {private local
 decl {\#include "dl_fldigi/hbtint.h"} {private local
 } 
 
+decl {\#include "data_io.h"} {private local
+} 
+
 decl {\#include "Viewer.h"} {private global
 } 
 
@@ -107,6 +110,12 @@ decl {\#include "rx_extract.h"} {private local
 decl {\#include "kmlserver.h"} {private local
 } 
 
+decl {\#include "macroedit.h"} {private local
+} 
+
+decl {\#include "fileselect.h"} {private local
+} 
+
 decl {extern void WefaxDestDirSet(Fl_File_Chooser *w, void *userdata);} {private local
 } 
 
@@ -121,17 +130,12 @@ decl {Fl_Double_Window *dlgConfig;} {public local
 decl {Mode_Browser* mode_browser;} {public local
 } 
 
-Function {choose_color(Fl_Color & c)} {open private return_type void
+Function {choose_color(Fl_Color & c)} {private return_type void
 } {
   code {unsigned char r, g, b;
 Fl::get_color(c, r, g, b);
 if (fl_color_chooser("Font color", r, g, b))
     c = fl_rgb_color(r, g, b);} {}
-} 
-
-Function {adjust_label(Fl_Widget* w)} {open private return_type void
-} {
-  code {w->labelcolor(fl_contrast(w->labelcolor(), w->color()));} {}
 } 
 
 Function {cbRxFontBrowser(Fl_Widget*, void*)} {open private return_type void
@@ -152,6 +156,10 @@ Function {cbRxFontBrowser(Fl_Widget*, void*)} {open private return_type void
     ReceiveText->setFont(font);
     ReceiveText->setFontSize(size);
     ReceiveText->setFontColor(progdefaults.RxFontcolor, FTextBase::RECV);
+    
+    fsq_rx_text->setFont(font);
+    fsq_rx_text->setFontSize(size);
+    fsq_rx_text->setFontColor(progdefaults.RxFontcolor, FTextBase::RECV);
 
     font_browser->hide();
 
@@ -177,12 +185,38 @@ Function {cbTxFontBrowser(Fl_Widget*, void*)} {open private return_type void
     TransmitText->setFontSize(size);
     TransmitText->setFontColor(progdefaults.TxFontcolor, FTextBase::RECV);
 
+    fsq_tx_text->setFont(font);
+    fsq_tx_text->setFontSize(size);
+    fsq_tx_text->setFontColor(progdefaults.RxFontcolor, FTextBase::RECV);
+
     font_browser->hide();
 
     progdefaults.changed = true;} {}
 } 
 
-Function {cbWaterfallFontBrowser(Fl_Widget*, void*)} {open return_type void
+Function {cbMacroEditFontBrowser(Fl_Widget*, void*)} {private return_type void
+} {
+  code {Fl_Font font = font_browser->fontNumber();
+    int size = font_browser->fontSize();
+
+    MacroText->textfont(font);
+    MacroText->textsize(size);
+    MacroText->redraw();
+
+    progdefaults.MacroEditFontnbr = font;
+    progdefaults.MacroEditFontsize = size;
+    
+    update_macroedit_font();
+
+    MacroText->textfont(font);
+    MacroText->textsize(size);
+    
+    font_browser->hide();
+
+    progdefaults.changed = true;} {}
+} 
+
+Function {cbWaterfallFontBrowser(Fl_Widget*, void*)} {return_type void
 } {
   code {Fl_Font fnt = font_browser->fontNumber();
     int size = font_browser->fontSize();
@@ -194,7 +228,34 @@ Function {cbWaterfallFontBrowser(Fl_Widget*, void*)} {open return_type void
     font_browser->hide();} {}
 } 
 
-Function {cbViewerFontBrowser(Fl_Widget*, void*)} {open return_type void
+Function {cbMacroBtnFontBrowser(Fl_Widget*, void*)} {private return_type void
+} {
+  code {progdefaults.MacroBtnFontnbr = font_browser->fontNumber();
+    progdefaults.MacroBtnFontsize = font_browser->fontSize();;
+    progdefaults.MacroBtnFontcolor = font_browser->fontColor();
+
+    font_browser->hide();
+    
+    btnGroup1->labelcolor(progdefaults.MacroBtnFontcolor);
+    btnGroup1->labelfont(progdefaults.MacroBtnFontnbr);
+    btnGroup1->labelsize(progdefaults.MacroBtnFontsize);
+    btnGroup1->redraw_label();
+
+    btnGroup2->labelcolor(progdefaults.MacroBtnFontcolor);
+    btnGroup2->labelfont(progdefaults.MacroBtnFontnbr);
+    btnGroup2->labelsize(progdefaults.MacroBtnFontsize);
+    btnGroup2->redraw_label();
+
+    btnGroup3->labelcolor(progdefaults.MacroBtnFontcolor);
+    btnGroup3->labelfont(progdefaults.MacroBtnFontnbr);
+    btnGroup3->labelsize(progdefaults.MacroBtnFontsize);
+    btnGroup3->redraw_label();
+
+    progdefaults.changed = true;
+    colorize_macros();} {}
+} 
+
+Function {cbViewerFontBrowser(Fl_Widget*, void*)} {return_type void
 } {
   code {progdefaults.ViewerFontnbr = font_browser->fontNumber();
     progdefaults.ViewerFontsize = font_browser->fontSize();
@@ -204,7 +265,7 @@ Function {cbViewerFontBrowser(Fl_Widget*, void*)} {open return_type void
     font_browser->hide();} {}
 } 
 
-Function {cbFreqControlFontBrowser(Fl_Widget*, void*)} {open return_type void
+Function {cbFreqControlFontBrowser(Fl_Widget*, void*)} {return_type void
 } {
   code {Fl_Font fnt = font_browser->fontNumber();
     progdefaults.FreqControlFontnbr = fnt;
@@ -218,11 +279,11 @@ Function {cbFreqControlFontBrowser(Fl_Widget*, void*)} {open return_type void
     qsoFreqDisp1->redraw();
     qsoFreqDisp2->redraw();
     qsoFreqDisp3->redraw();
-    
+
     font_browser->hide();} {}
 } 
 
-Function {cbLOGGINGFontBrowser(Fl_Widget*, void*)} {open private return_type void
+Function {cbLOGGINGFontBrowser(Fl_Widget*, void*)} {private return_type void
 } {
   code {Fl_Font font = font_browser->fontNumber();
     int size = font_browser->fontSize();
@@ -236,7 +297,7 @@ Function {cbLOGGINGFontBrowser(Fl_Widget*, void*)} {open private return_type voi
     LOGGINGdisplay->textcolor(color);
     LOGGINGdisplay->textfont(font);
     LOGGINGdisplay->redraw();
-    
+
     LOGGING_colors_font();
 
     font_browser->hide();
@@ -244,7 +305,7 @@ Function {cbLOGGINGFontBrowser(Fl_Widget*, void*)} {open private return_type voi
     progdefaults.changed = true;} {}
 } 
 
-Function {cbLOGBOOKFontBrowser(Fl_Widget*, void*)} {open private return_type void
+Function {cbLOGBOOKFontBrowser(Fl_Widget*, void*)} {private return_type void
 } {
   code {Fl_Font font = font_browser->fontNumber();
     int size = font_browser->fontSize();
@@ -258,7 +319,7 @@ Function {cbLOGBOOKFontBrowser(Fl_Widget*, void*)} {open private return_type voi
     LOGBOOKdisplay->textcolor(color);
     LOGBOOKdisplay->textfont(font);
     LOGBOOKdisplay->redraw();
-    
+
     LOGBOOK_colors_font();
 
     font_browser->hide();
@@ -289,8 +350,8 @@ for (size_t i = 0; i < sizeof(qrzbweb)/sizeof(*qrzbweb); i++)
 Function {ConfigureDialog()} {open
 } {
   code {font_browser = new Font_Browser;} {}
-  code {static const char szShifts[]  = "23|85|160|170|182|200|240|350|425|850|Custom";
-static const char szBauds[]  = "45|45.45|50|56|75|100|110|150|200|300";
+  code {static const char szShifts[]  = "23|85|160|170|182|200|240|350|425|600|850|Custom";
+static const char szBauds[]  = "45|45.45|50|56|75|100|110|150|200|300|600|1200";
 static const char szSelBits[] = "5 (baudot)|7 (ascii)|8 (ascii)";
 static const char szParity[]  = "none|even|odd|zero|one";
 static const char szStopBits[] = "1|1.5|2";
@@ -304,7 +365,7 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
   code {static const int payload_browser_columns[] = { 180, 350 };} {}
   Fl_Window {} {
     label {Fldigi configuration} open
-    xywh {921 110 600 415} type Double color 45 selection_color 51 labelsize 18 align 80 non_modal visible
+    xywh {996 32 600 415} type Double color 45 selection_color 51 labelsize 18 align 80 non_modal visible
   } {
     Fl_Tabs tabsConfigure {open
       xywh {0 0 600 380} color 50 selection_color 50
@@ -316,7 +377,7 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
       } {
         Fl_Group {} {
           label Station open
-          xywh {55 35 490 170} box ENGRAVED_FRAME align 21
+          xywh {55 35 490 200} box ENGRAVED_FRAME align 21
         } {
           Fl_Input inpMyCallsign {
             label {Callsign:}
@@ -385,7 +446,7 @@ btnApplyConfig->activate();}
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
-            xywh {132 200 320 25}
+            tooltip {Short description of radio} xywh {160 200 320 24}
             code0 {o->value(progdefaults.myRadio.c_str());}
           }
         }
@@ -396,28 +457,38 @@ btnApplyConfig->activate();}
           Fl_Check_Button btnNoiseOn {
             label {Noise on}
             callback {progdefaults.noise = o->value();}
-            xywh {93 269 70 15} down_box DOWN_BOX deactivate
+            xywh {93 269 70 15} down_box DOWN_BOX
             code0 {o->value(progdefaults.noise);}
           }
           Fl_Counter noiseDB {
             label dB
             callback {progdefaults.s2n = o->value();}
-            xywh {90 307 89 21} type Simple align 4 minimum -18 maximum 60 step 1 value 20 deactivate
+            xywh {312 264 130 21} align 4 minimum -18 maximum 60 value 20
             code0 {o->value(progdefaults.s2n);}
+            code1 {o->lstep(1);}
             class Fl_Counter2
+          }
+          Fl_Counter ctrl_freq_offset {
+            label {freq-offset}
+            tooltip {ONLY FOR TESTING !} xywh {312 304 130 21} align 4 minimum -250 maximum 250
+            code0 {o->lstep(10);}
+          }
+          Fl_Check_Button btnOffsetOn {
+            label {Offset on}
+            xywh {93 307 70 15} down_box DOWN_BOX
           }
         }
       }
       Fl_Group tabUI {
         label UI open
-        xywh {0 25 600 355} hide
+        tooltip {User Interface} xywh {0 25 600 355} hide
       } {
         Fl_Tabs tabsUI {open
           xywh {0 25 600 355} selection_color 50
         } {
           Fl_Group tabBrowser {
-            label Browser open
-            xywh {0 50 600 330}
+            label Browser
+            tooltip {User Interface - Browser} xywh {0 50 600 330} hide
           } {
             Fl_Group {} {open
               xywh {30 65 540 300} box ENGRAVED_FRAME
@@ -519,7 +590,7 @@ progdefaults.changed = true;}
     sldrViewerSquelch->redraw();
     mvsquelch->color(fl_rgb_color(r,g,b));
     mvsquelch->redraw();
-    
+
     progdefaults.changed = true;}
                   tooltip {Background color of signal viewer squelch control} xywh {47 310 60 24} align 1
                   code0 {bwsrSliderColor->color(fl_rgb_color(progdefaults.bwsrSliderColor.R, progdefaults.bwsrSliderColor.G,progdefaults.bwsrSliderColor.B));}
@@ -542,7 +613,7 @@ progdefaults.changed = true;}
     sldrViewerSquelch->redraw();
     mvsquelch->selection_color(fl_rgb_color(r,g,b));
     mvsquelch->redraw();
-    
+
     progdefaults.changed = true;}
                   tooltip {Slider hilite color of signal viewer squelch control} xywh {115 310 60 24} align 1
                   code0 {bwsrSldrSelColor->color(fl_rgb_color(progdefaults.bwsrSldrSelColor.R, progdefaults.bwsrSldrSelColor.G,progdefaults.bwsrSliderColor.B));}
@@ -602,8 +673,8 @@ progdefaults.changed = true;}
             }
           }
           Fl_Group tabContest {
-            label Contest open
-            xywh {0 50 600 330} hide
+            label Contest
+            tooltip {User Interface - Contest} xywh {0 50 600 330} hide
           } {
             Fl_Group {} {
               label Exchanges open
@@ -623,10 +694,10 @@ progdefaults.changed = true;}
                 class Fl_Input2
               }
               Fl_Check_Button btn599 {
-                label {RST always 599}
+                label {RST always 599/59}
                 callback {progdefaults.fixed599 = o->value();
 progdefaults.changed = true;}
-                tooltip {Force RST in/out to 599} xywh {360 90 130 20} down_box DOWN_BOX
+                tooltip {Force RST in/out to 599/59} xywh {360 90 130 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.fixed599);}
               }
               Fl_Check_Button btnCutNbrs {
@@ -724,9 +795,9 @@ progdefaults.changed = true;}
               }
               Fl_Button btnDupColor {
                 label {Dup Color}
-                callback {fl_color_chooser("Dup Check", 
-  progdefaults.dup_color.R, 
-  progdefaults.dup_color.G, 
+                callback {fl_color_chooser("Dup Check",
+  progdefaults.dup_color.R,
+  progdefaults.dup_color.G,
   progdefaults.dup_color.B);
 o->color(
   fl_rgb_color(
@@ -743,25 +814,25 @@ progdefaults.changed = true;}
           }
           Fl_Group tabUserInterface {
             label General open
-            xywh {0 50 600 330} hide
+            tooltip {User Interface - General} xywh {0 50 600 330} hide
           } {
             Fl_Group {} {open
-              xywh {52 62 496 76} box ENGRAVED_FRAME
+              xywh {40 77 520 76} box ENGRAVED_FRAME
             } {
               Fl_Check_Button btnShowTooltips {
                 label {Show tooltips}
                 callback {progdefaults.tooltips = o->value();
 Fl_Tooltip::enable(progdefaults.tooltips);
 progdefaults.changed = true;}
-                tooltip {Enable / disable tooltips} xywh {87 75 120 20} down_box DOWN_BOX value 1
+                tooltip {Enable / disable tooltips} xywh {75 90 120 20} down_box DOWN_BOX value 1
                 code0 {o->value(progdefaults.tooltips);}
               }
               Fl_Check_Button chkMenuIcons {
                 label {Show menu icons}
                 callback {progdefaults.menuicons = o->value();
-toggle_icon_labels();
+icons::toggle_icon_labels();
 progdefaults.changed = true;}
-                tooltip {Enable / disable icons on menus} xywh {231 75 150 20} down_box DOWN_BOX
+                tooltip {Enable / disable icons on menus} xywh {219 90 150 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.menuicons);}
               }
               Fl_Group listboxScheme {
@@ -770,7 +841,7 @@ progdefaults.changed = true;}
     Fl::scheme(progdefaults.ui_scheme.c_str());
 
     progdefaults.changed = true;} open
-                tooltip {Change application look and feel} xywh {205 104 80 20} box DOWN_BOX color 7 align 8
+                tooltip {Change application look and feel} xywh {193 119 80 20} box DOWN_BOX color 7 align 8
                 code0 {listboxScheme->add("base");}
                 code1 {listboxScheme->add("gtk+");}
                 code2 {listboxScheme->add("plastic");}
@@ -784,48 +855,48 @@ progdefaults.changed = true;}
 mode_browser->callback(toggle_visible_modes);
 mode_browser->show(&progdefaults.visible_modes);
 progdefaults.changed = true;}
-                tooltip {Select modes for menu access} xywh {70 104 110 20}
+                tooltip {Select modes for menu access} xywh {58 119 110 20}
               }
               Fl_Group listbox_language {
                 label {UI language}
                 callback {progdefaults.ui_language = o->index();
 progdefaults.changed = true;} open
-                tooltip {Changes take effect on next program startup} xywh {415 104 110 20} box DOWN_BOX color 7 labelsize 12 align 5
+                tooltip {Changes take effect on next program startup} xywh {375 119 170 20} box DOWN_BOX color 7 labelsize 12 align 5
                 code0 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
             }
-            Fl_Group {} {open
-              xywh {52 139 496 34} box ENGRAVED_FRAME align 21
+            Fl_Group {} {
+              xywh {40 154 520 34} box ENGRAVED_FRAME align 21
             } {
               Fl_Check_Button btn_rx_lowercase {
                 label {Print CW / RTTY / THROB / CONTESTIA in lowercase}
                 callback {progdefaults.rx_lowercase = o->value();
 progdefaults.changed = true;}
-                xywh {87 146 389 20} down_box DOWN_BOX
+                xywh {75 161 389 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.rx_lowercase);}
               }
             }
-            Fl_Group {} {open
-              xywh {52 174 496 34} box ENGRAVED_FRAME align 21
+            Fl_Group {} {
+              xywh {40 189 520 34} box ENGRAVED_FRAME align 21
             } {
               Fl_Check_Button btn_tx_lowercase {
                 label {Transmit all text in lower case}
                 callback {progdefaults.tx_lowercase = o->value();
 progdefaults.changed = true;}
-                xywh {87 182 389 20} down_box DOWN_BOX
+                xywh {75 197 389 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.tx_lowercase);}
               }
             }
             Fl_Group {} {
-              label {Exit prompts} open
-              xywh {52 209 496 110} box ENGRAVED_FRAME align 21
+              label {Exit prompts}
+              xywh {40 224 520 76} box ENGRAVED_FRAME align 21
             } {
               Fl_Check_Button btn_save_config_on_exit {
                 label {Prompt to save Configuration}
                 callback {progdefaults.SaveConfig = o->value();
 progdefaults.changed = true;}
-                xywh {87 272 233 20} down_box DOWN_BOX
+                xywh {75 248 233 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.SaveConfig);}
               }
               Fl_Check_Button btn2_save_macros_on_exit {
@@ -833,7 +904,7 @@ progdefaults.changed = true;}
                 callback {btn_save_macros_on_exit->value(o->value());
 progdefaults.SaveMacros = o->value();
 progdefaults.changed = true;}
-                tooltip {Write current macro set on program exit} xywh {87 294 233 20} down_box DOWN_BOX
+                tooltip {Write current macro set on program exit} xywh {75 270 233 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.SaveMacros);}
               }
               Fl_Check_Button btn2NagMe {
@@ -841,66 +912,38 @@ progdefaults.changed = true;}
                 callback {btnNagMe->value(o->value());
 progdefaults.NagMe=o->value();
 progdefaults.changed = true;}
-                tooltip {Bug me about saving log entries} xywh {331 272 166 20} down_box DOWN_BOX
+                tooltip {Bug me about saving log entries} xywh {319 248 166 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.NagMe);}
-              }
-              Fl_Box {} {
-                label {Exit prompts active only when File/Exit menu item selected.
-Not active if window decoration close button pressed.}
-                xywh {92 226 436 40} box BORDER_BOX align 20
               }
               Fl_Check_Button btn2_confirm_exit {
                 label {Confirm exit}
                 callback {btn2_confirm_exit->value(o->value());
 progdefaults.confirmExit=o->value();
 progdefaults.changed = true;}
-                xywh {331 294 200 20} down_box DOWN_BOX
+                xywh {319 270 200 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.confirmExit);}
               }
             }
             Fl_Group {} {
               label {Check for updates} open
-              xywh {52 321 496 54} box ENGRAVED_FRAME align 21
+              xywh {40 301 520 52} box ENGRAVED_FRAME align 21
             } {
               Fl_Check_Button btn_check_for_updates {
-                label {Check for updates when online}
+                label {Check for updates when starting program}
                 callback {progdefaults.check_for_updates = o->value();
 progdefaults.changed = true;}
-                xywh {87 344 324 20} down_box DOWN_BOX
+                xywh {75 324 324 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.check_for_updates);}
               }
             }
           }
           Fl_Group tabLogServer {
-            label Logging open
-            xywh {0 50 600 330} hide
+            label Log open
+            tooltip {User Interface - Logging} xywh {0 50 600 330} hide
           } {
             Fl_Group {} {
-              label {Client/Server Logbook} open
-              xywh {52 315 496 55} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Input xmllogServerAddress {
-                label {Address:}
-                callback {progdefaults.xmllog_address = o->value();}
-                tooltip {Enter URL address of server} xywh {149 336 100 24}
-                code0 {o->value(progdefaults.xmllog_address.c_str());}
-              }
-              Fl_Input xmllogServerPort {
-                label {Port:}
-                callback {progdefaults.xmllog_port = o->value();}
-                tooltip {Enter Port \# assigned to server} xywh {307 336 70 24}
-                code0 {o->value(progdefaults.xmllog_port.c_str());}
-              }
-              Fl_Button btn_reconnect_log_server {
-                label Reconnect
-                callback {progdefaults.xml_logbook = true;
-connect_to_log_server();}
-                xywh {410 336 115 24}
-              }
-            }
-            Fl_Group {} {
               label {QSO logging} open
-              xywh {52 59 496 180} box ENGRAVED_FRAME align 21
+              xywh {52 59 496 198} box ENGRAVED_FRAME align 21
             } {
               Fl_Check_Button btnNagMe {
                 label {Prompt to save log on exit}
@@ -914,21 +957,21 @@ progdefaults.changed = true;}
                 label {Clear on save}
                 callback {progdefaults.ClearOnSave=o->value();
 progdefaults.changed = true;}
-                tooltip {Clear log entries after saving or using macro <LOG>} xywh {69 106 236 20} down_box DOWN_BOX
+                tooltip {Clear log entries after saving or using macro <LOG>} xywh {69 110 236 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.ClearOnSave);}
               }
               Fl_Check_Button btnCallUpperCase {
                 label {Convert callsign to upper case}
                 callback {progdefaults.calluppercase = o->value();
 progdefaults.changed = true;}
-                tooltip {Force callsign field to UPPERCASE} xywh {69 132 236 20} down_box DOWN_BOX
+                tooltip {Force callsign field to UPPERCASE} xywh {69 139 236 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.calluppercase);}
               }
               Fl_Check_Button btnAutoFillQSO {
                 label {Auto-fill Country and Azimuth}
                 callback {progdefaults.autofill_qso_fields = o->value();
 progdefaults.changed = true;}
-                tooltip {Fill in Country / Azimuth using cty.dat information} xywh {69 157 236 20} down_box DOWN_BOX
+                tooltip {Fill in Country / Azimuth using cty.dat information} xywh {69 169 236 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.autofill_qso_fields);}
               }
               Fl_Check_Button btnDateTimeSort {
@@ -943,28 +986,28 @@ reload_browser();}
                 label {Date time ON == OFF}
                 callback {progdefaults.force_date_time = o->value();
 progdefaults.changed = true;}
-                tooltip {Force date/time ON == date/time OFF} xywh {322 106 190 20} down_box DOWN_BOX
+                tooltip {Force date/time ON == date/time OFF} xywh {322 110 190 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.force_date_time);}
               }
               Fl_Check_Button btnRSTindefault {
-                label {Default RST in to 599}
+                label {Default RST in to 599/59}
                 callback {progdefaults.RSTin_default = o->value();
 progdefaults.changed = true;}
-                tooltip {Clear log controls sets RST in to 599} xywh {322 131 186 20} down_box DOWN_BOX
+                tooltip {Clear log controls sets RST in to 599/59} xywh {322 139 213 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.RSTin_default);}
               }
               Fl_Check_Button btnRSTdefault {
-                label {Default RST out to 599}
+                label {Default RST out to 599/59}
                 callback {progdefaults.RSTdefault = o->value();
 progdefaults.changed = true;}
-                tooltip {Clear log controls sets RST out to 599} xywh {322 157 184 20} down_box DOWN_BOX
+                tooltip {Clear log controls sets RST out to 599/59} xywh {322 169 216 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.RSTdefault);}
               }
               Fl_Input txt_cty_dat_pathname {
-                label {cty.dat pathname}
+                label {cty.dat folder}
                 callback {progdefaults.cty_dat_pathname = o->value();
 progdefaults.changed = true;}
-                tooltip {Enter full path-filename for cty.dat} xywh {189 180 346 24} when 1
+                tooltip {Enter full path-name for cty.dat folder} xywh {189 196 346 24} when 1
                 code0 {o->value(progdefaults.cty_dat_pathname.c_str());}
                 code1 {\#include "dxcc.h"}
                 class Fl_Input2
@@ -972,44 +1015,44 @@ progdefaults.changed = true;}
               Fl_Button btn_select_cty_dat {
                 label Browse
                 callback {select_cty_dat_pathname();}
-                tooltip {Locate cty.dat file} xywh {70 209 75 24}
+                tooltip {Locate cty.dat file} xywh {70 225 75 24}
               }
               Fl_Button btn_default_cty_dat {
                 label Default
                 callback {default_cty_dat_pathname();}
-                tooltip {Restore cty.dat default folder} xywh {165 209 75 24}
+                tooltip {Restore cty.dat default folder} xywh {165 225 75 24}
               }
               Fl_Button btn_reload_cty_dat {
                 label Reload
                 callback {reload_cty_dat();}
-                tooltip {Reload cty.dat} xywh {260 209 75 24}
+                tooltip {Reload cty.dat} xywh {260 225 75 24}
               }
               Fl_Input inpMyPower {
                 label {Transmit Power}
                 callback {progdefaults.mytxpower = o->value();
 progdefaults.changed = true;}
-                tooltip {Tx power used for logbook entries} xywh {485 209 50 24}
+                tooltip {Tx power used for logbook entries} xywh {485 225 50 24}
                 code0 {o->value(progdefaults.mytxpower.c_str());}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Input2
               }
             }
             Fl_Group {} {
-              label {Rx Text Capture} open
-              xywh {52 240 496 74} box ENGRAVED_FRAME align 21
+              label {Rx Text} open
+              xywh {52 263 496 110} box ENGRAVED_FRAME align 21
             } {
               Fl_Check_Button btnRXClicks {
-                label {Double-click to capture}
+                label {Single-click to capture}
                 callback {progdefaults.rxtext_clicks_qso_data = o->value();
 progdefaults.changed = true;}
-                tooltip {Enable if you cannot use the middle mouse button} xywh {75 287 191 20} down_box DOWN_BOX
+                tooltip {Enable for single click capure of text in Rx panel} xywh {75 318 191 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.rxtext_clicks_qso_data);}
               }
               Fl_Check_Button btnRXTooltips {
                 label {callsign tooltips in received text}
                 callback {progdefaults.rxtext_tooltips = o->value();
 progdefaults.changed = true;}
-                tooltip {Popup info after a 2 second hover on a callsign} xywh {277 287 254 20} down_box DOWN_BOX
+                tooltip {Popup info after a 2 second hover on a callsign} xywh {277 318 254 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.rxtext_tooltips);}
               }
               Fl_Input inpNonword {
@@ -1017,103 +1060,152 @@ progdefaults.changed = true;}
                 callback {progdefaults.nonwordchars = o->value();
 progdefaults.changed = true;}
                 tooltip {RX text QSO data entry is bounded by the non-word characters
-defined here. Tab and newline are automatically included.} xywh {194 260 279 24} textfont 4
+defined here. Tab and newline are automatically included.} xywh {194 288 279 24} textfont 4
                 code0 {o->value(progdefaults.nonwordchars.c_str());}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Input2
+              }
+              Fl_Check_Button btnUSunits {
+                label {US units of distance (QRB)}
+                callback {progdefaults.us_units = o->value();
+progdefaults.changed = true;}
+                tooltip {Enable for single click capure of text in Rx panel} xywh {277 343 220 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.us_units);}
               }
             }
           }
           Fl_Group tabMBars {
             label Macros open
-            xywh {0 50 600 330} hide
+            tooltip {User Interface - Macros} xywh {0 50 600 330} hide
           } {
             Fl_Group {} {open
-              xywh {52 257 496 40} box ENGRAVED_FRAME
+              xywh {52 263 496 35} box ENGRAVED_FRAME
             } {
               Fl_Check_Button btnMacroMouseWheel {
                 label {Mouse wheel active on macro buttons}
                 callback {progdefaults.macro_wheel = o->value();
 progdefaults.changed = true;}
-                tooltip {enable mouse wheel control of macro bar} xywh {62 266 296 20} down_box DOWN_BOX
+                tooltip {enable mouse wheel control of macro bar} xywh {62 271 296 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.macro_wheel);}
               }
             }
             Fl_Group {} {
               label {Number and position of macro bars} open
-              xywh {52 61 496 195} box ENGRAVED_FRAME align 21
+              xywh {52 61 496 200} box ENGRAVED_FRAME align 21
             } {
-              Fl_Round_Button btn_oneA {
-                label {One bar (above waterfall)}
-                callback {progdefaults.mbar2_pos = 0;
-progdefaults.mbar1_pos = true;
+              Fl_Counter cnt_macro_height {
+                label {Button Height}
+                callback {progdefaults.macro_height = (int)o->value();
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {62 91 220 20} type Radio down_box ROUND_DOWN_BOX
+                tooltip {Height of macro bar} xywh {215 93 89 22} type Simple align 8 minimum 22 maximum 66 step 2 value 22
+                code0 {o->value(progdefaults.macro_height);}
               }
-              Fl_Round_Button btn_oneB {
-                label {One bar (below waterfall)}
-                callback {progdefaults.mbar2_pos = 0;
-progdefaults.mbar1_pos = false;
+              Fl_Round_Button btn_scheme_0 {
+                label {One above Rx/Tx}
+                callback {progdefaults.mbar_scheme = 0;
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {62 121 220 20} type Radio down_box ROUND_DOWN_BOX
+                tooltip {Single macro bar below logging panel
+variable height} xywh {61 130 144 22} type Radio down_box ROUND_DOWN_BOX
               }
-              Fl_Round_Button btn_twoA {
-                label {Two bars (scheme 1)}
-                callback {progdefaults.mbar2_pos = 1;
-progdefaults.mbar1_pos = true;
+              Fl_Round_Button btn_scheme_1 {
+                label {One above waterfall}
+                callback {progdefaults.mbar_scheme = 1;
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {62 151 220 20} type Radio down_box ROUND_DOWN_BOX
+                xywh {61 155 144 22} type Radio down_box ROUND_DOWN_BOX
               }
-              Fl_Round_Button btn_twoB {
-                label {Two bars (scheme 2)}
-                callback {progdefaults.mbar2_pos = 2;
-progdefaults.mbar1_pos = true;
+              Fl_Round_Button btn_scheme_2 {
+                label {One below waterfall}
+                callback {progdefaults.mbar_scheme = 2;
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {292 151 219 20} type Radio down_box ROUND_DOWN_BOX
+                xywh {61 180 144 22} type Radio down_box ROUND_DOWN_BOX
               }
-              Fl_Round_Button btn_twoC {
-                label {Two bars (scheme 3)}
-                callback {progdefaults.mbar2_pos = 3;
-progdefaults.mbar1_pos = true;
+              Fl_Round_Button btn_scheme_3 {
+                label {Two scheme 1}
+                callback {progdefaults.mbar_scheme = 3;
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {62 181 220 20} type Radio down_box ROUND_DOWN_BOX
+                xywh {228 130 144 22} type Radio down_box ROUND_DOWN_BOX
               }
-              Fl_Round_Button btn_twoD {
-                label {Two bars (scheme 4)}
-                callback {progdefaults.mbar2_pos = 1;
-progdefaults.mbar1_pos = false;
+              Fl_Round_Button btn_scheme_5 {
+                label {Two scheme 3}
+                callback {progdefaults.mbar_scheme = 5;
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {292 181 220 20} type Radio down_box ROUND_DOWN_BOX
+                xywh {228 155 144 22} type Radio down_box ROUND_DOWN_BOX
               }
-              Fl_Round_Button btn_twoE {
-                label {Two bars (scheme 5)}
-                callback {progdefaults.mbar2_pos = 2;
-progdefaults.mbar1_pos = false;
+              Fl_Round_Button btn_scheme_7 {
+                label {Two scheme 5}
+                callback {progdefaults.mbar_scheme = 7;
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {62 211 220 20} type Radio down_box ROUND_DOWN_BOX
+                xywh {228 180 144 22} type Radio down_box ROUND_DOWN_BOX
               }
-              Fl_Round_Button btn_twoF {
-                label {Two bars (scheme 6)}
-                callback {progdefaults.mbar2_pos = 3;
-progdefaults.mbar1_pos = false;
+              Fl_Round_Button btn_scheme_9 {
+                label {Two scheme 7}
+                callback {progdefaults.mbar_scheme = 9;
 progdefaults.changed = true;
 set_macroLabels();
 UI_select();}
-                xywh {292 211 220 20} type Radio down_box ROUND_DOWN_BOX
+                xywh {228 205 144 22} type Radio down_box ROUND_DOWN_BOX
+              }
+              Fl_Round_Button btn_scheme_11 {
+                label {Two scheme 9}
+                callback {progdefaults.mbar_scheme = 11;
+progdefaults.changed = true;
+set_macroLabels();
+UI_select();}
+                xywh {228 230 144 22} type Radio down_box ROUND_DOWN_BOX
+              }
+              Fl_Round_Button btn_scheme_4 {
+                label {Two scheme 2}
+                callback {progdefaults.mbar_scheme = 4;
+progdefaults.changed = true;
+set_macroLabels();
+UI_select();}
+                xywh {396 130 144 22} type Radio down_box ROUND_DOWN_BOX
+              }
+              Fl_Round_Button btn_scheme_6 {
+                label {Two scheme 4}
+                callback {progdefaults.mbar_scheme = 6;
+progdefaults.changed = true;
+set_macroLabels();
+UI_select();}
+                xywh {396 155 144 22} type Radio down_box ROUND_DOWN_BOX
+              }
+              Fl_Round_Button btn_scheme_8 {
+                label {Two scheme 6}
+                callback {progdefaults.mbar_scheme = 8;
+progdefaults.changed = true;
+set_macroLabels();
+UI_select();}
+                xywh {396 180 144 22} type Radio down_box ROUND_DOWN_BOX
+              }
+              Fl_Round_Button btn_scheme_10 {
+                label {Two scheme 8}
+                callback {progdefaults.mbar_scheme = 10;
+progdefaults.changed = true;
+set_macroLabels();
+UI_select();}
+                xywh {396 205 144 22} type Radio down_box ROUND_DOWN_BOX
+              }
+              Fl_Round_Button btn_scheme_12 {
+                label {Two scheme 10}
+                callback {progdefaults.mbar_scheme = 12;
+progdefaults.changed = true;
+set_macroLabels();
+UI_select();}
+                xywh {396 230 144 22} type Radio down_box ROUND_DOWN_BOX
               }
             }
             Fl_Group {} {open
@@ -1147,7 +1239,7 @@ progdefaults.changed = true;}
           }
           Fl_Group tabWF_UI {
             label {WF Ctrls}
-            xywh {0 50 600 330} hide
+            tooltip {User Interface - Waterfall controls} xywh {0 50 600 330} hide
           } {
             Fl_Group {} {open
               xywh {52 83 496 253} box ENGRAVED_BOX
@@ -1285,8 +1377,8 @@ WF_UI();}
             }
           }
           Fl_Group tabColorsFonts {
-            label {Colors/Fonts} open
-            xywh {0 50 600 330} hide
+            label {Clrs/Fnts} open
+            tooltip {User Interface - Colors / Fonts} xywh {0 50 600 330}
           } {
             Fl_Tabs tabsColors {open
               xywh {0 55 600 325}
@@ -1297,14 +1389,14 @@ WF_UI();}
               } {
                 Fl_Group listbox_charset_status {
                   label {Rx/Tx Character set} open
-                  tooltip {Select Rx/Tx Character Set} xywh {99 109 165 24} box BORDER_BOX color 55 align 8
+                  tooltip {Select Rx/Tx Character Set} xywh {96 85 165 24} box BORDER_BOX color 55 align 8
                   code0 {\#include "fl_digi.h"}
                   code1 {o->labelsize(FL_NORMAL_SIZE);
                   listbox_charset_status->callback(cb_listbox_charset, 0);}
                   class Fl_ListBox
                 } {}
                 Fl_Input RxText {
-                  xywh {99 143 165 36}
+                  xywh {96 116 220 36}
                   code0 {RxText->value("Receive Text");}
                   code1 {RxText->color(fl_rgb_color(progdefaults.RxColor.R, progdefaults.RxColor.G, progdefaults.RxColor.B));}
                   code2 {RxText->textfont(progdefaults.RxFontnbr); RxText->textsize(progdefaults.RxFontsize); RxText->textcolor(progdefaults.RxFontcolor);}
@@ -1329,7 +1421,7 @@ WF_UI();}
     ReceiveText->redraw();
 
     progdefaults.changed = true;}
-                  xywh {273 150 75 21}
+                  xywh {326 123 75 21}
                 }
                 Fl_Button btnTxColor {
                   label {Tx bkgnd}
@@ -1350,10 +1442,10 @@ WF_UI();}
     TransmitText->redraw();
 
 progdefaults.changed = true;}
-                  xywh {273 191 75 21}
+                  xywh {326 166 75 21}
                 }
                 Fl_Input TxText {
-                  xywh {99 186 165 37}
+                  xywh {96 158 220 37}
                   code0 {TxText->value("Transmit Text");}
                   code1 {TxText->color(fl_rgb_color(progdefaults.TxColor.R, progdefaults.TxColor.G, progdefaults.TxColor.B));}
                   code2 {TxText->textfont(progdefaults.TxFontnbr); TxText->textsize(progdefaults.TxFontsize); TxText->textcolor(progdefaults.TxFontcolor);}
@@ -1367,7 +1459,7 @@ progdefaults.changed = true;}
     font_browser->fontFilter(Font_Browser::ALL_TYPES);
     font_browser->callback(cbRxFontBrowser);
 font_browser->show();}
-                  xywh {358 150 75 21}
+                  xywh {411 123 75 21}
                 }
                 Fl_Button btnTxFont {
                   label {Tx font}
@@ -1377,11 +1469,27 @@ font_browser->show();}
     font_browser->fontFilter(Font_Browser::ALL_TYPES);
     font_browser->callback(cbTxFontBrowser);
     font_browser->show();}
-                  xywh {358 191 75 21}
+                  xywh {411 166 75 21}
+                }
+                Fl_Input MacroText {
+                  xywh {96 201 220 37}
+                  code0 {MacroText->value("Macro editor text");}
+                  code1 {MacroText->textfont(progdefaults.MacroEditFontnbr);}
+                  code2 {MacroText->textsize(progdefaults.MacroEditFontsize);}
+                  code3 {MacroText->type(FL_MULTILINE_INPUT_WRAP);}
+                }
+                Fl_Button btnMacroEditFont {
+                  label {Macro Edit Font}
+                  callback {font_browser->fontNumber(progdefaults.MacroEditFontnbr);
+font_browser->fontSize(progdefaults.MacroEditFontsize);
+font_browser->fontFilter(Font_Browser::ALL_TYPES);
+font_browser->callback(cbMacroEditFontBrowser);
+font_browser->show();}
+                  xywh {326 209 120 21}
                 }
                 Fl_Group {} {
                   label {Text Highlighting} open
-                  xywh {71 235 404 81} box ENGRAVED_FRAME align 17
+                  xywh {86 248 404 81} box ENGRAVED_FRAME align 17
                 } {
                   Fl_Button btnXMIT {
                     label XMIT
@@ -1392,7 +1500,7 @@ font_browser->show();}
     ReceiveText->setFontColor(progdefaults.XMITcolor, FTextBase::XMIT);
 
     progdefaults.changed = true;}
-                    tooltip {Sent chars in Rx/Tx pane} xywh {89 263 40 21} align 2
+                    tooltip {Sent chars in Rx/Tx pane} xywh {104 276 40 21} align 2
                     code0 {btnXMIT->color(progdefaults.XMITcolor);}
                   }
                   Fl_Button btnCTRL {
@@ -1404,7 +1512,7 @@ font_browser->show();}
     ReceiveText->setFontColor(progdefaults.CTRLcolor, FTextBase::CTRL);
 
     progdefaults.changed = true;}
-                    tooltip {Control chars in Rx/Tx pane} xywh {132 263 40 21} align 2
+                    tooltip {Control chars in Rx/Tx pane} xywh {147 276 40 21} align 2
                     code0 {btnCTRL->color(progdefaults.CTRLcolor);}
                   }
                   Fl_Button btnSKIP {
@@ -1417,7 +1525,7 @@ font_browser->show();}
 
     progdefaults.changed = true;}
                     tooltip {Skipped chars in Tx pane
-(Tx on/off in CW)} xywh {176 263 40 21} align 2
+(Tx on/off in CW)} xywh {191 276 40 21} align 2
                     code0 {btnSKIP->color(progdefaults.SKIPcolor);}
                   }
                   Fl_Button btnALTR {
@@ -1429,7 +1537,7 @@ font_browser->show();}
     ReceiveText->setFontColor(progdefaults.ALTRcolor, FTextBase::ALTR);
 
     progdefaults.changed = true;}
-                    tooltip {Alternate character color in Rx panelr} xywh {219 263 40 21} align 2
+                    tooltip {Alternate character color in Rx panelr} xywh {234 276 40 21} align 2
                     code0 {btnALTR->color(progdefaults.ALTRcolor);}
                   }
                   Fl_Button btnSEL {
@@ -1449,9 +1557,9 @@ TransmitText->color(
     progdefaults.TxColor.G,
     progdefaults.TxColor.B),
     progdefaults.RxTxSelectcolor);
-    
+
 progdefaults.changed = true;}
-                    tooltip {Selection background color in Rx Tx panels} xywh {263 263 39 21} align 2
+                    tooltip {Selection background color in Rx Tx panels} xywh {278 276 39 21} align 2
                     code0 {btnSEL->color(progdefaults.RxTxSelectcolor);}
                   }
                   Fl_Button btnNoTextColor {
@@ -1510,7 +1618,7 @@ progdefaults.changed = true;}
     TransmitText->redraw();
 
     progdefaults.changed = true;}
-                    xywh {310 263 70 21}
+                    xywh {325 276 70 21}
                   }
                   Fl_Button btnTextDefaults {
                     label Defaults
@@ -1569,20 +1677,27 @@ progdefaults.changed = true;}
     TransmitText->redraw();
 
     progdefaults.changed = true;}
-                    xywh {384 263 70 21}
+                    xywh {399 276 70 21}
                   }
+                }
+                Fl_Check_Button btn_show_all_codes {
+                  label {display Rx control chars as ascii string}
+                  callback {progdefaults.show_all_codes=o->value();
+progdefaults.changed = true;}
+                  xywh {110 340 25 25} down_box DOWN_BOX
+                  code0 {o->value(progdefaults.show_all_codes);}
                 }
               }
               Fl_Group {} {
-                label {Frq Disp} open
+                label {FreqDisp / Meters} open
                 xywh {0 75 600 305} hide
               } {
                 Fl_Group {} {open
-                  xywh {115 108 370 87} box ENGRAVED_FRAME
+                  xywh {115 88 394 87} box ENGRAVED_FRAME
                 } {
                   Fl_Box FDdisplay {
                     label {14070.150}
-                    xywh {182 112 235 45} box DOWN_BOX color 55 labelfont 4 labelsize 40
+                    xywh {195 92 235 45} box DOWN_BOX color 55 labelfont 4 labelsize 40
                     code0 {o->color(fl_rgb_color(progdefaults.FDbackground.R,progdefaults.FDbackground.G,progdefaults.FDbackground.B));}
                     code1 {o->labelcolor(fl_rgb_color(progdefaults.FDforeground.R,progdefaults.FDforeground.G,progdefaults.FDforeground.B));}
                     code2 {o->labelfont(progdefaults.FreqControlFontnbr);}
@@ -1596,7 +1711,7 @@ progdefaults.changed = true;}
     font_browser->fontFilter(Font_Browser::ALL_TYPES);
     font_browser->callback(cbFreqControlFontBrowser);
 font_browser->show();}
-                    xywh {125 163 80 24}
+                    xywh {122 143 90 24}
                   }
                   Fl_Button btnBackgroundColor {
                     label {Bg Color}
@@ -1611,10 +1726,10 @@ font_browser->show();}
     progdefaults.FDbackground.R = r;
     progdefaults.FDbackground.G = g;
     progdefaults.FDbackground.B = b;
-    
+
     FDdisplay->color(fl_rgb_color(r,g,b));
     FDdisplay->redraw();
-    
+
     if (qsoFreqDisp) {
         qsoFreqDisp->SetONOFFCOLOR(
           fl_rgb_color(	progdefaults.FDforeground.R,
@@ -1625,9 +1740,8 @@ font_browser->show();}
                         progdefaults.FDbackground.B));
         qsoFreqDisp->redraw();
     }
-
     progdefaults.changed = true;}
-                    xywh {215 163 80 24}
+                    xywh {218 143 90 24}
                   }
                   Fl_Button btnForegroundColor {
                     label {Digit Color}
@@ -1642,10 +1756,10 @@ font_browser->show();}
     progdefaults.FDforeground.R = r;
     progdefaults.FDforeground.G = g;
     progdefaults.FDforeground.B = b;
-    
+
     FDdisplay->labelcolor(fl_rgb_color(r,g,b));
     FDdisplay->redraw();
-    
+
     if (qsoFreqDisp) {
         qsoFreqDisp->SetONOFFCOLOR(
           fl_rgb_color(	progdefaults.FDforeground.R,
@@ -1656,9 +1770,8 @@ font_browser->show();}
                         progdefaults.FDbackground.B));
         qsoFreqDisp->redraw();
     }
-
     progdefaults.changed = true;}
-                    xywh {305 163 80 24}
+                    xywh {314 143 90 24}
                   }
                   Fl_Button btnFD_SystemColor {
                     label {Sys Colors}
@@ -1670,15 +1783,15 @@ font_browser->show();}
     progdefaults.FDbackground.R = r;
     progdefaults.FDbackground.G = g;
     progdefaults.FDbackground.B = b;
-   
+
     FDdisplay->color(clr);
-    
+
     clr = FL_FOREGROUND_COLOR;
     Fl::get_color(clr, r, g, b);
-    
+
     FDdisplay->labelcolor(clr);
     FDdisplay->redraw();
-    
+
     progdefaults.FDforeground.R = r;
     progdefaults.FDforeground.G = g;
     progdefaults.FDforeground.B = b;
@@ -1693,10 +1806,144 @@ font_browser->show();}
                         progdefaults.FDbackground.B));
         qsoFreqDisp->redraw();
     }
-         
     progdefaults.changed = true;}
-                    xywh {396 163 80 24}
+                    xywh {410 143 90 24}
                   }
+                }
+                Fl_Group {} {
+                  label {S-meter} open
+                  xywh {115 179 420 62} box ENGRAVED_FRAME align 21
+                } {
+                  Fl_Button btnSmeter_bg_color {
+                    label {Bg Color}
+                    callback {uchar r, g, b;
+    r = progdefaults.Smeter_bg_color.R;
+    g = progdefaults.Smeter_bg_color.G;
+    b = progdefaults.Smeter_bg_color.B;
+
+    if (!fl_color_chooser("Background", r, g, b))
+        return;
+
+    progdefaults.Smeter_bg_color.R = r;
+    progdefaults.Smeter_bg_color.G = g;
+    progdefaults.Smeter_bg_color.B = b;
+    
+    set_smeter_colors();
+
+    progdefaults.changed = true;}
+                    xywh {122 206 90 24}
+                  }
+                  Fl_Button btnSmeter_scale_color {
+                    label {Scale Color}
+                    callback {uchar r, g, b;
+    r = progdefaults.Smeter_scale_color.R;
+    g = progdefaults.Smeter_scale_color.G;
+    b = progdefaults.Smeter_scale_color.B;
+
+    if (!fl_color_chooser("Scale", r, g, b))
+        return;
+
+    progdefaults.Smeter_scale_color.R = r;
+    progdefaults.Smeter_scale_color.G = g;
+    progdefaults.Smeter_scale_color.B = b;
+    
+    set_smeter_colors();
+
+    progdefaults.changed = true;}
+                    xywh {218 206 90 24}
+                  }
+                  Fl_Button btnSmeter_meter_color {
+                    label {Meter Color}
+                    callback {uchar r, g, b;
+    r = progdefaults.Smeter_meter_color.R;
+    g = progdefaults.Smeter_meter_color.G;
+    b = progdefaults.Smeter_meter_color.B;
+
+    if (!fl_color_chooser("Meter", r, g, b))
+        return;
+
+    progdefaults.Smeter_meter_color.R = r;
+    progdefaults.Smeter_meter_color.G = g;
+    progdefaults.Smeter_meter_color.B = b;
+    
+    set_smeter_colors();
+
+    progdefaults.changed = true;}
+                    xywh {314 206 90 24}
+                  }
+                }
+                Fl_Group {} {
+                  label {PWR-meter} open
+                  xywh {115 248 394 67} box ENGRAVED_FRAME align 21
+                } {
+                  Fl_Button btnPWR_bg_color {
+                    label {Bg Color}
+                    callback {uchar r, g, b;
+    r = progdefaults.PWRmeter_bg_color.R;
+    g = progdefaults.PWRmeter_bg_color.G;
+    b = progdefaults.PWRmeter_bg_color.B;
+
+    if (!fl_color_chooser("Background", r, g, b))
+        return;
+
+    progdefaults.PWRmeter_bg_color.R = r;
+    progdefaults.PWRmeter_bg_color.G = g;
+    progdefaults.PWRmeter_bg_color.B = b;
+    
+    set_smeter_colors();
+
+    progdefaults.changed = true;}
+                    xywh {122 275 90 24}
+                  }
+                  Fl_Button btnPWR_scale_color {
+                    label {Scale Color}
+                    callback {uchar r, g, b;
+    r = progdefaults.PWRmeter_scale_color.R;
+    g = progdefaults.PWRmeter_scale_color.G;
+    b = progdefaults.PWRmeter_scale_color.B;
+
+    if (!fl_color_chooser("Scale", r, g, b))
+        return;
+
+    progdefaults.PWRmeter_scale_color.R = r;
+    progdefaults.PWRmeter_scale_color.G = g;
+    progdefaults.PWRmeter_scale_color.B = b;
+    
+    set_smeter_colors();
+
+    progdefaults.changed = true;}
+                    xywh {218 275 90 24}
+                  }
+                  Fl_Button btnPWR_meter_Color {
+                    label {Meter Color}
+                    callback {uchar r, g, b;
+    r = progdefaults.PWRmeter_meter_color.R;
+    g = progdefaults.PWRmeter_meter_color.G;
+    b = progdefaults.PWRmeter_meter_color.B;
+
+    if (!fl_color_chooser("Meter", r, g, b))
+        return;
+
+    progdefaults.PWRmeter_meter_color.R = r;
+    progdefaults.PWRmeter_meter_color.G = g;
+    progdefaults.PWRmeter_meter_color.B = b;
+    
+    set_smeter_colors();
+
+    progdefaults.changed = true;}
+                    xywh {314 275 90 24}
+                  }
+                  Fl_Group listboxPWRselect {
+                    label {Power scale}
+                    callback {progdefaults.PWRselect = o->index();
+set_smeter_colors();
+progdefaults.changed = true;} open
+                    tooltip {Select the type of FFT prefilter} xywh {410 275 80 24} box DOWN_BOX color 7
+                    code0 {o->add(_("25 W")); o->add("50 W");}
+                    code1 {o->add("100 W"); o->add("200 W"); o->add("AUTO");}
+                    code3 {o->index(progdefaults.PWRselect);o->labelsize(FL_NORMAL_SIZE);}
+                    class Fl_ListBox
+                  } {}
                 }
               }
               Fl_Group {} {
@@ -1723,12 +1970,12 @@ font_browser->show();}
         return;
 
     progdefaults.LOGGINGcolor = fl_rgb_color(r, g, b);
-    
+
     LOGGINGdisplay->color(progdefaults.LOGGINGcolor);
     LOGGINGdisplay->redraw();
 
     LOGGING_colors_font();
-    
+
     progdefaults.changed = true;}
                     xywh {240 125 80 25}
                   }
@@ -1754,9 +2001,9 @@ LOGGINGdisplay->textsize(progdefaults.LOGGINGtextsize);
 LOGGINGdisplay->textcolor(progdefaults.LOGGINGtextcolor);
 LOGGINGdisplay->textfont(progdefaults.LOGGINGtextfont);
 LOGGINGdisplay->redraw();
-    
+
 LOGGING_colors_font();
-    
+
 progdefaults.changed = true;}
                     xywh {396 125 80 25}
                   }
@@ -1777,16 +2024,16 @@ progdefaults.changed = true;}
                     callback {uchar r, g, b;
     Fl::get_color(progdefaults.LOGBOOKcolor, r, g, b);
 
-    if (!fl_color_chooser("Background", r, g, b))
+   if (!fl_color_chooser("Background", r, g, b))
         return;
 
     progdefaults.LOGBOOKcolor = fl_rgb_color(r, g, b);
-    
+
     LOGBOOKdisplay->color(progdefaults.LOGBOOKcolor);
     LOGBOOKdisplay->redraw();
 
     LOGBOOK_colors_font();
-    
+
     progdefaults.changed = true;}
                     xywh {239 200 80 25}
                   }
@@ -1812,9 +2059,9 @@ LOGBOOKdisplay->textsize(progdefaults.LOGBOOKtextsize);
 LOGBOOKdisplay->textcolor(progdefaults.LOGBOOKtextcolor);
 LOGBOOKdisplay->textfont(progdefaults.LOGBOOKtextfont);
 LOGBOOKdisplay->redraw();
-    
+
 LOGBOOK_colors_font();
-    
+
 progdefaults.changed = true;}
                     xywh {395 200 80 25}
                   }
@@ -1846,11 +2093,11 @@ progdefaults.changed = true;}
     progdefaults.btnGroup1.B = b;
     o->color(fl_rgb_color(r,g,b));
     colorize_macros();
-    
+
     progdefaults.changed = true;}
-                  tooltip {Background color for Function key group 1} xywh {135 139 75 20}
+                  tooltip {Background color for Function key group 1} xywh {103 155 90 30}
                   code0 {btnGroup1->color(fl_rgb_color(progdefaults.btnGroup1.R, progdefaults.btnGroup1.G,progdefaults.btnGroup1.B));}
-                  code1 {btnGroup1->labelcolor(fl_rgb_color(progdefaults.btnFkeyTextColor.R, progdefaults.btnFkeyTextColor.R, progdefaults.btnFkeyTextColor.R));}
+                  code1 {btnGroup1->labelcolor(progdefaults.MacroBtnFontcolor);}
                 }
                 Fl_Button btnGroup2 {
                   label {Group 2}
@@ -1868,9 +2115,9 @@ progdefaults.changed = true;}
     colorize_macros();
 
     progdefaults.changed = true;}
-                  tooltip {Background color for Function key group 2} xywh {226 139 75 20}
+                  tooltip {Background color for Function key group 2} xywh {205 155 90 30}
                   code0 {btnGroup2->color(fl_rgb_color(progdefaults.btnGroup2.R, progdefaults.btnGroup2.G,progdefaults.btnGroup2.B));}
-                  code1 {btnGroup2->labelcolor(fl_rgb_color(progdefaults.btnFkeyTextColor.R, progdefaults.btnFkeyTextColor.R, progdefaults.btnFkeyTextColor.R));}
+                  code1 {btnGroup2->labelcolor(progdefaults.MacroBtnFontcolor);}
                 }
                 Fl_Button btnGroup3 {
                   label {Group 3}
@@ -1888,36 +2135,9 @@ progdefaults.changed = true;}
 
     colorize_macros();
     progdefaults.changed = true;}
-                  tooltip {Background color for Function key group 3} xywh {318 139 75 20}
+                  tooltip {Background color for Function key group 3} xywh {307 155 90 30}
                   code0 {btnGroup3->color(fl_rgb_color(progdefaults.btnGroup3.R, progdefaults.btnGroup3.G,progdefaults.btnGroup3.B));}
-                  code1 {btnGroup3->labelcolor(fl_rgb_color(progdefaults.btnFkeyTextColor.R, progdefaults.btnFkeyTextColor.R, progdefaults.btnFkeyTextColor.R));}
-                }
-                Fl_Button btnFkeyTextColor {
-                  label {Label text}
-                  callback {uchar r, g, b;
-    r = progdefaults.btnFkeyTextColor.R;
-    g = progdefaults.btnFkeyTextColor.G;
-    b = progdefaults.btnFkeyTextColor.B;
-
-    if (fl_color_chooser("Fkey Text", r, g, b) == 0)
-        return;
-
-    progdefaults.btnFkeyTextColor.R = r;
-    progdefaults.btnFkeyTextColor.G = g;
-    progdefaults.btnFkeyTextColor.B = b;
-    o->color(fl_rgb_color(r,g,b));
-    adjust_label(o);
-    btnGroup1->labelcolor(fl_rgb_color(r,g,b));
-    btnGroup2->labelcolor(fl_rgb_color(r,g,b));
-    btnGroup3->labelcolor(fl_rgb_color(r,g,b));
-    btnGroup1->redraw_label();
-    btnGroup2->redraw_label();
-    btnGroup3->redraw_label();
-    progdefaults.changed = true;
-    colorize_macros();}
-                  xywh {318 107 75 21}
-                  code0 {btnFkeyTextColor->color(fl_rgb_color(progdefaults.btnFkeyTextColor.R, progdefaults.btnFkeyTextColor.G, progdefaults.btnFkeyTextColor.B));}
-                  code1 {adjust_label(btnFkeyTextColor);}
+                  code1 {btnGroup3->labelcolor(progdefaults.MacroBtnFontcolor);}
                 }
                 Fl_Button btnFkeyDEfaults {
                   label Defaults
@@ -1926,7 +2146,7 @@ progdefaults.changed = true;}
 
     r = 80; g = 144; b = 144;
     clr = fl_rgb_color(r,g,b);
-    btnGroup1->color(clr);
+     btnGroup1->color(clr);
     progdefaults.btnGroup1.R = r;
     progdefaults.btnGroup1.G = g;
     progdefaults.btnGroup1.B = b;
@@ -1945,27 +2165,38 @@ progdefaults.changed = true;}
     progdefaults.btnGroup3.G = g;
     progdefaults.btnGroup3.B = b;
 
-    r = 255; g = 255; b = 255;
-    clr = fl_rgb_color(r,g,b);
-    btnFkeyTextColor->color(clr);
-    btnFkeyTextColor->redraw_label();
-    progdefaults.btnFkeyTextColor.R = r;
-    progdefaults.btnFkeyTextColor.G = g;
-    progdefaults.btnFkeyTextColor.B = b;
+    progdefaults.MacroBtnFontcolor = FL_BLACK;
+    progdefaults.MacroBtnFontnbr = FL_HELVETICA;
+    progdefaults.MacroBtnFontsize = 12;
 
-    btnGroup1->labelcolor(clr);
+    btnGroup1->labelcolor(progdefaults.MacroBtnFontcolor);
+    btnGroup2->labelcolor(progdefaults.MacroBtnFontcolor);
+    btnGroup3->labelcolor(progdefaults.MacroBtnFontcolor);
+    btnGroup1->labelfont(progdefaults.MacroBtnFontnbr);
+    btnGroup2->labelfont(progdefaults.MacroBtnFontnbr);
+    btnGroup3->labelfont(progdefaults.MacroBtnFontnbr);
+    btnGroup1->labelsize(progdefaults.MacroBtnFontsize);
+    btnGroup2->labelsize(progdefaults.MacroBtnFontsize);
+    btnGroup3->labelsize(progdefaults.MacroBtnFontsize);
+
     btnGroup1->redraw_label();
-
-    btnGroup2->labelcolor(clr);
     btnGroup2->redraw_label();
-
-    btnGroup3->labelcolor(clr);
     btnGroup3->redraw_label();
 
     colorize_macros();
 
 progdefaults.changed = true;}
-                  xywh {410 139 75 20}
+                  xywh {410 155 90 30}
+                }
+                Fl_Button btnMacroBtnFont {
+                  label {Font/Color}
+                  callback {font_browser->fontNumber(progdefaults.MacroBtnFontnbr);
+    font_browser->fontSize(progdefaults.MacroBtnFontsize);
+    font_browser->fontColor(progdefaults.MacroBtnFontcolor);
+    font_browser->fontFilter(Font_Browser::ALL_TYPES);
+    font_browser->callback(cbMacroBtnFontBrowser);
+font_browser->show();}
+                  xywh {307 102 90 30}
                 }
               }
               Fl_Group {} {
@@ -1982,7 +2213,7 @@ progdefaults.changed = true;}
                 Fl_Button btnTabDefaultColor {
                   label System
                   callback {progdefaults.TabsColor = FL_BACKGROUND2_COLOR;
-setTabColors();    
+setTabColors();
 progdefaults.changed = true;}
                   xywh {330 113 75 21}
                 }
@@ -2185,10 +2416,56 @@ progdefaults.changed = true;}
               }
             }
           }
+          Fl_Group tab_touch {
+            label Touch open
+            xywh {0 50 600 330} hide
+          } {
+            Fl_Box {} {
+              label {Note:
+These configuration items are useful for but not unique to using fldigi on a
+touch screen device such as a tablet.}
+              xywh {15 70 570 52} align 20
+            }
+            Fl_Group {} {
+              label {Arrow Key Control of Frequency Entry} open
+              xywh {15 145 570 102} box ENGRAVED_BOX align 21
+            } {
+              Fl_Box {} {
+                label {Right/Left = 1 x LSD
+Up/Dn= 10 x LSD
+Shift - Right/Left = 100 x LSD
+Shift - Up/Dn = 1000 x LSD}
+                xywh {30 170 290 74} align 16
+              }
+              Fl_Choice sel_lsd {
+                label {Right/Left
+Select Least Signficant Digit}
+                callback {progdefaults.sel_lsd = o->value();
+set_freq_control_lsd();
+progdefaults.changed = true;} open
+                xywh {420 206 90 24} down_box BORDER_BOX align 1
+                code0 {o->add("1 Hz|10 Hz|100 Hz|1 kHz");}
+                code1 {o->value(progdefaults.sel_lsd);}
+              } {}
+            }
+            Fl_Group {} {
+              label {Rx / Tx Panels} open
+              xywh {15 256 570 64} box ENGRAVED_BOX align 21
+            } {
+              Fl_Check_Button btn_rxtx_swap {
+                label {Tx above Rx}
+                callback {progdefaults.rxtx_swap = o->value();
+progdefaults.changed = true;
+UI_select();}
+                tooltip {Enable to put Tx panel above Rx panel} xywh {145 276 116 30} down_box DOWN_BOX
+                code0 {o->value(progdefaults.rxtx_swap);}
+              }
+            }
+          }
         }
       }
       Fl_Group tabWaterfall {
-        label Waterfall open
+        label Waterfall
         xywh {0 25 600 355} hide
       } {
         Fl_Tabs tabsWaterfall {open
@@ -2287,8 +2564,8 @@ progdefaults.changed = true;}
                 Fl_Button btnCursorBWcolor {
                   label Color
                   callback {if (fl_color_chooser("Cursor BW Lines",
-  progdefaults.cursorLineRGBI.R, 
-  progdefaults.cursorLineRGBI.G, 
+  progdefaults.cursorLineRGBI.R,
+  progdefaults.cursorLineRGBI.G,
   progdefaults.cursorLineRGBI.B) ) {
 o->color(fl_rgb_color(progdefaults.cursorLineRGBI.R,progdefaults.cursorLineRGBI.G,progdefaults.cursorLineRGBI.B));
 o->redraw();
@@ -2320,8 +2597,8 @@ progdefaults.changed = true;}
                 Fl_Button btnCursorCenterLineColor {
                   label Color
                   callback {if (fl_color_chooser("Cursor Center Line",
-  progdefaults.cursorCenterRGBI.R, 
-  progdefaults.cursorCenterRGBI.G, 
+  progdefaults.cursorCenterRGBI.R,
+  progdefaults.cursorCenterRGBI.G,
   progdefaults.cursorCenterRGBI.B) ) {
 o->color(fl_rgb_color(progdefaults.cursorCenterRGBI.R,progdefaults.cursorCenterRGBI.G,progdefaults.cursorCenterRGBI.B));
 o->redraw();
@@ -2352,8 +2629,8 @@ progdefaults.changed = true;}
                 Fl_Button btnBwTracksColor {
                   label Color
                   callback {if (fl_color_chooser("Track Lines",
-  progdefaults.bwTrackRGBI.R, 
-  progdefaults.bwTrackRGBI.G, 
+  progdefaults.bwTrackRGBI.R,
+  progdefaults.bwTrackRGBI.G,
   progdefaults.bwTrackRGBI.B) ) {
 o->color(fl_rgb_color(progdefaults.bwTrackRGBI.R,progdefaults.bwTrackRGBI.G,progdefaults.bwTrackRGBI.B));
 o->redraw();
@@ -2378,8 +2655,8 @@ progdefaults.changed = true;}
                 Fl_Button btnNotchColor {
                   label Color
                   callback {if (fl_color_chooser("Notch Indicator",
-  progdefaults.notchRGBI.R, 
-  progdefaults.notchRGBI.G, 
+  progdefaults.notchRGBI.R,
+  progdefaults.notchRGBI.G,
   progdefaults.notchRGBI.B) ) {
 o->color(fl_rgb_color(progdefaults.notchRGBI.R,progdefaults.notchRGBI.G,progdefaults.notchRGBI.B));
 o->redraw();
@@ -2493,17 +2770,29 @@ progdefaults.changed = true;}
                 class Fl_Counter2
               }
             }
+            Fl_Group {} {open
+              tooltip {Show me more or less waterfall} xywh {55 212 490 73} box ENGRAVED_FRAME align 17
+            } {
+              Fl_Counter cntr_drop_speed {
+                label {Slow drop rate}
+                callback {progdefaults.drop_speed=(int)o->value();
+progdefaults.changed=true;}
+                tooltip {Normal drop speed / value} xywh {100 234 95 22} type Simple align 11 minimum 4 maximum 32 step 2 value 4
+                code0 {o->value(progdefaults.drop_speed);}
+              }
+            }
             Fl_Group {} {
               label {Changes take effect on next program startup} open
-              tooltip {Show me more or less waterfall} xywh {55 221 490 80} box ENGRAVED_FRAME align 17
+              tooltip {Show me more or less waterfall} xywh {55 292 490 73} box ENGRAVED_FRAME align 17
             } {
               Fl_Counter cntrWfheight {
                 label {Waterfall height in pixels}
                 callback {progdefaults.wfheight = (int)o->value();
 progdefaults.changed = true;}
-                tooltip {CPU usage increases with waterfall height} xywh {100 251 95 22} type Simple align 8 minimum 100 maximum 250 step 5 value 120
+                tooltip {CPU usage increases with waterfall height} xywh {100 322 120 22} align 8 minimum 100 maximum 500 step 5 value 120
                 code0 {o->value(progdefaults.wfheight);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
+                code2 {o->lstep(50);}
                 class Fl_Counter2
               }
             }
@@ -2563,7 +2852,7 @@ behaves inside the waterfall} xywh {65 207 150 22} box DOWN_BOX color 7 align 8
       }
       Fl_Group tabModems {
         label Modems open
-        xywh {0 25 600 355} hide
+        xywh {0 25 600 355}
       } {
         Fl_Tabs tabsModems {open
           xywh {0 25 600 355} selection_color 50 align 9
@@ -2577,7 +2866,7 @@ behaves inside the waterfall} xywh {65 207 150 22} box DOWN_BOX color 7 align 8
             } {
               Fl_Group {} {
                 label General open
-                xywh {0 75 600 305} align 5
+                xywh {0 75 600 305} align 5 hide
               } {
                 Fl_Group {} {
                   label Receive open
@@ -2726,26 +3015,26 @@ progdefaults.changed = true;}
               }
               Fl_Group {} {
                 label {Timing and QSK} open
-                xywh {0 75 600 305} align 5 hide
+                xywh {0 75 600 305} align 5
               } {
                 Fl_Group {} {
                   label Timing open
-                  xywh {35 85 530 120} box ENGRAVED_FRAME align 21
+                  xywh {5 85 585 120} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Counter cntCWweight {
                     label {Weight (%)}
                     callback {progdefaults.CWweight=(int)o->value();
 progdefaults.changed = true;}
-                    tooltip {Dot to dot-space ratio} xywh {45 114 65 20} type Simple align 8 minimum 20 maximum 80 step 1 value 50
+                    tooltip {Dot to dot-space ratio} xywh {20 110 65 20} type Simple align 8 minimum 20 maximum 80 step 1 value 50
                     code0 {o->value(progdefaults.CWweight);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
                   }
                   Fl_Counter cntCWdash2dot {
-                    label {Dash to dot ratio}
+                    label {Dash/Dot}
                     callback {progdefaults.CWdash2dot=o->value();
 progdefaults.changed = true;}
-                    tooltip {Dash to dot ratio} xywh {270 114 64 20} type Simple align 8 minimum 2.5 maximum 4 value 3
+                    tooltip {Dash to dot ratio} xywh {245 110 80 20} type Simple align 8 minimum 2.5 maximum 4 value 3
                     code0 {o->value(progdefaults.CWdash2dot);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
@@ -2754,32 +3043,50 @@ progdefaults.changed = true;}
                     label {Edge timing}
                     callback {progdefaults.CWrisetime=o->value();
 progdefaults.changed = true;}
-                    tooltip {Leading and Trailing edge risetimes (msec)} xywh {270 145 65 20} type Simple align 8 minimum 0 maximum 15 value 4
+                    tooltip {Leading and Trailing edge risetimes (msec)} xywh {245 143 80 20} type Simple align 8 minimum 0 maximum 15 value 4
                     code0 {o->value(progdefaults.CWrisetime);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
                   }
                   Fl_Group i_listboxQSKshape {
                     label {Edge shape}
-                    callback {progdefaults.QSKshape = o->index()-1;
+                    callback {progdefaults.QSKshape = o->index();
 progdefaults.changed = true;} open
-                    tooltip {Raised cosine = Hanning} xywh {45 144 112 20} box DOWN_BOX color 7 align 8
+                    tooltip {Hanning/Blackman - use edge timing
+BPF - use BPF bandwidth} xywh {20 143 112 20} box DOWN_BOX color 7 align 8
                     code0 {o->add("Hanning|Blackman");}
-                    code1 {o->index(progdefaults.QSKshape+1);}
+                    code1 {o->index(progdefaults.QSKshape);}
                     code2 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_ListBox
                   } {}
                   Fl_Check_Button btnCWnarrow {
-                    label {Edge decreases pulse width}
+                    label {Edge decrease}
                     callback {progdefaults.CWnarrow = o->value();
 progdefaults.changed = true;}
-                    tooltip {Weight decreases with increasing edge timing} xywh {45 175 225 15} down_box DOWN_BOX
+                    tooltip {Weight decreases with increasing edge timing} xywh {450 145 131 15} down_box DOWN_BOX
                     code0 {o->value(progdefaults.CWnarrow);}
+                  }
+                  Fl_Check_Button btnCW_bpf_on {
+                    label {BPF transmit audio}
+                    callback {progdefaults.CW_bpf_on = o->value();
+progdefaults.changed = true;}
+                    tooltip {Enable LO/HI bfp of transmit audio} xywh {20 180 167 15} down_box DOWN_BOX
+                    code0 {o->value(progdefaults.CW_bpf_on);}
+                  }
+                  Fl_Counter cntCW_hpf {
+                    label {BPF bw}
+                    callback {progdefaults.CW_bpf=o->value();
+progdefaults.changed = true;}
+                    tooltip {Low filter cutoff} xywh {235 177 100 20} align 8 minimum 10 maximum 1000 step 1 value 100
+                    code0 {o->value(progdefaults.CW_bpf);}
+                    code1 {o->labelsize(FL_NORMAL_SIZE);}
+                    code2 {o->lstep(10.0);}
+                    class Fl_Counter2
                   }
                 }
                 Fl_Group {} {
                   label QSK open
-                  xywh {35 217 530 118} box ENGRAVED_FRAME align 21
+                  xywh {5 217 585 118} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Check_Button btnQSK {
                     label {QSK on right audio channel}
@@ -2791,20 +3098,15 @@ if (o->value()) {
   chkAudioStereoOut->value(0);
   progdefaults.PTTrightchannel = false;
   btnPTTrightchannel->value(0);
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }
 }}
-                    tooltip {Generate square wave signal on right channel} xywh {45 245 211 20} down_box DOWN_BOX
+                    tooltip {Generate square wave signal on right channel} xywh {16 245 233 20} down_box DOWN_BOX
                     code0 {o->value(progdefaults.QSK);}
                   }
                   Fl_Counter cntPreTiming {
                     label {Pre-keydown timing (ms)}
                     callback {progdefaults.CWpre=o->value();
 progdefaults.changed = true;}
-                    tooltip {Msec pre-keydown (+ is earlier in time)} xywh {45 275 64 20} type Simple align 8 minimum 0 maximum 20 step 0.5
+                    tooltip {Msec pre-keydown (+ is earlier in time)} xywh {16 275 71 20} type Simple align 8 minimum 0 maximum 20 step 0.5
                     code0 {o->value(progdefaults.CWpre);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
@@ -2813,7 +3115,7 @@ progdefaults.changed = true;}
                     label {Post-keydown timing (ms)}
                     callback {progdefaults.CWpost=o->value();
 progdefaults.changed = true;}
-                    tooltip {Msec post-keydown (+ is earlier in time)} xywh {45 305 64 20} type Simple align 8 minimum -20 maximum 20 step 0.5
+                    tooltip {Msec post-keydown (+ is earlier in time)} xywh {16 305 71 20} type Simple align 8 minimum -20 maximum 20 step 0.5
                     code0 {o->value(progdefaults.CWpre);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
@@ -2821,17 +3123,17 @@ progdefaults.changed = true;}
                   Fl_Check_Button btnQSKadjust {
                     label {Send continuously}
                     callback {progdefaults.QSKadjust = o->value();}
-                    tooltip {Send a continuous stream of test characters} xywh {320 275 160 20} down_box DOWN_BOX
+                    tooltip {Send a continuous stream of test characters} xywh {320 275 176 20} down_box DOWN_BOX
                     code0 {o->value(progdefaults.QSKadjust);}
                   }
                   Fl_Group i_listbox_test_char {
                     label {Test char}
-                    callback {progdefaults.TestChar = o->index()-1;} open
-                    tooltip {Test character for QSK adjustment} xywh {320 245 41 20} box DOWN_BOX color 7 align 8
+                    callback {progdefaults.TestChar = o->index();} open
+                    tooltip {Test character for QSK adjustment} xywh {320 245 45 20} box DOWN_BOX color 7 align 8
                     code0 {extern char szTestChar[];}
                     code1 {o->add(szTestChar);}
-                    code2 {o->index(progdefaults.TestChar+1);
-                       o->labelsize(FL_NORMAL_SIZE);}
+                    code2 {o->index(progdefaults.TestChar);}
+                    code3 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_ListBox
                   } {}
                 }
@@ -3025,7 +3327,7 @@ progdefaults.changed = true;} open
             }
           }
           Fl_Group tabDomEX {
-            label Dom
+            label Dom open
             xywh {0 50 600 330} hide
           } {
             Fl_Group {} {open
@@ -3062,7 +3364,7 @@ progdefaults.changed = true;}
                 callback {progdefaults.DOMINOEX_ADJ = o->value();
 resetDOMEX();
 progdefaults.changed = true;}
-                tooltip {Tone-spacing adjust} xywh {156 166 63 20} type Simple align 8 minimum -100 maximum 100
+                tooltip {Tone-spacing adjust} xywh {206 166 63 20} type Simple align 8 minimum -100 maximum 100 value 0
                 code0 {o->value(progdefaults.DOMINOEX_ADJ);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Counter2
@@ -3172,6 +3474,190 @@ progdefaults.changed = true;}
               }
             }
           }
+          Fl_Group tabFSQ {
+            label FSQ open
+            xywh {0 50 600 330} hide
+          } {
+            Fl_Group {} {
+              label {Rx Parameters} open
+              xywh {5 60 585 80} box ENGRAVED_BOX align 21
+            } {
+              Fl_Value_Slider valhits {
+                label {Min Hits}
+                callback {progdefaults.fsqhits=(int)o->value();
+progdefaults.changed = true;}
+                tooltip {Minimum \# hits in tone detector} xywh {140 72 125 22} type {Horz Knob} align 8 minimum 3 maximum 6 step 1 value 3 textsize 14
+                code0 {o->value(progdefaults.fsqhits);}
+              }
+              Fl_Choice sel_fsq_lpf {
+                label {Image LPF}
+                callback {progdefaults.fsq_img_filter=o->value();
+progdefaults.changed = true;} open
+                tooltip {Narrow LPF if image noisy} xywh {163 104 102 21} down_box BORDER_BOX
+                code0 {o->add("None"); o->add("300 Hz"); o->add("400 Hz"); o->add("500 Hz");}
+                code1 {o->value(progdefaults.fsq_img_filter);}
+              } {}
+              Fl_Value_Slider sldrMovAvg {
+                label {MovAvg:}
+                callback {progdefaults.fsq_movavg = o->value();
+progdefaults.changed = true;}
+                tooltip {Filter FFT output} xywh {410 72 125 22} type Horizontal align 4 minimum 1 maximum 4 step 1 value 4 textsize 14
+                code0 {o->value(progdefaults.fsq_movavg);}
+              }
+              Fl_Choice sel_fsq_heard_aging {
+                label {Heard aging}
+                callback {progdefaults.fsq_heard_aging=o->value();
+progdefaults.changed = true;} open
+                tooltip {Remove call after ...} xywh {433 104 102 21} down_box BORDER_BOX
+                code0 {o->add("Never"); o->add("1 min"); o->add("5 min");o->add("10 min"); o->add("20 min"); o->add("20 min");}
+                code1 {o->value(progdefaults.fsq_heard_aging);}
+              } {}
+            }
+            Fl_Group {} {
+              label {Tx Parameters} open
+              xywh {5 150 585 135} box ENGRAVED_BOX align 21
+            } {
+              Fl_Round_Button {btn_fsqbaud[0]} {
+                label {2 baud}
+                callback {if (o->value() == 1) {
+progdefaults.fsqbaud = 2;
+btn_fsqbaud[1]->value(0);
+btn_fsqbaud[2]->value(0);
+btn_fsqbaud[3]->value(0);
+}
+progdefaults.changed = true;}
+                xywh {90 173 55 15} down_box ROUND_DOWN_BOX
+                code0 {o->value(progdefaults.fsqbaud == 2);}
+              }
+              Fl_Round_Button {btn_fsqbaud[1]} {
+                label {3 baud}
+                callback {if (o->value() == 1) {
+progdefaults.fsqbaud = 3;
+btn_fsqbaud[0]->value(0);
+btn_fsqbaud[2]->value(0);
+btn_fsqbaud[3]->value(0);
+}
+progdefaults.changed = true;}
+                xywh {198 173 55 15} down_box ROUND_DOWN_BOX
+                code0 {o->value(progdefaults.fsqbaud == 3);}
+              }
+              Fl_Round_Button {btn_fsqbaud[2]} {
+                label {4.5 baud}
+                callback {if (o->value() == 1) {
+progdefaults.fsqbaud = 4.5;
+btn_fsqbaud[0]->value(0);
+btn_fsqbaud[1]->value(0);
+btn_fsqbaud[3]->value(0);
+}
+progdefaults.changed = true;}
+                xywh {306 173 55 15} down_box ROUND_DOWN_BOX
+                code0 {o->value(progdefaults.fsqbaud == 4.5);}
+              }
+              Fl_Round_Button {btn_fsqbaud[3]} {
+                label {6 baud}
+                callback {if (o->value() == 1) {
+progdefaults.fsqbaud = 6;
+btn_fsqbaud[0]->value(0);
+btn_fsqbaud[1]->value(0);
+btn_fsqbaud[2]->value(0);
+}
+progdefaults.changed = true;}
+                xywh {415 173 55 15} down_box ROUND_DOWN_BOX
+                code0 {o->value(progdefaults.fsqbaud == 6);}
+              }
+              Fl_Choice sel_fsq_frequency {
+                label {Center freq}
+                callback {progdefaults.fsq_frequency=o->value();
+progdefaults.changed = true;} open
+                xywh {250 219 102 21} down_box BORDER_BOX align 1 hide
+                code0 {o->add("1150"); o->add("1500"); o->add("Variable");}
+                code1 {o->value(progdefaults.fsq_frequency);}
+              } {}
+              Fl_Choice sel_fsq_sounder {
+                label Sounder
+                callback {progdefaults.fsq_sounder=o->value();
+progdefaults.changed = true;} open
+                tooltip {Send beacon every ...} xywh {90 195 102 21} down_box BORDER_BOX
+                code0 {o->add("OFF"); o->add("1 min"); o->add("10 min"); o->add("30 min");}
+                code1 {o->value(progdefaults.fsq_sounder);}
+              } {}
+              Fl_Check_Button btn_fsq_lowercase {
+                label {MYCALL always lower case}
+                callback {progdefaults.fsq_lowercase=o->value();
+progdefaults.changed = true;}
+                tooltip {convert operator callsign to lower case} xywh {306 198 70 15} down_box DOWN_BOX
+                code0 {o->value(progdefaults.fsq_lowercase);}
+              }
+              Fl_Counter cntr_FSQ_time_out {
+                label {Time out}
+                callback {progdefaults.fsq_time_out = o->value();
+progdefaults.changed = true;}
+                tooltip {Time out xmt attempt in XX seconds} xywh {90 223 102 22} type Simple align 4 minimum 2 maximum 20 step 1 value 6
+                code0 {o->value(progdefaults.fsq_time_out);}
+              }
+              Fl_Input {} {
+                label {QTC:}
+                callback {progdefaults.fsqQTCtext = o->value();
+progdefaults.changed = true;}
+                tooltip {Enter QTC text} xywh {90 253 456 23}
+                code0 {o->value(progdefaults.fsqQTCtext.c_str());}
+              }
+            }
+            Fl_Group {} {
+              label Logging open
+              xywh {5 291 585 80} box ENGRAVED_BOX align 21
+            } {
+              Fl_Output txtAuditLog {
+                label {Audit log}
+                xywh {82 311 325 25}
+                code0 {o->value(progdefaults.fsq_audit_log.c_str());}
+              }
+              Fl_Light_Button btn_enable_auditlog {
+                label Enable
+                callback {progdefaults.fsq_enable_audit_log = o->value();
+progdefaults.changed = true;}
+                xywh {421 313 74 20} selection_color 2
+                code0 {o->value(progdefaults.fsq_enable_audit_log);}
+              }
+              Fl_Button btn_select_auditlog {
+                label Select
+                callback {std::string str = std::string(TempDir);
+str.append(progdefaults.fsq_audit_log);
+const char *fname = FSEL::saveas("Audit log", "*.txt\\t*", str.c_str());
+
+if (fname) {
+  progdefaults.fsq_audit_log = fl_filename_name(fname);
+  txtAuditLog->value(progdefaults.fsq_audit_log.c_str());
+  progdefaults.changed = true;
+}}
+                xywh {509 313 70 20}
+              }
+              Fl_Output txtHeardLog {
+                label {Heard log}
+                xywh {80 340 325 25}
+                code0 {o->value(progdefaults.fsq_heard_log.c_str());}
+              }
+              Fl_Light_Button btn_enable_fsq_heard_log {
+                label Enable
+                callback {progdefaults.fsq_enable_heard_log = o->value();
+progdefaults.changed = true;}
+                xywh {419 342 74 20} selection_color 2
+                code0 {o->value(progdefaults.fsq_enable_heard_log);}
+              }
+              Fl_Button btn_select_fsq_heard_log {
+                label Select
+                callback {std::string str = std::string(TempDir);
+str.append(progdefaults.fsq_heard_log);
+const char *fname = FSEL::saveas("Heard log", "*.txt\\t*", str.c_str());
+if (fname) {
+  progdefaults.fsq_heard_log = fl_filename_name(fname);
+  txtHeardLog->value(progdefaults.fsq_heard_log.c_str());
+  progdefaults.changed = true;
+}}
+                xywh {507 342 70 20}
+              }
+            }
+          }
           Fl_Group tabMT63 {
             label {MT-63} open
             xywh {0 50 600 330} hide
@@ -3241,7 +3727,7 @@ progdefaults.changed = true;}
             label Olivia open
             xywh {0 50 600 330} hide
           } {
-            Fl_Group {} {open
+            Fl_Group {} {
               xywh {55 76 490 280} box ENGRAVED_FRAME
             } {
               Fl_Group i_listbox_olivia_bandwidth {
@@ -3252,7 +3738,7 @@ resetOLIVIA();
 progdefaults.changed = true;} open
                 tooltip {Select bandwidth} xywh {110 96 85 22} box DOWN_BOX color 7 align 8
                 code0 {o->add(szOliviaBandwidth);}
-                code1 {o->index(progdefaults.oliviabw+1);
+                code1 {o->index(progdefaults.oliviabw);
                        o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
@@ -3264,7 +3750,7 @@ resetOLIVIA();
 progdefaults.changed = true;} open
                 tooltip {Select number of tones} xywh {371 96 70 22} box DOWN_BOX color 7 align 8
                 code0 {o->add(szOliviaTones);}
-                code1 {o->index(progdefaults.oliviatones+1);
+                code1 {o->index(progdefaults.oliviatones);
                        o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
@@ -3321,8 +3807,8 @@ resetCONTESTIA();
 progdefaults.changed = true;} open
                 tooltip {Select bandwidth} xywh {110 100 85 22} box DOWN_BOX color 7 align 8
                 code0 {o->add(szContestiaBandwidth);}
-                code1 {o->index(progdefaults.contestiabw +1);
-                       o->labelsize(FL_NORMAL_SIZE);}
+                code1 {o->index(progdefaults.contestiabw);}
+                code2 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
               Fl_Group i_listbox_contestia_tones {
@@ -3333,8 +3819,8 @@ resetCONTESTIA();
 progdefaults.changed = true;} open
                 tooltip {Select number of tones} xywh {371 100 70 22} box DOWN_BOX color 7 align 8
                 code0 {o->add(szContestiaTones);}
-                code1 {o->index(progdefaults.contestiatones +1);
-                       o->labelsize(FL_NORMAL_SIZE);}
+                code1 {o->index(progdefaults.contestiatones);}
+                code2 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
               Fl_Group {} {
@@ -3371,7 +3857,7 @@ progdefaults.changed = true;}
                 label {8-bit extended characters}
                 callback {progdefaults.contestia8bit = o->value();
 progdefaults.changed = true;}
-                tooltip {Enable this for Latin-1 accented characters} xywh {110 249 200 20} down_box DOWN_BOX hide
+                tooltip {Enable this for Latin-1 accented characters} xywh {79 249 200 20} down_box DOWN_BOX hide
               }
             }
           }
@@ -3382,20 +3868,20 @@ progdefaults.changed = true;}
             Fl_Tabs tabsPSK {open
               xywh {0 50 600 330} selection_color 50
             } {
-              Fl_Group {} {
+              Fl_Group grpPSK {
                 label General open
                 xywh {0 75 600 305} align 5
               } {
                 Fl_Group {} {
                   label {AFC behavior} open
-                  xywh {55 93 490 98} box ENGRAVED_FRAME align 21
+                  xywh {55 87 490 86} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Counter cntSearchRange {
                     label {Acquisition search range (Hz)}
                     callback {progdefaults.SearchRange = (int)o->value();
 wf->redraw_marker();
 progdefaults.changed = true;}
-                    tooltip {Capture signals within this frequency range} xywh {65 125 75 20} type Simple align 8 minimum 10 maximum 500 step 10 value 200
+                    tooltip {Capture signals within this frequency range} xywh {200 111 75 20} type Simple align 8 minimum 10 maximum 500 step 10 value 200
                     code0 {o->value(progdefaults.SearchRange);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
@@ -3404,7 +3890,7 @@ progdefaults.changed = true;}
                     label {Acquisition S/N (dB)}
                     callback {progdefaults.ACQsn = o->value();
 progdefaults.changed = true;}
-                    tooltip {Capture signals over this threshold} xywh {65 154 75 20} type Simple align 8 minimum 3 maximum 20 step 1 value 6
+                    tooltip {Capture signals over this threshold} xywh {200 140 75 20} type Simple align 8 minimum 3 maximum 20 step 1 value 6
                     code0 {o->value(progdefaults.ACQsn);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
@@ -3412,13 +3898,13 @@ progdefaults.changed = true;}
                 }
                 Fl_Group {} {
                   label {S/N and IMD behavior} open
-                  xywh {55 191 490 65} box ENGRAVED_FRAME align 21
+                  xywh {55 175 490 65} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Group listbox_psk_status_timeout {
                     label after
                     callback {progdefaults.StatusDim = o->index();
 progdefaults.changed = true;} open
-                    tooltip {Behavior of s/n imd} xywh {65 222 80 20} box DOWN_BOX color 7 align 8
+                    tooltip {Behavior of s/n imd} xywh {180 206 80 20} box DOWN_BOX color 7 align 8
                     code0 {o->add(_("Clear")); o->add(_("Dim"));}
                     code1 {o->index(progdefaults.StatusDim);
                        o->labelsize(FL_NORMAL_SIZE);}
@@ -3428,7 +3914,7 @@ progdefaults.changed = true;} open
                     label seconds
                     callback {progdefaults.StatusTimeout = (int)(o->value());
 progdefaults.changed = true;}
-                    tooltip {Will occur after this time in seconds} xywh {206 222 75 20} type Simple align 8 minimum 0 maximum 30 step 1
+                    tooltip {Will occur after this time in seconds} xywh {321 206 75 20} type Simple align 8 minimum 0 maximum 30 step 1
                     code0 {o->value(progdefaults.StatusTimeout);}
                     code1 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_Counter2
@@ -3436,18 +3922,39 @@ progdefaults.changed = true;}
                 }
                 Fl_Group {} {
                   label {Multi-Channel Signal Processing} open
-                  xywh {55 258 490 98} box ENGRAVED_FRAME align 21
+                  xywh {55 245 490 80} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Check_Button btnEnablePSKbrowsing {
                     label {Multi-channel detector}
                     callback {progdefaults.pskbrowser_on = o->value();
 progdefaults.changed = true;}
-                    xywh {65 315 180 20} down_box DOWN_BOX
+                    xywh {225 295 180 20} down_box DOWN_BOX
                     code0 {o->value(progdefaults.pskbrowser_on);}
                   }
                   Fl_Box {} {
                     label {Disable on very slow CPUs of if signal browser is not used}
-                    xywh {65 285 440 20} align 20
+                    xywh {65 272 440 20} align 20
+                  }
+                }
+                Fl_Group {} {
+                  label {8 psk} open
+                  xywh {55 327 490 47} box ENGRAVED_FRAME align 21
+                } {
+                  Fl_Check_Button btnPSKpilot {
+                    label {Pilot tone}
+                    callback {progdefaults.pskpilot = o->value();
+progdefaults.changed = true;}
+                    tooltip {Enable encode/decode vestigial pilot tone} xywh {141 342 113 20} down_box DOWN_BOX
+                    code0 {o->value(progdefaults.pskpilot);}
+                  }
+                  Fl_Counter cnt_pilot_power {
+                    label {pilot power (dB)}
+                    callback {progdefaults.pilot_power = o->value();
+progdefaults.changed = true;}
+                    tooltip {Pilot tone power relative to signal} xywh {305 342 75 20} type Simple align 8 minimum -60 maximum -20 step 1 value -30
+                    code0 {o->value(progdefaults.pilot_power);}
+                    code1 {o->labelsize(FL_NORMAL_SIZE);}
+                    class Fl_Counter2
                   }
                 }
               }
@@ -3455,14 +3962,147 @@ progdefaults.changed = true;}
           }
           Fl_Group tabRTTY {
             label RTTY open
-            xywh {0 50 600 330} hide
+            xywh {0 50 600 330}
           } {
             Fl_Tabs tabsRTTY {open
               xywh {0 50 600 330} selection_color 50
             } {
               Fl_Group {} {
-                label Rx open
+                label Tx open
                 xywh {0 75 600 305} align 5
+              } {
+                Fl_Group selShift {
+                  label {Carrier shift}
+                  callback {progdefaults.rtty_shift = o->index();
+if (progdefaults.rtty_shift == o->lsize() - 1)
+    selCustomShift->activate();
+else
+    selCustomShift->deactivate();
+selCustomShift->redraw();
+resetRTTY();
+progdefaults.changed = true;} open
+                  tooltip {Select carrier shift} xywh {65 104 100 20} box DOWN_BOX color 7 align 8 when 1
+                  code0 {o->add(szShifts);o->index(progdefaults.rtty_shift);
+                       o->labelsize(FL_NORMAL_SIZE);}
+                  class Fl_ListBox
+                } {}
+                Fl_Counter selCustomShift {
+                  label {Custom shift}
+                  callback {progdefaults.rtty_custom_shift = o->value();
+resetRTTY();
+progdefaults.changed = true;}
+                  tooltip {Input carrier shift} xywh {65 137 100 20} align 8 minimum 10 maximum 1200 step 10 value 450
+                  code0 {o->lstep(100.0);}
+                  code1 {o->labelsize(FL_NORMAL_SIZE);}
+                  class Fl_Counter2
+                }
+                Fl_Group selBaud {
+                  label {Baud rate}
+                  callback {progdefaults.rtty_baud = o->index();
+resetRTTY();
+progdefaults.changed = true;} open
+                  tooltip {Select carrier baudrate} xywh {65 170 100 20} box DOWN_BOX color 7 align 8 when 1
+                  code0 {o->add(szBauds);}
+                  code1 {o->index(progdefaults.rtty_baud);}
+                  code2 {o->labelsize(FL_NORMAL_SIZE);}
+                  class Fl_ListBox
+                } {}
+                Fl_Group selBits {
+                  label {Bits per character}
+                  callback {progdefaults.rtty_bits = o->index();
+selParity->do_callback();} open
+                  tooltip {Select \# bits / char} xywh {65 203 100 20} box DOWN_BOX color 7 align 8 when 1
+                  code0 {o->add(szSelBits);o->index(progdefaults.rtty_bits);
+                       o->labelsize(FL_NORMAL_SIZE);}
+                  class Fl_ListBox
+                } {}
+                Fl_Group selParity {
+                  label Parity
+                  callback {if (progdefaults.rtty_bits == 0) {
+  progdefaults.rtty_parity = rtty::RTTY_PARITY_NONE;
+  o->index(progdefaults.rtty_parity);
+} else
+  progdefaults.rtty_parity = o->index();
+resetRTTY();
+progdefaults.changed = true;} open
+                  tooltip {Select parity} xywh {65 236 100 20} box DOWN_BOX color 7 align 8 when 1
+                  code0 {o->add(szParity);o->index(progdefaults.rtty_parity);
+                       o->labelsize(FL_NORMAL_SIZE);}
+                  class Fl_ListBox
+                } {}
+                Fl_Group selStopBits {
+                  label {Stop bits}
+                  callback {progdefaults.rtty_stop = o->index();
+resetRTTY();
+progdefaults.changed = true;} open
+                  tooltip {Select \# stop bits} xywh {65 270 100 20} box DOWN_BOX color 7 align 8 when 1
+                  code0 {o->add(szStopBits);o->index(progdefaults.rtty_stop);
+                       o->labelsize(FL_NORMAL_SIZE);}
+                  class Fl_ListBox
+                } {}
+                Fl_Value_Slider sldrRTTYbandwidth {
+                  label {Filter Adjustment}
+                  callback {progdefaults.RTTY_BW = o->value();
+resetRTTY();
+progdefaults.changed = true;} selected
+                  tooltip {RTTY filter bandwidth} xywh {35 320 250 20} type Horizontal align 5 minimum 0.5 maximum 2 step 0.1 value 1 textsize 14
+                  code0 {o->value(progdefaults.RTTY_BW);}
+                  code1 {o->labelsize(FL_NORMAL_SIZE); o->textsize(FL_NORMAL_SIZE);}
+                  class Fl_Value_Slider2
+                }
+                Fl_Check_Button btnAUTOCRLF {
+                  label AutoCRLF
+                  callback {progdefaults.rtty_autocrlf = o->value();
+progdefaults.changed = true;}
+                  tooltip {Add CRLF after page width characters} xywh {316 103 90 22} down_box DOWN_BOX
+                  code0 {o->value(progdefaults.rtty_autocrlf);}
+                }
+                Fl_Counter cntrAUTOCRLF {
+                  label chars
+                  callback {progdefaults.rtty_autocount = (int)o->value();
+progdefaults.changed = true;}
+                  tooltip {Auto CRLF line length} xywh {427 104 65 20} type Simple align 8 minimum 68 maximum 80 step 1 value 72
+                  code0 {o->labelsize(FL_NORMAL_SIZE);}
+                  class Fl_Counter2
+                }
+                Fl_Check_Button btnCRCRLF {
+                  label {CR-CR-LF}
+                  callback {progdefaults.rtty_crcrlf = o->value();
+progdefaults.changed = true;}
+                  tooltip {Use "cr cr lf" for "cr lf"} xywh {316 136 90 22} down_box DOWN_BOX when 6
+                  code0 {o->value(progdefaults.rtty_crcrlf);}
+                }
+                Fl_Check_Button chkUOStx {
+                  label {TX - unshift on space}
+                  callback {progdefaults.UOStx=o->value();
+progdefaults.changed = true;}
+                  tooltip {Revert to Unsifted char's on a space} xywh {316 169 63 22} down_box DOWN_BOX
+                  code0 {o->value(progdefaults.UOStx);}
+                }
+                Fl_Check_Button chk_shaped_rtty {
+                  label {Shaped Tx}
+                  callback {progStatus.shaped_rtty = o->value();}
+                  tooltip {Use wave shaping on Tx signal} xywh {316 235 212 22} down_box DOWN_BOX value 1
+                  code0 {o->value(progStatus.shaped_rtty);}
+                }
+                Fl_Check_Button chkPseudoFSK {
+                  label {Pseudo-FSK - right channel}
+                  callback {progdefaults.PseudoFSK = o->value();
+chkPseudoFSK2->value(o->value());
+progdefaults.changed = true;
+if (o->value()) {
+  progdefaults.sig_on_right_channel = false;
+  chkAudioStereoOut->value(0);
+  progdefaults.PTTrightchannel = false;
+  btnPTTrightchannel->value(0);
+}}
+                  tooltip {Create keyed square wave on right audio channel} xywh {316 202 212 22} down_box DOWN_BOX
+                  code0 {o->value(progdefaults.PseudoFSK);}
+                }
+              }
+              Fl_Group {} {
+                label Rx open
+                xywh {0 75 600 305} align 5 hide
               } {
                 Fl_Group {} {
                   label Receive open
@@ -3470,12 +4110,12 @@ progdefaults.changed = true;}
                 } {
                   Fl_Group i_listbox_rtty_afc_speed {
                     label {AFC speed}
-                    callback {progdefaults.rtty_afcspeed = o->index()-1;
+                    callback {progdefaults.rtty_afcspeed = o->index();
 progdefaults.changed = true;} open
                     tooltip {AFC tracking speed} xywh {107 128 90 22} box DOWN_BOX color 7
                     code0 {o->add("Slow"); o->add("Normal"); o->add("Fast");}
-                    code1 {o->index(progdefaults.rtty_afcspeed+1);
-                       o->labelsize(FL_NORMAL_SIZE);}
+                    code1 {o->index(progdefaults.rtty_afcspeed);}
+                    code2 {o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_ListBox
                   } {}
                   Fl_Check_Button chkUOSrx {
@@ -3567,8 +4207,8 @@ Disabled - log QSO using center frequency} xywh {120 311 146 22} down_box DOWN_B
                   Fl_Button btnRTTY_mark_color {
                     label {track color}
                     callback {if (fl_color_chooser("MARK freq track",
-  progdefaults.rttymarkRGBI.R, 
-  progdefaults.rttymarkRGBI.G, 
+  progdefaults.rttymarkRGBI.R,
+  progdefaults.rttymarkRGBI.G,
   progdefaults.rttymarkRGBI.B) ) {
 o->color(fl_rgb_color(progdefaults.rttymarkRGBI.R,progdefaults.rttymarkRGBI.G,progdefaults.rttymarkRGBI.B));
 o->redraw();
@@ -3578,139 +4218,6 @@ progdefaults.changed = true;
                     tooltip {Color of Mark Track} xywh {340 311 41 18} color 2 align 8
                     code0 {o->color(fl_rgb_color(progdefaults.rttymarkRGBI.R,progdefaults.rttymarkRGBI.G,progdefaults.rttymarkRGBI.B));}
                   }
-                }
-              }
-              Fl_Group {} {
-                label Tx open
-                xywh {0 75 600 305} align 5 hide
-              } {
-                Fl_Group selShift {
-                  label {Carrier shift}
-                  callback {progdefaults.rtty_shift = o->index();
-if (progdefaults.rtty_shift == o->lsize() - 1)
-    selCustomShift->activate();
-else
-    selCustomShift->deactivate();
-selCustomShift->redraw();
-resetRTTY();
-progdefaults.changed = true;} open
-                  tooltip {Select carrier shift} xywh {65 104 100 20} box DOWN_BOX color 7 align 8 when 1
-                  code0 {o->add(szShifts);o->index(progdefaults.rtty_shift);
-                       o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Counter selCustomShift {
-                  label {Custom shift}
-                  callback {progdefaults.rtty_custom_shift = o->value();
-resetRTTY();
-progdefaults.changed = true;}
-                  tooltip {Input carrier shift} xywh {65 137 100 20} align 8 minimum 10 maximum 1000 step 1 value 450
-                  code0 {o->lstep(10.0);}
-                  code1 {o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_Counter2
-                }
-                Fl_Group selBaud {
-                  label {Baud rate}
-                  callback {progdefaults.rtty_baud = o->index();
-const double BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
-progdefaults.RTTY_BW = BAUD[progdefaults.rtty_baud] * 2;
-resetRTTY();
-progdefaults.changed = true;} open
-                  tooltip {Select carrier baudrate} xywh {65 170 100 20} box DOWN_BOX color 7 align 8 when 1
-                  code0 {o->add(szBauds);o->index(progdefaults.rtty_baud);
-                       o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group selBits {
-                  label {Bits per character}
-                  callback {progdefaults.rtty_bits = o->index();
-selParity->do_callback();} open
-                  tooltip {Select \# bits / char} xywh {65 203 100 20} box DOWN_BOX color 7 align 8 when 1
-                  code0 {o->add(szSelBits);o->index(progdefaults.rtty_bits);
-                       o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group selParity {
-                  label Parity
-                  callback {if (progdefaults.rtty_bits == 0) {
-  progdefaults.rtty_parity = RTTY_PARITY_NONE;
-  o->index(progdefaults.rtty_parity);
-} else
-  progdefaults.rtty_parity = o->index();
-resetRTTY();
-progdefaults.changed = true;} open
-                  tooltip {Select parity} xywh {65 236 100 20} box DOWN_BOX color 7 align 8 when 1
-                  code0 {o->add(szParity);o->index(progdefaults.rtty_parity);
-                       o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group selStopBits {
-                  label {Stop bits}
-                  callback {progdefaults.rtty_stop = o->index();
-resetRTTY();
-progdefaults.changed = true;} open
-                  tooltip {Select \# stop bits} xywh {65 270 100 20} box DOWN_BOX color 7 align 8 when 1
-                  code0 {o->add(szStopBits);o->index(progdefaults.rtty_stop);
-                       o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Check_Button btnAUTOCRLF {
-                  label AutoCRLF
-                  callback {progdefaults.rtty_autocrlf = o->value();
-progdefaults.changed = true;}
-                  tooltip {Add CRLF after page width characters} xywh {316 103 90 22} down_box DOWN_BOX
-                  code0 {o->value(progdefaults.rtty_autocrlf);}
-                }
-                Fl_Counter cntrAUTOCRLF {
-                  label chars
-                  callback {progdefaults.rtty_autocount = (int)o->value();
-progdefaults.changed = true;}
-                  tooltip {Auto CRLF line length} xywh {427 104 65 20} type Simple align 8 minimum 68 maximum 80 step 1 value 72
-                  code0 {o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_Counter2
-                }
-                Fl_Check_Button btnCRCRLF {
-                  label {CR-CR-LF}
-                  callback {progdefaults.rtty_crcrlf = o->value();
-progdefaults.changed = true;}
-                  tooltip {Use "cr cr lf" for "cr lf"} xywh {316 136 90 22} down_box DOWN_BOX when 6
-                  code0 {o->value(progdefaults.rtty_crcrlf);}
-                }
-                Fl_Check_Button chkUOStx {
-                  label {TX - unshift on space}
-                  callback {progdefaults.UOStx=o->value();
-progdefaults.changed = true;}
-                  tooltip {Revert to Unsifted char's on a space} xywh {316 169 63 22} down_box DOWN_BOX
-                  code0 {o->value(progdefaults.UOStx);}
-                }
-                Fl_Check_Button chkPseudoFSK {
-                  label {Pseudo-FSK - right channel}
-                  callback {progdefaults.PseudoFSK = o->value();
-chkPseudoFSK2->value(o->value());
-progdefaults.changed = true;
-if (o->value()) {
-  progdefaults.sig_on_right_channel = false;
-  chkAudioStereoOut->value(0);
-  progdefaults.PTTrightchannel = false;
-  btnPTTrightchannel->value(0);
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }
-}}
-                  tooltip {Create keyed square wave on right audio channel} xywh {316 202 212 22} down_box DOWN_BOX
-                  code0 {o->value(progdefaults.PseudoFSK);}
-                }
-                Fl_Value_Slider sldrRTTYbandwidth {
-                  label {Filter bandwidth}
-                  callback {progdefaults.RTTY_BW = o->value();
-resetRTTY();
-progdefaults.changed = true;}
-                  tooltip {RTTY filter bandwidth} xywh {35 320 335 20} type Horizontal align 5 minimum 10 maximum 1000 step 1 value 100 textsize 14
-                  code0 {o->value(progdefaults.RTTY_BW);}
-                  code1 {o->labelsize(FL_NORMAL_SIZE); o->textsize(FL_NORMAL_SIZE);}
-                  class Fl_Value_Slider2
                 }
               }
               Fl_Group {} {
@@ -3820,7 +4327,7 @@ progdefaults.changed = true;}
             }
           }
           Fl_Group tabNavtex {
-            label Navtex
+            label Nav
             xywh {0 50 600 330} hide
           } {
             Fl_Check_Button btnNvtxAdifLog {
@@ -3839,12 +4346,19 @@ progdefaults.changed = true;}
             }
           }
           Fl_Group tabWefax {
-            label Wefax open
+            label WFax open
             xywh {0 50 600 330} hide
           } {
             Fl_Group {} {open
               xywh {2 63 598 300}
             } {
+              Fl_Check_Button btnWefaxAdifLog {
+                label {Log Wefax messages to Adif file}
+                callback {progdefaults.WEFAX_AdifLog=o->value();
+progdefaults.changed = true;}
+                tooltip {Sent and received faxes are logged to Adif file.} xywh {94 137 235 30} down_box DOWN_BOX
+                code0 {o->value(progdefaults.WEFAX_AdifLog);}
+              }
               Fl_Check_Button btnWefaxEmbeddedGui {
                 label {Embedded Wefax Gui}
                 callback {progdefaults.WEFAX_EmbeddedGui=o->value();
@@ -3853,39 +4367,31 @@ progdefaults.changed = true;}
 Change requires restart of fldigi} xywh {94 74 235 30} down_box DOWN_BOX
                 code0 {o->value(progdefaults.WEFAX_EmbeddedGui);}
               }
-              Fl_Check_Button btnWefaxHideTx {
-                label {Hide Transmission window}
-                callback {progdefaults.WEFAX_HideTx=o->value();
-progdefaults.changed = true;}
-                tooltip {Hide transmission window by default.} xywh {94 119 235 30} down_box DOWN_BOX
-                code0 {o->value(progdefaults.WEFAX_HideTx);}
-              }
-              Fl_Check_Button btnWefaxAdifLog {
-                label {Log Wefax messages to Adif file}
-                callback {progdefaults.WEFAX_AdifLog=o->value();
-progdefaults.changed = true;}
-                tooltip {Sent and received faxes are logged to Adif file.} xywh {94 165 235 30} down_box DOWN_BOX
-                code0 {o->value(progdefaults.WEFAX_AdifLog);}
-              }
-              Fl_Counter cntr_wefax_shift {
+              Fl_Input btnWefaxShift {
                 label {Frequency shift (800 Hz)}
-                callback {progdefaults.WEFAX_Shift=o->value();
+                callback {if( o->value() > 900 ) { o->value(900); return; }
+if( o->value() < 750 ) { o->value(750); return; }
+progdefaults.WEFAX_Shift=o->value();
 progdefaults.changed = true;}
-                tooltip {Default 800 Hz. Deutsche Wetterdienst 850Hz} xywh {95 211 90 22} type Simple align 8 minimum 750 maximum 900 step 10 value 800
+                tooltip {Default 800 Hz. Deutsche Wetterdienst 850Hz} xywh {94 177 80 20} type Int align 8
                 code0 {o->value(progdefaults.WEFAX_Shift);}
+                class Fl_Value_Input2
               }
-              Fl_Counter ctr_wefax_max_rows {
-                label {Rx fax max rows}
-                callback {progdefaults.WEFAX_MaxRows=o->value();
+              Fl_Input btnWefaxMaxRows {
+                label {Received fax maximum rows number (5000)}
+                callback {if(o->value() > 10000 ) { o->value(10000); return ; }
+if(o->value() < 1000 ) { o->value(1000); return ; }
+progdefaults.WEFAX_MaxRows=o->value();
 progdefaults.changed = true;}
-                tooltip {Default 800 Hz. Deutsche Wetterdienst 850Hz} xywh {95 247 90 22} type Simple align 8 minimum 1000 maximum 10000 step 50 value 5000
+                tooltip {Maximum row number for a received fax image.} xywh {94 217 85 20} type Int align 8
                 code0 {o->value(progdefaults.WEFAX_MaxRows);}
+                class Fl_Value_Input2
               }
               Fl_Input btnWefaxSaveDir {
                 label {Fax images destination directory}
                 callback {progdefaults.wefax_save_dir=o->value();
 progdefaults.changed = true;}
-                xywh {94 290 310 24} align 5
+                xywh {94 267 310 20} align 5
                 code0 {o->value(progdefaults.wefax_save_dir.c_str());}
               }
               Fl_Button btnSelectFaxDestDir {
@@ -3893,15 +4399,51 @@ progdefaults.changed = true;}
                 callback {Fl_File_Chooser *fc = new Fl_File_Chooser(".",NULL,Fl_File_Chooser::DIRECTORY,"Input File");
 fc->callback(WefaxDestDirSet);
 fc->show();}
-                xywh {424 290 80 24}
+                xywh {424 267 80 20}
+              }
+              Fl_Check_Button btnWefaxHideTx {
+                label {Hide Transmission window}
+                callback {progdefaults.WEFAX_HideTx=o->value();
+progdefaults.changed = true;}
+                tooltip {Hide transmission window by default.} xywh {94 107 235 30} down_box DOWN_BOX
+                code0 {o->value(progdefaults.WEFAX_HideTx);}
               }
               Fl_Check_Button btnWefaxSaveMonochrome {
                 label {Save image as monochrome file}
                 callback {progdefaults.WEFAX_SaveMonochrome=o->value();
 progdefaults.changed = true;}
-                tooltip {Save the fax image as a gray-level PNG file.} xywh {94 320 235 30} down_box DOWN_BOX
+                tooltip {Save the fax image as a gray-level PNG file.} xywh {94 297 235 30} down_box DOWN_BOX
                 code0 {o->value(progdefaults.WEFAX_SaveMonochrome);}
               }
+            }
+          }
+          Fl_Group tabDFTscan {
+            label Scan open
+            xywh {0 50 600 330} hide
+          } {
+            Fl_Counter cnt_dft_scans {
+              label {\# scans}
+              callback {progdefaults.cnt_dft_scans=(int)o->value();
+progdefaults.changed = true;}
+              xywh {235 129 132 21} minimum 10 maximum 1000 step 10 value 60
+              code0 {o->value(progdefaults.cnt_dft_scans);}
+              code1 {o->lstep(100.0);}
+            }
+            Fl_Counter cnt_dft_range {
+              label {dB Range}
+              callback {progdefaults.cnt_dft_range=o->value();
+update_scope();
+progdefaults.changed = true;}
+              xywh {251 194 100 21} type Simple minimum 20 maximum 120 step 10 value 60
+              code0 {o->value(progdefaults.cnt_dft_range);}
+            }
+            Fl_Check_Button btn_use_relative_dB {
+              label {Use relative dB}
+              callback {progdefaults.dft_relative=o->value();
+update_scope();
+progdefaults.changed = true;}
+              xywh {275 265 70 15} down_box DOWN_BOX
+              code0 {o->value(progdefaults.dft_relative);}
             }
           }
         }
@@ -3917,7 +4459,7 @@ progdefaults.changed = true;}
             label {Hardware PTT} open
             xywh {0 50 600 330}
           } {
-            Fl_Group {} {
+            Fl_Group {} {open
               xywh {55 57 490 38} box ENGRAVED_FRAME
             } {
               Fl_Check_Button btnPTTrightchannel {
@@ -3931,11 +4473,6 @@ if (o->value()) {
   chkPseudoFSK->value(0);
   progdefaults.sig_on_right_channel = false;
   chkAudioStereoOut->value(0);
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }
 }
 progdefaults.changed = true;}
                 tooltip {Can be used in lieu of or in addition to other PTT types} xywh {74 66 250 20} down_box DOWN_BOX
@@ -4169,7 +4706,7 @@ btnRevertRIGCAT->activate();}
   btnRigCatRTSptt->value(0);
   btnRigCatDTRptt->value(0);
 }
-  
+
 btnInitRIGCAT->labelcolor(FL_RED);
 btnInitRIGCAT->redraw();
 btnRevertRIGCAT->activate();}
@@ -4275,14 +4812,14 @@ if (o->value() == 1) {
   progdefaults.chkUSERIGCATis = false;
   progdefaults.chkUSEXMLRPCis = false;
 }
-  
+
 btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw();
 progdefaults.changed = true;}
-              tooltip {Hamlib used for rig control} xywh {250 55 100 20} down_box DOWN_BOX
+              tooltip {Hamlib used for rig control} xywh {250 59 100 20} down_box DOWN_BOX
             }
             Fl_Group grpHamlib {open
-              xywh {55 78 490 277} box ENGRAVED_FRAME
+              xywh {5 88 585 277} box ENGRAVED_FRAME
             } {
               Fl_Group cboHamlibRig {
                 label {Rig:}
@@ -4292,16 +4829,16 @@ btnRevertHAMLIB->activate();
 \#if USE_HAMLIB
 hamlib_get_defaults();
 \#endif} open
-                xywh {115 88 160 22} box DOWN_BOX color 7 align 4
+                xywh {41 98 275 22} box DOWN_BOX color 7 align 4
                 code0 {o->labelsize(FL_NORMAL_SIZE);}
-                class Fl_ComboBox
+                class Fl_ListBox
               } {}
               Fl_Group inpRIGdev {
                 label {Device:}
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();} open
-                xywh {390 88 144 22} box DOWN_BOX color 7 align 4
+                xywh {385 98 190 22} box DOWN_BOX color 7 align 4
                 code0 {o->value(progdefaults.HamRigDevice.c_str());
                        o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ComboBox
@@ -4311,7 +4848,7 @@ btnRevertHAMLIB->activate();} open
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {\# times to resend command before giving up} xywh {80 128 70 24} align 5 maximum 1000 step 1
+                tooltip {\# times to resend command before giving up} xywh {40 138 70 24} align 5 maximum 1000 step 1
                 code0 {o->value(progdefaults.HamlibRetries);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Value_Input2
@@ -4321,7 +4858,7 @@ btnRevertHAMLIB->activate();}
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {Msec's between retries} xywh {205 128 70 24} align 5 maximum 10000 step 1
+                tooltip {Msec's between retries} xywh {165 138 70 24} align 5 maximum 10000 step 1
                 code0 {o->value(progdefaults.HamlibTimeout);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Value_Input2
@@ -4331,7 +4868,7 @@ btnRevertHAMLIB->activate();}
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {Msec's between sequential commands} xywh {80 171 70 24} align 5 maximum 10000 step 1
+                tooltip {Msec's between sequential commands} xywh {40 181 70 24} align 5 maximum 10000 step 1
                 code0 {o->value(progdefaults.HamlibWriteDelay);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Value_Input2
@@ -4341,7 +4878,7 @@ btnRevertHAMLIB->activate();}
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {Wait interval (msecs) before reading response} xywh {206 171 70 24} align 5 maximum 10000 step 1
+                tooltip {Wait interval (msecs) before reading response} xywh {166 181 70 24} align 5 maximum 10000 step 1
                 code0 {o->value(progdefaults.HamlibWait);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Value_Input2
@@ -4351,7 +4888,7 @@ btnRevertHAMLIB->activate();}
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();} open
-                xywh {435 122 99 22} box DOWN_BOX color 7 align 4
+                xywh {476 132 99 22} box DOWN_BOX color 7 align 4
                 code0 {o->add(szBaudRates);}
                 code1 {o->index(progdefaults.HamRigBaudrate);
                        o->labelsize(FL_NORMAL_SIZE);}
@@ -4362,7 +4899,7 @@ btnRevertHAMLIB->activate();} open
                 callback {progdefaults.HamRigStopbits = (int)o->value();
 btnRevertHAMLIB->activate();
 progdefaults.changed = true;}
-                xywh {439 158 95 21} type Simple align 4 minimum 1 maximum 2 step 1 value 1
+                xywh {480 168 95 21} type Simple align 4 minimum 1 maximum 2 step 1 value 1
                 code0 {o->value(progdefaults.HamRigStopbits);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Counter2
@@ -4372,7 +4909,7 @@ progdefaults.changed = true;}
                 callback {progdefaults.HamlibTimeout = (int)o->value();
 btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();}
-                tooltip {Msec's between retries} xywh {200 135 100 20} type Simple align 5 minimum 2 maximum 20000 step 1 value 10 hide
+                tooltip {Msec's between retries} xywh {160 145 100 20} type Simple align 5 minimum 2 maximum 20000 step 1 value 10 hide
                 code0 {o->value(progdefaults.HamlibTimeout);}
                 class Fl_Counter2
               }
@@ -4382,7 +4919,7 @@ btnInitHAMLIB->redraw_label();}
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
                 tooltip {Optional configuration
-in format: param=val ...} xywh {70 321 320 22} align 5
+in format: param=val ...} xywh {30 331 425 22} align 5
                 code0 {inpHamlibConfig->value(progdefaults.HamConfig.c_str());}
                 code1 {inpHamlibConfig->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Input2
@@ -4393,14 +4930,14 @@ in format: param=val ...} xywh {70 321 320 22} align 5
 o->labelcolor(FL_FOREGROUND_COLOR);
 //btnRevertHAMLIB->activate();
 progdefaults.changed = true;}
-                tooltip {Initialize hamlib interface} xywh {421 320 113 24}
+                tooltip {Initialize hamlib interface} xywh {462 330 113 24}
               }
               Fl_Group listbox_sideband {
                 label {Sideband:}
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();} open
-                xywh {390 212 144 22} box DOWN_BOX color 7 align 5
+                xywh {431 222 144 22} box DOWN_BOX color 7 align 5
                 code0 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
@@ -4409,7 +4946,7 @@ btnRevertHAMLIB->activate();} open
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {PTT is a hamlib command} xywh {95 213 200 20} down_box DOWN_BOX selection_color 1
+                tooltip {PTT is a hamlib command} xywh {55 223 200 20} down_box DOWN_BOX selection_color 1
                 code0 {o->value(progdefaults.HamlibCMDptt);}
               }
               Fl_Check_Button btnHamlibDTRplus {
@@ -4417,7 +4954,7 @@ btnRevertHAMLIB->activate();}
                 callback {btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {Initial state of DTR} xywh {95 238 90 20} down_box DOWN_BOX
+                tooltip {Initial state of DTR} xywh {55 248 90 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.HamlibDTRplus);}
               }
               Fl_Check_Button chkHamlibRTSplus {
@@ -4427,7 +4964,7 @@ btnRevertHAMLIB->activate();}
 btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {Initial state of RTS} xywh {319 238 85 20} down_box DOWN_BOX
+                tooltip {Initial state of RTS} xywh {345 248 85 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.HamlibRTSplus);}
               }
               Fl_Check_Button chkHamlibRTSCTSflow {
@@ -4440,7 +4977,7 @@ btnRevertHAMLIB->activate();}
 btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {Rig requires RTS/CTS flow control} xywh {95 266 170 20} down_box DOWN_BOX
+                tooltip {Rig requires RTS/CTS flow control} xywh {55 276 170 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.HamlibRTSCTSflow);}
                 code1 {if (o->value()) chkHamlibRTSplus->deactivate();}
               }
@@ -4451,7 +4988,7 @@ btnRevertHAMLIB->activate();}
 btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();}
-                tooltip {Rig requires Xon/Xoff flow control} xywh {319 266 185 20} down_box DOWN_BOX
+                tooltip {Rig requires Xon/Xoff flow control} xywh {345 276 185 20} down_box DOWN_BOX
                 code0 {o->value(progdefaults.HamlibXONXOFFflow);}
               }
               Fl_Button btnRevertHAMLIB {
@@ -4461,7 +4998,7 @@ btnInitHAMLIB->redraw_label();
 \#if USE_HAMLIB
 hamlib_restore_defaults();
 \#endif}
-                tooltip {Reset hamlib interface} xywh {421 289 113 24} hide deactivate
+                tooltip {Reset hamlib interface} xywh {381 299 113 24} hide deactivate
               }
             }
           }
@@ -4485,7 +5022,7 @@ if(o->value() == 1){
   progdefaults.chkUSEHAMLIBis = false;
   progdefaults.chkUSERIGCATis = false;
 }
-  
+
 btnInitXMLRPC->labelcolor(FL_RED);
 btnInitXMLRPC->redraw_label();
 progdefaults.changed = true;}
@@ -4497,6 +5034,18 @@ progdefaults.changed = true;}
 o->labelcolor(FL_FOREGROUND_COLOR);
 progdefaults.changed = true;}
                 tooltip {Initialize XML-RPC rig control} xywh {251 184 113 24}
+              }
+            }
+            Fl_Group {} {open
+              xywh {55 225 490 50} box ENGRAVED_BOX
+            } {
+              Fl_Counter mbw_delay {
+                label {Mode/BW delay}
+                callback {progdefaults.mbw=o->value();
+progdefaults.changed=true;}
+                tooltip {Delay in seconds between <RIGMODE... and <FILWID...
+when both in same macro definition} xywh {210 239 90 21} type Simple align 8 minimum 0.1 maximum 2 step 0.05 value 0.1
+                code0 {o->value(progdefaults.mbw);}
               }
             }
           }
@@ -4513,24 +5062,47 @@ progdefaults.changed = true;}
             label Devices open
             xywh {0 50 600 330}
           } {
-            Fl_Group AudioOSS {open
-              xywh {55 65 490 45} box ENGRAVED_FRAME
+            Fl_Group AudioTCP {open
+              xywh {55 65 380 45} box ENGRAVED_FRAME
             } {
               Fl_Round_Button {btnAudioIO[0]} {
-                label OSS
-                callback {sound_update(SND_IDX_OSS);
+                label TCP
+                callback {sound_update(SND_IDX_TCP);
 progdefaults.changed = true;
 resetSoundCard();}
-                tooltip {Use OSS audio server} xywh {65 75 53 25} down_box DOWN_BOX selection_color 1
+                tooltip {Use TCP audio server} xywh {65 75 53 25} down_box DOWN_BOX selection_color 1
               }
-              Fl_Input_Choice menuOSSDev {
-                label {Device:}
-                callback {scDevice[0] = scDevice[1] = progdefaults.OSSdevice = o->value();
-resetSoundCard();
-progdefaults.changed = true;} open
-                tooltip {Select device} xywh {424 75 110 25}
-                code0 {o->value(progdefaults.OSSdevice.c_str());}
-              } {}
+       Fl_Input inpIPServerHost {
+                label {Host:}
+                callback {scDevice[0] = progdefaults.IPServerHost = o->value();
+progdefaults.changed = true;
+resetSoundCard();} 
+               tooltip {TCP/UDP Server Host} xywh {180 75 90 25}
+               code0 {o->value(progdefaults.IPServerHost.c_str());}
+                code1 {inpIPServerHost->labelsize(FL_NORMAL_SIZE);}
+                class Fl_Input2
+              }
+       Fl_Input inpIPServerPort {
+                label {Port:}
+                callback {scDevice[0] = progdefaults.IPServerPort = o->value();
+progdefaults.changed = true;
+resetSoundCard();}
+                tooltip {TCP/UDP Server Port} xywh {320 75 90 25}
+                code0 {o->value(progdefaults.IPServerPort.c_str());}
+                code1 {inpIPServerPort->labelsize(FL_NORMAL_SIZE);}
+                class Fl_Input2
+              }
+            }
+            Fl_Group AudioUDP {open
+              xywh {435 65 110 45} box ENGRAVED_FRAME
+            } {
+                Fl_Round_Button {btnAudioIO[4]} {
+                label UDP
+                callback {sound_update(SND_IDX_UDP);
+progdefaults.changed = true;
+resetSoundCard();}
+                tooltip {Use UDP audio server} xywh {450 75 53 25} down_box DOWN_BOX selection_color 1
+              }
             }
             Fl_Group AudioPort {open
               xywh {55 110 490 80} box ENGRAVED_FRAME
@@ -4603,35 +5175,35 @@ resetSoundCard();}
             } {
               Fl_Group menuInSampleRate {
                 label Capture
-                callback {progdefaults.in_sample_rate = o->index() > 2 ? strtol(o->value(), 0, 10) : o->index()-1;
+                callback {progdefaults.in_sample_rate = o->index() > 1 ? strtol(o->value(), 0, 10) : o->index();
 resetSoundCard();
 progdefaults.changed = true;} open
                 tooltip {Force a specific sample rate. Select "Native" if "Auto"
-does not work well with your audio device.} xywh {65 94 100 20} box DOWN_BOX color 7 align 8
-                code2 {o->clear_changed();
-                       o->labelsize(FL_NORMAL_SIZE);}
+does not work well with your audio device.} xywh {65 94 100 22} box DOWN_BOX color 7 align 8
+                code0 {o->clear_changed();}
+                code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
               Fl_Group menuOutSampleRate {
                 label Playback
-                callback {progdefaults.out_sample_rate = o->index() > 2 ? strtol(o->value(), 0, 10) : o->index()-1;
+                callback {progdefaults.out_sample_rate = o->index() > 1 ? strtol(o->value(), 0, 10) : o->index();
 resetSoundCard();
 progdefaults.changed = true;} open
-                xywh {65 124 100 20} box DOWN_BOX color 7 align 8
-                code2 {o->clear_changed();}
-                code3 {o->tooltip(menuInSampleRate->tooltip());
-                       o->labelsize(FL_NORMAL_SIZE);}
+                xywh {65 124 100 22} box DOWN_BOX color 7 align 8
+                code0 {o->clear_changed();}
+                code1 {o->tooltip(menuInSampleRate->tooltip());}
+                code2 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
               } {}
               Fl_Group menuSampleConverter {
                 label Converter
-                callback {if ((o->index()-1) == FLDIGI_SRC_BEST)
+                callback {if ((o->index()) == FLDIGI_SRC_BEST)
     fl_alert2("The best quality SINC interpolator has very high CPU overhead");
-progdefaults.sample_converter = sample_rate_converters[o->index()-1];
+progdefaults.sample_converter = sample_rate_converters[o->index()];
 resetSoundCard();
 progdefaults.changed = true;
 o->tooltip(src_get_description(progdefaults.sample_converter));} open
-                tooltip {Set the type of resampler used of offset correction} xywh {319 94 216 20} box DOWN_BOX color 7 align 5
+                tooltip {Set the type of resampler used of offset correction} xywh {319 94 216 22} box DOWN_BOX color 7 align 5
                 code0 {\#include <FL/fl_ask.H>}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ListBox
@@ -4676,146 +5248,50 @@ progdefaults.changed = true;}
               }
             }
           }
-          Fl_Group tabMixer {
-            label Mixer open
-            xywh {0 50 600 330} hide
-          } {
-            Fl_Group {} {
-              label {OSS Mixer} open
-              xywh {55 69 490 145} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Check_Button btnMixer {
-                label {Manage mixer}
-                callback {enableMixer(o->value());
-progdefaults.changed = true;}
-                tooltip {Add mixer controls to main dialog} xywh {65 98 125 25} down_box DOWN_BOX
-                code0 {extern void resetMixerControls();}
-                code1 {o->value(progdefaults.EnableMixer);}
-              }
-              Fl_Group menuMix {
-                label {Device:}
-                callback {progdefaults.MXdevice = o->value();
-enableMixer(false);
-enableMixer(true);
-progdefaults.changed = true;} open
-                tooltip {Select Mixer device} xywh {152 141 170 24} box DOWN_BOX color 7
-                code0 {o->value(progdefaults.MXdevice.c_str());}
-                code1 {o->labelsize(FL_NORMAL_SIZE);}
-                class Fl_ListBox
-              } {}
-              Fl_Light_Button btnMicIn {
-                label {Mic In}
-                callback {if (o->value() == 1) {
-    btnLineIn->value(0);
-    progdefaults.LineIn = false;
-    progdefaults.MicIn = true;
-    setMixerInput(2);
-} else {
-    setMixerInput(0);
-    progdefaults.MicIn = false;
-}
-progdefaults.changed = true;}
-                tooltip {Use microphone input} xywh {331 102 74 25}
-              }
-              Fl_Light_Button btnLineIn {
-                label {Line In}
-                callback {if (o->value() == 1) {
-    btnMicIn->value(0);
-    progdefaults.LineIn = true;
-    progdefaults.MicIn = false;
-    setMixerInput(1);
-} else {
-    setMixerInput(0);
-    progdefaults.LineIn = false;
-}
-progdefaults.changed = true;}
-                tooltip {Use Line-In device} xywh {331 141 74 25} selection_color 3
-                code0 {extern void setMixerInput(int);}
-              }
-              Fl_Value_Slider valPCMvolume {
-                label PCM
-                callback {setPCMvolume(o->value());
-progdefaults.changed = true;}
-                tooltip {Set the sound card PCM level} xywh {65 176 340 20} type Horizontal selection_color 15 align 8 value 0.8 textsize 14
-                code0 {extern void setPCMvolume(double);}
-                code1 {o->labelsize(FL_NORMAL_SIZE); o->textsize(FL_NORMAL_SIZE);}
-                class Fl_Value_Slider2
-              }
-            }
-          }
           Fl_Group tabAudioRightChannel {
             label {Right channel} open
             xywh {0 50 600 330} hide
           } {
-            Fl_Check_Button chkForceMono {
-              label {Mono audio output}
-              callback {progdefaults.mono_audio = o->value();
-progdefaults.changed = true;
-if (o->value()) {
-  progdefaults.QSK = false;
-  btnQSK->value(0);
-  btnQSK2->value(0);
-  progdefaults.PseudoFSK = false;
-  chkPseudoFSK->value(0);
-  chkPseudoFSK2->value(0);
-  progdefaults.PTTrightchannel = false;
-  btnPTTrightchannel->value(0);
-  btnPTTrightchannel2->value(0);  
-  progdefaults.sig_on_right_channel = false;
-  chkAudioStereoOut->value(0);
-  progdefaults.ReverseAudio = false;
-  chkReverseAudio->value(0);
-}
-resetSoundCard();}
-              tooltip {Force output audio to single channel} xywh {160 63 280 20} down_box DOWN_BOX
-              code0 {chkForceMono->value(progdefaults.mono_audio);}
-            }
-            Fl_Check_Button chkAudioStereoOut {
-              label {Modem signal on left and right channels}
-              callback {progdefaults.sig_on_right_channel = o->value();
-progdefaults.changed = true;
-if (o->value()) {
-  progdefaults.QSK = false;
-  btnQSK->value(0);
-  btnQSK2->value(0);
-  progdefaults.PseudoFSK = false;
-  chkPseudoFSK->value(0);
-  chkPseudoFSK2->value(0);
-  progdefaults.PTTrightchannel = false;
-  btnPTTrightchannel->value(0);
-  btnPTTrightchannel2->value(0);  
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }
-}}
-              tooltip {Left and right channels both contain modem audio} xywh {160 95 280 20} down_box DOWN_BOX
-              code0 {chkAudioStereoOut->value(progdefaults.sig_on_right_channel);}
-            }
-            Fl_Check_Button chkReverseAudio {
-              label {Reverse Left/Right channels}
-              callback {progdefaults.ReverseAudio = o->value();
-progdefaults.changed = true;
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }}
-              tooltip {Software reversal of left-right audio channels} xywh {160 127 270 20} down_box DOWN_BOX
-              code0 {o->value(progdefaults.ReverseAudio);}
-            }
             Fl_Group {} {
-              label {...
+              label {Transmit Usage} open
+              xywh {25 61 550 246} box ENGRAVED_FRAME align 21
+            } {
+              Fl_Check_Button chkAudioStereoOut {
+                label {Modem signal on left and right channels}
+                callback {progdefaults.sig_on_right_channel = o->value();
+progdefaults.changed = true;
+if (o->value()) {
+  progdefaults.QSK = false;
+  btnQSK->value(0);
+  btnQSK2->value(0);
+  progdefaults.PseudoFSK = false;
+  chkPseudoFSK->value(0);
+  chkPseudoFSK2->value(0);
+  progdefaults.PTTrightchannel = false;
+  btnPTTrightchannel->value(0);
+  btnPTTrightchannel2->value(0);
+}}
+                tooltip {Left and right channels both contain modem audio} xywh {165 82 280 20} down_box DOWN_BOX
+                code0 {chkAudioStereoOut->value(progdefaults.sig_on_right_channel);}
+              }
+              Fl_Check_Button chkReverseAudio {
+                label {Reverse Left/Right channels}
+                callback {progdefaults.ReverseAudio = o->value();
+progdefaults.changed = true;}
+                tooltip {Software reversal of left-right audio channels} xywh {165 112 270 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.ReverseAudio);}
+              }
+              Fl_Group {} {
+                label {...
 These controls are on other tabs.
 They are replicated here for convenience.
 You may change the state from either location.
 ...} open
-              xywh {73 165 454 187} box ENGRAVED_FRAME align 18
-            } {
-              Fl_Check_Button btnPTTrightchannel2 {
-                label {PTT tone on right audio channel }
-                callback {progdefaults.PTTrightchannel = o->value();
+                xywh {75 135 454 162} box ENGRAVED_FRAME align 18
+              } {
+                Fl_Check_Button btnPTTrightchannel2 {
+                  label {PTT tone on right audio channel }
+                  callback {progdefaults.PTTrightchannel = o->value();
 btnPTTrightchannel->value(o->value());
 progdefaults.changed = true;
 if (o->value()) {
@@ -4827,19 +5303,14 @@ if (o->value()) {
   chkPseudoFSK2->value(0);
   progdefaults.sig_on_right_channel = false;
   chkAudioStereoOut->value(0);
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }
 }}
-                tooltip {1000 Hz tone when PTT enabled
-Can be used in lieu of or in addition to other PTT types} xywh {146 175 250 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.PTTrightchannel);}
-              }
-              Fl_Check_Button btnQSK2 {
-                label {CW QSK signal on right channel}
-                callback {progdefaults.QSK = o->value();
+                  tooltip {1000 Hz tone when PTT enabled
+Can be used in lieu of or in addition to other PTT types} xywh {165 142 250 20} down_box DOWN_BOX
+                  code0 {o->value(progdefaults.PTTrightchannel);}
+                }
+                Fl_Check_Button btnQSK2 {
+                  label {CW QSK signal on right channel}
+                  callback {progdefaults.QSK = o->value();
 btnQSK->value(o->value());
 progdefaults.changed = true;
 if (o->value()) {
@@ -4848,18 +5319,13 @@ if (o->value()) {
   progdefaults.PTTrightchannel = false;
   btnPTTrightchannel->value(0);
   btnPTTrightchannel2->value(0);
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }
 }}
-                tooltip {Generate 1000 Hz square wave signal on right channel} xywh {146 213 211 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QSK);}
-              }
-              Fl_Check_Button chkPseudoFSK2 {
-                label {Pseudo-FSK on right audio channel}
-                callback {progdefaults.PseudoFSK = o->value();
+                  tooltip {Generate 1000 Hz square wave signal on right channel} xywh {165 172 211 20} down_box DOWN_BOX
+                  code0 {o->value(progdefaults.QSK);}
+                }
+                Fl_Check_Button chkPseudoFSK2 {
+                  label {Pseudo-FSK on right audio channel}
+                  callback {progdefaults.PseudoFSK = o->value();
 chkPseudoFSK->value(o->value());
 progdefaults.changed = true;
 if (o->value()) {
@@ -4868,14 +5334,22 @@ if (o->value()) {
   progdefaults.PTTrightchannel = false;
   btnPTTrightchannel->value(0);
   btnPTTrightchannel2->value(0);
-  if (progdefaults.mono_audio) {
-    progdefaults.mono_audio = false;
-    chkForceMono->value(0);
-    resetSoundCard();
-  }
 }}
-                tooltip {Create 1000 Hz square wave on right channel} xywh {146 251 270 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.PseudoFSK);}
+                  tooltip {Create 1000 Hz square wave on right channel} xywh {165 203 270 20} down_box DOWN_BOX
+                  code0 {o->value(progdefaults.PseudoFSK);}
+                }
+              }
+            }
+            Fl_Group {} {
+              label {Receive Usage} open
+              xywh {25 310 550 60} box ENGRAVED_FRAME align 21
+            } {
+              Fl_Check_Button chkReverseRxAudio {
+                label {Reverse Left/Right channels}
+                callback {progdefaults.ReverseRxAudio = o->value();
+progdefaults.changed = true;}
+                tooltip {Software reversal of left-right audio channels} xywh {165 328 270 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.ReverseRxAudio);}
               }
             }
           }
@@ -5004,7 +5478,7 @@ progdefaults.changed = true;}
                 code0 {o->value(progdefaults.disable_rsid_freq_change);}
               }
               Fl_Group {} {
-                label {The RsID notification message contents and 
+                label {The RsID notification message contents and
 display characteristics are configured on the
 "Notifications" configure dialog.} open
                 xywh {216 74 330 60} box BORDER_BOX align 21
@@ -5304,89 +5778,6 @@ progdefaults.changed = true;}
               }
             }
           }
-          Fl_Group tabSpot {
-            label Spotting open
-            xywh {0 50 600 330} hide
-          } {
-            Fl_Group {} {
-              label {PSK Reporter} open
-              xywh {55 72 490 254} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Check_Button btnPSKRepAuto {
-                label {Automatically spot callsigns in decoded text}
-                callback {progdefaults.pskrep_auto = o->value();
-btnPSKRepInit->labelcolor(FL_RED);
-btnPSKRepInit->redraw_label();
-progdefaults.changed = true;}
-                tooltip {Parse all incoming text} xywh {65 103 324 20} down_box DOWN_BOX
-                code0 {btnPSKRepAuto->value(progdefaults.pskrep_auto);}
-              }
-              Fl_Check_Button btnPSKRepLog {
-                label {Send reception report when logging a QSO}
-                callback {progdefaults.pskrep_log = o->value();
-btnPSKRepInit->labelcolor(FL_RED);
-btnPSKRepInit->redraw_label();
-progdefaults.changed = true;}
-                tooltip {Send report only when QSO is logged} xywh {65 133 327 20} down_box DOWN_BOX
-                code0 {btnPSKRepLog->value(progdefaults.pskrep_log);}
-              }
-              Fl_Check_Button btnPSKRepQRG {
-                label {Report rig frequency (enable only if you have rig control!)}
-                callback {progdefaults.pskrep_qrg = o->value();
-progdefaults.changed = true;}
-                tooltip {Include the transmit frequency} xywh {65 164 416 20} down_box DOWN_BOX
-                code0 {btnPSKRepQRG->value(progdefaults.pskrep_qrg);}
-              }
-              Fl_Check_Button btn_report_when_visible {
-                label {Disable spotting when signal browser(s) are not visible.}
-                callback {progdefaults.report_when_visible = o->value();
-progdefaults.changed = true;}
-                tooltip {Check to reduce CPU load in PSK and RTTY modes.} xywh {65 195 416 20} down_box DOWN_BOX value 1
-                code0 {o->value(progdefaults.report_when_visible);}
-              }
-              Fl_Input inpPSKRepHost {
-                label {Host:}
-                callback {progdefaults.pskrep_host = o->value();
-btnPSKRepInit->labelcolor(FL_RED);
-btnPSKRepInit->redraw_label();
-progdefaults.changed = true;}
-                tooltip {To whom the connection is made} xywh {108 228 220 24} when 1
-                code0 {inpPSKRepHost->value(progdefaults.pskrep_host.c_str());}
-                code1 {inpPSKRepHost->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Input inpPSKRepPort {
-                label {Port:}
-                callback {progdefaults.pskrep_port = o->value();
-btnPSKRepInit->labelcolor(FL_RED);
-btnPSKRepInit->redraw_label();
-progdefaults.changed = true;}
-                tooltip {Using UDP port \#} xywh {477 228 60 24} when 1
-                code0 {inpPSKRepPort->value(progdefaults.pskrep_port.c_str());}
-                code1 {inpPSKRepPort->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Button btnPSKRepInit {
-                label Initialize
-                callback {pskrep_stop();
-if (!pskrep_start()) {
-    boxPSKRepMsg->copy_label(pskrep_error());
-    progdefaults.usepskrep = false;
-} else {
-    boxPSKRepMsg->label(0);
-    o->labelcolor(FL_FOREGROUND_COLOR);
-    progdefaults.usepskrep = true;
-}
-progdefaults.changed = true;}
-                tooltip {Initialize the socket client} xywh {457 273 80 24}
-              }
-              Fl_Box boxPSKRepMsg {
-                label {<PSK Reporter error message>}
-                xywh {67 257 300 48} labelfont 2
-                code0 {boxPSKRepMsg->label(0);}
-              }
-            }
-          }
           Fl_Group tabSweetSpot {
             label {Sweet Spot} open
             xywh {0 50 600 330} hide
@@ -5507,7 +5898,7 @@ progdefaults.changed = true;}
                 label {METAR station ID code}
                 callback {progdefaults.wx_sta = o->value();
 progdefaults.changed = true;}
-                tooltip {for example KMDQ for 
+                tooltip {for example KMDQ for
 Huntsville-Madison Executive Airport, AL} xywh {94 92 43 24} align 8
                 code0 {o->value(progdefaults.wx_sta.c_str());}
               }
@@ -5690,244 +6081,6 @@ fc->show();}
 progdefaults.changed = true;}
               tooltip {Empties KML documents when starting program.} xywh {322 231 172 15} down_box DOWN_BOX
               code0 {o->value(progdefaults.kml_purge_on_startup);}
-            }
-          }
-        }
-      }
-      Fl_Group tabQRZ {
-        label Web open
-        tooltip {Callsign database} xywh {0 25 600 355} hide
-      } {
-        Fl_Tabs tabsQRZ {open
-          xywh {0 25 600 355}
-        } {
-          Fl_Group {} {
-            label {Call Lookup} open
-            xywh {0 50 600 330}
-          } {
-            Fl_Group {} {
-              label {Web Browser lookup} open
-              xywh {55 56 490 122} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Round_Button btnQRZWEBnotavailable {
-                label None
-                callback {set_qrzweb_buttons(o);
-progdefaults.QRZWEB = QRZWEBNONE;
-progdefaults.changed = true;}
-                tooltip {Do not use callsign lookup via web browser} xywh {77 82 337 20} down_box DOWN_BOX value 1
-                code0 {o->value(progdefaults.QRZWEB == QRZWEBNONE);}
-              }
-              Fl_Round_Button btnQRZonline {
-                label {QRZ online via default Internet Browser}
-                callback {set_qrzweb_buttons(o);
-progdefaults.QRZWEB = QRZHTML;
-progdefaults.changed = true;}
-                tooltip {Visit QRZ web site} xywh {77 106 337 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZWEB == QRZHTML);}
-              }
-              Fl_Round_Button btnHAMCALLonline {
-                label {HamCall online via default Internet Browser}
-                callback {set_qrzweb_buttons(o);
-progdefaults.QRZWEB = HAMCALLHTML;
-progdefaults.changed = true;}
-                tooltip {Visit Hamcall web site} xywh {77 130 337 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZWEB == HAMCALLHTML);}
-              }
-              Fl_Round_Button btnHamQTHonline {
-                label {HamQTH via default Internet Browser}
-                callback {set_qrzweb_buttons(o);
-progdefaults.QRZWEB = HAMQTHHTML;
-progdefaults.changed = true;}
-                tooltip {Visit hamQTH web site} xywh {77 154 337 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZWEB == HAMQTHHTML);}
-              }
-            }
-            Fl_Group {} {
-              label {Data base lookup} open
-              xywh {55 180 490 190} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Round_Button btnQRZXMLnotavailable {
-                label None
-                callback {set_qrzxml_buttons(o);
-progdefaults.QRZXML = QRZXMLNONE;
-progdefaults.changed = true;}
-                tooltip {Do not use callsign database} xywh {77 203 64 20} down_box DOWN_BOX value 1
-                code0 {o->value(progdefaults.QRZXML == QRZXMLNONE);}
-              }
-              Fl_Round_Button btnQRZcdrom {
-                label {QRZ cdrom}
-                callback {set_qrzxml_buttons(o);
-progdefaults.QRZXML = QRZCD;
-progdefaults.changed = true;}
-                tooltip {Use CD or hard drive CD image} xywh {77 231 70 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZXML == QRZCD);}
-              }
-              Fl_Round_Button btnQRZsub {
-                label {QRZ.com}
-                callback {set_qrzxml_buttons(o);
-progdefaults.QRZXML = QRZNET;
-progdefaults.changed = true;}
-                tooltip {You need a paid QRZ online
-subscription to access} xywh {77 259 125 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZXML == QRZNET);}
-              }
-              Fl_Round_Button btnHamcall {
-                label {Hamcall.net}
-                callback {set_qrzxml_buttons(o);
-progdefaults.QRZXML = HAMCALLNET;
-progdefaults.changed = true;}
-                tooltip {You need a paid Hamcall online
-subscription to access} xywh {77 285 125 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZXML == HAMCALLNET);}
-              }
-              Fl_Round_Button btnHamQTH {
-                label {HamQTH.com (free service http://www.hamqth.com)}
-                callback {set_qrzxml_buttons(o);
-progdefaults.QRZXML = HAMQTH;
-progdefaults.changed = true;}
-                tooltip {Free service courtesy of OK} xywh {77 311 125 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZXML == HAMQTH);}
-              }
-              Fl_Round_Button btnCALLOOK {
-                label {Callook.info lookup (free service US callsigns only)}
-                callback {set_qrzxml_buttons(o);
-progdefaults.QRZXML = CALLOOK;
-progdefaults.changed = true;}
-                tooltip {Visit Hamcall web site} xywh {77 338 125 20} down_box DOWN_BOX
-                code0 {o->value(progdefaults.QRZXML == CALLOOK);}
-              }
-              Fl_Input txtQRZpathname {
-                label {at:}
-                callback {progdefaults.QRZpathname = o->value();
-progdefaults.QRZchanged = true;
-progdefaults.changed = true;}
-                tooltip {ie: /home/dave/CALLBK/ or C:/CALLBK/
-Leave blank to search for database} xywh {202 230 300 22}
-                code0 {o->value(progdefaults.QRZpathname.c_str());}
-                code1 {txtQRZpathname->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Input inpQRZusername {
-                label {User name}
-                callback {progdefaults.QRZusername = o->value();
-progdefaults.changed = true;}
-                tooltip {Your login name} xywh {285 258 150 22}
-                code0 {o->value(progdefaults.QRZusername.c_str());}
-                code1 {inpQRZusername->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Input inpQRZuserpassword {
-                label Password
-                callback {progdefaults.QRZuserpassword = o->value();
-progdefaults.changed = true;}
-                tooltip {Your login password} xywh {285 284 150 22}
-                code0 {o->value(progdefaults.QRZuserpassword.c_str());}
-                code1 {o->type(FL_SECRET_INPUT);}
-                code2 {inpQRZuserpassword->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Button btnQRZpasswordShow {
-                label Show
-                callback {inpQRZuserpassword->type(inpQRZuserpassword->type() ^ FL_SECRET_INPUT);
-inpQRZuserpassword->redraw();
-o->label((inpQRZuserpassword->type() & FL_SECRET_INPUT) ? "Show" : "Hide");}
-                tooltip {Show password in plain text} xywh {445 285 70 20}
-              }
-              Fl_Check_Button btn_notes_address {
-                label {Add address to notes field}
-                callback {progdefaults.notes_address = o->value();
-progdefaults.changed = true;}
-                xywh {202 205 207 15} down_box DOWN_BOX
-                code0 {o->value(progdefaults.notes_address);}
-              }
-            }
-          }
-          Fl_Group {} {
-            label eQSL open
-            xywh {0 50 600 330} hide
-          } {
-            Fl_Input inpEQSL_id {
-              label {User ID}
-              callback {progdefaults.eqsl_id = o->value();
-progdefaults.changed = true;}
-              tooltip {Your login name} xywh {225 58 150 20}
-              code0 {o->value(progdefaults.eqsl_id.c_str());}
-              code1 {inpEQSL_id->labelsize(FL_NORMAL_SIZE);}
-              class Fl_Input2
-            }
-            Fl_Input inpEQSL_pwd {
-              label Password
-              callback {progdefaults.eqsl_pwd = o->value();
-progdefaults.changed = true;}
-              tooltip {Your login password} xywh {225 85 150 20}
-              code0 {o->value(progdefaults.eqsl_pwd.c_str());}
-              code1 {o->type(FL_SECRET_INPUT);}
-              code2 {inpEQSL_pwd->labelsize(FL_NORMAL_SIZE);}
-              class Fl_Input2
-            }
-            Fl_Button btnEQSL_pwd_show {
-              label Show
-              callback {inpEQSL_pwd->type(inpEQSL_pwd->type() ^ FL_SECRET_INPUT);
-inpEQSL_pwd->redraw();
-o->label((inpEQSL_pwd->type() & FL_SECRET_INPUT) ? "Show" : "Hide");}
-              tooltip {Show password in plain text} xywh {395 85 70 20}
-            }
-            Fl_Input inpEQSL_nick {
-              label {QTH Nickname}
-              callback {progdefaults.eqsl_nick = o->value();
-progdefaults.changed = true;}
-              tooltip {Your login name} xywh {225 114 150 20}
-              code0 {o->value(progdefaults.eqsl_nick.c_str());}
-              code1 {inpEQSL_nick->labelsize(FL_NORMAL_SIZE);}
-              class Fl_Input2
-            }
-            Fl_Group {} {
-              label Options open
-              xywh {30 141 516 223} box ENGRAVED_FRAME align 21
-            } {
-              Fl_Check_Button btn_send_when_logged {
-                label {send when logged (log button, <LOG>, <LNW>)}
-                callback {progdefaults.eqsl_when_logged = o->value();
-progdefaults.changed = true;}
-                tooltip {automatic data upload} xywh {79 166 70 15} down_box DOWN_BOX
-                code0 {o->value(progdefaults.eqsl_when_logged);}
-              }
-              Fl_Input txt_eqsl_default_message {
-                label {Default message}
-                callback {progdefaults.eqsl_default_message = o->value();
-progdefaults.changed = true;}
-                tooltip {default text to send with <LOG> etc} xywh {83 226 451 40} type Multiline align 5 when 1
-                code0 {o->value(progdefaults.eqsl_default_message.c_str());}
-                class Fl_Input2
-              }
-              Fl_Group {} {
-                label {Text Tags (tags use {} delimiters)} open
-                xywh {33 270 510 90} box FLAT_BOX align 21
-              } {
-                Fl_Box eqsl_txt1 {
-                  label {  {CALL} other ops call sign}
-                  xywh {32 317 220 17} align 20
-                }
-                Fl_Box eqsl_txt2 {
-                  label {  {MODE} full mode / submode}
-                  xywh {30 336 220 17} align 20
-                }
-                Fl_Box eqsl_txt3 {
-                  label {{NAME} other ops name}
-                  xywh {278 317 220 17} align 20
-                }
-                Fl_Box {} {
-                  label {These tags can also be used in <EQSL:[message]>}
-                  xywh {68 293 440 17}
-                }
-              }
-              Fl_Check_Button btn_send_datetime_off {
-                label {Use date/time off for log entry}
-                callback {progdefaults.eqsl_datetime_off = o->value();
-progdefaults.changed = true;}
-                tooltip {default uses date/time on} xywh {80 188 70 15} down_box DOWN_BOX
-                code0 {o->value(progdefaults.eqsl_datetime_off);}
-              }
             }
           }
         }
@@ -6297,8 +6450,246 @@ dl_fldigi::hbtint::uthr->payloads();}
           }
         }
       }
+      Fl_Group tabQRZ {
+        label Web open
+        tooltip {Callsign database} xywh {0 25 600 355} hide
+      } {
+        Fl_Tabs tabsQRZ {open
+          xywh {0 25 600 355}
+        } {
+          Fl_Group {} {
+            label {Call Lookup} open
+            xywh {0 50 600 330} hide
+          } {
+            Fl_Group {} {
+              label {Web Browser lookup} open
+              xywh {55 56 490 122} box ENGRAVED_FRAME align 21
+            } {
+              Fl_Round_Button btnQRZWEBnotavailable {
+                label None
+                callback {set_qrzweb_buttons(o);
+progdefaults.QRZWEB = QRZWEBNONE;
+progdefaults.changed = true;}
+                tooltip {Do not use callsign lookup via web browser} xywh {77 82 337 20} down_box DOWN_BOX value 1
+                code0 {o->value(progdefaults.QRZWEB == QRZWEBNONE);}
+              }
+              Fl_Round_Button btnQRZonline {
+                label {QRZ online via default Internet Browser}
+                callback {set_qrzweb_buttons(o);
+progdefaults.QRZWEB = QRZHTML;
+progdefaults.changed = true;}
+                tooltip {Visit QRZ web site} xywh {77 106 337 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZWEB == QRZHTML);}
+              }
+              Fl_Round_Button btnHAMCALLonline {
+                label {HamCall online via default Internet Browser}
+                callback {set_qrzweb_buttons(o);
+progdefaults.QRZWEB = HAMCALLHTML;
+progdefaults.changed = true;}
+                tooltip {Visit Hamcall web site} xywh {77 130 337 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZWEB == HAMCALLHTML);}
+              }
+              Fl_Round_Button btnHamQTHonline {
+                label {HamQTH via default Internet Browser}
+                callback {set_qrzweb_buttons(o);
+progdefaults.QRZWEB = HAMQTHHTML;
+progdefaults.changed = true;}
+                tooltip {Visit hamQTH web site} xywh {77 154 337 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZWEB == HAMQTHHTML);}
+              }
+            }
+            Fl_Group {} {
+              label {Data base lookup} open
+              xywh {55 180 490 190} box ENGRAVED_FRAME align 21
+            } {
+              Fl_Round_Button btnQRZXMLnotavailable {
+                label None
+                callback {set_qrzxml_buttons(o);
+progdefaults.QRZXML = QRZXMLNONE;
+progdefaults.changed = true;}
+                tooltip {Do not use callsign database} xywh {77 203 64 20} down_box DOWN_BOX value 1
+                code0 {o->value(progdefaults.QRZXML == QRZXMLNONE);}
+              }
+              Fl_Round_Button btnQRZcdrom {
+                label {QRZ cdrom}
+                callback {set_qrzxml_buttons(o);
+progdefaults.QRZXML = QRZCD;
+progdefaults.changed = true;}
+                tooltip {Use CD or hard drive CD image} xywh {77 231 70 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZXML == QRZCD);}
+              }
+              Fl_Round_Button btnQRZsub {
+                label {QRZ.com}
+                callback {set_qrzxml_buttons(o);
+progdefaults.QRZXML = QRZNET;
+progdefaults.changed = true;}
+                tooltip {You need a paid QRZ online
+subscription to access} xywh {77 259 125 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZXML == QRZNET);}
+              }
+              Fl_Round_Button btnHamcall {
+                label {Hamcall.net}
+                callback {set_qrzxml_buttons(o);
+progdefaults.QRZXML = HAMCALLNET;
+progdefaults.changed = true;}
+                tooltip {You need a paid Hamcall online
+subscription to access} xywh {77 285 125 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZXML == HAMCALLNET);}
+              }
+              Fl_Round_Button btnHamQTH {
+                label {HamQTH.com (free service http://www.hamqth.com)}
+                callback {set_qrzxml_buttons(o);
+progdefaults.QRZXML = HAMQTH;
+progdefaults.changed = true;}
+                tooltip {Free service courtesy of OK} xywh {77 311 125 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZXML == HAMQTH);}
+              }
+              Fl_Round_Button btnCALLOOK {
+                label {Callook.info lookup (free service US callsigns only)}
+                callback {set_qrzxml_buttons(o);
+progdefaults.QRZXML = CALLOOK;
+progdefaults.changed = true;}
+                tooltip {Visit Hamcall web site} xywh {77 338 125 20} down_box DOWN_BOX
+                code0 {o->value(progdefaults.QRZXML == CALLOOK);}
+              }
+              Fl_Input txtQRZpathname {
+                label {at:}
+                callback {progdefaults.QRZpathname = o->value();
+progdefaults.QRZchanged = true;
+progdefaults.changed = true;}
+                tooltip {ie: /home/dave/CALLBK/ or C:/CALLBK/
+Leave blank to search for database} xywh {202 230 300 22}
+                code0 {o->value(progdefaults.QRZpathname.c_str());}
+                code1 {txtQRZpathname->labelsize(FL_NORMAL_SIZE);}
+                class Fl_Input2
+              }
+              Fl_Input inpQRZusername {
+                label {User name}
+                callback {progdefaults.QRZusername = o->value();
+progdefaults.changed = true;}
+                tooltip {Your login name} xywh {285 258 150 22}
+                code0 {o->value(progdefaults.QRZusername.c_str());}
+                code1 {inpQRZusername->labelsize(FL_NORMAL_SIZE);}
+                class Fl_Input2
+              }
+              Fl_Input inpQRZuserpassword {
+                label Password
+                callback {progdefaults.QRZuserpassword = o->value();
+progdefaults.changed = true;}
+                tooltip {Your login password} xywh {285 284 150 22}
+                code0 {o->value(progdefaults.QRZuserpassword.c_str());}
+                code1 {o->type(FL_SECRET_INPUT);}
+                code2 {inpQRZuserpassword->labelsize(FL_NORMAL_SIZE);}
+                class Fl_Input2
+              }
+              Fl_Button btnQRZpasswordShow {
+                label Show
+                callback {inpQRZuserpassword->type(inpQRZuserpassword->type() ^ FL_SECRET_INPUT);
+inpQRZuserpassword->redraw();
+o->label((inpQRZuserpassword->type() & FL_SECRET_INPUT) ? "Show" : "Hide");}
+                tooltip {Show password in plain text} xywh {445 285 70 20}
+              }
+              Fl_Check_Button btn_notes_address {
+                label {Add address to notes field}
+                callback {progdefaults.notes_address = o->value();
+progdefaults.changed = true;}
+                xywh {202 205 207 15} down_box DOWN_BOX
+                code0 {o->value(progdefaults.notes_address);}
+              }
+            }
+          }
+          Fl_Group {} {
+            label eQSL open
+            xywh {0 50 600 330}
+          } {
+            Fl_Input inpEQSL_id {
+              label {User ID}
+              callback {progdefaults.eqsl_id = o->value();
+progdefaults.changed = true;}
+              tooltip {Your login name} xywh {225 58 150 20}
+              code0 {o->value(progdefaults.eqsl_id.c_str());}
+              code1 {inpEQSL_id->labelsize(FL_NORMAL_SIZE);}
+              class Fl_Input2
+            }
+            Fl_Input inpEQSL_pwd {
+              label Password
+              callback {progdefaults.eqsl_pwd = o->value();
+progdefaults.changed = true;}
+              tooltip {Your login password} xywh {225 85 150 20}
+              code0 {o->value(progdefaults.eqsl_pwd.c_str());}
+              code1 {o->type(FL_SECRET_INPUT);}
+              code2 {inpEQSL_pwd->labelsize(FL_NORMAL_SIZE);}
+              class Fl_Input2
+            }
+            Fl_Button btnEQSL_pwd_show {
+              label Show
+              callback {inpEQSL_pwd->type(inpEQSL_pwd->type() ^ FL_SECRET_INPUT);
+inpEQSL_pwd->redraw();
+o->label((inpEQSL_pwd->type() & FL_SECRET_INPUT) ? _("Show") : _("Hide"));}
+              tooltip {Show password in plain text} xywh {395 85 70 20}
+            }
+            Fl_Input inpEQSL_nick {
+              label {QTH Nickname}
+              callback {progdefaults.eqsl_nick = o->value();
+progdefaults.changed = true;}
+              tooltip {Your login name} xywh {225 114 150 20}
+              code0 {o->value(progdefaults.eqsl_nick.c_str());}
+              code1 {inpEQSL_nick->labelsize(FL_NORMAL_SIZE);}
+              class Fl_Input2
+            }
+            Fl_Group {} {
+              label Options open
+              xywh {30 141 516 223} box ENGRAVED_FRAME align 21
+            } {
+              Fl_Check_Button btn_send_when_logged {
+                label {send when logged (log button, <LOG>, <LNW>)}
+                callback {progdefaults.eqsl_when_logged = o->value();
+progdefaults.changed = true;}
+                tooltip {automatic data upload} xywh {79 166 70 15} down_box DOWN_BOX
+                code0 {o->value(progdefaults.eqsl_when_logged);}
+              }
+              Fl_Input txt_eqsl_default_message {
+                label {Default message}
+                callback {progdefaults.eqsl_default_message = o->value();
+progdefaults.changed = true;}
+                tooltip {default text to send with <LOG> etc} xywh {83 226 451 40} type Multiline align 5 when 1
+                code0 {o->value(progdefaults.eqsl_default_message.c_str());}
+                class Fl_Input2
+              }
+              Fl_Group {} {
+                label {Text Tags (tags use {} delimiters)} open
+                xywh {30 270 513 90} box FLAT_BOX align 21
+              } {
+                Fl_Box eqsl_txt1 {
+                  label {  {CALL} other ops call sign}
+                  xywh {32 317 220 17} align 20
+                }
+                Fl_Box eqsl_txt2 {
+                  label {  {MODE} full mode / submode}
+                  xywh {30 336 220 17} align 20
+                }
+                Fl_Box eqsl_txt3 {
+                  label {{NAME} other ops name}
+                  xywh {278 317 220 17} align 20
+                }
+                Fl_Box {} {
+                  label {These tags can also be used in <EQSL:[message]>}
+                  xywh {68 293 440 17}
+                }
+              }
+              Fl_Check_Button btn_send_datetime_off {
+                label {Use date/time off for log entry}
+                callback {progdefaults.eqsl_datetime_off = o->value();
+progdefaults.changed = true;}
+                tooltip {default uses date/time on} xywh {80 188 70 15} down_box DOWN_BOX
+                code0 {o->value(progdefaults.eqsl_datetime_off);}
+              }
+            }
+          }
+        }
+      }
       Fl_Group tabAutoStart {
-        label Autostart
+        label StartUp
         callback {progdefaults.changed = true;} open
         tooltip {Operator information} xywh {0 25 600 355} when 1 hide
       } {
@@ -6310,14 +6701,13 @@ dl_fldigi::hbtint::uthr->payloads();}
             label {flrig:}
             callback {progdefaults.auto_flrig_pathname = o->value();
 progdefaults.changed = true;}
-            tooltip {Enter full path-filename for external program
-Or simple name of program} xywh {63 71 310 24} when 1
+            tooltip {Enter full path-filename for flrig} xywh {63 71 310 24} when 1
             code0 {o->value(progdefaults.auto_flrig_pathname.c_str());}
             class Fl_Input2
           }
           Fl_Button btn_select_flrig {
             label Locate
-            callback {std::string str = select_binary_pathname("flrig");
+            callback {std::string str = select_binary_pathname(progdefaults.auto_flrig_pathname);
 txt_auto_flrig_pathname->value(str.c_str());
 progdefaults.auto_flrig_pathname = str;
 progdefaults.changed = true;}
@@ -6327,14 +6717,13 @@ progdefaults.changed = true;}
             label {flamp:}
             callback {progdefaults.auto_flamp_pathname = o->value();
 progdefaults.changed = true;}
-            tooltip {Enter full path-filename for external program
-Or simple name of program} xywh {63 109 310 24} when 1
+            tooltip {Enter full path-filename for flamp} xywh {63 109 310 24} when 1
             code0 {o->value(progdefaults.auto_flamp_pathname.c_str());}
             class Fl_Input2
           }
           Fl_Button btn_select_auto_flamp {
             label Locate
-            callback {std::string str = select_binary_pathname("flamp");
+            callback {std::string str = select_binary_pathname(progdefaults.auto_flamp_pathname);
 txt_auto_flamp_pathname->value(str.c_str());
 progdefaults.auto_flamp_pathname = str;
 progdefaults.changed = true;}
@@ -6344,14 +6733,13 @@ progdefaults.changed = true;}
             label {flnet:}
             callback {progdefaults.flnet_pathname = o->value();
 progdefaults.changed = true;}
-            tooltip {Enter full path-filename for external program
-Or simple name of program} xywh {63 147 310 24} when 1
+            tooltip {Enter full path-filename for flnet} xywh {63 147 310 24} when 1
             code0 {o->value(progdefaults.auto_flnet_pathname.c_str());}
             class Fl_Input2
           }
           Fl_Button btn_select_auto_flnet {
             label Locate
-            callback {std::string str = select_binary_pathname("flnet");
+            callback {std::string str = select_binary_pathname(progdefaults.auto_flnet_pathname);
 txt_auto_flnet_pathname->value(str.c_str());
 progdefaults.auto_flnet_pathname = str;
 progdefaults.changed = true;}
@@ -6361,14 +6749,13 @@ progdefaults.changed = true;}
             label {fllog:}
             callback {progdefaults.auto_fllog_pathname = o->value();
 progdefaults.changed = true;}
-            tooltip {Enter full path-filename for external program
-Or simple name of program} xywh {63 186 310 24} when 1
+            tooltip {Enter full path-filename for fllog} xywh {63 186 310 24} when 1
             code0 {o->value(progdefaults.auto_fllog_pathname.c_str());}
             class Fl_Input2
           }
           Fl_Button btn_select_fllog {
             label Locate
-            callback {std::string str = select_binary_pathname("fllog");
+            callback {std::string str = select_binary_pathname(progdefaults.auto_fllog_pathname);
 txt_auto_fllog_pathname->value(str.c_str());
 progdefaults.auto_fllog_pathname = str;
 progdefaults.changed = true;}
@@ -6378,8 +6765,7 @@ progdefaults.changed = true;}
             label {Prog 1:}
             callback {progdefaults.auto_prog1_pathname = o->value();
 progdefaults.changed = true;}
-            tooltip {Enter full path-filename for external program
-Or simple name of program} xywh {63 224 310 24} when 1
+            tooltip {Enter full path-filename for external program} xywh {63 224 310 24} when 1
             code0 {o->value(progdefaults.auto_prog1_pathname.c_str());}
             class Fl_Input2
           }
@@ -6395,8 +6781,7 @@ progdefaults.changed = true;}
             label {Prog 2:}
             callback {progdefaults.auto_prog2_pathname = o->value();
 progdefaults.changed = true;}
-            tooltip {Enter full path-filename for external program
-Or simple name of program} xywh {63 262 310 24} when 1
+            tooltip {Enter full path-filename for external program} xywh {63 262 310 24} when 1
             code0 {o->value(progdefaults.auto_prog2_pathname.c_str());}
             class Fl_Input2
           }
@@ -6412,8 +6797,7 @@ progdefaults.changed = true;}
             label {Prog 3:}
             callback {progdefaults.auto_prog3_pathname = o->value();
 progdefaults.changed = true;}
-            tooltip {Enter full path-filename for external program
-Or simple name of program} xywh {63 301 310 24} when 1
+            tooltip {Enter full path-filename for external program} xywh {63 301 310 24} when 1
             code0 {o->value(progdefaults.auto_prog3_pathname.c_str());}
             class Fl_Input2
           }
@@ -6506,19 +6890,354 @@ progdefaults.changed = true;}
           }
         }
       }
+      Fl_Group tabIO {
+        label IO
+        callback {btnDisable_p2p_io_widgets->value(1);} open
+        tooltip {Program to Program Communications} xywh {0 25 600 355} hide
+        code0 {btnDisable_p2p_io_widgets->value(1);}
+      } {
+        Fl_Group {} {open
+          xywh {6 34 588 102} box ENGRAVED_BOX align 21
+        } {
+          Fl_Check_Button btnDisable_p2p_io_widgets {
+            label Lock user_data_type long
+            callback {progStatus.ip_lock = o->value();
+if(o->value())
+	disable_config_p2p_io_widgets();
+else
+	enable_config_p2p_io_widgets();}
+            tooltip {Allow/Disallow Changes} xywh {12 112 85 20} down_box DOWN_BOX
+            code0 {o->value(progStatus.ip_lock);}
+          }
+          Fl_Check_Button btnEnable_arq {
+            label {Enable ARQ}
+            callback {if(o->value()) {
+        progdefaults.changed = true;
+	progdefaults.data_io_enabled = ARQ_IO;
+	data_io_enabled = ARQ_IO;
+	enable_disable_kpsql();
+}
+
+progdefaults.changed = true;}
+            tooltip {Used For PSKMail and FLDIGI Suite of Programs} xywh {96 112 115 20} type Radio down_box DOWN_BOX
+            code0 {if(progdefaults.data_io_enabled == ARQ_IO) o->value(true);}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Check_Button btnEnable_kiss {
+            label {Enable KISS}
+            callback {if(o->value()) {
+	progdefaults.data_io_enabled = KISS_IO;
+	data_io_enabled = KISS_IO;
+	enable_disable_kpsql();
+}
+progdefaults.changed = true;}
+            tooltip {Used for BPQ32} xywh {221 112 115 20} type Radio down_box DOWN_BOX
+            code0 {if(progdefaults.data_io_enabled == KISS_IO) o->value(true);}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Check_Button btnEnable_ax25_decode {
+            label {AX25 Decode}
+            callback {if(o->value())
+	progdefaults.ax25_decode_enabled = true;
+else
+	progdefaults.ax25_decode_enabled = false;
+
+progdefaults.changed = true;}
+            tooltip {Decode AX25 Packets into human readable form} xywh {346 112 115 20} down_box DOWN_BOX
+            code0 {if(progdefaults.ax25_decode_enabled) o->value(true); else o->value(false);}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Check_Button btnEnable_csma {
+            label {Enable CSMA}
+            callback {if(o->value()) {
+	progdefaults.csma_enabled = true;
+} else {
+	progdefaults.csma_enabled = false;
+}
+progdefaults.changed = true;}
+            tooltip {Used for BPQ32} xywh {471 112 115 20} down_box DOWN_BOX
+            code0 {if(progdefaults.csma_enabled) o->value(true);}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Box {} {
+            label {Enable ARQ for programs that support TCP and FLDIGI ARQ protocol.
+Enable KISS for programs that supports UDP and TNC-2 KISS protocol.
+Only one interface (ARQ/KISS) can be active at any given time.
+KISS/ARQ/XML Addr/Port changes require program restart.}
+            xywh {8 37 582 72}
+          }
+        }
+        Fl_Group {} {
+          label KISS open
+          xywh {6 138 588 85} box ENGRAVED_FRAME align 21
+        } {
+          Fl_Button btnDefault_kiss_ip {
+            label Default
+            callback {set_ip_to_default(KISS_IO);
+progdefaults.changed = true;}
+            tooltip {Returns IP Address and port
+number to the default value.} xywh {425 193 73 25}
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Input txtKiss_ip_address {
+            label Addr
+            callback {progdefaults.kiss_address = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address for KISS interface
+IP Address format: nnn.nnn.nnn.nnn
+or name: i.e. localhost} xywh {56 193 230 25} align 8 when 1
+            code0 {txtKiss_ip_address->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.kiss_address.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Counter cntKPSQLAttenuation {
+            label {KPSQL Attenuate}
+            callback {progdefaults.kpsql_attenuation = (int) o->value();
+update_kpsql_fractional_gain(progdefaults.kpsql_attenuation);
+progdefaults.changed = true;}
+            tooltip Attenuation xywh {56 169 110 20} align 8 minimum 1 maximum 999 step 1 value 1
+            code0 {o->value(progdefaults.kpsql_attenuation);}
+            code1 {o->step(1,10);}
+            code2 {update_kpsql_fractional_gain(progdefaults.kpsql_attenuation);}
+            code3 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Input txtKiss_ip_io_port_no {
+            label {I/O}
+            callback {progdefaults.kiss_io_port = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address Port Number} xywh {333 164 55 25} align 8 when 1
+            code0 {txtKiss_ip_io_port_no->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.kiss_io_port.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Counter cntBusyChannelSeconds {
+            label Continue
+            callback {progdefaults.busyChannelSeconds = (int) o->value();
+progdefaults.changed = true;}
+            tooltip {Continue after in seconds} xywh {56 145 110 20} align 8 minimum 1 maximum 999 step 1 value 1
+            code0 {o->value(progdefaults.busyChannelSeconds);}
+            code1 {o->step(1,10);}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Check_Button btnEnableBusyChannel {
+            label Busy
+            callback {if(o->value())
+	progdefaults.enableBusyChannel = true;
+else
+	progdefaults.enableBusyChannel = false;
+progdefaults.changed = true;}
+            tooltip {Enable Busy Channel} xywh {425 147 65 15} down_box DOWN_BOX
+            code0 {if(progdefaults.enableBusyChannel) o->value(true);}
+            code1 {else o->value(false);}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Input txtKiss_ip_out_port_no {
+            label O
+            callback {progdefaults.kiss_out_port = o->value();
+progdefaults.changed = true;}
+            tooltip {Output port number when same IP address used} xywh {333 193 55 25} align 8 when 1
+            code0 {txtKiss_ip_out_port_no->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.kiss_out_port.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Check_Button btnEnable_dual_port {
+            label {Dual Port}
+            callback {if(o->value())
+	progdefaults.kiss_dual_port_enabled = true;
+else
+	progdefaults.kiss_dual_port_enabled = false;
+
+progdefaults.changed = true;}
+            tooltip {Enable when both programs are using the same IP address} xywh {425 168 90 16} down_box DOWN_BOX
+            code0 {if(progdefaults.kiss_dual_port_enabled) o->value(true); else o->value(false);}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Button btn_restart_kiss {
+            label Restart
+            callback {//restart_kiss_server();}
+            xywh {505 193 82 25} hide
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+        }
+        Fl_Group {} {
+          label ARQ open
+          xywh {6 225 588 35} box ENGRAVED_FRAME align 21
+        } {
+          Fl_Input txtArq_ip_address {
+            label Addr
+            callback {progdefaults.arq_address = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address for ARQ interface
+IP Address format: nnn.nnn.nnn.nnn
+or name: i.e. localhost} xywh {56 229 230 25} align 8 when 1
+            code0 {o->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.arq_address.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Input txtArq_ip_port_no {
+            label Port
+            callback {progdefaults.arq_port = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address Port Number} xywh {333 229 55 25} align 8 when 1
+            code0 {o->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.arq_port.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Button btnDefault_arq_ip {
+            label Default
+            callback {set_ip_to_default(ARQ_IO);
+progdefaults.changed = true;}
+            tooltip {Returns IP Address and port
+number to the default value.} xywh {425 229 73 25}
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Button btn_restart_arq {
+            label Restart
+            callback {//arq_restart();}
+            xywh {505 229 82 25} hide
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+        }
+        Fl_Box {} {
+          xywh {6 262 588 1} box BORDER_BOX
+        }
+        Fl_Group {} {
+          label XML open
+          xywh {6 266 588 35} box ENGRAVED_FRAME align 21
+        } {
+          Fl_Button btnDefault_xmlrpc_ip {
+            label Default
+            callback {set_ip_to_default(XMLRPC_IO);
+progdefaults.changed = true;}
+            tooltip {Returns IP Address and port
+number to the default value.} xywh {425 270 73 25}
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Input txtXmlrpc_ip_address {
+            label Addr
+            callback {progdefaults.xmlrpc_address = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address for XMLRPC interface
+IP Address format: nnn.nnn.nnn.nnn
+or name: i.e. localhost} xywh {56 270 230 25} align 8 when 1
+            code0 {o->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.xmlrpc_address.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Input txtXmlrpc_ip_port_no {
+            label Port
+            callback {progdefaults.xmlrpc_port = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address Port Number} xywh {333 270 55 25} align 8 when 1
+            code0 {o->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.xmlrpc_port.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Button btn_restart_xml {
+            label Restart
+            callback {//restart_xml_server();}
+            xywh {505 270 82 25} hide
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+        }
+        Fl_Group {} {
+          label flrig open
+          xywh {6 304 588 35} box ENGRAVED_FRAME align 21
+        } {
+          Fl_Button btnDefault_flrig_ip {
+            label Default
+            callback {set_ip_to_default(FLRIG_IO);
+progdefaults.changed = true;}
+            tooltip {Returns IP Address and port
+number to the default value.} xywh {425 309 73 25}
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Input txt_flrig_ip_address {
+            label Addr
+            callback {progdefaults.flrig_ip_address = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address for flrig interface
+IP Address format: nnn.nnn.nnn.nnn
+or name: i.e. localhost} xywh {56 309 230 25} align 8 when 1
+            code0 {o->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.flrig_ip_address.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Input txt_flrig_ip_port {
+            label Port
+            callback {progdefaults.flrig_ip_port = o->value();
+progdefaults.changed = true;}
+            tooltip {IP Address Port Number} xywh {333 309 55 25} align 8 when 1
+            code0 {o->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.flrig_ip_port.c_str());}
+            code2 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+            class Fl_Input2
+          }
+          Fl_Button btn_reconnect_flrig_server {
+            label Reconnect
+            callback {reconnect_to_flrig();}
+            xywh {505 309 82 25}
+            code0 {\#include "rigsupport.h"}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+        }
+        Fl_Group {} {
+          label fllog open
+          xywh {6 340 588 36} box ENGRAVED_FRAME align 21
+        } {
+          Fl_Input txt_fllog_ip_address {
+            label Addr
+            callback {progdefaults.xmllog_address = o->value();}
+            tooltip {IP Address for fllog interface
+IP Address format: nnn.nnn.nnn.nnn
+or name: i.e. localhost} xywh {56 345 230 25} align 8
+            code0 {o->value(progdefaults.xmllog_address.c_str());}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Input txt_fllog_ip_port {
+            label Port
+            callback {progdefaults.xmllog_port = o->value();}
+            tooltip {IP Address Port Number} xywh {333 345 55 25} align 8
+            code0 {o->value(progdefaults.xmllog_port.c_str());}
+            code1 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Button btn_reconnect_log_server {
+            label Reconnect
+            callback {progdefaults.xml_logbook = true;
+progdefaults.changed = true;
+connect_to_log_server();}
+            xywh {505 345 82 25}
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+          Fl_Button btnDefault_fllog_ip {
+            label Default
+            callback {set_ip_to_default(FLLOG_IO);
+progdefaults.changed = true;}
+            tooltip {Returns IP Address and port
+number to the default value.} xywh {425 345 73 25}
+            code0 {progStatus.ip_lock ? o->deactivate() : o->activate();}
+          }
+        }
+      }
     }
     Fl_Button btnSaveConfig {
       label Save
       callback {progdefaults.saveDefaults();
-dl_fldigi::commit();
-btnApplyConfig->deactivate();}
+	dl_fldigi::commit();}
       xywh {330 388 130 22}
     }
     Fl_Return_Button btnCloseConfig {
       label Close
       callback {closeDialog();
-dl_fldigi::commit();
-btnApplyConfig->deactivate();}
+	dl_fldigi::commit();}
       xywh {462 388 130 22}
     }
     Fl_Button btnResetConfig {
@@ -6531,7 +7250,7 @@ progdefaults.changed = false;}
       label {Apply (dl)}
       callback {dl_fldigi::commit();
 btnApplyConfig->deactivate();}
-      xywh {175 375 115 22} deactivate
+      xywh {175 388 115 22} deactivate
     }
   }
 } 
@@ -6579,3 +7298,6 @@ if( ( w->value() != NULL ) && ( ! w->shown() ) ) {
 } 
 
 Function {make_window()} {} {} 
+
+Function {make_window()} {open
+} {} 

@@ -221,8 +221,6 @@ void getwx(string& wx, const char *metar)
 		return;
 	}
 
-	LOG_DEBUG("\n%s", text.c_str());
-
 	p2 = text.find(wxsta);
 	if (p2 == string::npos) {
 		LOG_WARN("%s", "station not found\n");
@@ -251,6 +249,10 @@ void getwx(string& wx, const char *metar)
 		wx.assign(text.substr(0, p3));
 		return;
 	}
+//printf("%s\n",wx_full.c_str());
+
+	if (text[p2-1] == '(') // have valid line
+		name = text.substr(p1, p2 - p1 -2);
 
 	p = text.find(wxsta, p3 + 1);
 	text.erase(0, p + 1 + wxsta.length());

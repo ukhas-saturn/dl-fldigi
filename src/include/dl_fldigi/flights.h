@@ -14,6 +14,14 @@ enum tracking_type_enum
     TRACKING_PAYLOAD
 };
 
+enum RTTY_PARITY {
+        RTTY_PARITY_NONE = 0,
+        RTTY_PARITY_EVEN,
+        RTTY_PARITY_ODD,
+        RTTY_PARITY_ZERO,
+        RTTY_PARITY_ONE
+};
+
 extern bool downloaded_flights_once, downloaded_payloads_once;
 
 void init();

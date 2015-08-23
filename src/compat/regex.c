@@ -2816,7 +2816,7 @@ re_set_registers (bufp, regs, num_regs, starts, ends)
     {
       bufp->regs_allocated = REGS_UNALLOCATED;
       regs->num_regs = 0;
-      regs->start = regs->end = (regoff_t) 0;
+      regs->start = regs->end = (regoff_t *) 0;
     }
 }
 
@@ -4062,6 +4062,8 @@ re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
 	    POP_FAILURE_POINT (sdummy, pdummy,
 			       dummy_low_reg, dummy_high_reg,
 			       reg_dummy, reg_dummy, reg_info_dummy);
+		if (pdummy == 0) DEBUG_PRINT2("pdummy surely is! %p", pdummy);
+		if (sdummy == 0) DEBUG_PRINT2("sdummy surely is! %p", sdummy);
 	  }
 	  /* Note fall through.  */
 

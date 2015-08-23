@@ -95,6 +95,20 @@ modem *qpsk125_modem = 0;
 modem *qpsk250_modem = 0;
 modem *qpsk500_modem = 0;
 
+modem *_8psk125_modem = 0;
+modem *_8psk250_modem = 0;
+modem *_8psk500_modem = 0;
+modem *_8psk1000_modem = 0;
+modem *_8psk1200_modem = 0;
+modem *_8psk1333_modem = 0;
+
+modem *_8psk125f_modem = 0;
+modem *_8psk250f_modem = 0;
+modem *_8psk500f_modem = 0;
+modem *_8psk1000f_modem = 0;
+modem *_8psk1200f_modem = 0;
+modem *_8psk1333f_modem = 0;
+
 modem *psk125r_modem = 0;
 modem *psk250r_modem = 0;
 modem *psk500r_modem = 0;
@@ -146,6 +160,7 @@ modem *olivia_64_2000_modem = 0;
 modem *contestia_modem = 0;
 
 modem *rtty_modem = 0;
+modem *pkt_modem = 0;
 
 modem *thor4_modem = 0;
 modem *thor5_modem = 0;
@@ -157,6 +172,8 @@ modem *thor25x4_modem = 0;
 modem *thor50x1_modem = 0;
 modem *thor50x2_modem = 0;
 modem *thor100_modem = 0;
+
+modem *fsq_modem = 0;
 
 modem *dominoex4_modem = 0;
 modem *dominoex5_modem = 0;
@@ -176,6 +193,7 @@ modem *throbx4_modem = 0;
 
 modem *wwv_modem = 0;
 modem *anal_modem = 0;
+modem *fftscan_modem = 0;
 modem *ssb_modem = 0;
 
 double modem::frequency = 1000;
@@ -208,6 +226,7 @@ modem::modem()
 	PTTphaseacc = 0.0;
 	s2n_ncount = s2n_sum = s2n_sum2 = s2n_metric = 0.0;
 	s2n_valid = false;
+
 	track_freq_lock = 0;
 	bandwidth = 0.0;
 }
@@ -235,22 +254,24 @@ void modem::init()
 
 double modem::track_freq(double freq)
 {
+	/* locking code in logger/rx_extract.cxx may have been lost in a previous merge
+	 *	- was added in commit 78f05cef33dc2c59211eebedeae4d97a11529b1d */ 
 	if(track_freq_lock) return(freq);
-	
+
 	if(freq >= progdefaults.track_freq_min &&
 	   freq <= progdefaults.track_freq_max)
 		return(freq);
-	
+
 	double rf = wf->rfcarrier();
 	double cf = (progdefaults.track_freq_max + progdefaults.track_freq_min) / 2;
-	
+
 	if(rf <= 0) return(freq);
-	
+
 	if(wf->USB()) rf += freq - cf;
 	else rf -= freq - cf;
-	
+
 	qsy(rf);
-	
+
 	return(cf);
 }
 
@@ -258,7 +279,7 @@ void modem::set_freq(double freq)
 {
 	if(progdefaults.track_freq)
 		freq = track_freq(freq);
-	
+
 	frequency = CLAMP(
 		freq,
 		progdefaults.LowFreqCutoff + bandwidth / 2,
@@ -313,6 +334,7 @@ void modem::set_metric(double m)
 void modem::display_metric(double m)
 {
 	set_metric(m);
+	if(!progStatus.pwrsqlonoff)
 	::global_display_metric(m);
 }
 
@@ -359,8 +381,7 @@ void modem::set_samplerate(int smprate)
 double modem::PTTnco()
 {
 	PTTphaseacc += TWOPI * 1000 / samplerate;
-	if (PTTphaseacc > M_PI)
-		PTTphaseacc -= TWOPI;
+	if (PTTphaseacc > TWOPI) PTTphaseacc -= TWOPI;
 	return sin(PTTphaseacc);
 }
 
@@ -451,16 +472,21 @@ void modem::s2nreport(void)
 	pskmail_notify_s2n(s2n_ncount, s2n_avg, s2n_stddev);
 }
 
+bool disable_modem = false;
+
 void modem::ModulateXmtr(double *buffer, int len)
 {
 	if (unlikely(!scard)) return;
+	if (disable_modem) return;
+
+	tx_sample_count += len;
 
 	tx_sample_count += len;
 
 	if (progdefaults.PTTrightchannel) {
 		for (int i = 0; i < len; i++)
 			PTTchannel[i] = PTTnco();
-			ModulateStereo( buffer, PTTchannel, len);
+			ModulateStereo( buffer, PTTchannel, len, false);
 		return;
 	}
 
@@ -471,10 +497,11 @@ void modem::ModulateXmtr(double *buffer, int len)
 	if (withnoise && progdefaults.noise) add_noise(buffer, len);
 
 	double mult = pow(10, progdefaults.txlevel / 20.0);
+	if (mult > 0.99) mult = 0.99;
 	for (int i = 0; i < len; i++) {
-		if (buffer[i] < -1.0) buffer[i] = -1.0;
-		if (buffer[i] > 1.0) buffer[i] = 1.0;
 		buffer[i] *= mult;
+		if (buffer[i] < -0.99) buffer[i] = -0.99;
+		if (buffer[i] >  0.99) buffer[i] = 0.99;
 	}
 
 	try {
@@ -490,16 +517,17 @@ void modem::ModulateXmtr(double *buffer, int len)
 		}
 		return;
 	}
-
 }
 
 #include <iostream>
 using namespace std;
-void modem::ModulateStereo(double *left, double *right, int len)
+void modem::ModulateStereo(double *left, double *right, int len, bool sample_flag)
 {
 	if (unlikely(!scard)) return;
+	if (disable_modem) return;
 
-	tx_sample_count += len;
+	if(sample_flag)
+		tx_sample_count += len;
 
 	if (progdefaults.viewXmtSignal &&
 		!(PERFORM_CPS_TEST || active_modem->XMLRPC_CPS_TEST))
@@ -507,13 +535,15 @@ void modem::ModulateStereo(double *left, double *right, int len)
 
 	if (withnoise && progdefaults.noise) add_noise(left, len);
 
-	double mult = 0.98 * pow(10, progdefaults.txlevel / 20.0);
+	double mult = pow(10, progdefaults.txlevel / 20.0);
+	if (mult > 0.99) mult = 0.99;
+
 	for (int i = 0; i < len; i++) {
-		if (right[i] < -1.0) right[i] = -1.0;
-		if (right[i] > 1.0) right[i] = 1.0;
-		if (left[i] < -1.0) left[i] = -1.0;
-		if (left[i] > 1.0) left[i] = 1.0;
+		if (right[i] < -0.99) right[i] = -0.99;
+		if (right[i] >  0.99) right[i] = 0.99;
 		left[i] *= mult;
+		if (left[i] < -0.99) left[i] = -0.99;
+		if (left[i] >  0.99) left[i] = 0.99;
 	}
 	try {
 		unsigned n = 4;
@@ -531,7 +561,86 @@ void modem::ModulateStereo(double *left, double *right, int len)
 
 }
 
+//------------------------------------------------------------------------------
+// modulate video signal
+//------------------------------------------------------------------------------
+void modem::ModulateVideoStereo(double *left, double *right, int len, bool sample_flag)
+{
+	if (unlikely(!scard)) return;
 
+	if(sample_flag)
+		tx_sample_count += len;
+
+	if (progdefaults.viewXmtSignal &&
+		!(PERFORM_CPS_TEST || active_modem->XMLRPC_CPS_TEST))
+		trx_xmit_wfall_queue(samplerate, left, (size_t)len);
+
+	if (withnoise && progdefaults.noise) add_noise(left, len);
+
+	double mult = 0.99 * pow(10, progdefaults.txlevel / 20.0);
+
+	for (int i = 0; i < len; i++) {
+		if (right[i] < -1.0) right[i] = -1.0;
+		if (right[i] >  1.0) right[i] = 1.0;
+		left[i] *= mult;
+		if (left[i] < -1.0) left[i] = -1.0;
+		if (left[i] >  1.0) left[i] = 1.0;
+	}
+	try {
+		unsigned n = 4;
+		while (scard->Write_stereo(left, right, len) == 0 && --n);
+		if (n == 0)
+			throw SndException(-99, "Sound write failed");
+	}
+	catch (const SndException& e) {
+		if(e.error() < 0) {
+ 			LOG_ERROR("%s", e.what());
+ 			throw;
+		}
+		return;
+	}
+}
+
+void modem::ModulateVideo(double *buffer, int len)
+{
+	if (unlikely(!scard)) return;
+
+	tx_sample_count += len;
+
+	if (progdefaults.PTTrightchannel) {
+		for (int i = 0; i < len; i++)
+			PTTchannel[i] = PTTnco();
+			ModulateVideoStereo( buffer, PTTchannel, len, false);
+		return;
+	}
+
+	if (progdefaults.viewXmtSignal &&
+		!(PERFORM_CPS_TEST || active_modem->XMLRPC_CPS_TEST))
+		trx_xmit_wfall_queue(samplerate, buffer, (size_t)len);
+
+	double mult = 0.99 * pow(10, progdefaults.txlevel / 20.0);
+	for (int i = 0; i < len; i++) {
+		buffer[i] *= mult;
+		if (buffer[i] < -1.0) buffer[i] = -1.0;
+		if (buffer[i] >  1.0) buffer[i] = 1.0;
+	}
+
+	try {
+		unsigned n = 4;
+		while (scard->Write(buffer, len) == 0 && --n);
+		if (n == 0)
+			throw SndException(-99, "Sound write failed");
+	}
+	catch (const SndException& e) {
+		if(e.error() < 0) {
+ 			LOG_ERROR("%s", e.what());
+ 			throw;
+		}
+		return;
+	}
+}
+
+//------------------------------------------------------------------------------
 void modem::videoText()
 {
 	if (trx_state == STATE_TUNE)
@@ -602,8 +711,7 @@ double modem::cwid_nco(double freq)
 {
 	cwid_phaseacc += 2.0 * M_PI * freq / samplerate;
 
-	if (cwid_phaseacc > M_PI)
-		cwid_phaseacc -= 2.0 * M_PI;
+	if (cwid_phaseacc > TWOPI) cwid_phaseacc -= TWOPI;
 
 	return sin(cwid_phaseacc);
 }
@@ -751,7 +859,7 @@ void modem::wfid_make_tones(int numchars)
 {
 	double f, flo, fhi;
 	int vwidth = (numchars*NUMCOLS + (numchars-1)*CHARSPACE - 1);
-	f = frequency + TONESPACING * vwidth/2.0;
+	f = tx_frequency + TONESPACING * vwidth/2.0;
 	fhi = f + TONESPACING;
 	flo = fhi - (vwidth + 2) * TONESPACING;
 	for (int i = 1; i <= NUMCOLS * numchars; i++) {
@@ -785,7 +893,7 @@ void modem::wfid_send(int numchars)
 		vidfilt.Irun( val, val );
 		wfid_outbuf[i] = val;
 	}
-	ModulateXmtr(wfid_outbuf, IDSYMLEN);
+	ModulateVideo(wfid_outbuf, IDSYMLEN);
 }
 
 void modem::wfid_sendchars(string s)
@@ -829,7 +937,7 @@ void modem::pretone()
 	for (int j = 0; j < symlen; j++) {
 		outbuf[j] = (0.5 * (1.0 - cos (M_PI * j / symlen)))*sin(phase);
 		phase += phaseincr;
-		if (phase > 2.0 * M_PI) phase -= 2.0 * M_PI;
+		if (phase > TWOPI) phase -= TWOPI;
 	}
 	ModulateXmtr(outbuf, symlen);
 
@@ -837,7 +945,7 @@ void modem::pretone()
 		for (int j = 0; j < symlen; j++) {
 			outbuf[j] = sin(phase);
 			phase += phaseincr;
-			if (phase > 2.0 * M_PI) phase -= 2.0 * M_PI;
+			if (phase > TWOPI) phase -= TWOPI;
 		}
 		ModulateXmtr(outbuf, symlen);
 	}
@@ -845,7 +953,7 @@ void modem::pretone()
 	for (int j = 0; j < symlen; j++) {
 		outbuf[j] = (0.5 * (1.0 - cos (M_PI * (symlen - j) / symlen)))*sin(phase);
 		phase += phaseincr;
-		if (phase > 2.0 * M_PI) phase -= 2.0 * M_PI;
+		if (phase > TWOPI) phase -= TWOPI;
 	}
 	ModulateXmtr(outbuf, symlen);
 
@@ -888,6 +996,8 @@ void modem::wfid_text(const string& s)
 
 	put_status(video.c_str());
 
+	disable_modem = true;
+
 	int numlines = 0;
 	string tosend;
 	while (numlines < len) numlines += vidwidth;
@@ -905,6 +1015,7 @@ void modem::wfid_text(const string& s)
 	wfid_send(vidwidth);
 
 	put_status("");
+	disable_modem = false;
 }
 
 double	modem::wfid_outbuf[MAXIDSYMLEN];

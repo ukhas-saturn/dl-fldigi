@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: fldigi 3.21.76AP\n"
+"Project-Id-Version: fldigi 3.22.01\n"
 "Report-Msgid-Bugs-To: w1hkj AT w1hkj DOT com\n"
 "POT-Creation-Date: 2013-10-20 19:43-0500\n"
 "PO-Revision-Date: 2013-10-21 13:07+0100\n"
@@ -318,7 +318,8 @@ msgstr "Bestätigung"
 msgid "Save changed configuration?"
 msgstr "Geänderte Einstellungen speichern?"
 
-#: src/dialogs/fl_digi.cxx:2762
+#: src/dialogs/fl_digi.cxx:2766
+#, fuzzy
 msgid "Save current log entry?"
 msgstr "Aktuellen Log Eintrag speichern?"
 
@@ -981,11 +982,12 @@ msgid "*"
 msgstr "*"
 
 #: src/logger/speak.cxx:42
+#, fuzzy
 msgid ""
 "Save all received text, one character at a time to the following file:\n"
 "\n"
-"    fldigi.files\\talk\\textout.txt (Windows)\n"
-"    ~/.fldigi/talk/textout.txt (Linux, OS X, Free BSD)"
+"    dl-fldigi.files\\talk\\textout.txt (Windows)\n"
+"    ~/.dl-fldigi/talk/textout.txt (Linux, OS X, Free BSD)"
 msgstr ""
 "Empfangenen Text speichern, Zeichenweise in folgende Datei:\n"
 "\n"
@@ -1004,12 +1006,13 @@ msgstr "Immer LSB"
 msgid "Always USB"
 msgstr "Immer USB"
 
-#: src/misc/configuration.cxx:699
+#: src/misc/configuration.cxx:698
+#, fuzzy
 msgid ""
 "Reset all options to their default values?\n"
 "\n"
 "Reset options will take effect at the next start\n"
-"Files: fldigi_def.xml and fldigi.prefs will be deleted!\n"
+"Files: dl-fldigi_def.xml and dl-fldigi.prefs will be deleted!\n"
 msgstr ""
 "Alle Einstellungen auf Standard zurücksetzen?\n"
 "\n"
@@ -1361,6 +1364,7 @@ msgid "<REPEAT>\trepeat macro continuously"
 msgstr "<REPEAT>\tMakros kontinuierlich wiederholen"
 
 #: src/misc/macroedit.cxx:170
+#, fuzzy
 msgid "<SKED:hhmm[:YYYYDDMM]>\tschedule execution"
 msgstr "<SKED:hhmm[:YYYYDDMM]>\tgeplante Ausführung"
 
@@ -1373,6 +1377,7 @@ msgid "<CWID>\tCW identifier"
 msgstr "<CWID>\tCW Kennung"
 
 #: src/misc/macroedit.cxx:177
+#, fuzzy
 msgid "<ID>\tsend mode ID in video text"
 msgstr "<ID>\tSende Betriebsart ID in Video Text"
 
@@ -1437,6 +1442,7 @@ msgid "<SAVE>\tsave current macro file"
 msgstr "<SAVE>\tGegenwärtiges Makro speichern"
 
 #: src/misc/macroedit.cxx:203
+#, fuzzy
 msgid "<COMMENT:text>\tuntransmitted comment"
 msgstr "<COMMENT:text>\tnicht gesendeter Text"
 
@@ -2155,10 +2161,12 @@ msgid "free form exchange"
 msgstr "Frei Form Austausch"
 
 #: src/dialogs/confdialog.cxx:5189
+#, fuzzy
 msgid "RST always 599"
 msgstr "RST immer 599 senden"
 
 #: src/dialogs/confdialog.cxx:5190
+#, fuzzy
 msgid "Force RST in/out to 599"
 msgstr "RST immer 599 für ein/aus forcieren"
 
@@ -2371,6 +2379,7 @@ msgid "Client/Server Logbook"
 msgstr "Client/Server Logbuch"
 
 #: src/dialogs/confdialog.cxx:5428
+#, fuzzy
 msgid "Address:"
 msgstr "Adresse:"
 
@@ -2441,18 +2450,22 @@ msgid "Force date/time ON == date/time OFF"
 msgstr "Datum/Zeit ON == Datum/Zeit OFF forcieren"
 
 #: src/dialogs/confdialog.cxx:5482
+#, fuzzy
 msgid "Default RST in to 599"
 msgstr "Standard RST ist 599"
 
 #: src/dialogs/confdialog.cxx:5483
+#, fuzzy
 msgid "Clear log controls sets RST in to 599"
 msgstr "Log Felder mit RST In 599 löschen"
 
 #: src/dialogs/confdialog.cxx:5488
+#, fuzzy
 msgid "Default RST out to 599"
 msgstr "Standard Ausgangs RST ist 599"
 
 #: src/dialogs/confdialog.cxx:5489
+#, fuzzy
 msgid "Clear log controls sets RST out to 599"
 msgstr "Log Felder mit RST Out 599 löschen"
 
@@ -2461,8 +2474,9 @@ msgid "cty.dat pathname"
 msgstr "cty.dat Dateiname"
 
 #: src/dialogs/confdialog.cxx:5495
+#, fuzzy
 msgid "Enter full path-filename for cty.dat"
-msgstr "Vollständigen Dateinamen/Pfad für cty.dat Datei eingeben"
+msgstr "Dateipfad zu flmsg eingeben"
 
 #: src/dialogs/confdialog.cxx:5508
 msgid "Browse"
@@ -2498,10 +2512,12 @@ msgid "Tx power used for logbook entries"
 msgstr "Sende Leistung für Logbuch Einträge"
 
 #: src/dialogs/confdialog.cxx:5537
+#, fuzzy
 msgid "Rx Text Capture"
-msgstr "Empfangs Text aufnehmen"
+msgstr "Texterfassung"
 
 #: src/dialogs/confdialog.cxx:5540
+#, fuzzy
 msgid "Double-click to capture"
 msgstr "Doppelklicken, um zu erfassen"
 
@@ -2540,34 +2556,42 @@ msgid "Number and position of macro bars"
 msgstr "Anzahl und Position der Makroreihen"
 
 #: src/dialogs/confdialog.cxx:5588
+#, fuzzy
 msgid "One bar (above waterfall)"
 msgstr "Eine Reihe (über dem Wasserfall)"
 
 #: src/dialogs/confdialog.cxx:5593
+#, fuzzy
 msgid "One bar (below waterfall)"
 msgstr "Eine Reihe (unter dem Wasserfall)"
 
 #: src/dialogs/confdialog.cxx:5598
+#, fuzzy
 msgid "Two bars (scheme 1)"
 msgstr "Zwei Reihen (Schema 1)"
 
 #: src/dialogs/confdialog.cxx:5603
+#, fuzzy
 msgid "Two bars (scheme 2)"
 msgstr "Zwei Reihen (Schema 2)"
 
 #: src/dialogs/confdialog.cxx:5608
+#, fuzzy
 msgid "Two bars (scheme 3)"
 msgstr "Zwei Reihen (Schema 3)"
 
 #: src/dialogs/confdialog.cxx:5613
+#, fuzzy
 msgid "Two bars (scheme 4)"
 msgstr "Zwei Reihen (Schema 4)"
 
 #: src/dialogs/confdialog.cxx:5618
+#, fuzzy
 msgid "Two bars (scheme 5)"
 msgstr "Zwei Reihen (Schema 5)"
 
 #: src/dialogs/confdialog.cxx:5623
+#, fuzzy
 msgid "Two bars (scheme 6)"
 msgstr "Zwei Reihen (Schema 6)"
 
@@ -2652,6 +2676,7 @@ msgid "Disable all"
 msgstr "Alles aus"
 
 #: src/dialogs/confdialog.cxx:5738
+#, fuzzy
 msgid "Colors/Fonts"
 msgstr "Farben/Schrift"
 
@@ -3267,9 +3292,10 @@ msgstr "Kantenform"
 msgid "Raised cosine = Hanning"
 msgstr ""
 
-#: src/dialogs/confdialog.cxx:6724
+#: src/dialogs/confdialog.cxx:6723
+#, fuzzy
 msgid "Edge decreases pulse width"
-msgstr ""
+msgstr "Kantenform"
 
 #: src/dialogs/confdialog.cxx:6725
 msgid "Weight decreases with increasing edge timing"
@@ -4713,7 +4739,8 @@ msgstr ""
 msgid "Do not automatically change to RX RsID frequency"
 msgstr ""
 
-#: src/dialogs/confdialog.cxx:8651
+#: src/dialogs/confdialog.cxx:8650
+#, fuzzy
 msgid ""
 "The RsID notification message contents and \n"
 "display characteristics are configured on the\n"
@@ -5088,8 +5115,9 @@ msgstr "Talker"
 msgid "Connect/disconnect to Talker socket server"
 msgstr "Verbinden/Trennen von Talker Socket Server"
 
-#: src/dialogs/confdialog.cxx:9169
-msgid "Auto connect when fldigi opens (server must be up)"
+#: src/dialogs/confdialog.cxx:7612
+#, fuzzy
+msgid "Auto connect when dl-fldigi opens (server must be up)"
 msgstr ""
 "Automatisch verbinden, wenn Fldigi startet (der Server muss ereichbar sein)"
 
@@ -5490,11 +5518,13 @@ msgstr "Standard Text der mit dem <LOG> Makro gesendet wird"
 msgid "Text Tags (tags use {} delimiters)"
 msgstr ""
 
-#: src/dialogs/confdialog.cxx:9584
+#: src/dialogs/confdialog.cxx:9583
+#, fuzzy
 msgid "{CALL} other ops call sign"
 msgstr "{CALL} Rufzeichen des anderen OM"
 
-#: src/dialogs/confdialog.cxx:9587
+#: src/dialogs/confdialog.cxx:9586
+#, fuzzy
 msgid "{MODE} full mode / submode"
 msgstr "{MODE} Hauptmodus / Untermodus"
 
@@ -6153,3 +6183,302 @@ msgstr "Contest:"
 #: src/logbook/lgbook.cxx:1086
 msgid "QSO Date"
 msgstr "QSO Datum"
+
+#, fuzzy
+#~ msgid "Confirm Quit"
+#~ msgstr "Beenden bestätigen"
+
+#, fuzzy
+#~ msgid "Confirm quit?"
+#~ msgstr "Beenden bestätigen"
+
+#, fuzzy
+#~ msgid "Config Scripts"
+#~ msgstr "Beenden bestätigen"
+
+#, fuzzy
+#~ msgid "Generate"
+#~ msgstr "Allgemein"
+
+#, fuzzy
+#~ msgid "IO"
+#~ msgstr "IOTA"
+
+#, fuzzy
+#~ msgid "Frq"
+#~ msgstr "Freq"
+
+#, fuzzy
+#~ msgid "Select FSQ station"
+#~ msgstr "Linie auswählen"
+
+#, fuzzy
+#~ msgid "Detected FSQ baud rate"
+#~ msgstr "Träber Baudrate wählen"
+
+#, fuzzy
+#~ msgid "Delete entry?"
+#~ msgstr "Aktuellen Log Eintrag speichern?"
+
+#, fuzzy
+#~ msgid "KISS control"
+#~ msgstr "Radio Steuerung"
+
+#, fuzzy
+#~ msgid "<WAV_FILE:>\tWAV file; spec' file"
+#~ msgstr "<FILE:>\tTextdatei einfügen"
+
+#, fuzzy
+#~ msgid "<CSV:on|off|t>\tAnalysis CSV on,off,toggle"
+#~ msgstr "<AFC:on|off|t>\tAFC  ein, aus, umschalten"
+
+#, fuzzy
+#~ msgid "Test text file"
+#~ msgstr "<FILE:>\tTextdatei einfügen"
+
+#, fuzzy
+#~ msgid "Executing script file: %s"
+#~ msgstr "Radio Beschreibungsdatei auswählen"
+
+#, fuzzy
+#~ msgid "Command Not Found"
+#~ msgstr "Befehlszeilenoptionen"
+
+#, fuzzy
+#~ msgid "General Error"
+#~ msgstr "Allgemein"
+
+#, fuzzy
+#~ msgid "No Errors"
+#~ msgstr "Fehler"
+
+#, fuzzy
+#~ msgid "User Interface - Browser"
+#~ msgstr "GUI"
+
+#, fuzzy
+#~ msgid "User Interface - Contest"
+#~ msgstr "GUI"
+
+#, fuzzy
+#~ msgid "User Interface - General"
+#~ msgstr "GUI"
+
+#, fuzzy
+#~ msgid "User Interface - Logging"
+#~ msgstr "GUI"
+
+#, fuzzy
+#~ msgid "cty.dat folder"
+#~ msgstr "Finde cty.dat Datei"
+
+#, fuzzy
+#~ msgid "Enter full path-name for cty.dat folder"
+#~ msgstr "Vollständigen Dateinamen/Pfad für cty.dat Datei eingeben"
+
+#, fuzzy
+#~ msgid "Rx Text"
+#~ msgstr "Empfangs Text aufnehmen"
+
+#, fuzzy
+#~ msgid "User Interface - Macros"
+#~ msgstr "GUI"
+
+#, fuzzy
+#~ msgid "Button Height"
+#~ msgstr "Knopf"
+
+#, fuzzy
+#~ msgid "Height of macro bar"
+#~ msgstr "Anzahl und Position der Makroreihen"
+
+#, fuzzy
+#~ msgid "Two scheme 7"
+#~ msgstr "Zwei Reihen (Schema 1)"
+
+#, fuzzy
+#~ msgid "Two scheme 9"
+#~ msgstr "Zwei Reihen (Schema 1)"
+
+#, fuzzy
+#~ msgid "Two scheme 8"
+#~ msgstr "Zwei Reihen (Schema 1)"
+
+#, fuzzy
+#~ msgid "Two scheme 10"
+#~ msgstr "Zwei Reihen (Schema 1)"
+
+#, fuzzy
+#~ msgid "User Interface - Waterfall controls"
+#~ msgstr "Wasserfall Einstellungen"
+
+#, fuzzy
+#~ msgid "User Interface - Colors / Fonts"
+#~ msgstr "GUI"
+
+#, fuzzy
+#~ msgid "Rx/Tx Character set"
+#~ msgstr "Rx/Tx Zeichensatz auswählen"
+
+#, fuzzy
+#~ msgid "Macro Edit Font"
+#~ msgstr "Makro Editor - "
+
+#, fuzzy
+#~ msgid "Scale Color"
+#~ msgstr "Farbe"
+
+#, fuzzy
+#~ msgid "Meter Color"
+#~ msgstr "Ziffernfarbe"
+
+#, fuzzy
+#~ msgid "Font/Color"
+#~ msgstr "Schriftfarbe"
+
+#, fuzzy
+#~ msgid "Normal drop speed / value"
+#~ msgstr "Fallgeschwidigkeit des Wasserfalls"
+
+#, fuzzy
+#~ msgid "BPF transmit audio"
+#~ msgstr "CW Sendegeschwidigkeit in WPM"
+
+#, fuzzy
+#~ msgid "Center frequency"
+#~ msgstr "Aktuelle Frequenz hinzufügen"
+
+#, fuzzy
+#~ msgid "1500 Hz fixed"
+#~ msgstr "500 Hz Limit"
+
+#, fuzzy
+#~ msgid "Baudrate"
+#~ msgstr "Baudrate"
+
+#, fuzzy
+#~ msgid "Operating"
+#~ msgstr "Benutzer"
+
+#, fuzzy
+#~ msgid "Enter QTC text"
+#~ msgstr "Text einfügen"
+
+#, fuzzy
+#~ msgid "Pilot tone power relative to signal"
+#~ msgstr "Filter Bandbreite relativ zur Signal Breite"
+
+#, fuzzy
+#~ msgid "Nav"
+#~ msgstr "Wav"
+
+#, fuzzy
+#~ msgid "Init delay (ms)"
+#~ msgstr "Schreibvzg (ms)"
+
+#, fuzzy
+#~ msgid "Transmit Usage"
+#~ msgstr "Sendesignal"
+
+#, fuzzy
+#~ msgid "Receive Usage"
+#~ msgstr "Empfangen"
+
+#, fuzzy
+#~ msgid "Decode received DTMF tones"
+#~ msgstr "DTMF Töne dekodieren"
+
+#, fuzzy
+#~ msgid "Enter full path-filename for flrig"
+#~ msgstr "Dateipfad zu flmsg eingeben"
+
+#, fuzzy
+#~ msgid "Enter full path-filename for flnet"
+#~ msgstr "Dateipfad zu flmsg eingeben"
+
+#, fuzzy
+#~ msgid "Enter full path-filename for fllog"
+#~ msgstr "Dateipfad zu flmsg eingeben"
+
+#, fuzzy
+#~ msgid "Enter full path-filename for external program"
+#~ msgstr "Dateipfad zu flmsg eingeben"
+
+#, fuzzy
+#~ msgid "Program to Program Communications"
+#~ msgstr "Prompt Konfiguration speichern"
+
+#, fuzzy
+#~ msgid "Enable ARQ"
+#~ msgstr "Einschalten"
+
+#, fuzzy
+#~ msgid "Enable KISS"
+#~ msgstr "Einschalten"
+
+#, fuzzy
+#~ msgid "Enable CSMA"
+#~ msgstr "Einschalten"
+
+#, fuzzy
+#~ msgid "Addr"
+#~ msgstr "Adresse:"
+
+#, fuzzy
+#~ msgid "Attenuation"
+#~ msgstr "Station"
+
+#, fuzzy
+#~ msgid "Continue"
+#~ msgstr "Kontinent"
+
+#, fuzzy
+#~ msgid "Continue after in seconds"
+#~ msgstr "Wird nach dieser Zeit in Sek passieren"
+
+#, fuzzy
+#~ msgid "Enable Busy Channel"
+#~ msgstr "Alles ein"
+
+#, fuzzy
+#~ msgid "O"
+#~ msgstr "Okay"
+
+#, fuzzy
+#~ msgid "Restart"
+#~ msgstr "Start"
+
+#, fuzzy
+#~ msgid "Port"
+#~ msgstr "Port:"
+
+#, fuzzy
+#~ msgid "XML"
+#~ msgstr "KML"
+
+#, fuzzy
+#~ msgid "flrig"
+#~ msgstr "flrig:"
+
+#, fuzzy
+#~ msgid "fllog"
+#~ msgstr "fllog:"
+
+#, fuzzy
+#~ msgid "View/Hide Smeter"
+#~ msgstr "Kanäle anzeigen/verbergen"
+
+#~ msgid "FFT latency (scan merging)"
+#~ msgstr "FFT Latenz (scan merging)"
+
+#, fuzzy
+#~ msgid "Use cross-hair scope"
+#~ msgstr "Fadenkreuz verwenden"
+
+#, fuzzy
+#~ msgid "boost Audio input"
+#~ msgstr "Mono Audio Ausgabe"
+
+#, fuzzy
+#~ msgid "Initialize Memmap interface"
+#~ msgstr "Hamlib Interface initialisieren"

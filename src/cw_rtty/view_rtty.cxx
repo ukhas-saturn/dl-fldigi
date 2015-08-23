@@ -25,7 +25,7 @@
 #include <iostream>
 using namespace std;
 
-#include "rtty.h"
+//#include "rtty.h"
 #include "view_rtty.h"
 #include "fl_digi.h"
 #include "digiscope.h"
@@ -57,9 +57,13 @@ static char figures[32] = {
 	'9',	'?',	'&',	' ',	'.',	'/',	';',	' '
 };
 
-const double view_rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850};
-const double view_rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200};
-const int    view_rtty::BITS[]  = {5, 7, 8};
+const double	view_rtty::SHIFT[] = {23, 85, 160, 170, 182, 200, 240, 350, 425, 600, 850};
+// FILTLEN must be same size as BAUD
+const double	view_rtty::BAUD[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
+const int		view_rtty::FILTLEN[] = { 512, 512, 512, 512, 512, 512, 512, 256, 128, 64, 64, 64, 64};
+const int		view_rtty::BITS[]  = {5, 7, 8};
+const int		view_rtty::numshifts = (int)(sizeof(SHIFT) / sizeof(*SHIFT));
+const int		view_rtty::numbauds = (int)(sizeof(BAUD) / sizeof(*BAUD));
 
 void view_rtty::rx_init()
 {
@@ -81,8 +85,8 @@ void view_rtty::rx_init()
 
 		channel[ch].inp_ptr = 0;
 
-		for (int i = 0; i < MAXPIPE; i++)
-			channel[ch].mark_history[i] = 
+		for (int i = 0; i < VIEW_MAXPIPE; i++)
+			channel[ch].mark_history[i] =
 			channel[ch].space_history[i] = cmplx(0,0);
 	}
 }
@@ -100,34 +104,29 @@ view_rtty::~view_rtty()
 	for (int ch = 0; ch < MAX_CHANNELS; ch ++) {
 		if (channel[ch].mark_filt) delete channel[ch].mark_filt;
 		if (channel[ch].space_filt) delete channel[ch].space_filt;
+		if (channel[ch].bits) delete channel[ch].bits;
 	}
 }
 
 void view_rtty::reset_filters(int ch)
 {
-	int filter_length = 1024;
-	if (channel[ch].mark_filt) {
-		channel[ch].mark_filt->rtty_filter(rtty_baud/samplerate);
-	} else {
-		channel[ch].mark_filt = new fftfilt(rtty_baud/samplerate, filter_length);
-		channel[ch].mark_filt->rtty_filter(rtty_baud/samplerate);
-	}
-
-	if (channel[ch].space_filt) {
-		channel[ch].space_filt->rtty_filter(rtty_baud/samplerate);
-	} else {
-		channel[ch].space_filt = new fftfilt(rtty_baud/samplerate, filter_length);
-		channel[ch].space_filt->rtty_filter(rtty_baud/samplerate);
-	}
+	delete channel[ch].mark_filt;
+	channel[ch].mark_filt = new fftfilt(rtty_baud/samplerate, filter_length);
+	channel[ch].mark_filt->rtty_filter(rtty_baud/samplerate);
+	delete channel[ch].space_filt;
+	channel[ch].space_filt = new fftfilt(rtty_baud/samplerate, filter_length);
+	channel[ch].space_filt->rtty_filter(rtty_baud/samplerate);
 }
 
 void view_rtty::restart()
 {
 	double stl;
 
-	rtty_shift = shift = (progdefaults.rtty_shift >= 0 ?
+	rtty_shift = shift = (progdefaults.rtty_shift < rtty::numshifts ?
 			      SHIFT[progdefaults.rtty_shift] : progdefaults.rtty_custom_shift);
 	rtty_baud = BAUD[progdefaults.rtty_baud];
+	filter_length = FILTLEN[progdefaults.rtty_baud];
+
 	nbits = rtty_bits = BITS[progdefaults.rtty_bits];
 	if (rtty_bits == 5)
 		rtty_parity = RTTY_PARITY_NONE;
@@ -148,7 +147,7 @@ void view_rtty::restart()
 
 	set_bandwidth(shift);
 
-	rtty_BW = progdefaults.RTTY_BW;
+	rtty_BW = BAUD[progdefaults.rtty_baud];
 
 	bp_filt_lo = (shift/2.0 - rtty_BW/2.0) / samplerate;
 	if (bp_filt_lo < 0) bp_filt_lo = 0;
@@ -185,7 +184,7 @@ void view_rtty::restart()
 
 		for (int i = 0; i < VIEW_RTTY_MAXBITS; i++) channel[ch].bit_buf[i] = 0.0;
 
-		for (int i = 0; i < MAXPIPE; i++) 
+		for (int i = 0; i < VIEW_MAXPIPE; i++)
 			channel[ch].mark_history[i] = channel[ch].space_history[i] = cmplx(0,0);
 	}
 
@@ -413,7 +412,7 @@ void view_rtty::find_signals()
 			npwr = (wf->powerDensity(chf, delta) * 3000 / rtty_baud) + 1e-10;
 			if ((spwrlo / npwr > rtty_squelch) && (spwrhi / npwr > rtty_squelch)) {
 				if (!i && (channel[i+1].state == SRCHG || channel[i+1].state == RCVNG)) break;
-				if ((i == (progdefaults.VIEWERchannels -2)) && 
+				if ((i == (progdefaults.VIEWERchannels -2)) &&
 					(channel[i+1].state == SRCHG || channel[i+1].state == RCVNG)) break;
 				if (i && (channel[i-1].state == SRCHG || channel[i-1].state == RCVNG)) break;
 				if (i > 3 && (channel[i-2].state == SRCHG || channel[i-2].state == RCVNG)) break;
@@ -499,9 +498,9 @@ int view_rtty::rx_process(const double *buf, int buflen)
 
 // clipped if clipped decoder selected
 				double mclipped = 0, sclipped = 0;
-				mclipped = channel[ch].mark_mag > channel[ch].mark_env ? 
+				mclipped = channel[ch].mark_mag > channel[ch].mark_env ?
 							channel[ch].mark_env : channel[ch].mark_mag;
-				sclipped = channel[ch].space_mag > channel[ch].space_env ? 
+				sclipped = channel[ch].space_mag > channel[ch].space_env ?
 							channel[ch].space_env : channel[ch].space_mag;
 				if (mclipped < channel[ch].noise_floor) mclipped = channel[ch].noise_floor;
 				if (sclipped < channel[ch].noise_floor) sclipped = channel[ch].noise_floor;
@@ -509,9 +508,9 @@ int view_rtty::rx_process(const double *buf, int buflen)
 // Optimal ATC
 //				int v = (((mclipped - channel[ch].noise_floor) * (channel[ch].mark_env - channel[ch].noise_floor) -
 //						(sclipped - channel[ch].noise_floor) * (channel[ch].space_env - channel[ch].noise_floor)) -
-//				0.25 * ((channel[ch].mark_env - channel[ch].noise_floor) * 
+//				0.25 * ((channel[ch].mark_env - channel[ch].noise_floor) *
 //						(channel[ch].mark_env - channel[ch].noise_floor) -
-//						(channel[ch].space_env - channel[ch].noise_floor) * 
+//						(channel[ch].space_env - channel[ch].noise_floor) *
 //						(channel[ch].space_env - channel[ch].noise_floor)));
 //				bit = (v > 0);
 // Kahn Square Law demodulator
@@ -519,16 +518,16 @@ int view_rtty::rx_process(const double *buf, int buflen)
 
 				channel[ch].mark_history[channel[ch].inp_ptr] = zp_mark[i];
 				channel[ch].space_history[channel[ch].inp_ptr] = zp_space[i];
-				channel[ch].inp_ptr = (channel[ch].inp_ptr + 1) % MAXPIPE;
+				channel[ch].inp_ptr = (channel[ch].inp_ptr + 1) % VIEW_MAXPIPE;
 
 				if (channel[ch].state == RCVNG && rx( ch, reverse ? !bit : bit ) ) {
 					if (channel[ch].sigsearch) channel[ch].sigsearch--;
 					int mp0 = channel[ch].inp_ptr - 2;
 					int mp1 = mp0 + 1;
-					if (mp0 < 0) mp0 += MAXPIPE;
-					if (mp1 < 0) mp1 += MAXPIPE;
+					if (mp0 < 0) mp0 += VIEW_MAXPIPE;
+					if (mp1 < 0) mp1 += VIEW_MAXPIPE;
 					double ferr = (TWOPI * samplerate / rtty_baud) *
-						(!reverse ? 
+						(!reverse ?
 						arg(conj(channel[ch].mark_history[mp1]) * channel[ch].mark_history[mp0]) :
 						arg(conj(channel[ch].space_history[mp1]) * channel[ch].space_history[mp0]));
 					if (fabs(ferr) > rtty_baud / 2) ferr = 0;

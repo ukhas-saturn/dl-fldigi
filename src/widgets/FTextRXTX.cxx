@@ -66,6 +66,7 @@
 #include "status.h"
 #include "gettext.h"
 #include "arq_io.h"
+#include "fl_digi.h"
 
 #include "debug.h"
 
@@ -98,21 +99,19 @@ private:
 	bool draw_marks;
 };
 
-static void show_font_warning(FTextBase* w);
-
 Fl_Menu_Item FTextRX::menu[] = {
-	{ make_icon_label(_("Look up call"), net_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Call"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Name"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("QTH"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("State"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Province"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Country"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Locator"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("RST(r)"), enter_key_icon), 0, 0, 0,  FL_MENU_DIVIDER, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Exchange In"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Serial number"), enter_key_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Insert marker"), insert_link_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Look up call"), net_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Call"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Name"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("QTH"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("State"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Province"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Country"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Locator"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("RST(r)"), enter_key_icon), 0, 0, 0,  FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Exchange In"), enter_key_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Serial number"), enter_key_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Insert marker"), insert_link_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
 
 	{ 0 }, // VIEW_MENU_COPY
 	{ 0 }, // VIEW_MENU_CLEAR
@@ -173,20 +172,29 @@ int FTextRX::handle(int event)
 	static Fl_Cursor cursor;
 
 	switch (event) {
+	case FL_DRAG:
+		if (Fl::event_button() != FL_LEFT_MOUSE)
+			return 1;
+		break;
 	case FL_PUSH:
 		if (!Fl::event_inside(this))
 			break;
- 		switch (Fl::event_button()) {
+		switch (Fl::event_button()) {
 		case FL_LEFT_MOUSE:
-			if (Fl::event_shift() || (unlikely(Fl::event_clicks()) && progdefaults.rxtext_clicks_qso_data)) {
-				handle_qso_data(Fl::event_x() - x(), Fl::event_y() - y());
-				return 1;
+			if (Fl::event_shift() || progdefaults.rxtext_clicks_qso_data) {
+				if (handle_clickable(Fl::event_x() - x(), Fl::event_y() - y()))
+					return 1;
+				if (handle_qso_data(Fl::event_x() - x(), Fl::event_y() - y()))
+					return 1;
 			}
 			goto out;
 		case FL_MIDDLE_MOUSE:
-			if (cursor != FL_CURSOR_HAND)
-				handle_qso_data(Fl::event_x() - x(), Fl::event_y() - y());
-			return 1;
+			if (cursor != FL_CURSOR_HAND) {
+				if (handle_qso_data(Fl::event_x() - x(), Fl::event_y() - y())) {
+					return 1;
+				}
+			}
+			goto out;
  		case FL_RIGHT_MOUSE:
 			handle_context_menu();
 			return 1;
@@ -194,19 +202,8 @@ int FTextRX::handle(int event)
  			goto out;
  		}
 		break;
-	case FL_DRAG:
-		if (Fl::event_button() != FL_LEFT_MOUSE)
-			return 1;
-		break;
 	case FL_RELEASE:
-		{	int eb = Fl::event_button();
-			if (cursor == FL_CURSOR_HAND && eb == FL_LEFT_MOUSE &&
-			    Fl::event_is_click() && !Fl::event_clicks()) {
-				handle_clickable(Fl::event_x() - x(), Fl::event_y() - y());
-				return 1;
-			}
 			break;
-		}
 	case FL_MOVE: {
 		int p = xy_to_position(Fl::event_x(), Fl::event_y(), Fl_Text_Display_mod::CURSOR_POS);
 		if ((unsigned char)sbuf->byte_at(p) >= CLICK_START + FTEXT_DEF) {
@@ -341,7 +338,7 @@ void FTextRX::add(unsigned int c, int attr)
 	}
 
 // test for bottom of text visibility
-	if (// !mFastDisplay && 
+	if (// !mFastDisplay &&
 		(mVScrollBar->value() >= mNBufferLines - mNVisibleLines + mVScrollBar->linesize() - 1))
 		show_insert_position();
 }
@@ -381,10 +378,9 @@ void FTextRX::clear(void)
 void FTextRX::setFont(Fl_Font f, int attr)
 {
 	FTextBase::setFont(f, attr);
-	show_font_warning(this);
 }
 
-void FTextRX::handle_clickable(int x, int y)
+int FTextRX::handle_clickable(int x, int y)
 {
 	int pos;
 	unsigned int style;
@@ -392,7 +388,7 @@ void FTextRX::handle_clickable(int x, int y)
 	pos = xy_to_position(x + this->x(), y + this->y(), CURSOR_POS);
 	// return unless clickable style
 	if ((style = (unsigned char)sbuf->byte_at(pos)) < CLICK_START + FTEXT_DEF)
-		return;
+		return 0;
 
 	int start, end;
 	for (start = pos-1; start >= 0; start--)
@@ -407,11 +403,13 @@ void FTextRX::handle_clickable(int x, int y)
 	switch (style - FTEXT_DEF) {
 	case QSY:
 		handle_qsy(start, end);
+		return 1;
 		break;
 	// ...
 	default:
 		break;
 	}
+	return 0;
 }
 
 void FTextRX::handle_qsy(int start, int end)
@@ -434,14 +432,14 @@ static fre_t rst("^[1-5][1-9]{2}$", REG_EXTENDED | REG_NOSUB);
 static fre_t loc("[a-r]{2}[[:digit:]]{2}([a-x]{2})?", REG_EXTENDED | REG_ICASE);
 static fre_t call("([[:alnum:]]?[[:alpha:]/]+[[:digit:]]+[[:alnum:]/]+)", REG_EXTENDED);
 
-void FTextRX::handle_qso_data(int start, int end)
+int FTextRX::handle_qso_data(int start, int end)
 {
 	char* s = get_word(start, end, progdefaults.nonwordchars.c_str());
 	if (!s)
-		return;
+		return 0;
 	char* p = s;
 
-	Fl_Input* target = 0;
+	Fl_Input2* target = 0;
 
 	if (QsoInfoFrame1B->visible()) {
 		if (call.match(s)) { // point p to substring
@@ -449,11 +447,12 @@ void FTextRX::handle_qso_data(int start, int end)
 			p = s + offsets.rm_so;
 			*(s + offsets.rm_eo) = '\0';
 			inpCall->value(p);
-			inpCall->do_callback();
+			log_callback(inpCall);
 		} else {
 			inpXchgIn->position(inpXchgIn->size());
 			if (inpXchgIn->size()) inpXchgIn->insert(" ", 1);
 			inpXchgIn->insert(s);
+			log_callback(inpXchgIn);
 		}
 	} else {
 		if (rst.match(s))
@@ -470,13 +469,16 @@ void FTextRX::handle_qso_data(int start, int end)
 			target = inpQth;
 		else
 			target = *inpName->value() ? inpQth : inpName;
-
-		target->value(p);
-		target->do_callback();
+		if (target) {
+			target->value(p);
+			log_callback(target);
+			free(s);
+			restoreFocus(91);
+			return 1;
+		}
 	}
 	free(s);
-
-	restoreFocus(NULL);
+	return 0;
 }
 
 void FTextRX::handle_context_menu(void)
@@ -531,10 +533,10 @@ void FTextRX::handle_context_menu(void)
 #undef test_item
 
 	// availability of editing items depend on buffer state
-	set_active(&menu[RX_MENU_COPY], tbuf->selected());
-	set_active(&menu[RX_MENU_CLEAR], tbuf->length());
-	set_active(&menu[RX_MENU_SELECT_ALL], tbuf->length());
-	set_active(&menu[RX_MENU_SAVE], tbuf->length());
+	icons::set_active(&menu[RX_MENU_COPY], tbuf->selected());
+	icons::set_active(&menu[RX_MENU_CLEAR], tbuf->length());
+	icons::set_active(&menu[RX_MENU_SELECT_ALL], tbuf->length());
+	icons::set_active(&menu[RX_MENU_SAVE], tbuf->length());
 
 	if (wrap)
 		menu[RX_MENU_WRAP].set();
@@ -550,7 +552,7 @@ void FTextRX::handle_context_menu(void)
 ///
 void FTextRX::menu_cb(size_t item)
 {
-	Fl_Input* input = 0;
+	Fl_Input2* input = 0;
 	switch (item) {
 	case RX_MENU_QRZ_THIS:
 		menu_cb(RX_MENU_CALL);
@@ -622,7 +624,7 @@ void FTextRX::menu_cb(size_t item)
 		break;
 	}
 
-	restoreFocus(NULL);
+	restoreFocus(92);
 
 	if (!input)
 		return;
@@ -638,7 +640,7 @@ void FTextRX::menu_cb(size_t item)
 	}
 	else
 		input->value(s);
-	input->do_callback();
+	log_callback(input);
 	free(s);
 }
 
@@ -663,7 +665,7 @@ const char* FTextRX::dxcc_lookup_call(int x, int y)
 		const vector<regmatch_t>& v = loc.suboff();
 		s += v[0].rm_so;
 		*(s + v[0].rm_eo) = '\0';
-		if (locator2longlat(&lon2, &lat2, s) != RIG_OK)
+		if (QRB::locator2longlat(&lon2, &lat2, s) != QRB::QRB_OK)
 			goto ret;
 		e = 0; qsl = 0; qso = 0;
 	}
@@ -673,7 +675,7 @@ const char* FTextRX::dxcc_lookup_call(int x, int y)
 		qso = SearchLog(s);
 	}
 
-	if (qso && locator2longlat(&lon2, &lat2, qso->getField(GRIDSQUARE)) != RIG_OK)
+	if (qso && QRB::locator2longlat(&lon2, &lat2, qso->getField(GRIDSQUARE)) != QRB::QRB_OK)
 		lon2 = lat2 = 360.0;
 
 	if (e) {
@@ -687,11 +689,21 @@ const char* FTextRX::dxcc_lookup_call(int x, int y)
 		     << ") CQ-" << e->cq_zone << " ITU-" << e->itu_zone << '\n';
 	}
 
-	if (locator2longlat(&lon1, &lat1, progdefaults.myLocator.c_str()) == RIG_OK &&
-	    qrb(lon1, lat1, lon2, lat2, &distance, &azimuth) == RIG_OK) {
-		stip << "QTE " << fixed << setprecision(0) << azimuth << '\260' << " ("
-		     << azimuth_long_path(azimuth) << '\260' << ")  QRB " << distance << "km ("
-		     << distance_long_path(distance) << "km)\n";
+	if (QRB::locator2longlat(&lon1, &lat1, progdefaults.myLocator.c_str()) == QRB::QRB_OK &&
+	    QRB::qrb(lon1, lat1, lon2, lat2, &distance, &azimuth) == QRB::QRB_OK) {
+			if (progdefaults.us_units) {
+				stip << "QTE " << fixed << setprecision(0) << azimuth << '\260' << " ("
+					<< QRB::azimuth_long_path(azimuth) << '\260' << ")  QRB " 
+					<< distance * 0.62168188 << "mi"<< " (" <<
+					QRB::distance_long_path(distance) * 0.62168188 << 
+					"mi)\n";
+			}
+			else {
+				stip << "QTE " << fixed << setprecision(0) << azimuth << '\260' << " ("
+					<< QRB::azimuth_long_path(azimuth) << '\260' << ")  QRB "
+					<< distance << "km(" <<
+					QRB::distance_long_path(distance) << "km)\n";
+			}
 	}
 
 	if (qso) {
@@ -748,10 +760,10 @@ void FTextRX::dxcc_tooltip(void* obj)
 
 
 Fl_Menu_Item FTextTX::menu[] = {
-	{ make_icon_label(_("Transmit"), tx_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Receive"), rx_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Abort"), process_stop_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ make_icon_label(_("Send image..."), image_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Transmit"), tx_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Receive"), rx_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Abort"), process_stop_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Send image..."), image_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
 
 	{ 0 }, // EDIT_MENU_CUT
 	{ 0 }, // EDIT_MENU_COPY
@@ -797,6 +809,12 @@ int FTextTX::handle(int event)
 
 	switch (event) {
 	case FL_KEYBOARD:
+		if (active_modem->get_mode() == MODE_FSQ) {
+			if (Fl::event_key() == FL_Enter || Fl::event_key() == FL_KP_Enter) {
+				fsq_transmit(active_modem);
+				return 1;
+			}
+		}
 		return handle_key(Fl::event_key()) ? 1 : FTextEdit::handle(event);
 	case FL_PUSH:
 		if (Fl::event_button() == FL_MIDDLE_MOUSE &&
@@ -904,7 +922,6 @@ void FTextTX::add_text(string s)
 void FTextTX::setFont(Fl_Font f, int attr)
 {
 	FTextBase::setFont(f, attr);
-	show_font_warning(this);
 }
 
 /// Handles keyboard shorcuts
@@ -958,15 +975,15 @@ int FTextTX::handle_key_shortcuts(int key)
 			default:
 				break;
 			}
-			
+
 			// Add text + space if length is > 0
 			if (etag.length())
 				add_text(etag + std::string(" "));
-			
+
 			return 1;
 		}
 		break;
-		
+
 	default:
 		break;
 	}
@@ -1030,7 +1047,7 @@ int FTextTX::handle_key(int key)
 		else if (!(Fl::event_state() & (FL_META | FL_ALT)))
 			break;
 		// fall through to (un)pause for M-r or A-r
-	
+
 	case FL_Pause:
 		if (trx_state != STATE_TX) {
 			start_tx();
@@ -1051,6 +1068,7 @@ int FTextTX::handle_key(int key)
 			active_modem->toggleWPM();
 		return 1;
 	case FL_Tab:
+		if (active_modem == fsq_modem) return 1;
 		// In non-CW modes: Tab and Ctrl-tab both pause until user moves the
 		// cursor to let some more text through. Another (ctrl-)tab goes back to
 		// the end of the buffer and resumes sending.
@@ -1076,12 +1094,14 @@ int FTextTX::handle_key(int key)
 	// Move cursor, or search up/down with the Meta/Alt modifiers
 	case FL_Left:
 		if (Fl::event_state() & (FL_META | FL_ALT)) {
+			if (active_modem == fsq_modem) return 1;
 			active_modem->searchDown();
 			return 1;
 		}
 		return 0;
 	case FL_Right:
 		if (Fl::event_state() & (FL_META | FL_ALT)) {
+			if (active_modem == fsq_modem) return 1;
 			active_modem->searchUp();
 			return 1;
 		}
@@ -1103,9 +1123,10 @@ int FTextTX::handle_key(int key)
 	case '3':
 	case '4':
 		if (Fl::event_state() & FL_ALT) {
+			if (active_modem == fsq_modem) return 1;
 			static char lbl[2] = "1";
 			altMacros = key - '1';
-			if (progdefaults.mbar2_pos) {
+			if (progdefaults.mbar_scheme > MACRO_SINGLE_BAR_MAX) {
 				if (!altMacros) altMacros = 1;
 				for (int i = 0; i < NUMMACKEYS; i++) {
 					btnMacro[NUMMACKEYS + i]->label(
@@ -1136,9 +1157,9 @@ int FTextTX::handle_key(int key)
 		return 1;
 
 // insert a macro
-	if (key >= FL_F && key <= FL_F_Last)
+	if (key >= FL_F && key <= FL_F_Last) {
 		return handle_key_macro(key);
-
+	}
 // read ctl-ddd, where d is a digit, as ascii characters (in base 10)
 // and insert verbatim; e.g. ctl-001 inserts a <soh>
 	if (Fl::event_state() & FL_CTRL && (key >= FL_KP) && (key <= FL_KP + '9'))
@@ -1160,10 +1181,16 @@ int FTextTX::handle_key(int key)
 int FTextTX::handle_key_macro(int key)
 {
 	key -= FL_F + 1;
+
+	if (active_modem == fsq_modem) {
+		if (key == 0) fsq_repeat_last_heard();
+		if (key == 1) fsq_repeat_last_command();
+		return 1;
+	}
 	if (key > 11)
 		return 0;
 
-	if (progdefaults.mbar2_pos) {
+	if (progdefaults.mbar_scheme > MACRO_SINGLE_BAR_MAX) {
 		if (Fl::event_state(FL_SHIFT))
 			key += altMacros * NUMMACKEYS;
 	} else {
@@ -1211,12 +1238,12 @@ void FTextTX::handle_context_menu(void)
 
 	bool modify_text_ok = insert_position() >= txpos;
 	bool selected = tbuf->selected();
- 	set_active(&menu[TX_MENU_MFSK16_IMG], active_modem->get_cap() & modem::CAP_IMG);
-	set_active(&menu[TX_MENU_CLEAR], tbuf->length());
-	set_active(&menu[TX_MENU_CUT], selected && modify_text_ok);
-	set_active(&menu[TX_MENU_COPY], selected);
-	set_active(&menu[TX_MENU_PASTE], modify_text_ok);
-	set_active(&menu[TX_MENU_READ], modify_text_ok);
+ 	icons::set_active(&menu[TX_MENU_MFSK16_IMG], active_modem->get_cap() & modem::CAP_IMG);
+	icons::set_active(&menu[TX_MENU_CLEAR], tbuf->length());
+	icons::set_active(&menu[TX_MENU_CUT], selected && modify_text_ok);
+	icons::set_active(&menu[TX_MENU_COPY], selected);
+	icons::set_active(&menu[TX_MENU_PASTE], modify_text_ok);
+	icons::set_active(&menu[TX_MENU_READ], modify_text_ok);
 
 	if (wrap)
 		menu[TX_MENU_WRAP].set();
@@ -1356,36 +1383,6 @@ int FTextTX::kf_paste(int c, Fl_Text_Editor_mod* e)
 {
 	return e->insert_position() < *ptxpos ? 1 : Fl_Text_Editor_mod::kf_paste(c, e);
 }
-
-static void show_font_warning(FTextBase* w)
-{
-	Fl_Font f = w->textfont();
-
-	if (Font_Browser::fixed_width(f))
-		return;
-
-	// Check if we should generate a warning message
-	bool* warn = 0;
-	const char* fn = Fl::get_font_name(f);
-	if (w == ReceiveText) {
-		warn = &progdefaults.RxFontWarn;
-		if (progdefaults.RxFontName != fn)
-			*warn = true;
-	}
-	else if (w == TransmitText) {
-		warn = &progdefaults.TxFontWarn;
-		if (progdefaults.TxFontName != fn)
-			*warn = true;
-	}
-	if (warn && *warn) {
-		w->add(Fl::get_font_name(f), FTextBase::XMIT);
-		w->add(" is a variable width font.\n", FTextBase::XMIT);
-		w->add("Line wrapping with a variable width font may be\n"
-		       "too slow. Consider using a fixed width font.\n\n", FTextBase::XMIT);
-		*warn = false;
-	}
-}
-
 
 // ----------------------------------------------------------------------------
 

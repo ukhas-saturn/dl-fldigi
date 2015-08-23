@@ -37,6 +37,7 @@
 #include "gettext.h"
 #include "nls.h"
 #include "icons.h"
+#include "rigsupport.h"
 
 #if USE_HAMLIB
 	#include "hamlib.h"
@@ -82,11 +83,11 @@ using namespace std;
 
 
 const char *szBaudRates[] = {
-	"", 
+	"",
 	"300","600","1200","2400",
 	"4800","9600","19200","38400",
 	"57600","115200","230400","460800"};
-	
+
 const char *szBands[] = {
 	"",
 	"1830", "3580", "7030", "7070", "10138",
@@ -386,9 +387,10 @@ void configuration::loadDefaults()
 {
 // RTTY
 	selShift->index(rtty_shift);
-	if (progdefaults.rtty_shift == selShift->lsize() - 1)
+	if (progdefaults.rtty_shift == selShift->lsize() - 1) {
 		selCustomShift->activate();
-	else
+		selCustomShift->value(rtty_custom_shift);
+	} else
 		selCustomShift->deactivate();
 	selBaud->index(rtty_baud);
 	selBits->index(rtty_bits);
@@ -524,21 +526,13 @@ int configuration::setDefaults()
 
 	inpTTYdev->value(PTTdev.c_str());
 
-	if (chkUSEHAMLIBis) {
-		chkUSEHAMLIB->value(1);
-		chkUSERIGCAT->value(0);  chkUSEXMLRPC->value(0);
-	} else if (chkUSERIGCATis) {
-		chkUSERIGCAT->value(1);
-		chkUSEHAMLIB->value(0); chkUSEXMLRPC->value(0);
-	} else if (chkUSEXMLRPCis) {
-		chkUSEXMLRPC->value(1);
-		chkUSEHAMLIB->value(0); chkUSERIGCAT->value(0);
-	} else {
-		chkUSEHAMLIB->value(0); 
-		chkUSERIGCAT->value(0);
-		chkUSEHAMLIB->value(0);
-		chkUSEXMLRPC->value(0);
-	}
+	chkUSEHAMLIB->value(0);
+	chkUSERIGCAT->value(0);
+	chkUSEXMLRPC->value(0);
+	if (chkUSEHAMLIBis) chkUSEHAMLIB->value(1);
+	if (chkUSERIGCATis) chkUSERIGCAT->value(1);
+	if (chkUSEXMLRPCis) chkUSEXMLRPC->value(1);
+
 	if (!XmlRigFilename.empty()) readRigXML();
 
 	inpRIGdev->value(HamRigDevice.c_str());
@@ -568,14 +562,14 @@ int configuration::setDefaults()
 	cntSearchRange->value(SearchRange);
 	cntServerOffset->value(ServerOffset);
 	cntACQsn->value(ACQsn);
-			
+
 	btnCursorBWcolor->color(
 		fl_rgb_color(cursorLineRGBI.R, cursorLineRGBI.G, cursorLineRGBI.B) );
 	btnCursorCenterLineColor->color(
 		fl_rgb_color(cursorCenterRGBI.R, cursorCenterRGBI.G, cursorCenterRGBI.B) );
 	btnBwTracksColor->color(
 		fl_rgb_color(bwTrackRGBI.R, bwTrackRGBI.G, bwTrackRGBI.B) );
-				
+
 	cntCWweight->value(CWweight);
 	sldrCWxmtWPM->value(CWspeed);
 	cntCWdefWPM->value(defCWspeed);
@@ -595,10 +589,10 @@ int configuration::setDefaults()
 	cntPreTiming->value(CWpre);
 	cntPostTiming->value(CWpost);
 	btnCWID->value(CWid);
-			
+
 	listboxHellFont->index(feldfontnbr);
 	btnFeldHellIdle->value(HellXmtIdle);
-			
+
 	btnTxRSID->value(TransmitRSid);
 	btnRSID->value(rsid);
 	chkRSidWideSearch->value(rsidWideSearch);
@@ -678,7 +672,7 @@ int configuration::setDefaults()
 	ostringstream ss;
 	for (lang_def_t* p = ui_langs; p->lang; p++) {
 		ss.str("");
-		ss << p->native_name << " (" << p->percent_done << "%)";
+		ss << p->native_name;
 		listbox_language->add(ss.str().c_str());
 	}
 	listbox_language->index(get_ui_lang());
@@ -686,8 +680,6 @@ int configuration::setDefaults()
 #else
 	listbox_language->hide();
 #endif
-
-	inpGPSdev->value(gps_device.c_str());
 
 	return 1;
 }
@@ -699,7 +691,7 @@ Reset all options to their default values?\n\n\
 Reset options will take effect at the next start\n\
 Files: fldigi_def.xml and fldigi.prefs will be deleted!\n"), _("OK"), _("Cancel"), NULL) &&
 			Fl::event_key() != FL_Escape) {
-		if (!fl_choice2(_("Confirm RESET"), _("Yes"), _("No"), NULL) && 
+		if (!fl_choice2(_("Confirm RESET"), _("Yes"), _("No"), NULL) &&
 			Fl::event_key() != FL_Escape) {
 			reset();
 			atexit(reset);
@@ -722,8 +714,10 @@ void configuration::initInterface()
 // close down any possible rig interface threads
 #if USE_HAMLIB
 	hamlib_close();
+//		MilliSleep(100);
 #endif
 	rigCAT_close();
+//		MilliSleep(100);
 
 	RigCatCMDptt = btnRigCatCMDptt->value();
 	TTYptt = btnTTYptt->value();
@@ -758,7 +752,6 @@ void configuration::initInterface()
 
 	if (chkUSERIGCATis) { // start the rigCAT thread
 		if (rigCAT_init(true)) {
-			LOG_VERBOSE("%s", "using rigCAT");
 			wf->USB(true);
 			wf->setQSY(1);
 			riginitOK = true;
@@ -781,11 +774,12 @@ void configuration::initInterface()
 	}
 
 	if (riginitOK == false) {
-		LOG_VERBOSE("%s", "NO rig control");
 		rigCAT_init(false);
 		wf->USB(true);
 		wf->setQSY(0);
 	}
+
+	if (connected_to_flrig) wf->setQSY(1);
 
 	if (HamlibCMDptt && chkUSEHAMLIBis)
 		push2talk->reset(PTT::PTT_HAMLIB);
@@ -840,16 +834,6 @@ static bool open_serial(const char* dev)
 		CloseHandle(fd);
 		ret = true;
 	}
-	else 
-	{
-		DWORD err = GetLastError();
-
-		if (err == ERROR_ACCESS_DENIED)
-		{
-			LOG_DEBUG("opening port %s resulted in ERROR_ACCESS_DENIED, it exists but is currently open - allowing");
-			ret = true;
-		}
-	}
 #endif
 	return ret;
 }
@@ -860,7 +844,6 @@ void configuration::testCommPorts()
 	inpTTYdev->clear();
 	inpRIGdev->clear();
 	inpXmlRigDevice->clear();
-
 #ifndef PATH_MAX
 #  define PATH_MAX 1024
 #endif
@@ -876,7 +859,10 @@ void configuration::testCommPorts()
 #if defined(__linux__)
 		"/dev/ttyS%u",
 		"/dev/ttyUSB%u",
-		"/dev/usb/ttyUSB%u"
+		"/dev/usb/ttyUSB%u",
+		"/dev/ttyACM%u",
+		"/dev/usb/ttyACM%u",
+		"/opt/vttyS%u"
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 		"/dev/tty%2.2u"
 #elif defined(__CYGWIN__)
@@ -932,14 +918,12 @@ void configuration::testCommPorts()
 #    endif
 #  endif // __WOE32__
 
-			LOG_INFO("Found serial port %s", ttyname);
+			LOG_VERBOSE("Found serial port %s", ttyname);
 			inpTTYdev->add(ttyname);
 #  if USE_HAMLIB
 			inpRIGdev->add(ttyname);
 #  endif
 			inpXmlRigDevice->add(ttyname);
-
-			inpGPSdev->add(ttyname);
 		}
 #else // __APPLE__
 		glob_t gbuf;
@@ -948,13 +932,13 @@ void configuration::testCommPorts()
 			if ( !(stat(gbuf.gl_pathv[j], &st) == 0 && S_ISCHR(st.st_mode)) ||
 			     strstr(gbuf.gl_pathv[j], "modem") )
 				continue;
-			LOG_INFO("Found serial port %s", gbuf.gl_pathv[j]);
+			LOG_VERBOSE("Found serial port %s", gbuf.gl_pathv[j]);
 			inpTTYdev->add(gbuf.gl_pathv[j]);
 #  if USE_HAMLIB
 			inpRIGdev->add(gbuf.gl_pathv[j]);
 #  endif
 			inpXmlRigDevice->add(gbuf.gl_pathv[j]);
-			inpGPSdev->add(gbuf.gl_pathv[j]);
+
 		}
 		globfree(&gbuf);
 #endif // __APPLE__

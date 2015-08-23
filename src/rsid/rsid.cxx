@@ -46,6 +46,7 @@
 
 #include "main.h"
 #include "arq_io.h"
+#include "data_io.h"
 
 LOG_FILE_SOURCE(debug::LOG_MODEM);
 
@@ -213,7 +214,7 @@ void cRsId::CalculateBuckets(const rs_fft_type *pSpectrum, int iBegin, int iEnd)
 			j = i + RSID_NTIMES;
 			Amp = pSpectrum[j];
 			if (Amp > AmpMax) {
-				AmpMax	= Amp;
+				AmpMax    = Amp;
 				iBucketMax = j;
 			}
 		}
@@ -230,7 +231,7 @@ void cRsId::receive(const float* buf, size_t len)
 	double src_ratio = RSID_SAMPLE_RATE / active_modem->get_samplerate();
 
 	if (rsid_secondary_time_out > 0) {
-		rsid_secondary_time_out -= (int)(len / src_ratio);
+		rsid_secondary_time_out -= 1.0 * len / active_modem->get_samplerate();
 		if (rsid_secondary_time_out <= 0) {
 			LOG_INFO("%s", "Secondary RsID timed out");
 			reset();
@@ -331,7 +332,7 @@ void cRsId::search(void)
 	int symbol_out_2 = -1;
 	int bin_out_2    = -1;
 
-	if (rsid_secondary_time_out == 0) {
+	if (rsid_secondary_time_out <= 0) {
 		found1 = search_amp(bin_out_1, symbol_out_1, pCodes1);
 		if (found1) {
 			if (symbol_out_1 != RSID_ESCAPE) {
@@ -341,7 +342,8 @@ void cRsId::search(void)
 				reset();
 				return;
 			} else {
-				rsid_secondary_time_out = 3*15*1024;
+				// 10 rsid_gap + 15 symbols + 2 for timing errors
+				rsid_secondary_time_out = 27 * RSID_SYMLEN;
 				return;
 			}
 		} else
@@ -641,7 +643,13 @@ void cRsId::apply(int iBin, int iSymbol, int extended)
 	if (!progdefaults.disable_rsid_warning_dialog_box)
 		REQ(notify_rsid, mbin, rsidfreq);
 
-	if (progdefaults.rsid_notify_only) return;
+	if (progdefaults.rsid_notify_only) {
+		if (data_io_enabled == KISS_IO) {
+			bcast_rsid_kiss_frame(rsidfreq, mbin, (int) active_modem->get_txfreq(),
+								  active_modem->get_mode(), RSID_KISS_NOTIFY);
+		}
+		return;
+	}
 
 	if (progdefaults.rsid_mark) // mark current modem & freq
 		REQ(note_qrg, false, "\nBefore RSID: ", "\n",

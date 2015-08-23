@@ -280,10 +280,7 @@ cmplx throb::mixer(cmplx in)
 
 	phaseacc -= 2.0 * M_PI * f / THROB_SAMPLE_RATE;
 
-	if (phaseacc < -M_PI)
-		phaseacc += 2.0 * M_PI;
-	if (phaseacc >  M_PI)
-		phaseacc -= 2.0 * M_PI;
+	if (phaseacc < 0) phaseacc += TWOPI;
 
 	return z;
 }
@@ -412,12 +409,7 @@ void throb::decodechar(int tone1, int tone2)
 
 void throb::rx(cmplx in)
 {
-
-#ifdef __APPLE__
-    cmplx rxword[11];
-#else
 	cmplx rxword[MAX_TONES];
-#endif
 	int i, tone1, tone2, maxtone;
 
 	symbol[symptr] = in;

@@ -4,7 +4,7 @@
 // Copyright (C) 2006-2008
 //		Dave Freese, W1HKJ
 //
-// This file is part of fldigi.  Adapted from code contained in gmfsk source code 
+// This file is part of fldigi.  Adapted from code contained in gmfsk source code
 // distribution.
 //
 // Fldigi is free software: you can redistribute it and/or modify
@@ -39,7 +39,6 @@
 #include "mfskvaricode.h"
 
 //=====================================================================
-#define	PskSampleRate	(8000)
 #define PipeLen			(64)
 
 #define SNTHRESHOLD 6.0
@@ -55,15 +54,25 @@
 class psk : public modem {
 private:
 // tx & rx
-	int				symbollen;
+	int			symbollen;
+	int			symbits;
 	bool			_qpsk;
 	bool			_pskr;
+	bool			_16psk;
+	bool			_8psk;
+	bool			_xpsk;
+	bool			_disablefec;
+	bool			_puncturing;
+	int			flushlength;
+	double 			separation;
 	double			phaseacc[MAX_CARRIERS];
 	cmplx			prevsymbol[MAX_CARRIERS];
 	unsigned int		shreg;
 	//FEC: 2nd stream
 	unsigned int		shreg2;
 	int					numinterleavers; //interleaver size (speed dependant)
+	//double 			numcarriers; //Number of parallel carriers for M CAR PSK and PSKR and QPSKR
+	int 			numcarriers; //Number of parallel carriers for M CAR PSK and PSKR and QPSKR
 	double 			inter_carrier; // Frequency gap betweeb carriers
 
 // rx variables & functions
@@ -98,6 +107,11 @@ private:
 	double			fecmet;
 	double			fecmet2;
 
+	bool			vestigial;
+	int				sfft_size;
+	sfft			*vestigial_sfft;
+	cmplx			sfft_bins[11];
+
 	double			phase;
 	double			freqerr;
 	int				bits;
@@ -113,6 +127,7 @@ private:
 	int				dcdbits;
 	cmplx			quality;
 	int				acquire;
+	int             idepth;
 
 	viewpsk*		pskviewer;
 	pskeval*		evalpsk;
@@ -134,12 +149,19 @@ private:
 	bool			firstbit;
 	bool			startpreamble;
 
+//PSKR & 8PSK modes
+	bool			PSKviterbi;
+	double			vphase;
+	double			maxamp;
+
+
 //MULTI-CARRIER
 	double			sc_bw; // single carrier bandwidth
 
-	
+
 //	cmplx thirdorder;
 // tx variables & functions
+	int			accumulated_bits; //JD for multiple carriers
 	int				txsymbols[MAX_CARRIERS];
 
 	double			*tx_shape;
@@ -147,6 +169,7 @@ private:
 	void			tx_carriers();
 	void 			tx_symbol(int sym);
 	void			tx_bit(int bit);
+	void			tx_xpsk(int bit);
 	void			tx_char(unsigned char c);
 	void			tx_flush();
 	void			update_syncscope();
@@ -155,6 +178,7 @@ private:
 	void			phaseafc();
 	void			afc();
 	void			coreafc();
+	void			vestigial_afc();
 
 	void			initSN_IMD();
 	void			resetSN_IMD();
@@ -176,6 +200,13 @@ public:
 	int tx_process();
 	void searchDown();
 	void searchUp();
+
+	void clear_viewer() { pskviewer->clear(); }
+	void clear_ch(int n) { pskviewer->clearch(n); }
+	int  viewer_get_freq(int n) {
+		if (pskviewer) pskviewer->get_freq(n);
+		return 0;
+	}
 
 };
 

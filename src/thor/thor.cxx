@@ -44,7 +44,7 @@
 #include "debug.h"
 
 // Enable to enable profiling output for the soft-decision decoder
-#define SOFTPROFILE false 
+#define SOFTPROFILE false
 //#define SOFTPROFILE true
 
 using namespace std;
@@ -218,7 +218,7 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 		doublespaced = 2;
 		samplerate = 8000;
 		break;
-		
+
 	case MODE_THOR25x4:
 		symlen = 320;
 		doublespaced = 4;
@@ -226,7 +226,7 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 		idepth = 50; // 2 sec interleave
 		flushlength = 40;
 		break;
-		
+
 	case MODE_THOR50x1:
 		symlen = 160;
 		doublespaced = 1;
@@ -234,7 +234,7 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 		idepth = 50; // 1 sec interleave
 		flushlength = 40;
 		break;
-		
+
 	case MODE_THOR50x2:
 		symlen = 160;
 		doublespaced = 2;
@@ -242,7 +242,7 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 		idepth = 50; // 1 sec interleave
 		flushlength = 40;
 		break;
-		
+
 	case MODE_THOR100:
 		symlen = 80;
 		doublespaced = 1;
@@ -313,7 +313,7 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 	Txinlv = new interleave (isize, idepth, INTERLEAVE_FWD);
 	Rxinlv = new interleave (isize, idepth, INTERLEAVE_REV);
 	Dec->setchunksize (1);
-	
+
 	bitstate = 0;
 	symbolpair[0] = symbolpair[1] = 0;
 	datashreg = 1;
@@ -335,15 +335,11 @@ cmplx thor::mixer(int n, const cmplx& in)
 	else
 		f = THORFIRSTIF - THORBASEFREQ - bandwidth*0.5 + (samplerate / symlen) * ( (double)n / paths);
 
-	double phase_n = phase[n];
-	cmplx z( cos(phase_n), sin(phase_n) );
+	cmplx z( cos(phase[n]), sin(phase[n]) );
 	z *= in;
-	phase_n -= TWOPI * f / samplerate;
-	if (phase_n > M_PI)
-		phase_n -= TWOPI;
-	else if (phase_n < M_PI)
-		phase_n += TWOPI;
-	phase[n] = phase_n;
+	phase[n] -= TWOPI * f / samplerate;
+	if (phase[n] < 0) phase[n] += TWOPI;
+
 	return z;
 }
 
@@ -403,6 +399,11 @@ void thor::decodePairs(unsigned char symbol)
 	if (fec_confidence < 0) fec_confidence = 0;
 	if (fec_confidence > 100) fec_confidence = 100;
 
+	if(met < 255 / 2) fec_confidence -=  2 + fec_confidence / 2;
+	else fec_confidence += 2;
+	if (fec_confidence < 0) fec_confidence = 0;
+	if (fec_confidence > 100) fec_confidence = 100;
+
 	if (progStatus.sqlonoff && metric < progStatus.sldrSquelchValue)
 		return;
 
@@ -413,7 +414,7 @@ void thor::decodePairs(unsigned char symbol)
 //LOG_INFO("thorvaridec %X = %d", datashreg >> 1, ch);
 		datashreg = 1;
 	}
-	
+
 
 }
 
@@ -489,20 +490,19 @@ void thor::softdecodesymbol()
 	}
 	c -= 2;
 	if (c < 0) c += THORNUMTONES;
-	
-		
+
 	// Calculate soft-doppler / frequency-error of the symbol
 	// For a perfect & undistorted symbol, rawdoppler will == 0 (be a perfect multiple of paths*doublespaced)
-	rawdoppler = (currsymbol - prev1symbol) % (paths * doublespaced) ; 
+	rawdoppler = (currsymbol - prev1symbol) % (paths * doublespaced) ;
 #if SOFTPROFILE
 	LOG_INFO("Raw Doppler: %3d", rawdoppler);
 #endif
-	if ( 0 == rawdoppler) 
+	if ( 0 == rawdoppler)
 		nowdoppler = 1.0f; // Perfect symbol: assign probability = 100%
 	else {
 		// Detect modem "de-sync + immediate re-sync" events and reverse the incurred soft-penalty
 		// Probability of these events increases as baudrate increases
-		if ( -1 * prev1rawdoppler == rawdoppler) { 
+		if ( -1 * prev1rawdoppler == rawdoppler) {
 			rawdoppler = 0;
 			lastdoppler = 1.0f;
 		}
@@ -513,7 +513,7 @@ void thor::softdecodesymbol()
 		else
 			nowdoppler = 0.0 + ((1.0 / (paths * doublespaced)) * abs(rawdoppler)) ;
 	}
-	
+
 	prev1rawdoppler = rawdoppler; // save raw-value for comparison on next run
 #if SOFTPROFILE
 	LOG_INFO("Doppler Confidence: %3.1f", nowdoppler);
@@ -545,7 +545,7 @@ void thor::softdecodesymbol()
 		nowmag /= 16;
 		nextmag /= 16;
 	}
-	
+
 	// Apply the soft-doppler probability to the previous symbol's soft-magnitude
 	lastmag *= lastdoppler;
 
@@ -820,7 +820,7 @@ void thor::synchronize()
 void thor::eval_s2n()
 {
 	double s = abs(pipe[pipeptr].vector[currsymbol]);
-	double n = (THORNUMTONES - 1) * 
+	double n = (THORNUMTONES - 1) *
 				abs( pipe[(pipeptr + symlen) % twosym].vector[currsymbol]);
 
 	sig = decayavg( sig, s, s - sig > 0 ? 4 : 20);
@@ -847,7 +847,7 @@ void thor::eval_s2n()
 
 	snprintf(thormsg, sizeof(thormsg), "s/n %3.0f dB", s2n );
 	put_Status1(thormsg);
-	
+
 	// Scale FEC indicatior to reduce erratic / jumpy / unreadable display in GUI
 	int scalefec;
 	if (fec_confidence++ > 90) scalefec = 100;
@@ -904,12 +904,12 @@ int thor::rx_process(const double *buf, int len)
 				}
 				if (--synccounter <= 0) {
 					synccounter = symlen;
-					
-					if (progdefaults.THOR_SOFTSYMBOLS) 
+
+					if (progdefaults.THOR_SOFTSYMBOLS)
 						currsymbol = softdecode();
-					else 
+					else
 						currsymbol = harddecode();
-					
+
 					currmag = abs(pipe_pipeptr_vector[currsymbol]);
 					eval_s2n();
 
@@ -957,10 +957,7 @@ void thor::sendtone(int tone, int duration)
 		for (int i = 0; i < symlen; i++) {
 			outbuf[i] = cos(txphase);
 			txphase -= phaseincr;
-			if (txphase > M_PI)
-				txphase -= TWOPI;
-			else if (txphase < M_PI)
-				txphase += TWOPI;
+			if (txphase < 0) txphase += TWOPI;
 		}
 		ModulateXmtr(outbuf, symlen);
 	}
@@ -1048,7 +1045,7 @@ int thor::tx_process()
 		Clearbits();
 
 		for (int j = 0; j < 16; j++) sendsymbol(0);
-		
+
 	sendidle();
 		txstate = TX_STATE_START;
 		break;

@@ -27,6 +27,7 @@
 
 #include "ptt.h"
 #include "log.h"
+#include "data_io.h"
 
 #if USE_HAMLIB
 #  include "rigclass.h"
@@ -97,6 +98,7 @@ extern int			arq_get_char();
 // ARQ mail implementation
 extern void			arq_init();
 extern void			arq_close();
+extern void			arq_restart();
 extern void			WriteARQ(unsigned char);
 extern void			checkTLF();
 
@@ -114,5 +116,6 @@ int directory_is_created( const char * strdir );
 
 // autostart an external program
 extern void start_process(std::string executable);
+
 
 #endif

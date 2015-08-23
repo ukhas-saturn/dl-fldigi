@@ -21,10 +21,7 @@
 #ifndef ARQIO_H
 #define ARQIO_H
 
-#include <vector>
-
-#include "threads.h"
-#include "socket.h"
+class Socket;
 
 extern void WriteARQsocket(unsigned char* data, size_t len);
 extern bool Socket_arqRx();

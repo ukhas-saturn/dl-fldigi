@@ -248,13 +248,10 @@ static void dxcc_entity_cache_rm(cQsoRec* r);
 static void dxcc_entity_cache_add(cQsoDb& db);
 
 void cb_mnuNewLogbook(Fl_Menu_* m, void* d){
-	if (!fl_choice2(_("Create New Logbook?"), _("No"), _("Yes"), NULL))
-		return;
-
 	saveLogbook();
 
 	logbook_filename = LogsDir;
-	logbook_filename.append("newlog.").append(ADIF_SUFFIX);
+	logbook_filename.append("newlog." ADIF_SUFFIX);
 	progdefaults.logbookfilename = logbook_filename;
 	dlgLogbook->label(fl_filename_name(logbook_filename.c_str()));
 	progdefaults.changed = true;
@@ -278,13 +275,17 @@ void adif_read_OK()
 void cb_mnuOpenLogbook(Fl_Menu_* m, void* d)
 {
 	string title = _("Open logbook file");
-	string filters;
-	filters.assign("ADIF\t*.").append(ADIF_SUFFIX);
+	string filter;
+	filter.assign("ADIF file\t*.").append(ADIF_SUFFIX);
 #ifdef __APPLE__
-	filters.append("\n");
+	filter.append("\n");
 #endif
 
-	const char* p = FSEL::select( title.c_str(), filters.c_str(), logbook_filename.c_str());
+	std::string deffilename = LogsDir;
+	deffilename.append(fl_filename_name(logbook_filename.c_str()));
+
+	const char* p = FSEL::select( title.c_str(), filter.c_str(), deffilename.c_str());
+
 	if (p) {
 		saveLogbook();
 		qsodb.deleteRecs();
@@ -306,11 +307,19 @@ void cb_mnuSaveLogbook(Fl_Menu_*m, void* d) {
 #ifdef __APPLE__
 	filter.append("\n");
 #endif
-	const char* p = FSEL::saveas( title.c_str(), filter.c_str(), logbook_filename.c_str());
+	std::string deffilename = LogsDir;
+	deffilename.append(fl_filename_name(logbook_filename.c_str()));
+
+	const char* p = FSEL::select( title.c_str(), filter.c_str(), deffilename.c_str());
+
 	if (p) {
 		logbook_filename = p;
 		if (logbook_filename.find("." ADIF_SUFFIX) == string::npos)
 			logbook_filename.append("." ADIF_SUFFIX);
+
+		progdefaults.logbookfilename = logbook_filename;
+		progdefaults.changed = true;
+
 		dlgLogbook->label(fl_filename_name(logbook_filename.c_str()));
 
 		cQsoDb::reverse = false;
@@ -494,7 +503,7 @@ void merge_recs( cQsoDb *db, cQsoDb *mrgdb ) // (haystack, needle)
 }
 
 void cb_mnuMergeADIF_log(Fl_Menu_* m, void* d) {
-	const char* p = FSEL::select(_("Merge ADIF file"), "ADIF\t*." ADIF_SUFFIX);
+	const char* p = FSEL::select(_("Merge ADIF file"), "ADIF\t*." ADIF_SUFFIX, LogsDir.c_str());
 	Fl::wait();
 	fl_digi_main->redraw();
 	Fl::awake();
@@ -538,11 +547,16 @@ void cb_Export_log() {
 	cQsoRec *rec;
 	char line[80];
 	chkExportBrowser->clear();
+#ifdef __APPLE__
+	chkExportBrowser->textfont(FL_SCREEN_BOLD);
+	chkExportBrowser->textsize(12);
+#else
 	chkExportBrowser->textfont(FL_COURIER);
 	chkExportBrowser->textsize(12);
+#endif
 	for( int i = 0; i < qsodb.nbrRecs(); i++ ) {
 		rec = qsodb.getRec (i);
-		snprintf(line,sizeof(line),"%8s|%6s|%-10s|%10s|%-s",
+		snprintf(line,sizeof(line),"%8s %4s %-10s %-10s %-s",
  			rec->getField(QSO_DATE),
  			rec->getField(TIME_OFF),
  			rec->getField(CALL),
@@ -785,9 +799,9 @@ void SearchLastQSO(const char *callsign)
 			double lon1, lat1, lon2, lat2;
 			double azimuth, distance;
 			char szAZ[4];
-			if ( locator2longlat(&lon1, &lat1, progdefaults.myLocator.c_str()) == RIG_OK &&
-				 locator2longlat(&lon2, &lat2, inpLoc->value()) == RIG_OK &&
-				 qrb(lon1, lat1, lon2, lat2, &distance, &azimuth) == RIG_OK ) {
+			if ( QRB::locator2longlat(&lon1, &lat1, progdefaults.myLocator.c_str()) == QRB::QRB_OK &&
+				 QRB::locator2longlat(&lon2, &lat2, inpLoc->value()) == QRB::QRB_OK &&
+				 QRB::qrb(lon1, lat1, lon2, lat2, &distance, &azimuth) == QRB::QRB_OK ) {
 				snprintf(szAZ,sizeof(szAZ),"%0.f", azimuth);
 				inpAZ->value(szAZ);
 			} else
@@ -1156,6 +1170,7 @@ void AddRecord ()
 
 	restore_sort();
 	loadBrowser();
+
 	logState = VIEWREC;
 	activateButtons();
 }
@@ -1311,17 +1326,23 @@ void cb_Export_Cabrillo(Fl_Menu_* m, void* d) {
 	}
 	cboContest->index(0);
 	chkCabBrowser->clear();
+#ifdef __APPLE__
+	chkCabBrowser->textfont(FL_SCREEN_BOLD);
+	chkCabBrowser->textsize(12);
+#else
 	chkCabBrowser->textfont(FL_COURIER);
 	chkCabBrowser->textsize(12);
+#endif
 	for( int i = 0; i < qsodb.nbrRecs(); i++ ) {
 		rec = qsodb.getRec (i);
 		memset(line, 0, sizeof(line));
-		snprintf(line,sizeof(line),"%8s|%4s|%-10s|%10s|%-s",
+		snprintf(line,sizeof(line),"%8s %4s %-10s %-10s %-s",
  			rec->getField(QSO_DATE),
  			time4(rec->getField(TIME_OFF)),
  			rec->getField(CALL),
 			szfreq(rec->getField(FREQ)),
 			rec->getField(MODE) );
+std::cout << line << "\n";
         chkCabBrowser->add(line);
 	}
 	wCabrillo->show();
@@ -1330,17 +1351,19 @@ void cb_Export_Cabrillo(Fl_Menu_* m, void* d) {
 void cabrillo_append_qso (FILE *fp, cQsoRec *rec)
 {
 	char freq[16] = "";
-	string rst_in, rst_out, exch_in, exch_out, date, time, mode, mycall, call;
+	string rst_in, rst_out, exch_in, exch_out, date, time, mode, mycall, call, exch;
 	string qsoline = "QSO: ";
-	int rst_len = 3;
 	int ifreq = 0;
 	size_t len = 0;
+	size_t p = 0;
 
 	exch_out.clear();
+	exch_in.clear();
+	exch.clear();
 
 	if (btnCabFreq->value()) {
 		ifreq = (int)(1000.0 * atof(rec->getField(FREQ)));
-		snprintf(freq, sizeof(freq), "%d", ifreq);
+		snprintf(freq, sizeof(freq), "%7d", ifreq);
 		qsoline.append(freq); qsoline.append(" ");
 	}
 
@@ -1350,7 +1373,6 @@ void cabrillo_append_qso (FILE *fp, cQsoRec *rec)
 			mode.compare("SSB") == 0 || mode.compare("PH") == 0 ) mode = "PH";
 		else if (mode.compare("FM") == 0 || mode.compare("CW") == 0 ) ;
 		else mode = "RY";
-		if (mode.compare("PH") == 0 || mode.compare("FM") == 0 ) rst_len = 2;
 		qsoline.append(mode); qsoline.append(" ");
 	}
 
@@ -1368,56 +1390,75 @@ void cabrillo_append_qso (FILE *fp, cQsoRec *rec)
 
 	mycall = progdefaults.myCall;
 	if (mycall.length() > 13) mycall = mycall.substr(0,13);
-	if ((len = mycall.length()) < 13) mycall.append(13 - len, ' ');
-	qsoline.append(mycall); qsoline.append(" ");
+	len = mycall.length();
+	if (len < 13) mycall.append(13 - len, ' ');
+	qsoline.append(mycall); qsoline.append("   ");
 
-	if (btnCabRSTsent->value()) {
+	if (btnCabRSTsent->value() || contestnbr == BARTG_RTTY) {
 		rst_out = rec->getField(RST_SENT);
-		rst_out = rst_out.substr(0,rst_len);
+		if (rst_out.length() > 3) rst_out = rst_out.substr(0, 3);
+		len = rst_out.length();
+		if (len < 3) rst_out.append(3 - len, ' ');
 		exch_out.append(rst_out).append(" ");
 	}
 
-	if (btnCabSerialOUT->value()) {
+	if (btnCabSerialOUT->value() || contestnbr == BARTG_RTTY) {
 		exch_out.append(rec->getField(STX)).append(" ");
 	}
 
 	if (btnCabMyXchg->value()) {
-		exch_out.append(rec->getField(MYXCHG)).append(" ");
+		exch = rec->getField(MYXCHG);
+		if (!exch.empty())
+			exch_out.append(rec->getField(MYXCHG)).append(" ");
 	}
 
-	if (contestnbr == BARTG_RTTY && exch_out.length() < 11) {
+	if (contestnbr == BARTG_RTTY) {
 		string toff = rec->getField(TIME_OFF);
-		toff = toff.substr(0,4).append(" ");
+		if (toff.length() > 4) toff = toff.substr(0,4);
+		toff = toff.append(" ");
 		exch_out.append(toff);
 	}
 
-	if (exch_out.length() > 14) exch_out = exch_out.substr(0,14);
-	if ((len = exch_out.length()) < 14) exch_out.append(14 - len, ' ');
+	if (exch_out.length() > 20) exch_out = exch_out.substr(0,20);
+	len = exch_out.length();
+	if (len < 20) exch_out.append(20 - len, ' ');
 
-	qsoline.append(exch_out).append(" ");
+	qsoline.append(exch_out);
 
 	if (btnCabCall->value()) {
 		call = rec->getField(CALL);
 		if (call.length() > 13) call = call.substr(0,13);
-		if ((len = call.length()) < 13) call.append(13 - len, ' ');
+		len = call.length();
+		if (len < 13) call.append(13 - len, ' ');
 		qsoline.append(call); qsoline.append(" ");
 	}
 
 	if (btnCabRSTrcvd->value()) {
 		rst_in = rec->getField(RST_RCVD);
-		rst_in = rst_in.substr(0,rst_len);
+		if (rst_in.length() > 3) rst_in = rst_in.substr(0,3);
+		len = rst_in.length();
+		if (len < 3) rst_in.append(3 - len, ' ');
 		qsoline.append(rst_in); qsoline.append(" ");
 	}
 
 	if (btnCabSerialIN->value()) {
-		exch_in = rec->getField(SRX);
+		exch_in = exch_in.append(rec->getField(SRX));
 		if (exch_in.length())
 			exch_in += ' ';
 	}
-	if (btnCabXchgIn->value())
-		exch_in.append(rec->getField(XCHG1));
+
+	if (btnCabXchgIn->value()) {
+		exch = rec->getField(XCHG1);
+		while ((p = exch.find(":")) != string::npos) exch.erase(p,1);
+		while ((p = exch.find("  ")) != string::npos) exch.erase(p,1);
+		if (exch[0] == ' ') exch.erase(0,1);
+		exch_in.append(exch);
+	}
+
 	if (exch_in.length() > 14) exch_in = exch_in.substr(0,14);
-	if ((len = exch_in.length()) < 14) exch_in.append(14 - len, ' ');
+	len = exch_in.length();
+	if (len < 14) exch_in.append(14 - len, ' ');
+
 	qsoline.append(exch_in);
 
 	fprintf (fp, "%s\n", qsoline.c_str());
@@ -1540,7 +1581,7 @@ SOAPBOX: \n\n",
     for (int i = 0; i < qsodb.nbrRecs(); i++) {
         rec = qsodb.getRec(i);
         if (rec->getField(EXPORT)[0] == 'E') {
-        	cabrillo_append_qso(cabFile, rec);
+            cabrillo_append_qso(cabFile, rec);
             rec->putField(EXPORT,"");
             qsodb.qsoUpdRec(i, rec);
         }
@@ -1550,13 +1591,15 @@ SOAPBOX: \n\n",
     return;
 }
 
-//#ifdef __clang__
-//#	include <unordered_map>
-//	typedef std::unordered_map<string, unsigned> dxcc_entity_cache_t;
-//#else
+#if HAVE_STD_HASH
+#	include <unordered_map>
+ 	typedef std::unordered_map<string, unsigned> dxcc_entity_cache_t;
+#elif HAVE_STD_TR1_HASH
 #	include <tr1/unordered_map>
-	typedef tr1::unordered_map<string, unsigned> dxcc_entity_cache_t;
-//#endif
+ 	typedef tr1::unordered_map<string, unsigned> dxcc_entity_cache_t;
+#else
+#	error "No std::hash or std::tr1::hash support"
+#endif
 
 static dxcc_entity_cache_t dxcc_entity_cache;
 static bool dxcc_entity_cache_enabled = false;

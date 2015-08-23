@@ -1,8 +1,7 @@
 // ----------------------------------------------------------------------------
 // rx_extract.cxx extract delineated data stream to file
 //
-// Copyright 2013 W1HKJ, Dave Freese
-//           2013 KL4YFD, John Phelps
+// Copyright 2009 W1HKJ, Dave Freese
 //
 // This file is part of fldigi.
 //
@@ -129,7 +128,7 @@ void invoke_flmsg()
 	if (progdefaults.open_nbems_folder)
 		open_recv_folder(FLMSG_WRAP_recv_dir.c_str());
 
-	if ((progdefaults.open_flmsg || progdefaults.open_flmsg_print) && 
+	if ((progdefaults.open_flmsg || progdefaults.open_flmsg_print) &&
 		(rx_buff.find(flmsg) != string::npos) &&
 		!progdefaults.flmsg_pathname.empty()) {
 
@@ -148,8 +147,8 @@ void invoke_flmsg()
 		memset(&si, 0, sizeof(si));
 		si.cb = sizeof(si);
 		memset(&pi, 0, sizeof(pi));
-		if (!CreateProcess( NULL, cmdstr, 
-			NULL, NULL, FALSE, 
+		if (!CreateProcess( NULL, cmdstr,
+			NULL, NULL, FALSE,
 			CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
 			LOG_ERROR("CreateProcess failed with error code %ld", GetLastError());
 		CloseHandle(pi.hProcess);
@@ -174,7 +173,7 @@ void invoke_flmsg()
 			ap[n++] = " --b";//params = " --b";
 		else if (progdefaults.open_flmsg_print)
 			ap[n++] = " --p";//params = " --p";
-		ap[n++] = outfilename; 
+		ap[n++] = outfilename;
 
 		switch (fork()) {
 		case 0:
@@ -320,12 +319,9 @@ void rx_extract_add(int c)
 
 void select_flmsg_pathname()
 {
-	if (NBEMSapps_dir) {
-		progdefaults.flmsg_pathname.assign(BaseDir).append("flmsg.exe");
-		progdefaults.changed = true;
-		txt_flmsg_pathname->value(progdefaults.flmsg_pathname.c_str());
-		return;
-	}
+	txt_flmsg_pathname->value(progdefaults.flmsg_pathname.c_str());
+	txt_flmsg_pathname->redraw();
+
 #ifdef __APPLE__
 	open_recv_folder("/Applications/");
 	return;
@@ -359,13 +355,13 @@ bool find_pathto_exectable(string &binpath, string executable)
 
 // Get the PATH environment variable as pointer to string
 // The strings in the environment list are of the form name=value.
-// As  typically  implemented, getenv() returns a pointer to a string within 
+// As  typically  implemented, getenv() returns a pointer to a string within
 // the environment list.  The caller must take care not to modify this string,
 // since that would  change the environment of the process.
 //
 // The  implementation of getenv() is not required to be reentrant.  The string
-// pointed to by the return value of getenv() may be statically allocated, and 
-// can be modified by a  subsequent call to getenv(), putenv(3), setenv(3), or 
+// pointed to by the return value of getenv() may be statically allocated, and
+// can be modified by a  subsequent call to getenv(), putenv(3), setenv(3), or
 // unsetenv(3).
 
 	char *environment = getenv("PATH");
@@ -406,29 +402,19 @@ string select_binary_pathname(string deffilename)
 #ifdef __APPLE__
 	open_recv_folder("/Applications/");
 	return "";
-#endif
-
-	string executable;
-
-#ifdef __MINGW32__
-	deffilename = "C:\\Program Files\\";
-	const char *psz = FSEL::select(_("Locate executable"), _("*.exe"), deffilename.c_str());
 #else
-	size_t p = deffilename.rfind('/');
-	if (p != string::npos) executable = deffilename.substr(p+1);
-	else executable = deffilename;
-
-	if (!executable.empty() && find_pathto_exectable(deffilename, executable))
-		return deffilename;
-
-	deffilename = "/usr/bin/";
-	const char *psz = FSEL::select(_("Locate binary"), _("*"), deffilename.c_str());
-#endif
-
-	if (psz) executable = psz;
+#  ifdef __MINGW32__
+	deffilename = "C:\\Program Files\\";
+	const char *p = FSEL::select(_("Locate executable"), _("*.exe"), deffilename.c_str());
+#  else
+	deffilename = "/usr/local/bin/";
+	const char *p = FSEL::select(_("Locate binary"), _("*"), deffilename.c_str());
+# endif
+	string executable = "";
+	if (p) executable = p;
 // do not allow recursion !!
 	if (executable.find("fldigi") != string::npos) return "";
 	return executable;
-
+#endif
 }
 

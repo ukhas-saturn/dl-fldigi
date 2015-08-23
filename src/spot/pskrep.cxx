@@ -50,20 +50,24 @@
 #include <algorithm>
 #include <fstream>
 
-#if __zclang__
-#  define MAP_TYPE std::unordered_map
-#define HASH_TYPE std::hash
-#  include <unordered_map>
-#elif (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1)
-#  define MAP_TYPE std::tr1::unordered_map
-#define HASH_TYPE std::tr1::hash
-#  include <tr1/unordered_map>
+#if GCC_VER_OK
+#	if HAVE_STD_HASH
+#		define MAP_TYPE std::unordered_map
+#		define HASH_TYPE std::hash
+#		include <unordered_map>
+#	else
+#		if 	HAVE_STD_TR1_HASH
+#			define MAP_TYPE std::tr1::unordered_map
+#			define HASH_TYPE std::tr1::hash
+#			include <tr1/unordered_map>
+#		endif
+#	endif
 #else
-// use the non-standard gnu hash_map on gcc <= 4.0.x,
+// use the non-standard gnu hash_map on gcc < 4.1.0
 // which has a broken tr1::unordered_map::operator=
-#  define MAP_TYPE __gnu_cxx::hash_map
-#define HASH_TYPE __gnu_cxx::hash
-#  include <ext/hash_map>
+#	define MAP_TYPE __gnu_cxx::hash_map
+#	define HASH_TYPE __gnu_cxx::hash
+#	include <ext/hash_map>
 namespace __gnu_cxx {
 	// define the missing hash specialisation for std::string
 	// using the 'const char*' hash function
@@ -89,6 +93,12 @@ namespace __gnu_cxx {
 #include "pskrep.h"
 
 LOG_FILE_SOURCE(debug::LOG_SPOTTER);
+
+//------------------------------------------------------------------------------
+#include "threads.h"
+
+static pthread_mutex_t pskrep_mutex = PTHREAD_MUTEX_INITIALIZER;
+//------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 
@@ -168,7 +178,7 @@ private:
 	vector<unsigned char> long_station_info;
 	vector<unsigned char> short_station_info;
 
-	uint32_t identifier;
+	//uint32_t identifier;
 	uint32_t sequence_number;
 
 	unsigned template_count;
@@ -409,7 +419,7 @@ void pskrep::append(string call, const char* loc, long long freq, trx_mode mode,
 	if (bandq.empty() || rtime - bandq.back().rtime >= DUP_INTERVAL) { // add new
 		bandq.push_back(rcpt_report_t(mode, freq, rtime, rtype, loc));
 		LOG_VERBOSE("Added (call=\"%s\", loc=\"%s\", mode=\"%s\", freq=%d, time=%" PRIdMAX ", type=%u)",
-			 call.c_str(), loc, mode_info[mode].adif_name, 
+			 call.c_str(), loc, mode_info[mode].adif_name,
 			 static_cast<int>(freq), (intmax_t)rtime, rtype);
 		new_count++;
 		save_queue();
@@ -420,8 +430,8 @@ void pskrep::append(string call, const char* loc, long long freq, trx_mode mode,
 			r.locator = loc;
 			r.rtype = rtype;
 			LOG_VERBOSE("Updated (call=\"%s\", loc=\"%s\", mode=\"%s\", freq=%d, time=%d, type=%u)",
-				 call.c_str(), loc, mode_info[r.mode].adif_name, 
-				 static_cast<int>(r.freq), 
+				 call.c_str(), loc, mode_info[r.mode].adif_name,
+				 static_cast<int>(r.freq),
 				 static_cast<int>(r.rtime), rtype);
 			save_queue();
 		}
@@ -685,9 +695,9 @@ void pskrep_sender::write_preamble(void)
 	*reinterpret_cast<uint32_t*>(p) = htonl(sequence_number); p += sizeof(uint32_t);
 	memcpy(p, short_id.data(), SHORT_ID_SIZE);                p += SHORT_ID_SIZE;
 
-	const unsigned char* station_info_template;
+	const unsigned char* station_info_template(long_station_info_template);
 	size_t tlen;
-	vector<unsigned char>* station_info;
+	vector<unsigned char>* station_info(&long_station_info);
 
 	if (template_count == 0 && now - last_template >= TEMPLATE_INTERVAL)
 		template_count = TEMPLATE_THRESHOLD;
@@ -709,17 +719,22 @@ void pskrep_sender::write_preamble(void)
 	}
 
 	// station info record
-	memcpy(p, &(*station_info)[0], station_info->size());     p += station_info->size();
+	memcpy(p, &(*station_info)[0], station_info->size());
+	p += station_info->size();
 
 	report_offset = p - dgram;
 	// write report record header
-	memcpy(p, rcpt_record_template + 4, 2); p += 2; /* length written later */ p += sizeof(uint16_t);
+	memcpy(p, rcpt_record_template + 4, 2);
+	p += 2; /* length written later */
+	p += sizeof(uint16_t);
 
 	dgram_size = p - dgram;
 }
 
 bool pskrep_sender::append(const string& callsign, const band_map_t::value_type& r)
 {
+	guard_lock dsp_lock(&pskrep_mutex);
+
 	if (dgram_size == 0)
 		write_preamble();
 
@@ -740,8 +755,8 @@ bool pskrep_sender::append(const string& callsign, const band_map_t::value_type&
 
 
 	LOG_INFO("Appending report (call=%s mode=%s freq=%d time=%d type=%u)",
-		 callsign.c_str(), mode_info[r.mode].adif_name, 
-		 static_cast<int>(r.freq), 
+		 callsign.c_str(), mode_info[r.mode].adif_name,
+		 static_cast<int>(r.freq),
 		 static_cast<int>(r.rtime), r.rtype);
 
 	unsigned char* start = dgram + dgram_size;

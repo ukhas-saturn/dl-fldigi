@@ -44,8 +44,6 @@
 #include <FL/Fl_Counter.H>
 #include <FL/Enumerations.H>
 
-#include <png.h>
-
 #include "fl_digi.h"
 #include "trx.h"
 #include "misc.h"
@@ -53,6 +51,7 @@
 #include "main.h"
 #include "modem.h"
 #include "qrunner.h"
+#include "threads.h"
 
 #if USE_HAMLIB
 	#include "hamlib.h"
@@ -113,6 +112,8 @@ RGB		palette[9];
 
 short int *tmp_fft_db;
 
+static pthread_mutex_t waterfall_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 WFdisp::WFdisp (int x0, int y0, int w0, int h0, char *lbl) :
 			  Fl_Widget(x0,y0,w0,h0,"") {
 	disp_width = w();
@@ -120,7 +121,7 @@ WFdisp::WFdisp (int x0, int y0, int w0, int h0, char *lbl) :
 		disp_width = progdefaults.HighFreqCutoff/4;
 	scale_width = IMAGE_WIDTH * 2;
 	image_height = h() - WFTEXT - WFSCALE - WFMARKER;
-	image_area	  = IMAGE_WIDTH * image_height;
+	image_area      = IMAGE_WIDTH * image_height;
 	sig_image_area  = IMAGE_WIDTH * h();
 	RGBsize			= sizeof(RGB);
 	RGBwidth		= RGBsize * scale_width;
@@ -164,7 +165,8 @@ WFdisp::WFdisp (int x0, int y0, int w0, int h0, char *lbl) :
 	wfspeed = NORMAL;
 	srate = 8000;
 	wfspdcnt = 0;
-	dispcnt = 4;
+	dispcnt = 1.0 * WFBLOCKSIZE / SC_SMPLRATE;
+	dispdec = 1.0 * WFBLOCKSIZE / srate;
 	wantcursor = false;
 	cursormoved = false;
 //	usebands = false;
@@ -210,16 +212,20 @@ inline void WFdisp::makeMarker_(int width, const RGB* color, int freq, const RGB
 	if (marker_mode == MODE_RTTY) {
 	// rtty has two bandwidth indicators on the waterfall
 	// upper and lower frequency
-		int shift = static_cast<int>(progdefaults.rtty_shift >= 0 ?
-				 rtty::SHIFT[progdefaults.rtty_shift] : progdefaults.rtty_custom_shift);
-		int bw_limit_hi = (int)(shift / 2 + progdefaults.RTTY_BW / 2.0);
-		int bw_limit_lo = (int)(shift / 2 - progdefaults.RTTY_BW / 2.0);
+		int shift = static_cast<int>(
+			(progdefaults.rtty_shift < rtty::numshifts ?
+				rtty::SHIFT[progdefaults.rtty_shift] :
+				progdefaults.rtty_custom_shift));
+		const double bauds[]  = {45, 45.45, 50, 56, 75, 100, 110, 150, 200, 300, 600, 1200, 0};
+		double rttyband = bauds[ progdefaults.rtty_baud ] * progdefaults.RTTY_BW;
+		int bw_limit_hi = (int)(shift / 2 + rttyband / 2);
+		int bw_limit_lo = (int)(shift / 2 - rttyband / 2);
 		int bw_freq = static_cast<int>(freq + 0.5);
 		int bw_lower1 = -bw_limit_hi;
 		int bw_upper1 = -bw_limit_lo;
 		int bw_lower2 = bw_limit_lo;
 		int bw_upper2 = bw_limit_hi;
-		if (bw_lower1 + bw_freq < 0) 
+		if (bw_lower1 + bw_freq < 0)
 			bw_lower1 -= bw_lower1 + bw_freq;
 		if (bw_upper1 + bw_freq < 0)
 			bw_lower2 -= bw_lower2 + bw_freq;
@@ -248,6 +254,9 @@ inline void WFdisp::makeMarker_(int width, const RGB* color, int freq, const RGB
 
 	if (marker_mode >= MODE_MT63_500S && marker_mode <= MODE_MT63_2000L)
 			bw_upper = (int)(width * 31 / 32);
+
+	if (marker_mode == MODE_FSQ)
+			bw_upper = (int)(width * 32 / 33);
 
 	if (bw_lower + static_cast<int>(freq+0.5) < 0)
 		bw_lower -= bw_lower + static_cast<int>(freq+0.5);
@@ -285,7 +294,9 @@ void WFdisp::makeMarker()
 	else if (mode >= MODE_FELDHELL && mode <= MODE_HELL80)
 		marker_width = (int)progdefaults.HELL_BW;
 	else if (mode == MODE_RTTY)
-		marker_width = static_cast<int>(rtty::SHIFT[progdefaults.rtty_shift]);
+		marker_width = static_cast<int>((progdefaults.rtty_shift < rtty::numshifts ?
+				  rtty::SHIFT[progdefaults.rtty_shift] :
+				  progdefaults.rtty_custom_shift));
 	marker_width = (int)(marker_width / 2.0 + 1);
 
 	RGBmarker.R = progdefaults.bwTrackRGBI.R;
@@ -324,6 +335,7 @@ void WFdisp::makeMarker()
 	int bw_hi = marker_width;
 	if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 		bw_hi = bw_hi * 31 / 32;
+	if (mode == MODE_FSQ) bw_hi = bw_hi * 32 / 33;
 
 	for (int y = 0; y < WFMARKER - 2; y++) {
 		int incr = y * scale_width;
@@ -409,6 +421,8 @@ void WFdisp::initmaps() {
 
 int WFdisp::peakFreq(int f0, int delta)
 {
+	guard_lock waterfall_lock(&waterfall_mutex);
+
 	double threshold = 0.0;
 	int f1, fmin =	(int)((f0 - delta)),
 		f2, fmax =	(int)((f0 + delta));
@@ -430,6 +444,8 @@ int WFdisp::peakFreq(int f0, int delta)
 
 double WFdisp::powerDensity(double f0, double bw)
 {
+	guard_lock waterfall_lock(&waterfall_mutex);
+
 	double pwrdensity = 0.0;
 	int flower = (int)((f0 - bw/2)),
 		fupper = (int)((f0 + bw/2));
@@ -440,9 +456,11 @@ double WFdisp::powerDensity(double f0, double bw)
 	return pwrdensity/(bw+1);
 }
 
-// Frequency of the maximum power for a given bandwidth. Used for AFC.
+/// Frequency of the maximum power for a given bandwidth. Used for AFC.
 double WFdisp::powerDensityMaximum(int bw_nb, const int (*bw)[2]) const
 {
+	guard_lock waterfall_lock(&waterfall_mutex);
+
 	double max_pwr = 0 ;
 	int f_lowest = bw[0][0];
 	int f_highest = bw[bw_nb-1][1];
@@ -460,10 +478,10 @@ double WFdisp::powerDensityMaximum(int bw_nb, const int (*bw)[2]) const
 
 	double curr_pwr = max_pwr ;
 	int max_idx = -1 ;
-	// Single pass to compute the maximum on this bandwidth.
+	/// Single pass to compute the maximum on this bandwidth.
 	for( int f = -f_lowest ; f < IMAGE_WIDTH - f_highest; ++f )
 	{
-		// Difference with previous power.
+		/// Difference with previous power.
 		for( int i = 0 ; i < bw_nb; ++i )
 		{
 			const int * p_bw = bw[i];
@@ -503,7 +521,7 @@ void WFdisp::processFFT() {
 
 	wf_fft_type scale = ( 1.0 * SC_SMPLRATE / srate ) * ( FFT_LEN / 8000.0);
 
-	if (--dispcnt == 0) {
+	if ((dispcnt -= dispdec) <= 0) {
 		static const int log2disp100 = log2disp(-100);
 		double vscale = 2.0 / FFT_LEN;
 
@@ -544,15 +562,14 @@ void WFdisp::processFFT() {
 					 IMAGE_WIDTH * sizeof(short int));
 		}
 		redraw();
+		Fl::flush();
 
-		if (srate == 8000)
-			dispcnt = wfspeed;
-		else if (srate == 11025)
-			dispcnt = wfspeed * 4 / 3;
-		//kl4yfd
-		else
-			dispcnt = wfspeed * 8 / 3;
+		dispcnt = 1.0 * WFBLOCKSIZE / SC_SMPLRATE; // FAST
+		if (wfspeed == NORMAL) dispcnt *= NORMAL;
+		if (wfspeed == SLOW) dispcnt *= progdefaults.drop_speed;
 	}
+	dispdec = 1.0 * WFBLOCKSIZE / srate;
+	if (wfspeed == PAUSE) dispdec = 0;
 }
 
 void WFdisp::process_analog (wf_fft_type *sig, int len) {
@@ -592,6 +609,8 @@ void WFdisp::redrawCursor()
 //	cursormoved = true;
 }
 
+extern state_t trx_state;
+
 void WFdisp::sig_data( double *sig, int len, int sr )
 {
 	if (wfspeed == PAUSE)
@@ -605,9 +624,9 @@ void WFdisp::sig_data( double *sig, int len, int sr )
 	}
 
 	memmove((void*)circbuff,
-			(void*)(circbuff + len), 
+			(void*)(circbuff + len),
 			(size_t)((FFT_LEN - len)*sizeof(wf_fft_type)));
-	memcpy((void*)&circbuff[FFT_LEN-len], 
+	memcpy((void*)&circbuff[FFT_LEN-len],
 			(void*)sig,
 			(size_t)(len)*sizeof(double));
 
@@ -635,8 +654,9 @@ update_freq:
 		int rttyoffset = 0;
 		trx_mode mode = active_modem->get_mode();
 		if (mode == MODE_RTTY && progdefaults.useMARKfreq) {
-			rttyoffset = (progdefaults.rtty_shift >= 0 ?
-				rtty::SHIFT[progdefaults.rtty_shift] : progdefaults.rtty_custom_shift);
+			rttyoffset = (progdefaults.rtty_shift < rtty::numshifts ?
+				  rtty::SHIFT[progdefaults.rtty_shift] :
+				  progdefaults.rtty_custom_shift);
 			rttyoffset /= 2;
 			if (active_modem->get_reverse()) rttyoffset *= -1;
 		}
@@ -645,10 +665,14 @@ update_freq:
 			cwoffset = progdefaults.CWsweetspot;
 			usb = ! (progdefaults.CWIsLSB ^ (testmode == "CWR"));
 		}
-		if (usb)
-			dfreq = rfc + active_modem->get_txfreq() - cwoffset + rttyoffset;
-		else
-			dfreq = rfc - active_modem->get_txfreq() + cwoffset - rttyoffset;
+		if (mode == MODE_ANALYSIS) {
+			dfreq = active_modem->track_freq();
+		} else {
+			if (usb)
+				dfreq = rfc + active_modem->get_txfreq() - cwoffset + rttyoffset;
+			else
+				dfreq = rfc - active_modem->get_txfreq() + cwoffset - rttyoffset;
+		}
 		snprintf(szFrequency, sizeof(szFrequency), "%-.3f", dfreq / 1000.0);
 	} else {
 		dfreq = active_modem->get_txfreq();
@@ -779,12 +803,12 @@ void WFdisp::drawScale() {
 		if (progdefaults.wf_audioscale)
 			fr = 500.0 * i;
 		else {
-			int cwoffset = 0;
-			string testmode = qso_opMODE->value();
-			if (testmode == "CW" or testmode == "CWR") {
+		    int cwoffset = 0;
+		    string testmode = qso_opMODE->value();
+		    if (testmode == "CW" or testmode == "CWR") {
 				cwoffset = ( progdefaults.CWOffset ? progdefaults.CWsweetspot : 0 );
-				usb = ! (progdefaults.CWIsLSB ^ (testmode == "CWR")); 
-			}
+				usb = ! (progdefaults.CWIsLSB ^ (testmode == "CWR"));
+		    }
 			if (usb)
 				fr = (rfc - (rfc%500))/1000.0 + 0.5*i - cwoffset/1000.0;
 			else
@@ -864,6 +888,9 @@ case Step: for (int row = 0; row < image_height; row++) { \
 		trx_mode mode = active_modem->get_mode();
 		if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 			bw_hi = bw_hi * 31 / 32;
+		if (mode == MODE_FSQ) {
+			bw_hi = bw_lo = 69 * bandwidth / 100;
+		}
 		RGBI  *pos1 = fft_img + (carrierfreq - offset - bw_lo) / step;
 		RGBI  *pos2 = fft_img + (carrierfreq - offset + bw_hi) / step;
 		if (unlikely(pos2 == fft_img + disp_width))
@@ -919,24 +946,18 @@ case Step: for (int row = 0; row < image_height; row++) { \
 }
 
 void WFdisp::drawcolorWF() {
-	static int waterwheel = 0;
-	FILE *fp;
-	png_structp png_ptr;
-	png_infop info_ptr;
-	png_bytep row_pointers[image_height];
-	png_byte tmp_image[image_height][w() * 3];
-
 	uchar *pixmap = (uchar *)fft_img;
 
 	update_waterfall();
 
-	if (active_modem && wantcursor && 
+	if (active_modem && wantcursor &&
 		(progdefaults.UseCursorLines || progdefaults.UseCursorCenterLine) ) {
 		trx_mode mode = active_modem->get_mode();
 		int bw_lo = bandwidth / 2;
 		int bw_hi = bandwidth / 2;
 		if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 			bw_hi = bw_hi * 31 / 32;
+		if (mode == MODE_FSQ) bw_hi = bw_hi * 32 / 33;
 		RGBI  *pos0 = (fft_img + cursorpos);
 		RGBI  *pos1 = (fft_img + cursorpos - bw_lo/step);
 		RGBI  *pos2 = (fft_img + cursorpos + bw_hi/step);
@@ -967,82 +988,6 @@ void WFdisp::drawcolorWF() {
 		disp_width, image_height,
 		sizeof(RGBI), disp_width * sizeof(RGBI) );
 	drawScale();
-
-	if (waterwheel == 0)
-	{
-		if (progdefaults.png_wfall == 1)
-		{
-			const char * pngfilename = progdefaults.waterfall_png_location.c_str();
-			fp = fopen(pngfilename, "w");
-			if (fp == NULL)
-			{
-				perror("waterfall export fopen");
-				return;
-			}
-
-			png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-
-			if (png_ptr == NULL)
-			{
-				fclose(fp);
-				fprintf(stderr, "waterfall export png_create_write_struct failed.\n");
-				return;
-			}
-
-			/* Allocate/initialize the image information data.  REQUIRED */
-			info_ptr = png_create_info_struct(png_ptr);
-			if (info_ptr == NULL)
-			{
-				fclose(fp);
-				png_destroy_write_struct(&png_ptr, NULL);
-				fprintf(stderr, "waterfall export png_create_info_struct failed.\n");
-				return;
-			}
-
-			if (setjmp(png_jmpbuf(png_ptr)))
-			{
-				/* If we get here, we had a problem writing the file */
-				fclose(fp);
-				png_destroy_write_struct(&png_ptr, &info_ptr);
-				fprintf(stderr, "waterfall export libpng is bailing out!\n");
-				return;
-			}
-
-			png_init_io(png_ptr, fp);
-
-			/* Don't use libpngs filters, they increase
-			 * the image size for this type of image */
-			png_set_filter(png_ptr, 0, PNG_FILTER_NONE);
-
-			png_set_IHDR(png_ptr, info_ptr, disp_width, image_height, 8, PNG_COLOR_TYPE_RGB,
-					 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-
-			for (int y = 0; y < image_height; y++) for (int x = 0; x < disp_width; x++)
-			{
-				memcpy(&(tmp_image[y][x * 3]), pixmap + ((x + (y * disp_width)) * sizeof(RGBI)), 3);
-			}
-
-			for (int k = 0; k < image_height; k++)
-			{
-				row_pointers[k] = (png_byte *) tmp_image + k * w() * 3;
-			}
-
-			png_write_info(png_ptr, info_ptr);
-			png_write_image(png_ptr, row_pointers);
-			png_write_end(png_ptr, info_ptr);
-
-			png_destroy_write_struct(&png_ptr, &info_ptr);
-
-			fclose(fp);
-		}
-	}
-
-	waterwheel++;
-
-	if (waterwheel > image_height / 2)
-	{
-		waterwheel = 0;
-	}
 }
 
 void WFdisp::drawspectrum() {
@@ -1074,7 +1019,7 @@ void WFdisp::drawspectrum() {
 	if (progdefaults.UseBWTracks) {
 		uchar  *pos1 = pixmap + (carrierfreq - offset - bandwidth/2) / step;
 		uchar  *pos2 = pixmap + (carrierfreq - offset + bandwidth/2) / step;
-		if (pos1 >= pixmap && 
+		if (pos1 >= pixmap &&
 			pos2 < pixmap + disp_width)
 			for (int y = 0; y < image_height; y ++) {
 				*pos1 = *pos2 = 255;
@@ -1086,13 +1031,14 @@ void WFdisp::drawspectrum() {
 				pos2 += IMAGE_WIDTH/step;
 			}
 	}
-	if (active_modem && wantcursor && 
+	if (active_modem && wantcursor &&
 		(progdefaults.UseCursorLines || progdefaults.UseCursorCenterLine)) {
 		trx_mode mode = active_modem->get_mode();
 		int bw_lo = bandwidth / 2;
 		int bw_hi = bandwidth / 2;
 		if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 			bw_hi = bw_hi * 31 / 32;
+		if (mode == MODE_FSQ) bw_hi = bw_hi * 32 / 33;
 		uchar  *pos0 = pixmap + cursorpos;
 		uchar  *pos1 = (pixmap + cursorpos - bw_lo/step);
 		uchar  *pos2 = (pixmap + cursorpos + bw_hi/step);
@@ -1289,8 +1235,7 @@ void xmtrcv_cb(Fl_Widget *w, void *vi)
 	FL_UNLOCK_D();
 	if (!(active_modem->get_cap() & modem::CAP_TX)) {
 		b->value(0);
-		restoreFocus();
-		return;
+		restoreFocus();		return;
 	}
 	if (v == 1) {
 		stopMacroTimer();
@@ -1375,7 +1320,7 @@ void ampspan_cb(Fl_Widget *w, void *v) {
 	restoreFocus();
 }
 
-void btnRev_cb(Fl_Widget *w, void *v) 
+void btnRev_cb(Fl_Widget *w, void *v)
 {
 	if (!active_modem) return;
 	FL_LOCK_D();
@@ -1489,7 +1434,7 @@ void waterfall::opmode() {
 	int val = (int)active_modem->get_bandwidth();
 
 	wfdisp->carrier((int)CLAMP(
-		wfdisp->carrier(), 
+		wfdisp->carrier(),
 		progdefaults.LowFreqCutoff + val / 2,
 		progdefaults.HighFreqCutoff - val / 2));
 
@@ -1617,6 +1562,7 @@ void waterfall::show_scope(bool on)
 		wfdisp->size( wf->w() - 2 * BEZEL, wf_dim - 2 * BEZEL);
 		rs1->init_sizes();
 	}
+	wfscope->redraw();
 }
 
 waterfall::waterfall(int x0, int y0, int w0, int h0, char *lbl) :
@@ -1828,7 +1774,7 @@ int waterfall::handle(int event)
 		for (;;) {
 			mode = WCLAMP(mode + d, 0, NUM_MODES - 1);
 			if ((mode >= NUM_RXTX_MODES && mode < NUM_MODES) ||
-				progdefaults.visible_modes.test(mode))
+			    progdefaults.visible_modes.test(mode))
 				break;
 		}
 		init_modem(mode);
@@ -1837,7 +1783,7 @@ int waterfall::handle(int event)
 	// as above; handle wheel events for the macro bar
 	extern void altmacro_cb(Fl_Widget *w, void *v);
 	if (progdefaults.macro_wheel) {
-		if (progdefaults.mbar2_pos) {
+		if (progdefaults.mbar_scheme > MACRO_SINGLE_BAR_MAX) {
 			if (Fl::event_inside(macroFrame2)) {
 				altmacro_cb(btnAltMacros2, reinterpret_cast<void *>(d));
 				return 1;
@@ -1870,7 +1816,7 @@ void waterfall::insert_text(bool check)
 		m.mode = active_modem->get_mode();
 		extern qrg_mode_t last_marked_qrg;
 		if (last_marked_qrg.mode == m.mode && last_marked_qrg.rfcarrier == m.rfcarrier &&
-			abs(last_marked_qrg.carrier - m.carrier) <= 16)
+		    abs(last_marked_qrg.carrier - m.carrier) <= 16)
 			return;
 		last_marked_qrg = m;
 	}
@@ -1904,7 +1850,7 @@ static void find_signal_text(void)
 		// try the other direction
 		int pos = ReceiveText->insert_position();
 		if (ReceiveText->buffer()->search_backward(pos, i->first.c_str(), &pos, 1) ||
-			ReceiveText->buffer()->search_forward(pos, i->first.c_str(), &pos, 1)) {
+		    ReceiveText->buffer()->search_forward(pos, i->first.c_str(), &pos, 1)) {
 			ReceiveText->insert_position(pos);
 			ReceiveText->show_insert_position();
 		}
@@ -1990,8 +1936,8 @@ int WFdisp::handle(int event)
 				if (!progdefaults.WaterfallHistoryDefault)
 					bHistory = true;
 				if (eb == FL_LEFT_MOUSE) {
-					   restoreFocus();
-					   break;
+				       restoreFocus();
+				       break;
 				}
 			}
 			if (progdefaults.WaterfallHistoryDefault)
@@ -1999,8 +1945,8 @@ int WFdisp::handle(int event)
 			newcarrier = cursorFreq(xpos);
 			if (active_modem) {
 				newcarrier = (int)CLAMP(
-					newcarrier, 
-					progdefaults.LowFreqCutoff + active_modem->get_bandwidth() / 2, 
+					newcarrier,
+					progdefaults.LowFreqCutoff + active_modem->get_bandwidth() / 2,
 					progdefaults.HighFreqCutoff - active_modem->get_bandwidth() / 2);
 				active_modem->set_freq(newcarrier);
 				viewer_paste_freq(newcarrier);
@@ -2085,8 +2031,8 @@ int WFdisp::handle(int event)
 				d = -d;
 			if (active_modem) {
 				oldcarrier = newcarrier = (int)CLAMP(
-					carrier() + d, 
-					progdefaults.LowFreqCutoff + active_modem->get_bandwidth() / 2, 
+					carrier() + d,
+					progdefaults.LowFreqCutoff + active_modem->get_bandwidth() / 2,
 					progdefaults.HighFreqCutoff - active_modem->get_bandwidth() / 2);
 				active_modem->set_freq(newcarrier);
 			}
@@ -2106,8 +2052,8 @@ int WFdisp::handle(int event)
 		if (Fl::event_inside(this)) {
 			int k = Fl::event_key();
 			if (k == FL_Shift_L || k == FL_Shift_R || k == FL_Control_L ||
-				k == FL_Control_R || k == FL_Meta_L || k == FL_Meta_R ||
-				k == FL_Alt_L || k == FL_Alt_R)
+			    k == FL_Control_R || k == FL_Meta_L || k == FL_Meta_R ||
+			    k == FL_Alt_L || k == FL_Alt_R)
 				restoreFocus();
 		}
 		break;
@@ -2171,7 +2117,7 @@ void waterfall::handle_mouse_wheel(int what, int d)
 		val = sldrSquelch;
 		d = -d;
 		msg_fmt = "%s = %2.0f %%";
-		msg_label = "Sqlch";
+		msg_label = "Squelch";
 		break;
 	case WF_CARRIER:
 		val = wfcarrier;

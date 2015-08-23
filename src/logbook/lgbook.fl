@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0300 
 i18n_type 1 
 i18n_include "gettext.h" 
 i18n_function _ 
@@ -326,8 +326,8 @@ btnSelectNotes->value(0);}
     }
   }
   Fl_Window dlgLogbook {
-    label Logbook open
-    xywh {885 64 590 510} type Double resizable visible
+    label Logbook
+    xywh {603 71 590 514} type Double resizable visible
   } {
     Fl_Input inpDate_log {
       label {Date On}
@@ -552,7 +552,7 @@ wBrowser->allowResize (1);
 wBrowser->gridEnabled (0);
 dlgLogbook->xclass(PACKAGE_TARNAME);} {}
   Fl_Window wCabrillo {
-    label {Cabrillo Setup}
+    label {Cabrillo Setup} selected
     xywh {516 612 675 340} type Double hide
   } {
     Fl_Group {} {

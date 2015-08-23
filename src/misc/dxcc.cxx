@@ -44,13 +44,15 @@
 
 using namespace std;
 
-//#ifdef __clang__
-//#	include <unordered_map>
-//	using std::unordered_map;
-//#else
+#if HAVE_STD_HASH
+#	include <unordered_map>
+	using std::unordered_map;
+#elif HAVE_STD_TR1_HASH
 #	include <tr1/unordered_map>
 	using tr1::unordered_map;
-//#endif
+#else
+#	error "No std::hash or std::tr1::hash support"
+#endif
 
 dxcc::dxcc(const char* cn, int cq, int itu, const char* ct, float lat, float lon, float tz)
 	: country(cn), cq_zone(cq), itu_zone(itu), latitude(lat), longitude(lon), gmt_offset(tz)
@@ -327,9 +329,16 @@ void default_cty_dat_pathname()
 void select_cty_dat_pathname()
 {
 	string deffilename = progdefaults.cty_dat_pathname;
-	const char *p = FSEL::select(_("Locate cty.dat"), _("cty.dat\t*"), deffilename.c_str());
+	const char *p = FSEL::select(_("Locate cty.dat folder"), _("cty.dat\t*"), deffilename.c_str());
 	if (p) {
 		string nupath = p;
+		size_t ptr;
+//crappy win32 again
+		ptr = nupath.find("\\");
+		while (ptr != string::npos) {
+			nupath[ptr] = '/';
+			ptr = nupath.find("\\");
+		}
 		size_t endslash = nupath.rfind("/");
 		if ((endslash != string::npos) && (endslash != (nupath.length()-1)))
 			nupath.erase(endslash + 1);

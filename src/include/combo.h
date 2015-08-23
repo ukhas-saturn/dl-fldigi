@@ -73,6 +73,7 @@ public:
 class Fl_ComboBox : public Fl_Group  {
   friend int DataCompare (const void *, const void *);
   friend class Fl_PopBrowser;
+  friend void val_callback(Fl_Widget *, void *);
 
 	Fl_Button		*btn;
 	Fl_Box			*valbox;
@@ -109,6 +110,7 @@ public:
 	void sort ();
 	int  index ();
 	void index (int i);
+	int  find_index(const char *str);
 	void *data ();
 	void textfont (int);
 	void textsize (uchar);

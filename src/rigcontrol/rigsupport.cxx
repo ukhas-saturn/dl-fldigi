@@ -323,6 +323,7 @@ int cb_qso_opMODE()
 	else
 #endif
 		rigCAT_setmode(qso_opMODE->value());
+	set_flrig_mode(qso_opMODE->value());
 	return 0;
 }
 
@@ -331,6 +332,7 @@ int cb_qso_opBW()
 	if (progdefaults.chkUSERIGCATis)
 //    if (!progdefaults.chkUSEXMLRPCis)
 		rigCAT_setwidth(qso_opBW->value());
+	set_flrig_bw(qso_opBW->index());
 	return 0;
 }
 
@@ -342,12 +344,14 @@ void sendFreq(long int f)
 	else
 #endif
 		rigCAT_setfreq(f);
+	set_flrig_freq(f);
 }
 
-void qso_movFreq(Fl_Widget* w, void*)
+void qso_movFreq(Fl_Widget* w, void *data)
 {
 	cFreqControl *fc = (cFreqControl *)w;
 	long int f;
+	long restore = reinterpret_cast<long>(data);
 	f = fc->value();
 	if (fc == qsoFreqDisp1) {
 		qsoFreqDisp2->value(f);
@@ -361,7 +365,23 @@ void qso_movFreq(Fl_Widget* w, void*)
 	}
 
 	sendFreq(f);
+	if (restore == 1)
+		restoreFocus();
 	return;
+}
+
+void qso_selectFreq(long int rfcarrier, int carrier)
+{
+	if (rfcarrier > 0) {
+		qsoFreqDisp1->value(rfcarrier);
+		qsoFreqDisp2->value(rfcarrier);
+		qsoFreqDisp3->value(rfcarrier);
+		sendFreq(rfcarrier);
+	}
+
+	if (carrier > 0) {
+		active_modem->set_freq(carrier);
+	}
 }
 
 void qso_selectFreq()
@@ -391,6 +411,15 @@ void qso_selectFreq()
 	}
 }
 
+void qso_setFreq(long int f)
+{
+	// transceiver frequency
+	if (f > 0) {
+		qsoFreqDisp->value(f);
+		sendFreq(f);
+	}
+}
+
 void qso_setFreq()
 {
 	int n = qso_opBrowser->value();
@@ -398,10 +427,7 @@ void qso_setFreq()
 
 	n -= 1;
 // transceiver frequency
-	if (freqlist[n].rfcarrier > 0) {
-		qsoFreqDisp->value(freqlist[n].rfcarrier);
-		sendFreq(freqlist[n].rfcarrier);
-	}
+ 	qso_setFreq(freqlist[n].rfcarrier);
 }
 
 void qso_delFreq()
@@ -425,13 +451,11 @@ void qso_addFreq()
 
 void setTitle()
 {
-	if (windowTitle.length() > 0) {
-		txtRigName->label(windowTitle.c_str());
-		txtRigName->redraw_label();
-	} else {
-		txtRigName->label();
-		txtRigName->redraw_label();
-	}
+	if (windowTitle.empty()) return;
+	size_t p = main_window_title.find(" / ");
+	if (p != string::npos) main_window_title.erase(p);
+	main_window_title.append(" / ").append(windowTitle);
+	update_main_title();
 }
 
 bool init_Xml_RigDialog()
@@ -466,7 +490,7 @@ bool init_NoRig_RigDialog()
 	clearList();
 	buildlist();
 
-	windowTitle = _("Enter Xcvr Freq");
+	windowTitle.clear();
 	setTitle();
 
 	return true;

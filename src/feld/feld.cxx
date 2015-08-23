@@ -222,10 +222,7 @@ cmplx feld::mixer(cmplx in)
 
 	rxphacc -= 2.0 * M_PI * frequency / samplerate;
 
-	if (rxphacc > M_PI)
-		rxphacc -= 2.0 * M_PI;
-	else if (rxphacc < M_PI)
-		rxphacc += 2.0 * M_PI;
+	if (rxphacc < 0) rxphacc += TWOPI;
 
 	return z;
 }
@@ -451,8 +448,7 @@ double feld::nco(double freq)
 
 	txphacc += 2.0 * M_PI * freq / samplerate;
 
-	if (txphacc > M_PI)
-		txphacc -= 2.0 * M_PI;
+	if (txphacc > TWOPI) txphacc -= TWOPI;
 
 	return x;
 }
@@ -473,7 +469,7 @@ void feld::send_symbol(int currsymb, int nextsymb)
 		switch (mode) {
 			ncoval = nco(tone);
 			case MODE_FSKHELL : case MODE_FSKH105 : case MODE_HELL80 :
-				if ((tone2 != tone) && ((1.0 - fabs(ncoval)) < .001)) 
+				if ((tone2 != tone) && ((1.0 - fabs(ncoval)) < .001))
 					tone = tone2;
 				break;
 			case MODE_HELLX5 : case MODE_HELLX9 :

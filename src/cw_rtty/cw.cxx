@@ -54,6 +54,9 @@
 
 using namespace std;
 
+#define XMT_FILT_LEN 256
+#define QSK_DELAY_LEN 4*XMT_FILT_LEN
+
 const cw::SOM_TABLE cw::som_table[] = {
 	/* Prosigns */
 	{'=',	"<BT>",   {1.0,  0.33,  0.33,  0.33, 1.0,   0, 0}	}, // 0
@@ -182,10 +185,15 @@ void cw::tx_init(SoundBase *sc)
 	phaseacc = 0;
 	lastsym = 0;
 	qskphase = 0;
+	if (progdefaults.pretone) pretone();
 
 	symbols = 0;
 	acc_symbols = 0;
 	ovhd_symbols = 0;
+
+	cw_xmt_filter->create_filter(lwr, upr);
+	qsk_ptr = XMT_FILT_LEN / 2;
+	maxval = 0.0;
 }
 
 void cw::rx_init()
@@ -227,12 +235,14 @@ void cw::init()
 	use_paren = progdefaults.CW_use_paren;
 	prosigns = progdefaults.CW_prosigns;
 	stopflag = false;
+	maxval = 0;
 }
 
 cw::~cw() {
 	if (hilbert) delete hilbert;
 	if (cw_FIR_filter) delete cw_FIR_filter;
 	if (cw_FFT_filter) delete cw_FFT_filter;
+	if (cw_xmt_filter) delete cw_xmt_filter;
 	if (bitfilter) delete bitfilter;
 	if (trackingfilter) delete trackingfilter;
 }
@@ -307,6 +317,23 @@ cw::cw() : modem()
 // low pass implementation
 	FilterFFTLen = 4096;
 	cw_FFT_filter = new fftfilt(progdefaults.CWspeed/(1.2 * samplerate), FilterFFTLen);
+
+// transmit filtering
+
+	nbfreq = frequency;
+	nbpf = progdefaults.CW_bpf;
+	lwr = nbfreq - nbpf/2.0;
+	upr = nbfreq + nbpf/2.0;
+	if (lwr < 50.0) lwr = 50.0;
+	if (upr > 3900.0) upr = 3900.0;
+	lwr /= samplerate;
+	upr /= samplerate;
+	xmt_signal = new double[XMT_FILT_LEN];
+	for (int i = 0; i < XMT_FILT_LEN; i++) xmt_signal[i] = 0.0;
+	qsk_signal = new double[QSK_DELAY_LEN];
+	for (int i = 0; i < QSK_DELAY_LEN; i++) qsk_signal[i] = 0.0;
+	cw_xmt_filter = new fftfilt( lwr, upr, 2*XMT_FILT_LEN);// transmit filter length
+//		FilterFFTLen);
 
 // bit filter based on 10 msec rise time of CW waveform
 	int bfv = (int)(samplerate * .010 / DEC_RATIO);
@@ -387,15 +414,12 @@ void cw::reset_rx_filter()
 // Synchronize the dot, dash, end of element, end of character, and end
 // of word timings and ranges to new values of Morse speed, or receive tolerance.
 
-void cw::sync_parameters()
+void cw::sync_transmit_parameters()
 {
-	int lowerwpm, upperwpm, nusymbollen, nufsymlen;
-
-	int wpm = usedefaultWPM ? progdefaults.defCWspeed : progdefaults.CWspeed;
-	int fwpm = progdefaults.CWfarnsworth;
+	wpm = usedefaultWPM ? progdefaults.defCWspeed : progdefaults.CWspeed;
+	fwpm = progdefaults.CWfarnsworth;
 
 	cw_send_dot_length = DOT_MAGIC / progdefaults.CWspeed;
-
 	cw_send_dash_length = 3 * cw_send_dot_length;
 
 	nusymbollen = (int)round(samplerate * 1.2 / wpm);
@@ -404,13 +428,18 @@ void cw::sync_parameters()
 	if (symbollen != nusymbollen ||
 		nufsymlen != fsymlen ||
 		risetime  != progdefaults.CWrisetime ||
-		QSKshape  != progdefaults.QSKshape ) {
+		QSKshape  != progdefaults.QSKshape) {
 		risetime = progdefaults.CWrisetime;
 		QSKshape = progdefaults.QSKshape;
 		symbollen = nusymbollen;
 		fsymlen = nufsymlen;
 		makeshape();
 	}
+}
+
+void cw::sync_parameters()
+{
+	sync_transmit_parameters();
 
 // check if user changed the tracking or the cw default speed
 	if ((cwTrack != progdefaults.CWtrack) ||
@@ -529,10 +558,7 @@ cmplx cw::mixer(cmplx in)
 	z = z * in;
 
 	phaseacc += TWOPI * frequency / samplerate;
-	if (phaseacc > M_PI)
-		phaseacc -= TWOPI;
-	else if (phaseacc < M_PI)
-		phaseacc += TWOPI;
+	if (phaseacc > TWOPI) phaseacc -= TWOPI;
 
 	return z;
 }
@@ -611,10 +637,7 @@ void cw::rx_FFTprocess(const double *buf, int len)
 
 		z = cmplx ( *buf * cos(FFTphase), *buf * sin(FFTphase) );
 		FFTphase += TWOPI * frequency / samplerate;
-		if (FFTphase > M_PI)
-			FFTphase -= TWOPI;
-		else if (FFTphase < M_PI)
-			FFTphase += TWOPI;
+		if (FFTphase > TWOPI) FFTphase -= TWOPI;
 
 		buf++;
 
@@ -648,10 +671,7 @@ void cw::rx_FIRprocess(const double *buf, int len)
 		buf++;
 
 		FIRphase += TWOPI * frequency / samplerate;
-		if (FIRphase > M_PI)
-			FIRphase -= TWOPI;
-		else if (FIRphase < M_PI)
-			FIRphase += TWOPI;
+		if (FIRphase > TWOPI) FIRphase -= TWOPI;
 
 		if (cw_FIR_filter->run ( z, z )) {
 
@@ -884,21 +904,18 @@ double keyshape[KNUM];
 void cw::makeshape()
 {
 	for (int i = 0; i < KNUM; i++) keyshape[i] = 1.0;
-	knum = (int)(8 * risetime);
-
-	if (knum >= symbollen)
-		knum = symbollen - 1;
-
-	if (knum > KNUM)
-		knum = KNUM;
 
 	switch (QSKshape) {
 		case 1: // blackman
+			knum = (int)(8 * risetime);
+			if (knum >= symbollen) knum = symbollen;
 			for (int i = 0; i < knum; i++)
 				keyshape[i] = (0.42 - 0.50 * cos(M_PI * i/ knum) + 0.08 * cos(2 * M_PI * i / knum));
 			break;
-		case 0: // raised cosine (hanning)
+		case 0: // hanning
 		default:
+			knum = (int)(8 * risetime);
+			if (knum >= symbollen) knum = symbollen;
 			for (int i = 0; i < knum; i++)
 				keyshape[i] = 0.5 * (1.0 - cos (M_PI * i / knum));
 	}
@@ -908,8 +925,7 @@ inline double cw::nco(double freq)
 {
 	phaseacc += 2.0 * M_PI * freq / samplerate;
 
-	if (phaseacc > M_PI)
-		phaseacc -= 2.0 * M_PI;
+	if (phaseacc > TWOPI) phaseacc -= TWOPI;
 
 	return sin(phaseacc);
 }
@@ -918,8 +934,7 @@ inline double cw::qsknco()
 {
 	qskphase += 2.0 * M_PI * 1000 / samplerate;
 
-	if (qskphase > M_PI)
-		qskphase -= 2.0 * M_PI;
+	if (qskphase > TWOPI) qskphase -= TWOPI;
 
 	return sin(qskphase);
 }
@@ -939,6 +954,59 @@ inline double cw::qsknco()
 // character.
 //=======================================================================
 
+//void appendfile(double *left, double *right, size_t count)
+//{
+//	FILE *ofile = fopen("stereo.txt", "a");
+//	for (size_t i = 0; i < count; i++)
+//		fprintf(ofile,"%f,%f\n", left[i], right[i]);
+//	fclose(ofile);
+//}
+
+void cw::nb_filter(double *output, double *qsk, int len)
+{
+// fft implementation of 
+	if (nbfreq != tx_frequency ||
+		nbpf != progdefaults.CW_bpf) {
+
+		nbfreq = tx_frequency;
+		nbpf = progdefaults.CW_bpf;
+		lwr = nbfreq - nbpf/2.0;
+		upr = nbfreq + nbpf/2.0;
+		if (lwr < 50.0) lwr = 50.0;
+		if (upr > 3900.0) upr = 3900.0;
+		lwr /= samplerate;
+		upr /= samplerate;
+		cw_xmt_filter->create_filter(lwr, upr);
+	}
+	cmplx *zp;
+	int n = 0;
+	for (int i = 0; i < len; i++) {
+// n will be either 0 or XMT_FILT_LEN
+		qsk_signal[qsk_ptr] = qsk[i];
+		qsk_ptr++;
+		if (qsk_ptr == QSK_DELAY_LEN) qsk_ptr--;
+		if ((n = cw_xmt_filter->run(
+					cmplx(output[i], output[i]), 
+					&zp)) > 0) {
+			for (int k = 0; k < n; k++)
+				if (abs(zp[k].real()) > maxval) maxval = abs(zp[k].real());
+			if (maxval == 0) maxval = 1.0;
+			for (int k = 0; k < n; k++)
+				xmt_signal[k] = 0.95 * zp[k].real() / maxval;
+
+//			appendfile(xmt_signal, qsk_signal, n);
+
+			if (progdefaults.QSK)
+				ModulateStereo(xmt_signal, qsk_signal, n);
+			else
+				ModulateXmtr(xmt_signal, n);
+			for (int k = 0; k < QSK_DELAY_LEN - n - 1; k++)
+				qsk_signal[k] = qsk_signal[k + n];
+			qsk_ptr -= n;
+		}
+	}
+}
+
 int q_carryover = 0, carryover = 0;
 
 void cw::send_symbol(int bits, int len)
@@ -954,6 +1022,11 @@ void cw::send_symbol(int bits, int len)
 	int symlen = 0;
 	float dsymlen = 0.0;
 	int currsym = bits & 1;
+	double qsk_amp = progdefaults.QSK ? 1.0 : 0.0;
+
+	sync_transmit_parameters();
+
+	acc_symbols += len;
 
 	acc_symbols += len;
 
@@ -1005,7 +1078,7 @@ void cw::send_symbol(int bits, int len)
 		if (lastsym == 1) {
 			for (i = 0; i < keydown; i++, sample++) {
 				outbuf[sample] = nco(freq);
-				qskbuf[sample] = qsknco();
+				qskbuf[sample] = qsk_amp * qsknco();
 			}
 			duration = keydown;
 		} else {
@@ -1019,11 +1092,11 @@ void cw::send_symbol(int bits, int len)
 					outbuf[sample] = 0 * nco(freq);
 			sample = 0;
 			for (int i = 0; i < kpre; i++, sample++) {
-				qskbuf[sample] = qsknco();
+				qskbuf[sample] = qsk_amp * qsknco();
 			}
 			for (int i = 0; i < knum; i++, sample++) {
 				outbuf[sample] = nco(freq) * keyshape[i];
-				qskbuf[sample] = qsknco();
+				qskbuf[sample] = qsk_amp * qsknco();
 			}
 			duration = kpre + knum;
 		}
@@ -1046,7 +1119,7 @@ void cw::send_symbol(int bits, int len)
 			qsample = 0;
 			if (q_carryover) {
 				for (int i = 0; i < q_carryover; i++, qsample++) {
-					qskbuf[qsample] = qsknco();
+					qskbuf[qsample] = qsk_amp * qsknco();
 				}
 				while (qsample < duration)
 					qskbuf[qsample++] = 0 * qsknco();
@@ -1088,7 +1161,7 @@ void cw::send_symbol(int bits, int len)
 					q_carryover = kpost - duration;
 					break;
 				}
-				qskbuf[qsample] = qsknco();
+				qskbuf[qsample] = qsk_amp * qsknco();
 			}
 			while (qsample < duration)
 				qskbuf[qsample++] = 0 * qsknco();
@@ -1096,10 +1169,14 @@ void cw::send_symbol(int bits, int len)
 	}
 
 	if (duration > 0) {
-		if (progdefaults.QSK)
-			ModulateStereo(outbuf, qskbuf, duration);
-		else
-			ModulateXmtr(outbuf, duration);
+		if (progdefaults.CW_bpf_on)
+			nb_filter(outbuf, qskbuf, duration);
+		else {
+			if (progdefaults.QSK)
+				ModulateStereo(outbuf, qskbuf, duration);
+			else
+				ModulateXmtr(outbuf, duration);
+		}
 	}
 
 	lastsym = currsym;
@@ -1199,18 +1276,23 @@ int cw::tx_process()
 	c = get_tx_char();
 	if (c == GET_TX_CHAR_ETX || stopflag) {
 		stopflag = false;
-			return -1;
+		if (progdefaults.CW_bpf_on) { // flush the transmit bandpass filter
+			int n = cw_xmt_filter->flush_size();
+			for (int i = 0; i < n; i++) outbuf[i] = 0;
+			nb_filter(outbuf, outbuf, n);
+		}
+		return -1;
 	}
 	acc_symbols = 0;
 	send_ch(c);
 
 	xmt_samples = char_samples = acc_symbols;
 
-	printf("%5s %d samples, overhead %d, %f sec's\n",
-		ascii3[c & 0xff],
-		char_samples,
-		ovhd_samples,
-		1.0 * char_samples / samplerate);
+//	printf("%5s %d samples, overhead %d, %f sec's\n",
+//		ascii3[c & 0xff],
+//		char_samples,
+//		ovhd_samples,
+//		1.0 * char_samples / samplerate);
 
 	return 0;
 }

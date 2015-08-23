@@ -88,42 +88,42 @@ static string arqtext = "";  // Protected by arq_rx_mutex
 static string txstring = ""; // Protected by arq_rx_mutex
 static size_t pText;         // Protected by arq_rx_mutex
 bool arq_text_available = false; // Protected by arq_rx_mutex
-// Beware 'arq_text_available' is accessed by other modules.
+								 // Beware 'arq_text_available' is accessed by other modules.
 
 // =====================================================================
 
 static const char *asc[128] = {
 	"<NUL>", "<SOH>", "<STX>", "<ETX>",
 	"<EOT>", "<ENQ>", "<ACK>", "<BEL>",
-	"<BS>",  "<TAB>", "\n",  "<VT>", 
+	"<BS>",  "<TAB>", "\n",  "<VT>",
 	"<FF>",  "",  "<SO>",  "<SI>",
 	"<DLE>", "<DC1>", "<DC2>", "<DC3>",
 	"<DC4>", "<NAK>", "<SYN>", "<ETB>",
 	"<CAN>", "<EM>",  "<SUB>", "<ESC>",
 	"<FS>",  "<GS>",  "<RS>",  "<US>",
-	" ",     "!",     "\"",    "#",    
-	"$",     "%",     "&",     "\'",   
-	"(",     ")",     "*",     "+",    
-	",",     "-",     ".",     "/",   
-	"0",     "1",     "2",     "3",    
-	"4",     "5",     "6",     "7",   
-	"8",     "9",     ":",     ";",    
-	"<",     "=",     ">",     "?",   
-	"@",     "A",     "B",     "C",    
-	"D",     "E",     "F",     "G",   
-	"H",     "I",     "J",     "K",    
-	"L",     "M",     "N",     "O",   
-	"P",     "Q",     "R",     "S",    
-	"T",     "U",     "V",     "W",   
-	"X",     "Y",     "Z",     "[",    
-	"\\",    "]",     "^",     "_",   
-	"`",     "a",     "b",     "c",    
-	"d",     "e",     "f",     "g",   
-	"h",     "i",     "j",     "k",    
-	"l",     "m",     "n",     "o",   
-	"p",     "q",     "r",     "s",    
-	"t",     "u",     "v",     "w",   
-	"x",     "y",     "z",     "{",    
+	" ",     "!",     "\"",    "#",
+	"$",     "%",     "&",     "\'",
+	"(",     ")",     "*",     "+",
+	",",     "-",     ".",     "/",
+	"0",     "1",     "2",     "3",
+	"4",     "5",     "6",     "7",
+	"8",     "9",     ":",     ";",
+	"<",     "=",     ">",     "?",
+	"@",     "A",     "B",     "C",
+	"D",     "E",     "F",     "G",
+	"H",     "I",     "J",     "K",
+	"L",     "M",     "N",     "O",
+	"P",     "Q",     "R",     "S",
+	"T",     "U",     "V",     "W",
+	"X",     "Y",     "Z",     "[",
+	"\\",    "]",     "^",     "_",
+	"`",     "a",     "b",     "c",
+	"d",     "e",     "f",     "g",
+	"h",     "i",     "j",     "k",
+	"l",     "m",     "n",     "o",
+	"p",     "q",     "r",     "s",
+	"t",     "u",     "v",     "w",
+	"x",     "y",     "z",     "{",
 	"|",     "}",     "~",     "<DEL>"
 };
 
@@ -192,12 +192,11 @@ void ParseMode(string src)
 	for (size_t i = 0; i < NUM_MODES; ++i) {
 		if (strlen(mode_info[i].pskmail_name) > 0) {
 			if (src == mode_info[i].pskmail_name) {
-//				while (trx_state != STATE_RX) {
-//					MilliSleep(10);
-//				}
-				if (debug_pskmail)
-					LOG_INFO("Setting modem to %s", mode_info[i].pskmail_name);
 				REQ_SYNC(init_modem_sync, mode_info[i].mode, 0);
+				AbortARQ();
+				WriteARQ('\002');
+				if (debug_pskmail)
+					LOG_INFO("Modem set to %s", mode_info[i].pskmail_name);
 				break;
 			}
 		}
@@ -235,8 +234,8 @@ void ParseTxRSID(string src)
 
 void parse_arqtext(string &toparse)
 {
-static	string strCmdText;
-static	string strSubCmd;
+	static	string strCmdText;
+	static	string strSubCmd;
 	unsigned long int idxCmd, idxCmdEnd, idxSubCmd, idxSubCmdEnd;
 
 	if (toparse.empty()) return;
@@ -285,7 +284,7 @@ static	string strSubCmd;
 		} else if ((idxSubCmd = strCmdText.find("<mode>")) != string::npos) {
 			idxSubCmdEnd = strCmdText.find("</mode>");
 			if (	idxSubCmdEnd != string::npos &&
-					idxSubCmdEnd > idxSubCmd ) {
+				idxSubCmdEnd > idxSubCmd ) {
 				strSubCmd = strCmdText.substr(idxSubCmd + 6, idxSubCmdEnd - idxSubCmd - 6);
 				ParseMode(strSubCmd);
 				LOG_INFO("%s %s", "ARQ mode ", strSubCmd.c_str());
@@ -293,7 +292,7 @@ static	string strSubCmd;
 		} else if ((idxSubCmd = strCmdText.find("<rsid>")) != string::npos) {
 			idxSubCmdEnd = strCmdText.find("</rsid>");
 			if (	idxSubCmdEnd != string::npos &&
-					idxSubCmdEnd > idxSubCmd ) {
+				idxSubCmdEnd > idxSubCmd ) {
 				strSubCmd = strCmdText.substr(idxSubCmd + 6, idxSubCmdEnd - idxSubCmd - 6);
 				ParseRSID(strSubCmd);
 				LOG_INFO("%s %s", "ARQ rsid ", strSubCmd.c_str());
@@ -301,7 +300,7 @@ static	string strSubCmd;
 		} else if ((idxSubCmd = strCmdText.find("<txrsid>")) != string::npos) {
 			idxSubCmdEnd = strCmdText.find("</txrsid>");
 			if (	idxSubCmdEnd != string::npos &&
-					idxSubCmdEnd > idxSubCmd ) {
+				idxSubCmdEnd > idxSubCmd ) {
 				strSubCmd = strCmdText.substr(idxSubCmd + 8, idxSubCmdEnd - idxSubCmd - 8);
 				ParseTxRSID(strSubCmd);
 				LOG_INFO("%s %s", "ARQ txrsid ", strSubCmd.c_str());
@@ -331,8 +330,8 @@ static	string strSubCmd;
 // in $HOME
 
 void checkTLF() {
-static	string TLFfile;
-static	string TLFlogname;
+	static	string TLFfile;
+	static	string TLFlogname;
 	ifstream testFile;
 
 	tlfio = mailserver = mailclient = false;
@@ -355,7 +354,6 @@ static	string TLFlogname;
 static bool TLF_arqRx()
 {
 	/// The mutex is automatically unlocked when returning.
-	guard_lock arq_rx_lock(&arq_rx_mutex);
 #if defined(__WOE32__) || defined(__APPLE__)
 	return false;
 #else
@@ -393,6 +391,7 @@ static bool TLF_arqRx()
 		}
 
 		if (arqtext.empty() && !txstring.empty()) {
+			guard_lock arq_rx_lock(&arq_rx_mutex);
 			arqtext = txstring;
 			if (mailserver && progdefaults.PSKmailSweetSpot)
 				active_modem->set_freq(progdefaults.PSKsweetspot);
@@ -529,12 +528,12 @@ bool ARQ_SOCKET_Server::start(const char* node, const char* service)
 
 void ARQ_SOCKET_Server::stop(void)
 {
-// FILEME - uncomment when we have an ARQ_SOCKET_Server than can be
-// interrupted
-//	if (!inst)
-//		return;
-//	delete inst;
-//	inst = 0;
+	// FILEME - uncomment when we have an ARQ_SOCKET_Server than can be
+	// interrupted
+	//	if (!inst)
+	//		return;
+	//	delete inst;
+	//	inst = 0;
 }
 
 void* ARQ_SOCKET_Server::thread_func(void*)
@@ -568,7 +567,7 @@ void* ARQ_SOCKET_Server::thread_func(void*)
 	}
 
 	{
-	/// Mutex is unlocked when leaving the block.
+		/// Mutex is unlocked when leaving the block.
 		guard_lock arq_lock(&arq_mutex);
 
 		if (!arqclient.empty()) {
@@ -627,9 +626,14 @@ void WriteARQsocket(unsigned char* data, size_t len)
 	if (arqclient.empty()) return;
 	static string instr;
 	instr.clear();
+
+	string outs = "";
+	for (unsigned int i = 0; i < len; i++)
+		outs += asc[data[i] & 0x7F];
+	LOG_INFO("%s", outs.c_str());
+
 	vector<ARQCLIENT>::iterator p;
-	p = arqclient.begin();
-	while (p != arqclient.end()) {
+	for (p = arqclient.begin(); p < arqclient.end(); p++) {
 		try {
 			(*p).sock.wait(1);
 			(*p).sock.send(data, len);
@@ -646,11 +650,6 @@ void WriteARQsocket(unsigned char* data, size_t len)
 			arqclient.erase(p);
 		}
 	}
-
-	string outs = "";
-	for (unsigned int i = 0; i < len; i++)
-		outs += asc[data[i] & 0x7F];
-	LOG_INFO("%s", outs.c_str());
 
 	if (arqclient.empty()) arq_reset();
 }
@@ -692,7 +691,7 @@ void test_arq_clients()
 bool Socket_arqRx()
 {
 	{
-	/// Mutex is unlocked when leaving block
+		/// Mutex is unlocked when leaving block
 		guard_lock arq_lock(&arq_mutex);
 		if (arqclient.empty()) return false;
 
@@ -723,20 +722,24 @@ bool Socket_arqRx()
 			}
 		}
 		if (arqclient.empty()) arq_reset();
+
+		if(data_io_enabled != ARQ_IO) {
+			txstring.clear();
+			return true;
+		}
+	}
+
+	if (!txstring.empty()) parse_arqtext(txstring);
+
+	if (abort_flag) {
+		AbortARQ();
+		abort_flag = false;
+		return true;
 	}
 
 	{
-	/// Mutex is unlocked when leaving block
+		/// Mutex is unlocked when leaving block
 		guard_lock arq_rx_lock(&arq_rx_mutex);
-		if (!txstring.empty()) parse_arqtext(txstring);
-
-		if (abort_flag) {
-			AbortARQ();
-			abort_flag = false;
-			return true;
-		}
-
-		{
 
 		if (txstring.empty()) return false;
 
@@ -758,7 +761,7 @@ bool Socket_arqRx()
 
 		arq_text_available = true;
 		active_modem->set_stopflag(false);
-		}
+
 	}
 	return true;
 }
@@ -769,29 +772,45 @@ bool Socket_arqRx()
 
 void WriteARQ(unsigned char data)
 {
+	if (active_modem->get_mode() == MODE_FSQ) return;
 	guard_lock tosend_lock(&tosend_mutex);
 	tosend += data;
 }
 
 void WriteARQ(const char *data)
 {
+	if (active_modem->get_mode() == MODE_FSQ) return;
 	guard_lock tosend_lock(&tosend_mutex);
 	tosend.append(data);
 }
-
+/*
+static void arq_reset_buffers(void)
+{
+	{
+		guard_lock tosend_lock(&tosend_mutex);
+		guard_lock arq_lock(&arq_rx_mutex);
+		arqtext.clear();
+		txstring.clear();
+		pText = 0;
+		arq_text_available = false;
+		enroute.clear();
+		tosend.clear();
+	}
+}
+*/
 static void *arq_loop(void *args)
 {
 	SET_THREAD_ID(ARQ_TID);
 
 	for (;;) {
-	/* see if we are being canceled */
+		/* see if we are being canceled */
 		if (arq_exit)
 			break;
 
 		test_arq_clients();
 
 		{
-		/// Mutex is unlocked when exiting block
+			/// Mutex is unlocked when exiting block
 			guard_lock tosend_lock(&tosend_mutex);
 			enroute.clear();
 			if (!tosend.empty()) {
@@ -804,7 +823,7 @@ static void *arq_loop(void *args)
 			}
 		}
 
-// order of precedence; Socket, Wrap autofile, TLF autofile
+		// order of precedence; Socket, Wrap autofile, TLF autofile
 		if (!Socket_arqRx())
 			if (!WRAP_auto_arqRx())
 				TLF_arqRx();
@@ -812,8 +831,13 @@ static void *arq_loop(void *args)
 		MilliSleep(ARQLOOP_TIMING);
 
 	}
-// exit the arq thread
+	// exit the arq thread
 	return NULL;
+}
+
+bool arq_state(void)
+{
+	return arq_enabled;
 }
 
 void arq_init()
@@ -822,11 +846,14 @@ void arq_init()
 
 	txstring.clear();
 
-	if (!ARQ_SOCKET_Server::start( progdefaults.arq_address.c_str(), progdefaults.arq_port.c_str() ))
+	if (!ARQ_SOCKET_Server::start( progdefaults.arq_address.c_str(), progdefaults.arq_port.c_str() )) {
+		arq_enabled = false;
 		return;
+	}
 
 	if (pthread_create(&arq_thread, NULL, arq_loop, NULL) < 0) {
 		LOG_ERROR("arq init: pthread_create failed");
+		arq_enabled = false;
 		return;
 	}
 
@@ -839,13 +866,14 @@ void arq_close(void)
 
 	ARQ_SOCKET_Server::stop();
 
-// tell the arq thread to kill it self
+	// tell the arq thread to kill it self
 	arq_exit = true;
 
-// and then wait for it to die
+	// and then wait for it to die
 	pthread_join(arq_thread, NULL);
 	arq_enabled = false;
-
+	if(data_io_enabled == ARQ_IO)
+		data_io_enabled = DISABLED_IO ;
 	arq_exit = false;
 }
 
@@ -855,7 +883,7 @@ int arq_get_char()
 	guard_lock arq_rx_lock(&arq_rx_mutex);
 	int c = 0;
 	if (arq_text_available) {
-		if (pText != arqtext.length()) {
+		if (!arqtext.empty() && pText != arqtext.length()) {
 			c = arqtext[pText++] & 0xFF;
 		} else {
 			arqtext.clear();
@@ -879,7 +907,6 @@ void AbortARQ() {
 	txstring.clear();
 	pText = 0;
 	arq_text_available = false;
-//	bSend0x06 = true;
 }
 
 //======================================================================
@@ -891,8 +918,8 @@ void pskmail_notify_rsid(trx_mode mode)
 	static char buf[64];
 	memset(buf, 0, sizeof(buf));
 	int n = snprintf(buf, sizeof(buf),
-				"\x12<Mode:%s>\n",
-				mode_info[mode].name);
+					 "\x12<Mode:%s>\n",
+					 mode_info[mode].name);
 	if (n > 0 && n < (int)sizeof(buf)) {
 		WriteARQ((const char *)buf);
 		REQ(&FTextBase::addstr, ReceiveText, buf, FTextBase::CTRL);
@@ -910,8 +937,8 @@ void pskmail_notify_s2n(double s2n_ncount, double s2n_avg, double s2n_stddev)
 	static char buf[64];
 	memset(buf, 0, sizeof(buf));
 	int n = snprintf(buf, sizeof(buf),
-				"\x12<s2n: %1.0f, %1.1f, %1.1f>\n",
-				s2n_ncount, s2n_avg, s2n_stddev);
+					 "\x12<s2n: %1.0f, %1.1f, %1.1f>\n",
+					 s2n_ncount, s2n_avg, s2n_stddev);
 	if (n > 0 && n < (int)sizeof(buf)) {
 		WriteARQ((const char *)buf);
 		REQ(&FTextBase::addstr, ReceiveText, buf, FTextBase::CTRL);
