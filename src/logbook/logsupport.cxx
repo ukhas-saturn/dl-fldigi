@@ -212,7 +212,7 @@ void Export_ADIF()
 		}
 	}
 	string sp = p;
-	if (sp.find("."ADIF_SUFFIX) == string::npos) sp.append("."ADIF_SUFFIX);
+	if (sp.find("." ADIF_SUFFIX) == string::npos) sp.append("." ADIF_SUFFIX);
 	adifFile.writeFile (sp.c_str(), &qsodb);
 }
 
@@ -309,8 +309,8 @@ void cb_mnuSaveLogbook(Fl_Menu_*m, void* d) {
 	const char* p = FSEL::saveas( title.c_str(), filter.c_str(), logbook_filename.c_str());
 	if (p) {
 		logbook_filename = p;
-		if (logbook_filename.find("."ADIF_SUFFIX) == string::npos)
-			logbook_filename.append("."ADIF_SUFFIX);
+		if (logbook_filename.find("." ADIF_SUFFIX) == string::npos)
+			logbook_filename.append("." ADIF_SUFFIX);
 		dlgLogbook->label(fl_filename_name(logbook_filename.c_str()));
 
 		cQsoDb::reverse = false;
@@ -1386,7 +1386,9 @@ void cabrillo_append_qso (FILE *fp, cQsoRec *rec)
 	}
 
 	if (contestnbr == BARTG_RTTY && exch_out.length() < 11) {
-		exch_out.append(rec->getField(TIME_OFF)).append(" ");
+		string toff = rec->getField(TIME_OFF);
+		toff = toff.substr(0,4).append(" ");
+		exch_out.append(toff);
 	}
 
 	if (exch_out.length() > 14) exch_out = exch_out.substr(0,14);
@@ -1548,9 +1550,14 @@ SOAPBOX: \n\n",
     return;
 }
 
+#ifdef __clang__
+#	include <unordered_map>
+	typedef std::unordered_map<string, unsigned> dxcc_entity_cache_t;
+#else
+#	include <tr1/unordered_map>
+	typedef tr1::unordered_map<string, unsigned> dxcc_entity_cache_t;
+#endif
 
-#include <tr1/unordered_map>
-typedef tr1::unordered_map<string, unsigned> dxcc_entity_cache_t;
 static dxcc_entity_cache_t dxcc_entity_cache;
 static bool dxcc_entity_cache_enabled = false;
 

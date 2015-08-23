@@ -691,8 +691,8 @@ void set_olivia_default_integ()
 
 void set_olivia_tab_widgets()
 {
-	i_listbox_olivia_bandwidth->index(progdefaults.oliviabw+1);
-	i_listbox_olivia_tones->index(progdefaults.oliviatones+1);
+	i_listbox_olivia_bandwidth->index(progdefaults.oliviabw);
+	i_listbox_olivia_tones->index(progdefaults.oliviatones);
 	set_olivia_default_integ();
 }
 
@@ -726,8 +726,8 @@ void set_contestia_default_integ()
 
 void set_contestia_tab_widgets()
 {
-	i_listbox_contestia_bandwidth->index(progdefaults.contestiabw+1);
-	i_listbox_contestia_tones->index(progdefaults.contestiatones+1);
+	i_listbox_contestia_bandwidth->index(progdefaults.contestiabw);
+	i_listbox_contestia_tones->index(progdefaults.contestiatones);
 	set_contestia_default_integ();
 }
 
@@ -7703,7 +7703,7 @@ void set_olivia_tones(int tones)
 	while (tones >>= 1)
 		i++;
 	bool changed = progdefaults.changed;
-	i_listbox_olivia_tones->index(i);// - 1);
+	i_listbox_olivia_tones->index(i+1);
 	i_listbox_olivia_tones->do_callback();
 	progdefaults.changed = changed;
 }
@@ -7734,7 +7734,7 @@ void set_contestia_tones(int tones)
 	while (tones >>= 1)
 		i++;
 	bool changed = progdefaults.changed;
-	i_listbox_contestia_tones->index(i);// - 1);
+	i_listbox_contestia_tones->index(i+1);
 	i_listbox_contestia_tones->do_callback();
 	progdefaults.changed = changed;
 }
