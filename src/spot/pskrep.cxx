@@ -50,7 +50,7 @@
 #include <algorithm>
 #include <fstream>
 
-#if __clang__
+#if __zclang__
 #  define MAP_TYPE std::unordered_map
 #define HASH_TYPE std::hash
 #  include <unordered_map>

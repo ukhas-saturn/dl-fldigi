@@ -35,7 +35,7 @@
 
 #include "timeops.h"
 
-#ifdef __clang__
+#ifdef __zclang__
 #  define MAP_TYPE std::unordered_map
 #  include <unordered_map>
 #else

@@ -1550,13 +1550,13 @@ SOAPBOX: \n\n",
     return;
 }
 
-#ifdef __clang__
-#	include <unordered_map>
-	typedef std::unordered_map<string, unsigned> dxcc_entity_cache_t;
-#else
+//#ifdef __clang__
+//#	include <unordered_map>
+//	typedef std::unordered_map<string, unsigned> dxcc_entity_cache_t;
+//#else
 #	include <tr1/unordered_map>
 	typedef tr1::unordered_map<string, unsigned> dxcc_entity_cache_t;
-#endif
+//#endif
 
 static dxcc_entity_cache_t dxcc_entity_cache;
 static bool dxcc_entity_cache_enabled = false;

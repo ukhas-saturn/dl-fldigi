@@ -23,7 +23,7 @@
 #include <config.h>
 
 #include <list>
-#ifdef __clang__
+#ifdef __zclang__
 #include <unordered_map>
 #else
 #include <tr1/unordered_map>
@@ -64,7 +64,7 @@ struct fre_comp : std::unary_function<const fre_t*, bool>
 };
 
 typedef list<callback_t*> callback_p_list_t;
-#ifdef __clang__
+#ifdef __zclang__
 typedef std::unordered_map<fre_t*, callback_p_list_t, fre_hash, fre_comp> rcblist_t;
 static std::unordered_map<int, string> buffers;
 #else

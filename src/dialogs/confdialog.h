@@ -368,7 +368,7 @@ extern Fl_Tabs *tabsRig;
 extern Fl_Check_Button *btnPTTrightchannel;
 extern Fl_Group *grpHWPTT;
 extern Fl_Round_Button *btnTTYptt;
-extern Fl_ListBox *inpTTYdev;
+extern Fl_ComboBox *inpTTYdev;
 extern Fl_Round_Button *btnRTSptt;
 extern Fl_Round_Button *btnRTSplusV;
 extern Fl_Round_Button *btnDTRptt;
@@ -383,7 +383,7 @@ extern Fl_Check_Button *chkUSERIGCAT;
 extern Fl_Group *grpRigCAT;
 extern Fl_Output *txtXmlRigFilename;
 extern Fl_Button *btnSelectRigXmlFile;
-extern Fl_ListBox *inpXmlRigDevice;
+extern Fl_ComboBox *inpXmlRigDevice;
 extern Fl_Value_Input2 *cntRigCatRetries;
 extern Fl_Value_Input2 *cntRigCatTimeout;
 extern Fl_Value_Input2 *cntRigCatWait;
@@ -405,8 +405,8 @@ extern Fl_Value_Input2 *cntRigCatInitDelay;
 extern Fl_Group *tabHamlib;
 extern Fl_Check_Button *chkUSEHAMLIB;
 extern Fl_Group *grpHamlib;
-extern Fl_ListBox *cboHamlibRig;
-extern Fl_ListBox *inpRIGdev;
+extern Fl_ComboBox *cboHamlibRig;
+extern Fl_ComboBox *inpRIGdev;
 extern Fl_Value_Input2 *cntHamlibRetries;
 extern Fl_Value_Input2 *cntHamlibTimeout;
 extern Fl_Value_Input2 *cntHamlibWriteDelay;
@@ -431,10 +431,12 @@ extern Fl_Group *tabSoundCard;
 extern Fl_Tabs *tabsSoundCard;
 extern Fl_Group *tabAudio;
 extern Fl_Group *AudioOSS;
-extern Fl_ListBox *menuOSSDev;
+#include <FL/Fl_Input_Choice.H>
+extern Fl_Input_Choice *menuOSSDev;
 extern Fl_Group *AudioPort;
-extern Fl_ListBox *menuPortInDev;
-extern Fl_ListBox *menuPortOutDev;
+#include <FL/Fl_Choice.H>
+extern Fl_Choice *menuPortInDev;
+extern Fl_Choice *menuPortOutDev;
 extern Fl_Group *AudioPulse;
 extern Fl_Input2 *inpPulseServer;
 extern Fl_Group *AudioNull;
@@ -605,7 +607,6 @@ extern Fl_Counter2 *cntTrackFreqMax;
 #include <FL/Fl_Float_Input.H>
 extern Fl_Float_Input *stationary_lat;
 extern Fl_Float_Input *stationary_lon;
-#include <FL/Fl_Input_Choice.H>
 extern Fl_Input_Choice *inpGPSdev;
 #include <FL/Fl_Spinner.H>
 extern Fl_Output *gps_pos_lat;
@@ -618,7 +619,6 @@ extern Fl_Group *tabDLFlights;
 #include <FL/Fl_Browser.H>
 extern Fl_Browser *flight_browser;
 extern Fl_Button *flight_docs_refresh_a;
-#include <FL/Fl_Choice.H>
 extern Fl_Choice *flight_payload_list;
 extern Fl_Button *payload_autoconfigure_a;
 extern Fl_Choice *flight_payload_transmission_list;
