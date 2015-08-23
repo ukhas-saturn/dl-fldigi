@@ -1060,72 +1060,52 @@ SoundPort::~SoundPort()
 
 int SoundPort::Open(int mode, int freq)
 {
-	int old_sample_rate = (int)req_sample_rate;
-	req_sample_rate = sample_frequency = freq;
-
-	// do we need to (re)initialise the streams?
-	int ret = 0;
-	int sr[2] = { progdefaults.in_sample_rate, progdefaults.out_sample_rate };
-
-	// initialize stream if it is a JACK device, regardless of mode
-	device_iterator idev;
-	int device_type = 0;
-	if (mode == O_WRONLY && (idev = name_to_device(sd[0].device, 0)) != devs.end() &&
-		(device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
-		mode = O_RDWR;
-	if (mode == O_RDONLY && (idev = name_to_device(sd[1].device, 1)) != devs.end() &&
-		(device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
-		mode = O_RDWR;
-	static char pa_open_str[200];
-	snprintf(pa_open_str, sizeof(pa_open_str),
-		"Port Audio open mode = %s, device type = %s",
-		mode == O_WRONLY ? "Write" : mode == O_RDONLY ? "Read" :
-		mode == O_RDWR ? "Read/Write" : "unknown",
-		device_type == 0 ? "paInDevelopment" :
-		device_type == 1 ? "paDirectSound" :
-		device_type == 2 ? "paMME" :
-		device_type == 3 ? "paASIO" :
-		device_type == 4 ? "paSoundManager" :
-		device_type == 5 ? "paCoreAudio" :
-		device_type == 7 ? "paOSS" :
-		device_type == 8 ? "paALSA" :
-		device_type == 9 ? "paAL" :
-		device_type == 10 ? "paBeOS" :
-		device_type == 11 ? "paWDMKS" :
-		device_type == 12 ? "paJACK" :
-		device_type == 13 ? "paWASAPI" :
-		device_type == 14 ? "paAudioScienceHPI" : "unknown" );
-	LOG_INFO( "%s", pa_open_str);
-
-	size_t start = (mode == O_RDONLY || mode == O_RDWR) ? 0 : 1,
-		end = (mode == O_WRONLY || mode == O_RDWR) ? 1 : 0;
-	for (size_t i = start; i <= end; i++) {
-		if ( !(stream_active(i) && (Pa_GetHostApiInfo((*sd[i].idev)->hostApi)->type == paJACK ||
-						old_sample_rate == freq ||
-						sr[i] != SAMPLE_RATE_AUTO)) ) {
-			Close(i);
-			init_stream(i);
-			src_data_reset(i);
-
-			// reset the semaphore
-			while (sem_trywait(sd[i].rwsem) == 0);
-			if (errno && errno != EAGAIN) {
-				pa_perror(errno, "open");
-				throw SndException(errno);
-			}
-			start_stream(i);
-
-			ret = 1;
-		}
-		else {
-			pause_stream(i);
-			src_data_reset(i);
-			sd[i].state = spa_continue;
-		}
-	}
-
-	static char pa_open_str[500];
-	snprintf(pa_open_str, sizeof(pa_open_str),
+    int old_sample_rate = (int)req_sample_rate;
+    req_sample_rate = sample_frequency = freq;
+    
+    // do we need to (re)initialise the streams?
+    int ret = 0;
+    int sr[2] = { progdefaults.in_sample_rate, progdefaults.out_sample_rate };
+    
+    // initialize stream if it is a JACK device, regardless of mode
+    device_iterator idev;
+    int device_type = 0;
+    if (mode == O_WRONLY && (idev = name_to_device(sd[0].device, 0)) != devs.end() &&
+        (device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
+        mode = O_RDWR;
+    if (mode == O_RDONLY && (idev = name_to_device(sd[1].device, 1)) != devs.end() &&
+        (device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
+        mode = O_RDWR;
+    
+    size_t start = (mode == O_RDONLY || mode == O_RDWR) ? 0 : 1,
+    end = (mode == O_WRONLY || mode == O_RDWR) ? 1 : 0;
+    for (size_t i = start; i <= end; i++) {
+        if ( !(stream_active(i) && (Pa_GetHostApiInfo((*sd[i].idev)->hostApi)->type == paJACK ||
+                                    old_sample_rate == freq ||
+                                    sr[i] != SAMPLE_RATE_AUTO)) ) {
+            Close(i);
+            init_stream(i);
+            src_data_reset(i);
+            
+            // reset the semaphore
+            while (sem_trywait(sd[i].rwsem) == 0);
+            if (errno && errno != EAGAIN) {
+                pa_perror(errno, "open");
+                throw SndException(errno);
+            }
+            start_stream(i);
+            
+            ret = 1;
+        }
+        else {
+            pause_stream(i);
+            src_data_reset(i);
+            sd[i].state = spa_continue;
+        }
+    }
+    
+    static char pa_open_str[500];
+    snprintf(pa_open_str, sizeof(pa_open_str),
 "\
 Port Audio open mode = %s\n\
 device type = %s\n\
