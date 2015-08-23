@@ -267,8 +267,17 @@ void fftfilt::rtty_filter(double f)
     // amplitude equalized nyquist-channel response
             dht /= sinc(2.0 * i * f);
 
-            filter[i].real() = dht*cos((double)i* - 0.5*M_PI);
-            filter[i].imag() = dht*sin((double)i* - 0.5*M_PI);
+// amplitude equalized nyquist-channel response
+		dht /= sinc(2.0 * i * f);
+
+		filter[i] = 
+			cmplx(	dht*cos((double)i* - 0.5*M_PI), 
+					dht*sin((double)i* - 0.5*M_PI) );
+
+		filter[(flen-i)%flen] = 
+			cmplx(	dht*cos((double)i*+0.5*M_PI),
+					dht*sin((double)i*+0.5*M_PI) );
+	}
 
             filter[(flen-i)%flen].real() = dht*cos((double)i*+0.5*M_PI);
             filter[(flen-i)%flen].imag() = dht*sin((double)i*+0.5*M_PI);

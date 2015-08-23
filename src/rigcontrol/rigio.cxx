@@ -1173,6 +1173,8 @@ void rigCAT_close(void)
 	if ( rigCAT_open == false || rigCAT_exit == true)
 		return;
 
+	rigCAT_sendINIT("CLOSE");
+
 	{
 		guard_lock ser_guard( &rigCAT_mutex );
 		rigCAT_exit = true;
@@ -1182,12 +1184,10 @@ void rigCAT_close(void)
 
 	pthread_join(rigCAT_thread, NULL);
 
-	rigCAT_sendINIT("CLOSE");
-
 	rigio.ClosePort();
-
-	rigCAT_open = false;
+ 
 	rigCAT_exit = false;
+	rigCAT_open = false;
 	rigCAT_bypass = false;
 	wf->USB(true);
 

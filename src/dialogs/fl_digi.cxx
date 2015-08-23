@@ -444,10 +444,10 @@ Pixmap				fldigi_icon_pixmap;
 #endif
 
 // for character set conversion
-int rxtx_charset = 0;
-static CharsetDistiller rx_chd(charset_list[rxtx_charset].tiniconv_id);
-static CharsetDistiller echo_chd(charset_list[rxtx_charset].tiniconv_id);
-static OutputEncoder    tx_encoder(charset_list[rxtx_charset].tiniconv_id);
+int rxtx_charset;
+static CharsetDistiller rx_chd;
+static CharsetDistiller echo_chd;
+static OutputEncoder    tx_encoder;
 
 Fl_Menu_Item *getMenuItem(const char *caption, Fl_Menu_Item* submenu = 0);
 void UI_select();
@@ -1372,28 +1372,33 @@ void init_modem_sync(trx_mode m, int f)
 {
 	ENSURE_THREAD(FLMAIN_TID);
 
-	int count = 500;
+	int count = 2000;
 	if (trx_state != STATE_RX) {
-		LOG_INFO("%s", "Waiting for STATE_RX");
+		LOG_INFO("Waiting for %s", mode_info[active_modem->get_mode()].name);
 		abort_tx();
 		while (trx_state != STATE_RX && count) {
-			LOG_VERBOSE("%d msecs remaining", count * 10);
+			LOG_DEBUG("%0.2f secs remaining", count / 100.0);
+			Fl::awake();
 			MilliSleep(10);
 			count--;
 		}
-		if (!count) LOG_ERROR("%s", "trx wait for RX timeout");
+		if (count == 0) {
+			LOG_ERROR("%s", "TIMED OUT!!");
+			return;  // abort modem selection
+		}
 	}
 
-	LOG_INFO("Call init_modem %d, %d", (int)m, f);
 	init_modem(m, f);
 
 	count = 500;
 	if (trx_state != STATE_RX) {
 		while (trx_state != STATE_RX && count) {
+			Fl::awake();
 			MilliSleep(10);
 			count--;
 		}
-		LOG_INFO("Waited %.2f sec for RX state", (500 - count) * 0.01);
+		if (count == 0)
+			LOG_ERROR("%s", "Wait for STATE_RX timed out");
 	}
 
 	REQ_FLUSH(TRX_TID);
@@ -7211,7 +7216,12 @@ int get_tx_char(void)
 	if (Qidle_time) { return GET_TX_CHAR_NODATA; }
 	if (macro_idle_on) { return GET_TX_CHAR_NODATA; }
 	if (idling) { return GET_TX_CHAR_NODATA; }
-	
+
+	if (xmltest_char_available) {
+		num_cps_chars++;
+		return xmltest_char();
+	}
+
 	if (arq_text_available) {
 		return arq_get_char();
 	}
@@ -7247,6 +7257,7 @@ int get_tx_char(void)
 	}
 
 	c = TransmitText->nextChar();
+
 	if (c == GET_TX_CHAR_ETX) {
 		return c;
 	}
@@ -7330,7 +7341,10 @@ int get_tx_char(void)
 
 void put_echo_char(unsigned int data, int style)
 {
-        trx_mode mode = active_modem->get_mode();
+// suppress print to rx widget when making timing tests
+	if (PERFORM_CPS_TEST || active_modem->XMLRPC_CPS_TEST) return; 
+
+	trx_mode mode = active_modem->get_mode();
 
 	if (mode == MODE_CW && progdefaults.QSKadjust)
 		return;
@@ -7346,6 +7360,8 @@ void put_echo_char(unsigned int data, int style)
 		asc = ascii2;
 	else if (mode == MODE_RTTY || mode == MODE_CW)
 		asc = ascii;
+	else if (PERFORM_CPS_TEST || active_modem->XMLRPC_CPS_TEST)
+		asc = ascii3;
 
 	// assign a style to the data
 	if (asc == ascii2 && iscntrl(data))

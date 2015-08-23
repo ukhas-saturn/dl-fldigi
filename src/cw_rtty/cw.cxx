@@ -48,6 +48,7 @@
 #include "status.h"
 #include "debug.h"
 #include "FTextRXTX.h"
+#include "modem.h"
 
 #include "qrunner.h"
 
@@ -181,6 +182,10 @@ void cw::tx_init(SoundBase *sc)
 	phaseacc = 0;
 	lastsym = 0;
 	qskphase = 0;
+
+	symbols = 0;
+	acc_symbols = 0;
+	ovhd_symbols = 0;
 }
 
 void cw::rx_init()
@@ -259,8 +264,8 @@ cw::cw() : modem()
 	cw_noise_spike_threshold = cw_adaptive_receive_threshold / 4;
 	cw_send_dot_length = DOT_MAGIC / cw_send_speed;
 	cw_send_dash_length = 3 * cw_send_dot_length;
-	symbollen = (int)(samplerate * 1.2 / progdefaults.CWspeed);
-	fsymlen = (int)(samplerate * 1.2 / progdefaults.CWfarnsworth);
+	symbollen = (int)round(samplerate * 1.2 / progdefaults.CWspeed);
+	fsymlen = (int)round(samplerate * 1.2 / progdefaults.CWfarnsworth);
 
 	memset(rx_rep_buf, 0, sizeof(rx_rep_buf));
 
@@ -353,8 +358,8 @@ void cw::reset_rx_filter()
 		cw_noise_spike_threshold = cw_adaptive_receive_threshold / 4;
 		cw_send_dot_length = DOT_MAGIC / cw_send_speed;
 		cw_send_dash_length = 3 * cw_send_dot_length;
-		symbollen = (int)(samplerate * 1.2 / progdefaults.CWspeed);
-		fsymlen = (int)(samplerate * 1.2 / progdefaults.CWfarnsworth);
+		symbollen = (int)round(samplerate * 1.2 / progdefaults.CWspeed);
+		fsymlen = (int)round(samplerate * 1.2 / progdefaults.CWfarnsworth);
 
 		phaseacc = 0.0;
 		FFTphase = 0.0;
@@ -393,8 +398,8 @@ void cw::sync_parameters()
 
 	cw_send_dash_length = 3 * cw_send_dot_length;
 
-	nusymbollen = (int)(samplerate * 1.2 / wpm);
-	nufsymlen = (int)(samplerate * 1.2 / fwpm);
+	nusymbollen = (int)round(samplerate * 1.2 / wpm);
+	nufsymlen = (int)round(samplerate * 1.2 / fwpm);
 
 	if (symbollen != nusymbollen ||
 		nufsymlen != fsymlen ||
@@ -950,6 +955,8 @@ void cw::send_symbol(int bits, int len)
 	float dsymlen = 0.0;
 	int currsym = bits & 1;
 
+	acc_symbols += len;
+
 	freq = get_txfreq_woffset();
 
 	delta = (int) (len * (progdefaults.CWweight - 50) / 100.0);
@@ -1191,11 +1198,20 @@ int cw::tx_process()
 
 	c = get_tx_char();
 	if (c == GET_TX_CHAR_ETX || stopflag) {
-		send_symbol(0, symbollen);
 		stopflag = false;
 			return -1;
 	}
+	acc_symbols = 0;
 	send_ch(c);
+
+	xmt_samples = char_samples = acc_symbols;
+
+	printf("%5s %d samples, overhead %d, %f sec's\n",
+		ascii3[c & 0xff],
+		char_samples,
+		ovhd_samples,
+		1.0 * char_samples / samplerate);
+
 	return 0;
 }
 

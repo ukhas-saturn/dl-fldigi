@@ -813,6 +813,9 @@
         ELEM_(std::string, QRZuserpassword, "QRZPASSWORD",                              \
               "QRZ or HamCall subscriber password",                                     \
               "")                                                                       \
+        ELEM_(bool, notes_address, "NOTES_ADDRESS",                                     \
+              "Populate logbook notes (comment) field with mailing address",            \
+              false)                                                                    \
         ELEM_(bool, QRZchanged, "", "",  false)                                         \
         /* eQSL */                                                                      \
         ELEM_(std::string, eqsl_id, "EQSL_ID",                                          \
@@ -1055,8 +1058,9 @@
               0)                                                                        \
         ELEM_(int, wavSampleRate, "WAV_SAMPLERATE",                                     \
               "Wave file record sample rate\n"                                          \
-              "0 - 22050, 1 - 24000, 2 - 44100, 3 - 48000",                             \
-              3)                                                                        \
+              "0 - 8000, 1 - 11025, 2 - 16000, 3 - 22050\n"                             \
+              "4 - 24000, 5 - 44100, 6 - 48000",                                        \
+              0)                                                                        \
         ELEM_(bool, loop_playback, "LOOPPLAYBACK",                                      \
               "true = continuous loop of sound file playback\n"                         \
               "false = single pass through playback file.",                             \

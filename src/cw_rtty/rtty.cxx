@@ -3,7 +3,7 @@
 //
 // Copyright (C) 2012
 //		Dave Freese, W1HKJ
-//		Stefan Fendt, DO2SMF
+//		Stefan Fendt, DL1SMF
 //
 // This file is part of fldigi.
 //
@@ -46,6 +46,7 @@ using namespace std;
 #include "debug.h"
 #include "synop.h"
 #include "main.h"
+#include "modem.h"
 
 #include "dl_fldigi/hbtint.h"
 
@@ -89,6 +90,10 @@ void rtty::tx_init(SoundBase *sc)
 	phaseacc = 0;
 	preamble = true;
 	videoText();
+
+	symbols = 0;
+	acc_symbols = 0;
+	ovhd_symbols = 0;
 }
 
 // Customizes output of Synop decoded data.
@@ -276,7 +281,8 @@ void rtty::restart()
 		snprintf(msg1, sizeof(msg1), "%-4.2f/%-4.0f", rtty_baud, rtty_shift);
 	put_Status1(msg1);
 	put_MODEstatus(mode);
-	for (int i = 0; i < MAXPIPE; i++) QI[i].real() = QI[i].imag() = 0.0;
+	for (int i = 0; i < MAXPIPE; i++) 
+		QI[i] = cmplx(0.0, 0.0);
 	sigpwr = 0.0;
 	noisepwr = 0.0;
 	sigsearch = 0;
@@ -633,7 +639,6 @@ double value;
 if (snum < 2 * filter_length) {
 	frequency = 1000.0;
 	ook(snum);
-//	z.real() = z.imag() = (snum/symbollen % 2 == 0) ? 1.0 : 0.0;
 	z = complex(value, value);
 	ook_signal << snum << "," << z.real() << ",";
 //	snum++;
@@ -752,17 +757,23 @@ if (mnum < 2 * filter_length)
 //----------------------------------------------------------------------
 
 // get the baseband-signal and...
-				xy.real() = zp_mark[i].real() * cos(xy_phase) + zp_mark[i].imag() * sin(xy_phase);
-				xy.imag() = zp_space[i].real() * cos(xy_phase) + zp_space[i].imag() * sin(xy_phase);
+				xy = cmplx(
+						zp_mark[i].real() * cos(xy_phase) + zp_mark[i].imag() * sin(xy_phase),
+						zp_space[i].real() * cos(xy_phase) + zp_space[i].imag() * sin(xy_phase) );
 
 // if mark-tone has a higher magnitude than the space-tone,
 // further reduce the scope's space-amplitude and vice versa
 // this makes the scope looking a little bit nicer, too...
 // aka: less noisy...
 				if( abs(zp_mark[i]) > abs(zp_space[i]) ) {
-					xy.imag() *= abs(zp_space[i])/abs(zp_mark[i]);
+// note ox x complex lib does not support xy.real(double) or xy.imag(double)
+					xy = cmplx( xy.real(),
+								xy.imag() * abs(zp_space[i])/abs(zp_mark[i]) );
+//					xy.imag() *= abs(zp_space[i])/abs(zp_mark[i]);
 				} else {
-					xy.real() /= abs(zp_space[i])/abs(zp_mark[i]);
+					xy = cmplx( xy.real() / ( abs(zp_space[i])/abs(zp_mark[i]) ),
+								xy.imag() );
+//					xy.real() /= abs(zp_space[i])/abs(zp_mark[i]);
 				}
 
 // now normalize the scope
@@ -839,7 +850,8 @@ if (mnum < 2 * filter_length)
 				if (clear_zdata) {
 					clear_zdata = false;
 					Clear_syncscope();
-					for (int i = 0; i < MAXPIPE; i++) QI[i].real() = QI[i].imag() = 0.0;
+					for (int i = 0; i < MAXPIPE; i++) 
+						QI[i] = cmplx(0.0, 0.0);
 				}
 			}
 			if (!--showxy) {
@@ -883,6 +895,7 @@ double rtty::FSKnco()
 
 void rtty::send_symbol(int symbol, int len)
 {
+	acc_symbols += len;
 #if 0
 	double freq;
 
@@ -1090,7 +1103,16 @@ int rtty::tx_process()
 
 // if NOT Baudot
 	if (nbits != 5) {
+///
+		acc_symbols = 0;
 		send_char(c);
+		xmt_samples = char_samples = acc_symbols;
+
+		printf("%5s %d samples, overhead %d, %f sec's\n",
+			ascii3[c & 0xff],
+			char_samples,
+			ovhd_samples,
+			1.0 * char_samples / samplerate);
 		return 0;
 	}
 
@@ -1148,8 +1170,16 @@ int rtty::tx_process()
 			txmode = FIGURES;
 		}
 	}
-
+///
+	acc_symbols = 0;
 	send_char(c & 0x1F);
+	xmt_samples = char_samples = acc_symbols;
+
+	printf("%5s %d samples, overhead %d, %f sec's\n",
+		ascii3[c & 0xff],
+		char_samples,
+		ovhd_samples,
+		1.0 * char_samples / samplerate);
 
 	return 0;
 }

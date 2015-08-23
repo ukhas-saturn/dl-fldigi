@@ -417,7 +417,7 @@ btnApplyConfig->activate();}
         } {
           Fl_Group tabBrowser {
             label Browser
-            xywh {0 50 540 320}
+            xywh {0 50 540 320} hide
           } {
             Fl_Group {} {open
               xywh {24 59 496 300} box ENGRAVED_FRAME
@@ -867,7 +867,7 @@ progdefaults.changed = true;}
           }
           Fl_Group tabLogServer {
             label Logging
-            xywh {0 50 540 320} hide
+            xywh {0 50 540 320}
           } {
             Fl_Group {} {
               label {Client/Server Logbook} open
@@ -2490,7 +2490,7 @@ progdefaults.changed = true;}
                 label {Waterfall height in pixels}
                 callback {progdefaults.wfheight = (int)o->value();
 progdefaults.changed = true;}
-                tooltip {CPU usage increases with waterfall height} xywh {72 251 95 22} type Simple align 8 minimum 100 maximum 160 step 5 value 120
+                tooltip {CPU usage increases with waterfall height} xywh {72 251 95 22} type Simple align 8 minimum 100 maximum 250 step 5 value 120
                 code0 {o->value(progdefaults.wfheight);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Counter2
@@ -4805,7 +4805,7 @@ if (o->value()) {
               callback {progdefaults.wavSampleRate = o->value();
 progdefaults.changed = true;} open
               tooltip {Pick baud rate from list} xywh {60 96 150 24} down_box BORDER_BOX align 5
-              code0 {o->add("22050|24000|44100|48000");}
+              code0 {o->add("8000|11025|16000|22050|24000|44100|48000");}
               code1 {o->value(progdefaults.wavSampleRate);}
             } {}
           }
@@ -5404,7 +5404,7 @@ progdefaults.changed = true;}
             Fl_Check_Button chkDTMFdecode {
               label {Decode DTMF tones}
               callback {progdefaults.DTMFdecode = o->value();}
-              tooltip {Send rx text to file: textout.txt} xywh {187 103 175 20} down_box DOWN_BOX
+              tooltip {Decode received DTMF tones} xywh {187 103 175 20} down_box DOWN_BOX
               code0 {o->value(progdefaults.DTMFdecode);}
             }
           }
@@ -5606,7 +5606,7 @@ progdefaults.changed = true;}
         }
       }
       Fl_Group tabQRZ {
-        label Web
+        label Web open
         tooltip {Callsign database} xywh {0 25 540 349} hide
       } {
         Fl_Tabs tabsQRZ {open
@@ -5662,7 +5662,7 @@ progdefaults.changed = true;}
                 callback {set_qrzxml_buttons(o);
 progdefaults.QRZXML = QRZXMLNONE;
 progdefaults.changed = true;}
-                tooltip {Do not use callsign database} xywh {49 199 337 20} down_box DOWN_BOX value 1
+                tooltip {Do not use callsign database} xywh {49 199 64 20} down_box DOWN_BOX value 1
                 code0 {o->value(progdefaults.QRZXML == QRZXMLNONE);}
               }
               Fl_Round_Button btnQRZcdrom {
@@ -5743,6 +5743,13 @@ progdefaults.changed = true;}
 inpQRZuserpassword->redraw();
 o->label((inpQRZuserpassword->type() & FL_SECRET_INPUT) ? "Show" : "Hide");}
                 tooltip {Show password in plain text} xywh {417 281 70 20}
+              }
+              Fl_Check_Button btn_notes_address {
+                label {Add address to notes field}
+                callback {progdefaults.notes_address = o->value();
+progdefaults.changed = true;}
+                xywh {174 201 207 15} down_box DOWN_BOX
+                code0 {o->value(progdefaults.notes_address);}
               }
             }
           }

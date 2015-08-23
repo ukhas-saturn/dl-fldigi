@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iomanip>
+#include <iostream>
 
 #include "psk.h"
 #include "main.h"
@@ -44,8 +45,9 @@
 #include "status.h"
 #include "viewpsk.h"
 #include "pskeval.h"
-#include "ascii.h"
+#include "modem.h"
 #include "Viewer.h"
+#include "macros.h"
 
 extern waterfall *wf;
 
@@ -95,8 +97,9 @@ void psk::tx_init(SoundBase *sc)
 	bitshreg = 0;
 	startpreamble = true;
 
-//Multiple carriers handling
-	accumulated_bits = 0;
+	symbols = 0;
+	acc_symbols = 0;
+	ovhd_symbols = 0;
 
 }
 
@@ -129,6 +132,8 @@ void psk::rx_init()
 	// interleaver, split incoming bit stream into two, one late by one bit
 	rxbitstate = 0;
 	fecmet = fecmet2 = 0;
+	if (Rxinlv) Rxinlv->flush();
+	if (Rxinlv2) Rxinlv2->flush();
 
 }
 
@@ -559,7 +564,7 @@ psk::psk(trx_mode pskmode) : modem()
 		numcarriers = 1;
 	}
 
-//printf("%s: symlen %d, dcdbits %d, _qpsk %d, _pskr %d, numc %f\n",
+//printf("%s: symlen %d, dcdbits %d, _qpsk %d, _pskr %d, numc %d\n",
 //mode_info[mode].sname,
 //symbollen, dcdbits, _qpsk, _pskr, numcarriers);
 
@@ -820,7 +825,7 @@ void psk::rx_pskr(unsigned char symbol)
 	int c;
 
 	//In the case of multiple carriers, if even number of carriers then we
-	// know the bit-order and don't need voting otherwise  
+	// know the bit-order and don't need voting otherwise
 	// we accumulate the soft bits for the interleaver THEN submit to Viterbi
 	// decoder in alternance so that each one is processed one bit later.
 	// Only two possibilities for sync: current bit or previous one since
@@ -835,7 +840,7 @@ void psk::rx_pskr(unsigned char symbol)
 		rxbitstate++;
 		//Only use one decoder is using even carriers (we know the bits order)
 //		if (((int)numcarriers) % 2 == 0) {
-//			fecmet2 = -9999.0; 
+//			fecmet2 = -9999.0;
 //			return;
 //		}
 		// copy to avoid scrambling symbolpair for the next bit
@@ -969,12 +974,12 @@ void psk::findsignal()
 	}
 }
 
-//JD: disable for multiple carriers as we are running as modem and 
+//JD: disable for multiple carriers as we are running as modem and
 //    therefore use other strategies for frequency alignment like RSID
 void psk::phaseafc()
 {
 	double error;
-	if (afcmetric < 0.05 || 
+	if (afcmetric < 0.05 ||
 		mode == MODE_PSK500 ||
 		mode == MODE_QPSK500 ||
 		numcarriers > 1 ) return;
@@ -1027,32 +1032,30 @@ static double averageamp;
 	} else { // bpsk and pskr
 		bits = (((int) (phase / M_PI + 0.5)) & 1) << 1;
 		// hard decode if needed
-		// softbit = (bits & 2) ? 0 : 255;  
+		// softbit = (bits & 2) ? 0 : 255;
 		// reversed as we normally pass "!bits" when hard decoding
-		// Soft decode section below
+
+// Soft decode section below
 		averageamp = decayavg(averageamp, sigamp, SQLDECAY);
 		if (sigamp > 0 && averageamp > 0) {
-			softamp = clamp( averageamp / sigamp, 1.0, 1e6);
+			if (sigamp > averageamp) {
+				softamp = clamp( sqrt(sigamp / averageamp), 1.0, 1e6);
+			} else {
+				softamp = clamp( sqrt(averageamp / sigamp), 1.0, 1e6);
+			}
 		} else {
-			softamp = 1; // arbritary number (50% impact)
+			softamp = 2; // arbritary number (50% impact)
 		}
-		// Compute values between -128 and +127 for phase value only
-		if (phase > M_PI) {
-			softangle = (127 - (((2 * M_PI - phase) / M_PI) * (double) 255));
-		} else {
-			softangle = (127 - ((phase / M_PI) * (double) 255));
-		}
-		// Then apply impact of amplitude. Fanally, re-centre on 127-128
-		// as the decoder needs values between 0-255
-		softbit = (unsigned char) ((softangle / (1 + softamp)) - 127);
+// Compute values between -128 and +127 for phase value only
+		double alpha = phase / M_PI;
+		if (alpha > 1.0) alpha = 2.0 - alpha;
+		softangle = 127.0 - 255.0 * alpha;
+		softbit = (unsigned char) ((softangle / ( 1.0 + softamp / 2.0)) + 128);
+
 		n = 2;
 	}
 
 	// simple low pass filter for quality of signal
-//	quality.re = decayavg(quality.re, cos(n*phase), _pskr ? SQLDECAY * 5 : SQLDECAY);
-//	quality.im = decayavg(quality.im, sin(n*phase), _pskr ? SQLDECAY * 5 : SQLDECAY);
-//	quality.re = decayavg(quality.re, cos(n*phase), _pskr ? SQLDECAY * 10 : SQLDECAY);
-//	quality.im = decayavg(quality.im, sin(n*phase), _pskr ? SQLDECAY * 10 : SQLDECAY);
 	quality = cmplx(
 		decayavg(quality.real(), cos(n*phase), _pskr ? SQLDECAY * 10 : SQLDECAY),
 		decayavg(quality.imag(), sin(n*phase), _pskr ? SQLDECAY * 10 : SQLDECAY));
@@ -1107,7 +1110,7 @@ static double averageamp;
 		}
 		break;
 
-	case 0:			// DCD off by postamble. Not for PSKR modes as this is not unique to postamble. 
+	case 0:			// DCD off by postamble. Not for PSKR modes as this is not unique to postamble.
 		if (!_pskr) {
 			dcd = false;
 			acquire = 0;
@@ -1219,7 +1222,7 @@ int psk::rx_process(const double *buf, int len)
 		    fir2[car]->run( z, z2[car] ); // fir2 returns value on every sample
 
 		    //On last carrier processing
-		    if (car == numcarriers - 1) { 
+		    if (car == numcarriers - 1) {
 
 			calcSN_IMD(z); //JD OR all carriers together check logic???
 
@@ -1229,9 +1232,9 @@ int psk::rx_process(const double *buf, int len)
 * expected to have been modified to a fairly symmetric shape.  The
 * magnitude of the samples are taken, thus rectifying the signal to
 * positive values. "bitclk" is a counter that is very close in rate to
-* (samples / symbol).  Its purpose is to repeatedly "draw" one symbol 
+* (samples / symbol).  Its purpose is to repeatedly "draw" one symbol
 * waveform in the syncbuf array, according to its amplitude (not phase).
-*/                         
+*/
 
 			int idx = (int) bitclk;
 			double sum = 0.0;
@@ -1257,11 +1260,11 @@ int psk::rx_process(const double *buf, int len)
 /**
 * Here we sum up the difference between each sample's magnitude in the
 * lower half of the array with its counterpart on the upper half of the
-* array, or the other side of the waveform.  Each pair's difference is 
+* array, or the other side of the waveform.  Each pair's difference is
 * divided by their sum, scaling it so that the signal amplitude does not
 * affect the result.  When the differences are summed, it gives an
 * indication of which side is larger than the other.
-*/                                    
+*/
 
 			for (int i = 0; i < symsteps; i++) {
 				sum += (syncbuf[i] - syncbuf[i+symsteps]);
@@ -1276,11 +1279,11 @@ int psk::rx_process(const double *buf, int len)
 * be a little faster, so that the next drawing of the waveform in syncbuf
 * will be shifted right. Conversely, if the sum is positive, then it needs
 * to slow down bitclk so that the waveform is shifted left.  Thus the
-* error is subtracted from bitclk, rather than added.  The goal is to 
+* error is subtracted from bitclk, rather than added.  The goal is to
 * get the error as close to zero as possible, so that the receiver is
 * exactly synced with the transmitter and the waveform is exactly in
-* the middle of syncbuf.       
-*/                                                    
+* the middle of syncbuf.
+*/
 
 //			bitclk -= sum / 5.0;
 			bitclk -= sum / (5.0 * 16 / bitsteps);
@@ -1290,11 +1293,11 @@ int psk::rx_process(const double *buf, int len)
 * When bitclock reaches the end of the buffer, then a complete waveform
 * has been received.  It is time to output the current sample and wrap
 * around to the next cycle.
-*        
+*
 * There is a complete symbol waveform in syncbuf, so that each
 * sample[0..N/2-1] is very close in amplitude with the corresponding
 * sample in [N/2..N-1].
-*        
+*
 *     |            ********                       ********            |
 *     |        ****        ****               ****        ****        |
 *     |     ***                ***         ***                ***     |
@@ -1304,9 +1307,9 @@ int psk::rx_process(const double *buf, int len)
 *     |*                              *                              *|
 *     |_______________________________________________________________|
 *     0                              N/2                             N-1
-*     
+*
 *     === or some variation of it .... ===
-*                     
+*
 *     |****                       ********                       *****|
 *     |    ****               ****        ****               ****     |
 *     |        ***         ***                ***         ***         |
@@ -1321,7 +1324,7 @@ int psk::rx_process(const double *buf, int len)
 * have the maximum phase difference, if any, from the previous symbol's
 * phase.
 *
-*/                           
+*/
 
 //			if (bitclk < 0) bitclk += 16.0;
 //			if (bitclk >= 16.0) {
@@ -1372,30 +1375,24 @@ int psk::rx_process(const double *buf, int len)
 // transmit processes
 //=====================================================================
 
-void psk::tx_symbol(int sym)
+void psk::tx_carriers()
 {
 	double delta[MAX_CARRIERS];
 	double	ival, qval, shapeA, shapeB;
 	cmplx symbol;
 	double	frequencies[MAX_CARRIERS];
 
-	txsymbols[accumulated_bits] = sym;
-
-	if (++accumulated_bits < numcarriers) {
-		return;
-	} 
-
 	//Process all carrier's symbols, then submit to sound card
-	accumulated_bits = 0; //reset
 	frequencies[0] = get_txfreq_woffset() + ((-1 * numcarriers) + 1) * inter_carrier / 2;
 	delta[0] = TWOPI * frequencies[0] / samplerate;
-	for (int car = 1; car < numcarriers; car++) {
+	for (int car = 1; car < symbols; car++) {
 			frequencies[car] = frequencies[car - 1] + inter_carrier;
 			delta[car] = TWOPI * frequencies[car] / samplerate;
 	}
 
-double maxamp = 0;
-	for (int car = 0; car < numcarriers; car++) {
+	double maxamp = 0;
+	int sym;
+	for (int car = 0; car < symbols; car++) {
 		sym = txsymbols[car];
 
 		if (_qpsk && !reverse)
@@ -1427,7 +1424,7 @@ double maxamp = 0;
 			qval = shapeA * prevsymbol[car].imag() + shapeB * symbol.imag();
 
 			if (car != 0) {
-				outbuf[i] += (ival * cos(phaseacc[car]) + qval * sin(phaseacc[car]));// / numcarriers; 
+				outbuf[i] += (ival * cos(phaseacc[car]) + qval * sin(phaseacc[car]));// / numcarriers;
 			} else {
 				outbuf[i] = (ival * cos(phaseacc[car]) + qval * sin(phaseacc[car]));// / numcarriers;
 			}
@@ -1442,10 +1439,21 @@ double maxamp = 0;
 
 		prevsymbol[car] = symbol;
 	}
+
 	if (maxamp)
 		for (int i = 0; i < symbollen; i++) outbuf[i] /= maxamp;
-
 	ModulateXmtr(outbuf, symbollen);
+}
+
+void psk::tx_symbol(int sym)
+{
+	acc_symbols++;
+	txsymbols[symbols] = sym;
+	if (++symbols < numcarriers) {
+		return;
+	}
+	tx_carriers();
+	symbols = 0; //reset
 }
 
 void psk::tx_bit(int bit)
@@ -1455,35 +1463,33 @@ void psk::tx_bit(int bit)
 	// qpsk transmission
 	if (_qpsk) {
 		sym = enc->encode(bit);
-		//JD add interleaver
-//		Txinlv->bits(&sym); 
 		sym = sym & 3;//JD just to make sure
 		tx_symbol(sym);
-	// else pskr (fec + interleaver) transmission
 	} else if (_pskr) {
-		// Encode into two bits
+// Encode into two bits
 		bitshreg = enc->encode(bit);
-		// pass through interleaver
+// pass through interleaver
 		if (mode != MODE_PSK63F) Txinlv->bits(&bitshreg);
-		// Send low bit first. tx_symbol expects 0 or 2 for BPSK
+// Send low bit first. tx_symbol expects 0 or 2 for BPSK
 		sym = (bitshreg & 1) << 1;
 		tx_symbol(sym);
 		sym = bitshreg & 2;
 		tx_symbol(sym);
-	// else normal bpsk tranmission
+// else normal bpsk tranmission
 	} else {
 		sym = bit << 1;
 		tx_symbol(sym);
 	}
 }
 
-
-
+unsigned char ch;
 void psk::tx_char(unsigned char c)
 {
+	ch = c;
 	const char *code;
-
+	char_symbols = acc_symbols;
 	if (_pskr) {
+//		acc_symbols = 0;
 		// ARQ varicode instead of MFSK for PSK63FEC
 		code = varienc(c);
 	} else {
@@ -1499,21 +1505,18 @@ void psk::tx_char(unsigned char c)
 		tx_bit(0);
 		tx_bit(0);
 	}
+	char_symbols = acc_symbols - char_symbols;
 }
-
 
 void psk::tx_flush()
 {
 	if (_pskr) {
-		//VK2ETA replace with a more effective flushing sequence (avoids cutting the last characters in low s/n)
-/*		for (int i = 0; i < dcdbits; i++)
-			tx_bit(0);
-		}
-*/
-		for (int i = 0; i < dcdbits / 2; i++) {
-			tx_bit(1);
-			tx_bit(1);
-		}
+		ovhd_symbols = ((numcarriers - symbols) % numcarriers);
+//VK2ETA replace with a more effective flushing sequence (avoids cutting the last characters in low s/n)
+		for (int i = 0; i < ovhd_symbols/2; i++) tx_bit(0);
+
+		for (int i = 0; i < dcdbits; i++) tx_bit(0);
+		return;
 	}
 	// QPSK - flush the encoder
 	if (_qpsk) {
@@ -1539,8 +1542,6 @@ void psk::clearbits()
 	}
 }
 
-
-
 int psk::tx_process()
 {
 	int c;
@@ -1556,9 +1557,10 @@ int psk::tx_process()
 			preamble--;
 			tx_bit(1);
 			tx_bit(0);
-			// FEC: Mark start of first character with a double zero 
+			// FEC: Mark start of first character with a double zero
 			// to ensure sync at end of preamble
-			if (preamble == 0)  tx_bit(0);
+			if (preamble == 0)
+				while (acc_symbols % numcarriers) tx_bit(0);
 			return 0;
 		} else {
 			//JD for QPSK500R
@@ -1576,6 +1578,11 @@ int psk::tx_process()
 		tx_flush();
 		stopflag = false;
 		cwid();
+
+		char_samples = char_symbols * symbollen / numcarriers;
+		xmt_samples  = acc_symbols * symbollen / numcarriers;
+		ovhd_samples = (acc_symbols - char_symbols - ovhd_symbols) * symbollen / numcarriers;
+
 		return -1;   // we're done
 	}
 
