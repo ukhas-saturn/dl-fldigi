@@ -767,6 +767,7 @@ flarq_SOURCES += \
 EXTRA_DIST = \
 	$(srcdir)/../scripts/mkappbundle.sh \
 	$(srcdir)/../scripts/mkhamlibstatic.sh \
+	$(srcdir)/../scripts/mknsisinst.sh \
 	$(srcdir)/../scripts/dl-fldigi-shell \
 	$(srcdir)/../scripts/tests/cr.sh \
 	$(srcdir)/../scripts/tests/config-h.sh \
