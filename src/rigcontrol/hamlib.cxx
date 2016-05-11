@@ -349,6 +349,8 @@ bool hamlib_init(bool bPtt)
 	}
 
 	init_Hamlib_RigDialog();
+	show_mode("-none-");
+        wf->USB(progdefaults.HamlibSideband == SIDEBAND_USB);
 
 	hamlib_closed = false;
 	return true;
@@ -439,6 +441,7 @@ int hamlib_setmode(rmode_t m)
 		return -1;
 	if (xcvr->isOnLine() == false)
 		return -1;
+#if 0
 	pthread_mutex_lock(&hamlib_mutex);
 		try {
 			hamlib_rmode = xcvr->getMode(hamlib_pbwidth);
@@ -450,6 +453,9 @@ int hamlib_setmode(rmode_t m)
 			hamlib_passes = 0;
 		}
 	pthread_mutex_unlock(&hamlib_mutex);
+#else
+	hamlib_rmode = m;
+#endif
 	return 1;
 }
 
@@ -457,6 +463,7 @@ int hamlib_setwidth(pbwidth_t w)
 {
 	if (xcvr->isOnLine() == false)
 		return -1;
+#if 0
 	pthread_mutex_lock(&hamlib_mutex);
 		try {
 			hamlib_rmode = xcvr->getMode(hamlib_pbwidth);
@@ -468,6 +475,7 @@ int hamlib_setwidth(pbwidth_t w)
 			hamlib_passes = 0;
 		}
 	pthread_mutex_unlock(&hamlib_mutex);
+#endif
 	return 1;
 }
 
@@ -486,7 +494,7 @@ static void *hamlib_loop(void *args)
 	SET_THREAD_ID(RIGCTL_TID);
 
 	long int freq = 0L;
-	rmode_t  numode = RIG_MODE_NONE;
+	rmode_t  numode = RIG_MODE_USB;
 	bool freqok = false, modeok = false;
 
 	for (;;) {
@@ -504,16 +512,13 @@ static void *hamlib_loop(void *args)
 				f = xcvr->getFreq();
 				freq = (long int) f;
 				freqok = true;
-				if (freq == 0) {
-					pthread_mutex_unlock(&hamlib_mutex);
-					continue;
-				}
 			}
 			catch (const RigException& Ex) {
 				show_error(__func__, "Rig not responding: freq");
 				freqok = false;
 			}
 		}
+#if 0
 		if (hamlib_exit)
 			break;
 
@@ -527,6 +532,7 @@ static void *hamlib_loop(void *args)
 				modeok = false;
 			}
 		}
+#endif
 		pthread_mutex_unlock(&hamlib_mutex);
 
 		if (hamlib_exit)
@@ -542,7 +548,7 @@ static void *hamlib_loop(void *args)
 
 		if (modeok && (hamlib_rmode != numode)) {
 			hamlib_rmode = numode;
-			show_mode(modeString(hamlib_rmode));
+			show_mode("None");
 			if (progdefaults.HamlibSideband != SIDEBAND_RIG)
 				wf->USB(progdefaults.HamlibSideband == SIDEBAND_USB);
 			else
