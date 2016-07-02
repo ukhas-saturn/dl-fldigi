@@ -151,10 +151,11 @@ public:
 	virtual void		send_color_image(std::string) {}
 	virtual void		send_Grey_image(std::string) {}
 
-	virtual void		fsq_send_image(){}
-	virtual const char *fsq_mycall() {return "";}
-	virtual bool		fsq_squelch_open() {return false;}
-	virtual void		fsq_transmit(void *) {}
+	virtual void		ifkp_send_image(std::string s = ""){}
+	virtual void		ifkp_send_avatar(){}
+
+	virtual void		thor_send_image(std::string s = ""){}
+	virtual void		thor_send_avatar(){}
 
 	void		set_stopflag(bool b) { stopflag = b;};
 	bool		get_stopflag() const { return stopflag; };
@@ -249,13 +250,20 @@ public:
 	int  ovhd_samples;
 
 // analysis mode
+	int  write_to_csv;
 	virtual void start_csv() {}
 	virtual void stop_csv() {}
-	virtual int is_csv() { return true;}
-	virtual double track_freq() { return 0;}
 
 // fsq mode
-	virtual void send_ack(std::string relay) {};
+	bool    fsq_tx_image;
+	std::string xmt_string;
+	virtual double		fsq_xmtdelay() {return 0;};
+	virtual void		send_ack(std::string relay) {};
+	virtual void		fsq_send_image(std::string s){}
+	virtual std::string fsq_mycall() {return "";}
+	virtual bool		fsq_squelch_open() {return false;}
+	virtual void		fsq_transmit(void *) {}
+
 };
 
 extern modem *null_modem;
@@ -318,7 +326,9 @@ extern modem *_8psk1000_modem;
 extern modem *_8psk1200_modem;
 extern modem *_8psk1333_modem;
 
+extern modem *_8psk125fl_modem;
 extern modem *_8psk125f_modem;
+extern modem *_8psk250fl_modem;
 extern modem *_8psk250f_modem;
 extern modem *_8psk500f_modem;
 extern modem *_8psk1000f_modem;
@@ -412,5 +422,7 @@ extern modem *fftscan_modem;
 extern modem *ssb_modem;
 
 extern modem *fsq_modem;
+
+extern modem *ifkp_modem;
 
 #endif

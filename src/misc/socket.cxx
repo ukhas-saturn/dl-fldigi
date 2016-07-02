@@ -59,11 +59,13 @@
 #include <cstdlib>
 #include <cmath>
 #include <cstdio>
+#include <errno.h>
 
 //#undef NDEBUG
 #include "debug.h"
 
 #include "socket.h"
+
 
 #if HAVE_GETADDRINFO && !defined(AI_NUMERICSERV)
 #  define AI_NUMERICSERV 0
@@ -665,8 +667,10 @@ void Socket::bind(void)
 #else
 		;
 #endif
-	if (::bind(sockfd, ainfo->ai_addr, ainfo->ai_addrlen) == -1)
+	if (::bind(sockfd, ainfo->ai_addr, ainfo->ai_addrlen) == -1) {
+		if(errno != EADDRINUSE) // EADDRINUSE == 48
 		throw SocketException(errno, "bind");
+}
 }
 
 ///
@@ -801,6 +805,30 @@ Socket Socket::accept1(void)
 
 	return s;
 }
+///
+/// Accepts a connection
+///
+/// The socket must already have been bound to an address via a call to the bind
+/// method.
+///
+/// @return A Socket instance pointer for the accepted connection
+///
+Socket * Socket::accept2(void)
+{
+	listen();
+
+	// wait for fd to become readable
+	if (nonblocking && ((timeout.tv_sec > 0) || (timeout.tv_usec > 0)))
+		if (!wait(0))
+			throw SocketException(ETIMEDOUT, "select");
+
+	int r;
+	if ((r = ::accept(sockfd, NULL, 0)) == -1)
+		return (Socket *)0;
+	set_close_on_exec(true, r);
+
+	return new Socket(r);
+}
 
 ///
 /// Connects the socket to the address that is associated with the object
@@ -812,6 +840,20 @@ void Socket::connect(void)
 #endif
 	if (::connect(sockfd, ainfo->ai_addr, ainfo->ai_addrlen) == -1)
 		throw SocketException(errno, "connect");
+}
+///
+/// Connects the socket to the address that is associated with the object
+/// Return connect state (T/F)
+///
+bool Socket::connect1(void)
+{
+#ifndef NDEBUG
+	LOG_DEBUG("Connecting to %s", address.get_str(ainfo).c_str());
+#endif
+	if (::connect(sockfd, ainfo->ai_addr, ainfo->ai_addrlen) == -1) {
+		return false;
+	}
+	return true;
 }
 
 ///
@@ -875,8 +917,14 @@ size_t Socket::send(const void* buf, size_t len)
 				shutdown(sockfd, SHUT_WR);
 				throw SocketException(errno, "send");
 			} else if (r == -1) {
-				if (errno != EAGAIN)
+				switch(errno) {
+					case EAGAIN:
+					case ENOTCONN:
+ 				    case EBADF:
+						break;
+					default:
 					throw SocketException(errno, "send");
+				}
 				r = 0;
 			}
 		}

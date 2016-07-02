@@ -528,12 +528,10 @@ bool ARQ_SOCKET_Server::start(const char* node, const char* service)
 
 void ARQ_SOCKET_Server::stop(void)
 {
-	// FILEME - uncomment when we have an ARQ_SOCKET_Server than can be
-	// interrupted
-	//	if (!inst)
-	//		return;
-	//	delete inst;
-	//	inst = 0;
+	if (!inst)
+		return;
+	delete inst;
+	inst = 0;
 }
 
 void* ARQ_SOCKET_Server::thread_func(void*)
@@ -872,6 +870,7 @@ void arq_close(void)
 	// and then wait for it to die
 	pthread_join(arq_thread, NULL);
 	arq_enabled = false;
+	LOG_INFO("ARQ closed");
 	if(data_io_enabled == ARQ_IO)
 		data_io_enabled = DISABLED_IO ;
 	arq_exit = false;

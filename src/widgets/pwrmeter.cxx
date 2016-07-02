@@ -59,7 +59,7 @@ void PWRmeter::select_25W()
 	fl_font(FL_HELVETICA, labelsize());
 	meter_width = fl_width(W25_face);
 	sx = (tw - meter_width) / 2 + fl_width("|") / 2;
-	meter_width -= fl_width("|  25");
+	meter_width -= fl_width("|");
 }
 
 void PWRmeter::select_50W()
@@ -69,7 +69,7 @@ void PWRmeter::select_50W()
 	fl_font(FL_HELVETICA, labelsize());
 	meter_width = fl_width(W50_face);
 	sx = (tw - meter_width) / 2 + fl_width("|") / 2;
-	meter_width -= fl_width("|  50");
+	meter_width -= fl_width("|");
 }
 
 void PWRmeter::select_100W()
@@ -79,7 +79,7 @@ void PWRmeter::select_100W()
 	fl_font(FL_HELVETICA, labelsize());
 	meter_width = fl_width(W100_face);
 	sx = (tw - meter_width) / 2 + fl_width("|") / 2;
-	meter_width -= fl_width("| 100");
+	meter_width -= fl_width("|");
 }
 
 void PWRmeter::select_200W()
@@ -89,7 +89,7 @@ void PWRmeter::select_200W()
 	fl_font(FL_HELVETICA, labelsize());
 	meter_width = fl_width(W200_face);
 	sx = (tw - meter_width) / 2 + fl_width("|") / 2;
-	meter_width -= fl_width("| 200");
+	meter_width -= fl_width("|");
 }
 
 void PWRmeter::select_auto()
@@ -132,10 +132,10 @@ void PWRmeter::select( int sel ) {
 	redraw();
 }
 
-const char * PWRmeter::W25_face   = "| : : : : | : : : : | : : : : | : : : : | : : : : |  25";
-const char * PWRmeter::W50_face   = "|    :    |    :    |    :    |    :    |    :    |  50";
-const char * PWRmeter::W100_face  = "|    |    |    |    |    |    |    |    |    |    | 100";
-const char * PWRmeter::W200_face  = "|     :     |     :      |      :     |     :     | 200";
+const char * PWRmeter::W25_face   = "| : : : : | : : : : | : : : : | : : : : | : : : 25|";
+const char * PWRmeter::W50_face   = "|    :    |    :    |    :    |    :    |    :  50|";
+const char * PWRmeter::W100_face  = "|    |    |    |    |    |    |    |    |    | 100|";
+const char * PWRmeter::W200_face  = "|     :     |     :      |      :     |     :  200|";
 
 PWRmeter::PWRmeter(int X, int Y, int W, int H, const char* l)
 : Fl_Widget(X, Y, W, H, "")
@@ -174,9 +174,6 @@ PWRmeter::PWRmeter(int X, int Y, int W, int H, const char* l)
 	fl_font(FL_HELVETICA, fsize);
 	meter_width = fl_width(W100_face);
 
-//printf("widths: 25W %.0f, 50W %.0f, 100W %.0f, 200W %.0f\n",
-//fl_width(W25_face), fl_width(W50_face), fl_width(W100_face), fl_width(W200_face));
-
 	meter_height = fl_height();
 	label(W100_face);
 	labelfont(FL_HELVETICA);
@@ -185,7 +182,73 @@ PWRmeter::PWRmeter(int X, int Y, int W, int H, const char* l)
 
 	sx = (tw - meter_width) / 2 + fl_width("|") / 2;
 
-	meter_width -= fl_width("| 100");
+	meter_width -= fl_width("|");
+}
+
+void PWRmeter::resize(int X, int Y, int W, int H) {
+	Fl_Widget::resize(X,Y,W,H);
+
+	bx = Fl::box_dx(box());
+	by = Fl::box_dy(box());
+	bw = Fl::box_dw(box());
+	bh = Fl::box_dh(box());
+
+	tx = X + bx;
+	tw = W - bw;
+	ty = Y + by;
+	th = H - bh;
+
+	const char *face;
+	switch (select_) {
+		case P25:
+			face = W25_face;
+			break;
+		case P50:
+			face = W50_face;
+			break;
+		case P100:
+			face = W100_face;
+			break;
+		case P200:
+			face = W200_face;
+			break;
+		case AUTO:
+		default:
+			face = W25_face;
+	}
+
+	static int fsize = 6;
+	fl_font(FL_HELVETICA, fsize);
+	meter_width = fl_width(face);
+	while ((meter_width < tw) && (fl_height() < th)) {
+		fsize++;
+		fl_font(FL_HELVETICA, fsize);
+		meter_width = fl_width(face);
+	}
+	fsize--;
+	fl_font(FL_HELVETICA, fsize);
+	meter_width = fl_width(face);
+
+	meter_height = fl_height();
+	label(face);
+	labelfont(FL_HELVETICA);
+	labelsize(fsize);
+	labelcolor(scale_color);
+
+	sx = (tw - meter_width) / 2 + fl_width("|") / 2;
+	meter_width -= fl_width("|");
+
+}
+
+int PWRmeter::handle(int event)
+{
+	if (Fl::event_inside( this )) {
+		if (event == FL_RELEASE) {
+			do_callback();
+			return 1;
+		}
+	}
+	return 0;
 }
 
 //

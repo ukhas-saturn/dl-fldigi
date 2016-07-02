@@ -43,13 +43,18 @@ extern void initOptionMenus();
 extern void clearList();
 extern void updateSelect();
 extern size_t addtoList(long val);
-extern void buildlist();
+extern void build_frequencies2_list();
 extern void qso_movFreq(Fl_Widget* w, void*);
 extern int	cb_qso_opMODE();
 extern int  cb_qso_opBW();
+extern int  cb_qso_btnBW1();
+extern int  cb_qso_opBW1();
+extern int  cb_qso_btnBW2();
+extern int  cb_qso_opBW2();
 extern void qso_setMode();
 extern void setTitle();
 
+extern int  fwidths[];
 extern void qso_addFreq();
 extern void qso_delFreq();
 extern void qso_selectFreq();
@@ -58,42 +63,32 @@ extern void qso_setFreq();
 extern void qso_setFreq(long int f);
 extern void qso_clearList();
 extern void saveFreqList();
+extern void qso_updateEntry(int i, std::string usage);
 
 extern bool readRigXML();
 extern bool init_Xml_RigDialog();
 extern bool init_NoRig_RigDialog();
 
+extern bool ModeIsLSB(std::string);
+
 #if USE_HAMLIB
 extern bool init_Hamlib_RigDialog();
 extern void selMode(rmode_t m);
 extern std::string modeString(rmode_t m);
+extern bool hamlib_USB();
+extern bool hamlib_active();
 #endif
 
 // xmlrpc_rig specific
 
 extern bool connected_to_flrig;
+
 extern void xmlrpc_rig_set_qsy(long long rfc);
+extern bool xmlrpc_USB();
 
-using namespace XmlRpc;
-using namespace std;
-
-extern bool bws_posted;
-extern bool FLRIG_bw_posted;
-extern bool FLRIG_mode_posted;
-extern bool modes_posted;
-extern bool FLRIG_freq_posted;
-
-extern long int FLRIG_xcvr_freq;
-extern string   xcvr_name;
-extern string   posted_mode;
-extern string   posted_bw1;
-extern string   posted_bw2;
-
-extern XmlRpcValue modes_result;
-extern XmlRpcValue bws_result;
-extern XmlRpcValue FLRIG_bw_result;
-
+extern void FLRIG_set_flrig_ab(int n);
 extern void FLRIG_start_flrig_thread();
+
 extern void stop_flrig_thread();
 extern void reconnect_to_flrig();
 extern void set_flrig_ptt(int on);
@@ -101,12 +96,6 @@ extern void set_flrig_freq(long int fr);
 extern void set_flrig_mode(const char *md);
 extern void set_flrig_bw(int bw1, int bw2 = 0);
 extern void set_flrig_notch();
-extern void FLRIG_set_flrig_ab(int n);
-
-
-//------------------------------------------------------------------------------
-// flrig xmlrpc client support
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 

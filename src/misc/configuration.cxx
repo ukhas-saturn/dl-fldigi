@@ -207,26 +207,29 @@ public:
 	void write(ostream& out) const
         {
 		out << "<!-- " << doc << " -->\n" << '<' << tag << '>';
-		for (size_t i = 0; i < modes.size(); i++)
+		for (size_t i = 0; i < modes.size(); i++) {
 			if (!modes.test(i))
 				out << mode_info[i].name << ',';
+		}
 		out << ",</" << tag << ">\n\n";
 	}
 	void read(const char* data)
 	{
+		string sdata = data, smode, tstmode;
 		modes.set();
-		for( ; data ; )
-		{
-			const char * comma = strchr( data, ',' );
-			size_t tok_len = comma ? comma - data : strlen(data);
+		size_t p = sdata.find(",");
+		while ((p != string::npos) && (p != 0)) {
+			smode = sdata.substr(0, p);
 
 			for (size_t i = 0; i < modes.size(); i++) {
-				if (!strncmp(mode_info[i].name, data, tok_len )) {
-					modes.set(i, 0);
+				tstmode = mode_info[i].name;
+				if (smode == tstmode) {
+					modes.set(i,0);
 					break;
 				}
 			}
-			data = comma ? comma + 1 : NULL ;
+			sdata.erase(0, p+1);
+			p = sdata.find(",");
 		}
 	}
 	mode_set_t& modes;
@@ -526,6 +529,8 @@ int configuration::setDefaults()
 
 	inpTTYdev->value(PTTdev.c_str());
 
+	inpGPIOPort->value(GPIOPort);
+
 	chkUSEHAMLIB->value(0);
 	chkUSERIGCAT->value(0);
 	chkUSEXMLRPC->value(0);
@@ -729,6 +734,8 @@ void configuration::initInterface()
 
 	PTTdev = inpTTYdev->value();
 
+	GPIOPort = static_cast<int>(inpGPIOPort->value());
+
 #if USE_HAMLIB
 	chkUSEHAMLIBis = chkUSEHAMLIB->value();
      HamlibCMDptt = btnHamlibCMDptt->value();
@@ -748,38 +755,46 @@ void configuration::initInterface()
 	listbox_baudrate->hide();
 #endif
 
-	bool riginitOK = false;
-
-	if (chkUSERIGCATis) { // start the rigCAT thread
-		if (rigCAT_init(true)) {
+	if (connected_to_flrig) {
+		LOG_INFO("%s", "using flrig xcvr control");
+		wf->setQSY(1);
+	} else if (chkUSERIGCATis) { // start the rigCAT thread
+		if (rigCAT_init()) {
+			LOG_INFO("%s", "using rigCAT xcvr control");
 			wf->USB(true);
 			wf->setQSY(1);
-			riginitOK = true;
+			rigCAT_get_pwrlevel();
+		} else {
+			LOG_INFO("%s", "defaulting to no xcvr control");
+			noCAT_init();
+			wf->USB(true);
+			wf->setQSY(0);
+			chkUSERIGCATis = false;
 		}
 #if USE_HAMLIB
 	} else if (chkUSEHAMLIBis) { // start the hamlib thread
 		if (hamlib_init(HamlibCMDptt)) {
+			LOG_INFO("%s", "using HAMLIB xcvr control");
 			wf->USB(true);
 			wf->setQSY(1);
-			riginitOK = true;
+		} else {
+			LOG_INFO("%s", "defaulting to no xcvr control");
+			noCAT_init();
+			wf->USB(true);
+			wf->setQSY(0);
 		}
 #endif
 	} else if (chkUSEXMLRPCis) {
-		if (rigCAT_init(false)) {
-			LOG_VERBOSE("%s", "using XMLRPC");
-			wf->USB(true);
-			wf->setQSY(0);
-			riginitOK = true;
-		}
-	}
-
-	if (riginitOK == false) {
-		rigCAT_init(false);
+		LOG_INFO("%s", "using XMLRPC");
+		wf->USB(true);
+		wf->setQSY(0);
+	} else {
+		LOG_INFO("%s", "No xcvr control selected");
+		noCAT_init();
 		wf->USB(true);
 		wf->setQSY(0);
 	}
-
-	if (connected_to_flrig) wf->setQSY(1);
+	build_frequencies2_list();
 
 	if (HamlibCMDptt && chkUSEHAMLIBis)
 		push2talk->reset(PTT::PTT_HAMLIB);
@@ -789,6 +804,8 @@ void configuration::initInterface()
 		push2talk->reset(PTT::PTT_TTY);
 	else if (UsePPortPTT)
 		push2talk->reset(PTT::PTT_PARPORT);
+	else if (UseGPIOPTT)
+		push2talk->reset(PTT::PTT_GPIO);
 	else if (UseUHrouterPTT)
 		push2talk->reset(PTT::PTT_UHROUTER);
 	else
@@ -929,11 +946,19 @@ void configuration::testCommPorts()
 		glob_t gbuf;
 		glob(tty_fmt[i], 0, NULL, &gbuf);
 		for (size_t j = 0; j < gbuf.gl_pathc; j++) {
-			if ( !(stat(gbuf.gl_pathv[j], &st) == 0 && S_ISCHR(st.st_mode)) ||
-			     strstr(gbuf.gl_pathv[j], "modem") )
+			int ret1 = !stat(gbuf.gl_pathv[j], &st);
+			int ret2 = S_ISCHR(st.st_mode);
+			if (ret1) {
+				LOG_INFO("Serial port %s", gbuf.gl_pathv[j]);
+				LOG_INFO("  device mode:     %X", st.st_mode);
+				LOG_INFO("  char device?     %s", ret2 ? "Y" : "N");
+			} else
+				LOG_INFO("%s does not return stat query", gbuf.gl_pathv[j]);
+
+			if ( (ret1 && ret2 ) || strstr(gbuf.gl_pathv[j], "modem") )
+				inpTTYdev->add(gbuf.gl_pathv[j]);
+			else
 				continue;
-			LOG_VERBOSE("Found serial port %s", gbuf.gl_pathv[j]);
-			inpTTYdev->add(gbuf.gl_pathv[j]);
 #  if USE_HAMLIB
 			inpRIGdev->add(gbuf.gl_pathv[j]);
 #  endif

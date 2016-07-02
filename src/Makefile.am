@@ -35,16 +35,25 @@ include/hamlib.h \
 rigcontrol/hamlib.cxx \
 include/rigclass.h \
 rigcontrol/rigclass.cxx
+
 XMLRPC_SRC = \
 include/xmlrpc.h \
 misc/xmlrpc.cxx
+
 FLDIGI_WIN32_RES_SRC = fldigirc.rc
+
 FLARQ_WIN32_RES_SRC = flarq-src/flarqrc.rc
+
 COMMON_WIN32_RES_SRC = common.rc
+
 BENCHMARK_SRC = include/benchmark.h misc/benchmark.cxx
+
 REGEX_SRC = compat/regex.h compat/regex.c
+
 STACK_SRC = include/stack.h misc/stack.cxx
+
 MINGW32_SRC = include/compat.h compat/getsysinfo.c compat/mingw.c compat/mingw.h
+
 NLS_SRC = misc/nls.cxx include/nls.h
 
 # Build the xmlrpcpp source if libflxmlrpc is not found
@@ -76,7 +85,7 @@ XMLRPCPP_SRC = \
 EXTRA_dl_fldigi_SOURCES = $(HAMLIB_SRC) $(XMLRPC_SRC) $(FLDIGI_WIN32_RES_SRC) $(COMMON_WIN32_RES_SRC) \
 	$(BENCHMARK_SRC) $(REGEX_SRC) $(STACK_SRC) $(MINGW32_SRC) $(NLS_SRC) $(XMLRPCPP_SRC)
 
-EXTRA_flarq_SOURCES = $(FLARQ_WIN32_RES_SRC) $(COMMON_WIN32_RES_SRC)
+EXTRA_flarq_SOURCES = $(FLARQ_WIN32_RES_SRC) $(COMMON_WIN32_RES_SRC) $(XMLRPCPP_SRC)
 
 dl_fldigi_SOURCES =
 flarq_SOURCES =
@@ -85,11 +94,16 @@ dl_fldigi_SOURCES += $(XMLRPC_SRC)
 
 if !ENABLE_FLXMLRPC
 dl_fldigi_SOURCES += $(XMLRPCPP_SRC)
+flarq_SOURCES  += $(XMLRPCPP_SRC)
 else
 dl_fldigi_CPPFLAGS += @FLXMLRPC_CFLAGS@
 dl_fldigi_CXXFLAGS += @FLXMLRPC_CFLAGS@
 dl_fldigi_CFLAGS   += @FLXMLRPC_CFLAGS@
 dl_fldigi_LDFLAGS  += @FLXMLRPC_LIBS@
+flarq_CPPFLAGS += @FLXMLRPC_CFLAGS@
+flarq_CXXFLAGS += @FLXMLRPC_CFLAGS@
+flarq_CFLAGS   += @FLXMLRPC_CFLAGS@
+flarq_LDFLAGS  += @FLXMLRPC_LIBS@
 endif
 
 if ENABLE_HAMLIB
@@ -423,6 +437,7 @@ dl_fldigi_SOURCES += \
 	include/jalocha/pj_mfsk.h \
 	include/jalocha/pj_struc.h \
 	include/kiss_io.h \
+	include/maclogger.h \
 	include/ax25_decode.h \
 	include/coordinate.h \
 	include/gfft.h \
@@ -507,6 +522,7 @@ dl_fldigi_SOURCES += \
 	include/viterbi.h \
 	include/waterfall.h \
 	include/fsq.h \
+	include/ifkp.h \
 	include/wwv.h \
 	include/xmlreader.h \
 	include/adif_def.h \
@@ -539,6 +555,12 @@ dl_fldigi_SOURCES += \
 	include/habitat/RFC3339.h \
 	include/utf8file_io.h \
 	include/weather.h \
+	include/dock_events.h \
+	include/dock_gp.h \
+	include/drag_btn.h \
+	include/dropwin.h \
+	include/toolgrp.h \
+	include/toolwin.h \
 	irrxml/CXMLReaderImpl.h \
 	irrxml/fast_atof.h \
 	irrxml/heapsort.h \
@@ -554,6 +576,7 @@ dl_fldigi_SOURCES += \
 	logbook/logbook.cxx \
 	logbook/logsupport.cxx \
 	logbook/lookupcall.cxx \
+	logbook/maclogger.cxx \
 	logbook/qrzlib.cxx \
 	logbook/qso_db.cxx \
 	logbook/table.cxx \
@@ -614,6 +637,7 @@ dl_fldigi_SOURCES += \
 	qrunner/fqueue.h \
 	qrunner/qrunner.cxx \
 	rigcontrol/FreqControl.cxx \
+	rigcontrol/norig.cxx \
 	rigcontrol/ptt.cxx \
 	rigcontrol/rigio.cxx \
 	rigcontrol/rigsupport.cxx \
@@ -654,7 +678,14 @@ dl_fldigi_SOURCES += \
 	widgets/psk_browser.cxx \
 	widgets/smeter.cxx \
 	widgets/pwrmeter.cxx \
+	widgets/dock_gp.cxx \
+	widgets/drag_btn.cxx \
+	widgets/dropwin.cxx \
+	widgets/toolgrp.cxx \
+	widgets/toolwin.cxx \
 	fsq/fsq.cxx \
+	ifkp/ifkp.cxx \
+	ifkp/tux.cxx \
 	fsq/fsq_monitor.cxx \
 	wwv/analysis.cxx \
 	wwv/fftscan.cxx \
@@ -708,6 +739,9 @@ EXTRA_dl_fldigi_SOURCES += \
 	include/Fl_Text_Editor_mod.H \
 	fsq/fsq-pic.cxx \
 	fsq/bitmaps.cxx \
+	ifkp/ifkp_bitmaps.cxx \
+	ifkp/ifkp_varicode.cxx \
+	ifkp/ifkp-pic.cxx \
 	mfsk/mfsk-pic.cxx \
 	mt63/alias_1k.dat \
 	mt63/alias_2k.dat \
@@ -716,6 +750,7 @@ EXTRA_dl_fldigi_SOURCES += \
 	mt63/alias_k5.dat \
 	mt63/mt63intl.dat \
 	rsid/rsid_defs.cxx \
+	thor/thor-pic.cxx \
 	trx/tune.cxx \
 	dialogs/guide.cxx \
 	libtiniconv/tiniconv.h \
@@ -782,11 +817,13 @@ flarq_SOURCES += \
 	flarq-src/b64.cxx \
 	flarq-src/flarq.cxx \
 	flarq-src/flarqenv.cxx \
+	flarq-src/xml_server.cxx \
 	flarq-src/include/arq.h \
 	flarq-src/include/arqdialogs.h \
 	flarq-src/include/b64.h \
 	flarq-src/include/flarq.h \
 	flarq-src/include/flarqenv.h \
+	flarq-src/include/xml_server.h \
 	include/Fl_Text_Display_mod.H \
 	include/Fl_Text_Editor_mod.H \
 	include/FTextView.h \
@@ -828,9 +865,12 @@ flarq_SOURCES += \
 
 # Additional files that we distribute
 EXTRA_DIST = \
+    $(srcdir)/../build-aux/config.rpath \
 	$(srcdir)/../scripts/mkappbundle.sh \
 	$(srcdir)/../scripts/mkhamlibstatic.sh \
 	$(srcdir)/../scripts/mknsisinst.sh \
+	$(srcdir)/../scripts/buildmxe.sh \
+	$(srcdir)/../scripts/builddist.sh \
 	$(srcdir)/../scripts/tests/cr.sh \
 	$(srcdir)/../scripts/tests/config-h.sh \
 	$(srcdir)/../data/fldigi-psk.png \
@@ -846,6 +886,7 @@ EXTRA_DIST = \
 	$(srcdir)/../data/mac/Info.plist.in \
 	$(srcdir)/../data/mac/fldigi.icns \
 	$(srcdir)/../data/win32/fldigi.ico \
+	$(srcdir)/../data/win32/fldigi.nsi \
 	$(srcdir)/../data/flarq.desktop \
 	$(srcdir)/../data/flarq.xpm \
 	$(srcdir)/../data/mac/flarq.icns \

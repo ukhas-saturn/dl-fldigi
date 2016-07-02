@@ -448,6 +448,7 @@ int FTextRX::handle_qso_data(int start, int end)
 			*(s + offsets.rm_eo) = '\0';
 			inpCall->value(p);
 			log_callback(inpCall);
+			Fl::copy(p, strlen(p), 1);  // copy to clipboard
 		} else {
 			inpXchgIn->position(inpXchgIn->size());
 			if (inpXchgIn->size()) inpXchgIn->insert(" ", 1);
@@ -464,6 +465,7 @@ int FTextRX::handle_qso_data(int start, int end)
 			p = s + offsets.rm_so;
 			*(s + offsets.rm_eo) = '\0';
 			target = inpCall;
+			Fl::copy(p, strlen(p), 1);  // copy to clipboard
 		}
 		else if (count_if(s, s + strlen(s), static_cast<int(*)(int)>(isdigit)))
 			target = inpQth;
@@ -693,9 +695,9 @@ const char* FTextRX::dxcc_lookup_call(int x, int y)
 	    QRB::qrb(lon1, lat1, lon2, lat2, &distance, &azimuth) == QRB::QRB_OK) {
 			if (progdefaults.us_units) {
 				stip << "QTE " << fixed << setprecision(0) << azimuth << '\260' << " ("
-					<< QRB::azimuth_long_path(azimuth) << '\260' << ")  QRB " 
+					<< QRB::azimuth_long_path(azimuth) << '\260' << ")  QRB "
 					<< distance * 0.62168188 << "mi"<< " (" <<
-					QRB::distance_long_path(distance) * 0.62168188 << 
+					QRB::distance_long_path(distance) * 0.62168188 <<
 					"mi)\n";
 			}
 			else {
@@ -762,8 +764,8 @@ void FTextRX::dxcc_tooltip(void* obj)
 Fl_Menu_Item FTextTX::menu[] = {
 	{ icons::make_icon_label(_("Transmit"), tx_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
 	{ icons::make_icon_label(_("Receive"), rx_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ icons::make_icon_label(_("Abort"), process_stop_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
-	{ icons::make_icon_label(_("Send image..."), image_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Abort"), process_stop_icon), 0, 0, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL },
+	{ icons::make_icon_label(_("Send image..."), image_icon), 0, 0, 0, 0, _FL_MULTI_LABEL },
 
 	{ 0 }, // EDIT_MENU_CUT
 	{ 0 }, // EDIT_MENU_COPY
@@ -772,6 +774,92 @@ Fl_Menu_Item FTextTX::menu[] = {
 	{ 0 }, // EDIT_MENU_READ
 	{ 0 }, // EDIT_MENU_WRAP
 
+	{ _("Spec Char"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+		{ "¢ - cent", 0, 0, 0, 0, FL_NORMAL_LABEL },
+		{ "£ - pound", 0, 0, 0, 0, FL_NORMAL_LABEL },
+		{ "µ - micro", 0, 0, 0, 0, FL_NORMAL_LABEL },
+		{ "° - degree", 0, 0, 0, 0, FL_NORMAL_LABEL },
+		{ "¿ - iques", 0, 0, 0, 0, FL_NORMAL_LABEL },
+		{ "× - times", 0, 0, 0, 0, FL_NORMAL_LABEL },
+		{ "÷ - divide", 0, 0, 0, 0, FL_NORMAL_LABEL },
+		{ _("A"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "À - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "à - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Á - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "á - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Â - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "â - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ã - tilde", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ã - tilde", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ä - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ä - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Å - ring", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "å - ring", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Æ - aelig", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "æ - aelig", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{ _("E"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "È - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "è - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "É - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "é - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ê - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ê - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ë - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ë - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{ _("I"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "Ì - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ì - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Í - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "í - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Î - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "î - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ï - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ï - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{ _("N"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "Ñ - tilde", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ñ - tilde", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{ _("O"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "Ò - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ò - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ó - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ó - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ô - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ô - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Õ - tilde", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "õ - tilde", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ö - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ö - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ø - slash", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ø - slash", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{ _("U"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "Ù - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ù - grave", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ú - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ú - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Û - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "û - circ", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ü - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ü - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{ _("Y"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "Ý - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ý - acute", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ÿ - umlaut", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{ _("Other"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL },
+			{ "ß - szlig", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ç - cedil", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ç - cedil", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Ð - eth", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "ð - eth", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{ "Þ - thorn", 0, 0, 0, 0, FL_NORMAL_LABEL },
+			{0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0},
 	{ 0 }
 };
 
@@ -811,7 +899,7 @@ int FTextTX::handle(int event)
 	case FL_KEYBOARD:
 		if (active_modem->get_mode() == MODE_FSQ) {
 			if (Fl::event_key() == FL_Enter || Fl::event_key() == FL_KP_Enter) {
-				fsq_transmit(active_modem);
+				fsq_transmit(0);
 				return 1;
 			}
 		}
@@ -1279,8 +1367,16 @@ void FTextTX::menu_cb(size_t item)
  			abort_tx();
   		break;
 	case TX_MENU_MFSK16_IMG:
-		showTxViewer(0, 0);
+		{
+			trx_mode md = active_modem->get_mode();
+		if (md == MODE_IFKP)
+			ifkp_showTxViewer();
+		else if (md >= MODE_THOR_FIRST && md <= MODE_THOR_LAST)
+			thor_showTxViewer();
+		else
+			showTxViewer(0, 0);
 		break;
+		}
 	case TX_MENU_CLEAR:
 		clear();
 		break;
@@ -1302,6 +1398,9 @@ void FTextTX::menu_cb(size_t item)
 	case TX_MENU_WRAP:
 		set_word_wrap(!wrap, true);
 		break;
+	default:
+		if (FTextTX::menu[item].flags == 0) // not an FL_SUB_MENU
+			add(FTextTX::menu[item].text[0]); add(FTextTX::menu[item].text[1]);
 	}
 }
 

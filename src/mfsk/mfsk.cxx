@@ -65,7 +65,9 @@ struct TRACEPAIR {
 
 TRACEPAIR tracepair(45, 352);
 
-bool xmt_filter = true;
+// enable to limit within band signal sidebands
+// not really needed
+static bool xmt_filter = false;
 
 //=============================================================================
 char mfskmsg[80];
@@ -79,11 +81,14 @@ void  mfsk::tx_init(SoundBase *sc)
 	txstate = TX_STATE_PREAMBLE;
 	bitstate = 0;
 
-	double bw2 = (numtones + 1) * samplerate / symlen / 2.0;
-	double flo = (get_txfreq_woffset() - bw2) / samplerate;
-	if (flo <= 0) flo = 0;
-	double fhi = (get_txfreq_woffset() + bw2) / samplerate;
-	xmtfilt->init_bandpass (127, 1, flo, fhi);
+	double factor = 1.5;
+	double bw2 = factor*(numtones + 1) * samplerate / symlen / 2.0;
+	double flo = (get_txfreq_woffset() - bw2);// / samplerate;
+	if (flo <= 100) flo = 100;
+	double fhi = (get_txfreq_woffset() + bw2);// / samplerate;
+	if (fhi >= samplerate/2 - 100) fhi = samplerate/2 - 100;
+
+	xmtfilt->init_bandpass (255, 1, flo/samplerate, fhi/samplerate);
 
 	videoText();
 }
@@ -1022,6 +1027,8 @@ void mfsk::send_epilogue()
 	flush_xmt_filter(64);
 }
 
+static bool close_after_transmit = false;
+
 void mfsk::clearbits()
 {
 	int data = enc->encode(0);
@@ -1039,9 +1046,29 @@ void mfsk::clearbits()
 	}
 }
 
-
 int mfsk::tx_process()
 {
+	// filter test set to 1
+#if 0
+	double *ptr;
+	double f;
+	char msg[100];
+	for (int i = 100; i < 3900; i++) {
+		ptr = outbuf;
+		f = 1.0 * i;
+		snprintf(msg, sizeof(msg), "freq: %.0f", f);
+		put_status(msg);
+		for (int j = 0; j < 32; j++) {
+			*ptr++ = cos(phaseacc);
+			phaseacc += TWOPI * f / samplerate;
+			if (phaseacc > TWOPI) phaseacc -= TWOPI;
+		}
+		transmit (outbuf, 32);
+
+	}
+	return -1;
+#endif
+
 	int xmtbyte;
 
 	switch (txstate) {
@@ -1137,6 +1164,8 @@ int mfsk::tx_process()
 			btnpicTxSendGrey->show();
 			btnpicTxLoad->show();
 			btnpicTxClose->show();
+			if (close_after_transmit) picTxWin->hide();
+			close_after_transmit = false;
 			abortxmt = false;
 			rxstate = RX_STATE_DATA;
 			memset(picheader, ' ', PICHEADER - 1);
@@ -1151,6 +1180,7 @@ int mfsk::tx_process()
 void mfsk::send_color_image(std::string s)
 {
 	if (load_image(s.c_str())) {
+		close_after_transmit = true;
 		pic_TxSendColor();
 	}
 }
@@ -1158,6 +1188,7 @@ void mfsk::send_color_image(std::string s)
 void mfsk::send_Grey_image(std::string s)
 {
 	if (load_image(s.c_str())) {
+		close_after_transmit = true;
 		pic_TxSendGrey();
 	}
 }

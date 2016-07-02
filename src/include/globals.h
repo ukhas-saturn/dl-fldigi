@@ -137,8 +137,10 @@ enum {
 	MODE_QPSK_LAST = MODE_QPSK500,
 
 	MODE_8PSK125,
+	MODE_8PSK125FL,
 	MODE_8PSK125F,
 	MODE_8PSK250,
+	MODE_8PSK250FL,
 	MODE_8PSK250F,
 	MODE_8PSK500,
 	MODE_8PSK500F,
@@ -221,12 +223,13 @@ enum {
 	MODE_PSKR_FIRST = MODE_PSK125R,
 	MODE_PSKR_LAST = MODE_2X_PSK1000R,
 
+	MODE_FSQ,
+	MODE_IFKP,
+
 	MODE_SSB,
 	MODE_WWV,
 	MODE_ANALYSIS,
 	MODE_FFTSCAN,
-
-	MODE_FSQ,
 
 	NUM_MODES,
 	NUM_RXTX_MODES = NUM_MODES - 2
@@ -253,10 +256,16 @@ public:
 	std::string rmode;
 	int carrier;
 	trx_mode mode;
+	std::string usage;
 
-	qrg_mode_t() : rfcarrier(0), rmode("NONE"), carrier(0), mode(NUM_MODES) { }
-	qrg_mode_t(long long rfc_, std::string rm_, int c_, trx_mode m_)
-                : rfcarrier(rfc_), rmode(rm_), carrier(c_), mode(m_) { }
+	qrg_mode_t() :
+		rfcarrier(0),
+		rmode("NONE"),
+		carrier(0),
+		mode(NUM_MODES),
+		usage("") { }
+	qrg_mode_t(long long rfc_, std::string rm_, int c_, trx_mode m_, std::string use_ = "")
+                : rfcarrier(rfc_), rmode(rm_), carrier(c_), mode(m_), usage(use_) { }
 	bool operator<(const qrg_mode_t& rhs) const
         {
 		return rfcarrier < rhs.rfcarrier;
@@ -266,13 +275,13 @@ public:
 		return rfcarrier == rhs.rfcarrier && rmode == rhs.rmode &&
 		       carrier == rhs.carrier && mode == rhs.mode;
 	}
-        std::string str(void);
+	std::string str(void);
 };
 std::ostream& operator<<(std::ostream& s, const qrg_mode_t& m);
 std::istream& operator>>(std::istream& s, qrg_mode_t& m);
 
 #include <bitset>
-class mode_set_t : public std::bitset<NUM_RXTX_MODES> { };
+class mode_set_t : public std::bitset<NUM_MODES> {};
 
 enum band_t {
 	BAND_160M, BAND_80M, BAND_75M, BAND_60M, BAND_40M, BAND_30M, BAND_20M,

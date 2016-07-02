@@ -57,7 +57,7 @@ const struct mode_info_t mode_info[NUM_MODES] = {
 	{ MODE_DOMINOEX5, &dominoex5_modem, "DOMEX5", "DominoEX 5", "DOMINOEX5", "DOMINO", "DM 5", DISABLED_IO },
 	{ MODE_DOMINOEX8, &dominoex8_modem, "DOMEX8", "DominoEX 8", "DOMINOEX8", "DOMINO", "DM 8", DISABLED_IO },
 	{ MODE_DOMINOEX11, &dominoex11_modem, "DOMX11", "DominoEX 11", "DOMINOEX11", "DOMINO", "DM11", DISABLED_IO },
-	{ MODE_DOMINOEX16, &dominoex16_modem, "DOMX16", "DominoEX 16", "DOMINOEX16", "DOMINO", "DM16", DISABLED_IO },
+	{ MODE_DOMINOEX16, &dominoex16_modem, "DOMX16", "DominoEX 16", "DOMINOEX16", "DOMINO", "DM16", ARQ_IO | KISS_IO },
 	{ MODE_DOMINOEX22, &dominoex22_modem, "DOMX22", "DominoEX 22", "DOMINOEX22", "DOMINO", "DM22", ARQ_IO | KISS_IO },
 	{ MODE_DOMINOEX44, &dominoex44_modem, "DOMX44", "DominoEX 44", "DOMINOEX44", "DOMINO", "DM44", ARQ_IO | KISS_IO },
 	{ MODE_DOMINOEX88, &dominoex88_modem, "DOMX88", "DominoEX 88", "DOMINOEX88", "DOMINO", "DM88", ARQ_IO | KISS_IO },
@@ -71,13 +71,13 @@ const struct mode_info_t mode_info[NUM_MODES] = {
 	{ MODE_HELL80, &feld_80modem, "HELL80", "Hell 80", "", "HELL80", "HL80", DISABLED_IO },
 
 	{ MODE_MFSK8, &mfsk8_modem, "MFSK8", "MFSK-8", "MFSK8", "MFSK8", "MK 8", DISABLED_IO  },
-	{ MODE_MFSK16, &mfsk16_modem, "MFSK16", "MFSK-16", "MFSK16", "MFSK16", "MK16", ARQ_IO  },
+	{ MODE_MFSK16, &mfsk16_modem, "MFSK16", "MFSK-16", "MFSK16", "MFSK16", "MK16", ARQ_IO | KISS_IO },
 	{ MODE_MFSK32, &mfsk32_modem, "MFSK32", "MFSK-32", "MFSK32", "MFSK32", "MK32", ARQ_IO | KISS_IO  },
 
 	{ MODE_MFSK4, &mfsk4_modem, "MFSK4", "MFSK-4", "MFSK4", "MFSK4", "MK 4", DISABLED_IO  },
 	{ MODE_MFSK11, &mfsk11_modem, "MFSK11", "MFSK-11", "MFSK11", "MFSK11", "MK11", DISABLED_IO  },
 	{ MODE_MFSK22, &mfsk22_modem, "MFSK22", "MFSK-22", "MFSK22", "MFSK22", "MK22", DISABLED_IO  },
-	{ MODE_MFSK31, &mfsk31_modem, "MFSK31", "MFSK-31", "MFSK31", "MFSK31", "MK31", ARQ_IO  },
+	{ MODE_MFSK31, &mfsk31_modem, "MFSK31", "MFSK-31", "MFSK31", "MFSK31", "MK31", ARQ_IO | KISS_IO },
 	{ MODE_MFSK64, &mfsk64_modem, "MFSK64", "MFSK-64", "MFSK64", "MFSK64", "MK64", ARQ_IO | KISS_IO   },
 	{ MODE_MFSK128, &mfsk128_modem, "MFSK128", "MFSK-128", "MFSK128", "MFSK128", "MK128", ARQ_IO | KISS_IO   },
 	{ MODE_MFSK64L, &mfsk64l_modem, "MFSK64L", "MFSK-64L", "MFSK64L", "MFSK64L", "MK64L", ARQ_IO | KISS_IO   },
@@ -118,8 +118,10 @@ const struct mode_info_t mode_info[NUM_MODES] = {
 	{ MODE_QPSK500, &qpsk500_modem, "QPSK500", "QPSK-500", "QPSK500", "QPSK500", "Q500",  ARQ_IO | KISS_IO  },
 
 	{ MODE_8PSK125, &_8psk125_modem, "8PSK125", "8PSK-125", "8PSK125", "8PSK125", "8PSK125", ARQ_IO | KISS_IO },
+	{ MODE_8PSK125FL, &_8psk125fl_modem, "8PSK125FL", "8PSK-125FL", "8PSK125FL", "8PSK125FL", "8PSK125FL", ARQ_IO | KISS_IO },
 	{ MODE_8PSK125F, &_8psk125f_modem, "8PSK125F", "8PSK-125F", "8PSK125F", "8PSK125F", "8PSK125F", ARQ_IO | KISS_IO },
 	{ MODE_8PSK250, &_8psk250_modem, "8PSK250", "8PSK-250", "8PSK250", "8PSK250", "8PSK250", ARQ_IO | KISS_IO },
+	{ MODE_8PSK250FL, &_8psk250fl_modem, "8PSK250FL", "8PSK-250FL", "8PSK250FL", "8PSK250FL", "8PSK250FL", ARQ_IO | KISS_IO },
 	{ MODE_8PSK250F, &_8psk250f_modem, "8PSK250F", "8PSK-250F", "8PSK250F", "8PSK250F", "8PSK250F", ARQ_IO | KISS_IO },
 	{ MODE_8PSK500, &_8psk500_modem, "8PSK500", "8PSK-500", "8PSK500", "8PSK500", "8PSK500", ARQ_IO | KISS_IO },
 	{ MODE_8PSK500F, &_8psk500f_modem, "8PSK500F", "8PSK-500F", "8PSK500F", "8PSK500F", "8PSK500F", ARQ_IO | KISS_IO },
@@ -191,25 +193,35 @@ const struct mode_info_t mode_info[NUM_MODES] = {
 
 	{ MODE_2X_PSK1000R, &psk1000r_c2_modem, "PSK1000RC2", "2xPSK1000R", "PSK1000RC2", "PSK1000RC2", "P1KRC2", ARQ_IO | KISS_IO },
 
+	{ MODE_FSQ, &fsq_modem, "FSQ", "FSQ", "FSQ", "FSQ", "FSQ", DISABLED_IO },
+	{ MODE_IFKP, &ifkp_modem, "IFKP", "IFKP", "IFKP", "IFKP", "IFKP", DISABLED_IO },
+
 	{ MODE_SSB, &ssb_modem, "SSB", "SSB", "", "SSB", "", DISABLED_IO },
 	{ MODE_WWV, &wwv_modem, "WWV", "WWV", "", "", "", DISABLED_IO },
 	{ MODE_ANALYSIS, &anal_modem, "ANALYSIS", "Freq Analysis", "", "", "", DISABLED_IO },
-	{ MODE_FFTSCAN, &fftscan_modem, "FREQSCAN", "Freq Scan", "", "", "", DISABLED_IO },
-
-	{ MODE_FSQ, &fsq_modem, "FSQ", "FSQ", "", "", "", DISABLED_IO }
-
+	{ MODE_FFTSCAN, &fftscan_modem, "FREQSCAN", "Freq Scan", "", "", "", DISABLED_IO }
 };
 
 std::ostream& operator<<(std::ostream& s, const qrg_mode_t& m)
 {
-	return s << m.rfcarrier << ' ' << m.rmode << ' ' << m.carrier << ' ' << mode_info[m.mode].sname;
+	return s << m.rfcarrier << ' '
+			 << m.rmode << ' '
+			 << m.carrier << ' '
+			 << mode_info[m.mode].sname << ' '
+			 << m.usage;
 }
 
 std::istream& operator>>(std::istream& s, qrg_mode_t& m)
 {
 	string sMode;
+	char temp[255];
 	int mnbr;
 	s >> m.rfcarrier >> m.rmode >> m.carrier >> sMode;
+
+	s.getline(temp, 255);
+	m.usage = temp;
+	while (m.usage[0] == ' ') m.usage.erase(0,1);
+
 // handle case for reading older type of specification string
 	if (sscanf(sMode.c_str(), "%d", &mnbr)) {
 		m.mode = mnbr;
@@ -231,7 +243,9 @@ std::string qrg_mode_t::str(void)
 	  << setprecision(3) << rfcarrier/1000.0 << '|'
 	  << rmode << '|'
 	  << (mode < NUM_MODES ? mode_info[mode].sname : "NONE") << '|'
-	  << carrier;
+//	  << carrier;
+	  << carrier << '|'
+	  << usage;
 	return s.str();
 }
 

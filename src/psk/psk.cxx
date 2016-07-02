@@ -51,6 +51,8 @@
 #include "Viewer.h"
 #include "macros.h"
 
+#include "confdialog.h"
+
 extern waterfall *wf;
 
 // Change the following for DCD low pass filter adjustment
@@ -80,17 +82,6 @@ extern waterfall *wf;
 #define K13_POLY1	016461 // 7473
 #define K13_POLY2	012767 // 5623
 
-// Poorly performing code: Do not use
-#define K9		9
-#define K9_POLY1	0677 // 447
-#define K9_POLY2	0515 // 333
-
-// df=18 : correct up to 8 bits
-#define	K15		15
-#define	K15_POLY1	044735 // 18909
-#define	K15_POLY2	063057 // 26159
-
-
 // df=19 : correct up to 9 bits
 #define	K16		16
 #define	K16_POLY1	0152711 // 54729
@@ -101,7 +92,7 @@ extern waterfall *wf;
 //  - One of the bits is still known with 100% certianty.
 //  - Only up to 1 bit can be in error
 static cmplx graymapped_8psk_pos[] = {
-	//				 Degrees  Bits In  Mapped Soft-Symbol
+	//			Degrees  Bits In  Mapped Soft-Symbol
 	cmplx (1.0, 0.0),         // 0   | 0b000  | 025,000,025
 	cmplx (0.7071, 0.7071),   // 45  | 0b001  | 000,025,230
 	cmplx (-0.7071, 0.7071),  // 135 | 0b010  | 025,255,025
@@ -164,6 +155,12 @@ void psk::tx_init(SoundBase *sc)
 	vphase = 0;
 	maxamp = 0;
 
+	double bw2 = 6.0 * bandwidth;
+	double flo = (get_txfreq_woffset() - bw2);
+	if (flo <= 0) flo = 0;
+	double fhi = (get_txfreq_woffset() + bw2);
+	if (fhi >= 0.48*samplerate) fhi = 0.48*samplerate;
+	xmtfilt->init_bandpass (127, 1, flo/samplerate, fhi/samplerate);
 }
 
 void psk::rx_init()
@@ -190,7 +187,6 @@ void psk::rx_init()
 	else sigsearch = 0;
 	put_MODEstatus(mode);
 	resetSN_IMD();
-	imdValid = false;
 	afcmetric = 0.0;
 	// interleaver, split incoming bit stream into two, one late by one bit
 	rxbitstate = 0;
@@ -234,6 +230,9 @@ psk::~psk()
 	}
 	if (snfilt) delete snfilt;
 	if (imdfilt) delete imdfilt;
+	if (e0_filt) delete e0_filt;
+	if (e1_filt) delete e1_filt;
+	if (e2_filt) delete e2_filt;
 
 	if (pskviewer) delete pskviewer;
 	if (evalpsk) delete evalpsk;
@@ -244,6 +243,8 @@ psk::~psk()
 	if (Txinlv) delete Txinlv;
 
 	if (vestigial_sfft) delete vestigial_sfft;
+
+	if (xmtfilt) delete xmtfilt;
 }
 
 psk::psk(trx_mode pskmode) : modem()
@@ -365,6 +366,26 @@ psk::psk(trx_mode pskmode) : modem()
 			break;
 
 	// 8psk modes with FEC
+		case MODE_8PSK125FL:
+			symbollen = 128;
+			idepth = 384; // 1024 milliseconds
+			flushlength = 38;
+			samplerate = 16000;
+			_8psk = true;
+			dcdbits = 128;
+			vestigial = true;
+			cap |= CAP_REV;
+			break;
+		case MODE_8PSK250FL: // 250 baud | 375 bits/sec @ 1/2 Rate FEC
+			symbollen = 64;
+			idepth = 512; // 682 milliseconds
+			flushlength = 47;
+			samplerate = 16000;
+			_8psk = true;
+			dcdbits = 256;
+			vestigial = true;
+			cap |= CAP_REV;
+			break;
 		case MODE_8PSK125F:
 			symbollen = 128;
 			idepth = 384; // 1024 milliseconds
@@ -723,6 +744,9 @@ psk::psk(trx_mode pskmode) : modem()
 
 	snfilt = new Cmovavg(16);
 	imdfilt = new Cmovavg(16);
+	e0_filt = new Cmovavg(dcdbits / 2);
+	e1_filt = new Cmovavg(dcdbits / 2);
+	e2_filt = new Cmovavg(dcdbits / 2);
 
 	if (_disablefec) {
 		enc = NULL;
@@ -732,7 +756,7 @@ psk::psk(trx_mode pskmode) : modem()
 		enc = new encoder(K, POLY1, POLY2);
 		dec = new viterbi(K, POLY1, POLY2);
 
-	} else if (_pskr || mode == MODE_8PSK1200F || PSKviterbi) {
+	} else if (_pskr || PSKviterbi) {
 		// FEC for BPSK. Use a 2nd Viterbi decoder for comparison.
 		// Set decode size to 4 since some characters can be as small
 		// as 3 bits long. This minimises intercharacters decoding
@@ -743,27 +767,26 @@ psk::psk(trx_mode pskmode) : modem()
 		dec2 = new viterbi(PSKR_K, PSKR_POLY1, PSKR_POLY2);
 		dec2->setchunksize(4);
 
-	} else if (_puncturing) { 
-		// Use the FEC code best suited for puncturing
-		enc = new encoder(K13, K13_POLY1, K13_POLY2);
-		dec = new viterbi(K13, K13_POLY1, K13_POLY2);
-		// long constraint length codes require long traceback
-		dec->settraceback (PATHMEM); 
-		dec->setchunksize(4);
-		dec2 = new viterbi(K13, K13_POLY1, K13_POLY2);
-		dec2->settraceback (PATHMEM);
-		dec2->setchunksize(4);
-
-	} else if (_xpsk || _8psk || _16psk) { 
-		// Use the code with the best FEC capabilities
+	} else if (mode == MODE_8PSK125F || mode == MODE_8PSK250F) {
 		enc = new encoder(K16, K16_POLY1, K16_POLY2);
 		dec = new viterbi(K16, K16_POLY1, K16_POLY2);
-		// long constraint length codes require long traceback
-		dec->settraceback (PATHMEM); 
 		dec->setchunksize(4);
-		dec2 = new viterbi(K16, K16_POLY1, K16_POLY2);
-		dec2->settraceback (PATHMEM);
+		dec2 = new viterbi(K13, K16_POLY1, K16_POLY2);
 		dec2->setchunksize(4);
+
+	} else if (_xpsk || _8psk || _16psk) {
+		enc = new encoder(K13, K13_POLY1, K13_POLY2);
+		dec = new viterbi(K13, K13_POLY1, K13_POLY2);
+		dec->setchunksize(4);
+		// Second viterbi decoder is only needed when modem has an odd number of bits/symbol.
+		if ( _8psk && !_puncturing ) { // (punctured 8psk has 3-real bits + 1-punctured bit per transmitted symbol)
+			dec2 = new viterbi(K13, K13_POLY1, K13_POLY2);
+			dec2->setchunksize(4);
+		}
+		if (_puncturing) { // punctured codes benefit from a longer traceback
+			dec->settraceback(K13 * 16);
+			if (dec2) dec2->settraceback(K13 * 16);
+		}
 	}
 
 	// Interleaver. For PSKR to maintain constant time delay between bits,
@@ -773,7 +796,7 @@ psk::psk(trx_mode pskmode) : modem()
 
 	Txinlv = new interleave (isize, idepth, INTERLEAVE_FWD);
 	Rxinlv = new interleave (isize, idepth, INTERLEAVE_REV);
-	Rxinlv2 = new interleave (isize, idepth, INTERLEAVE_REV);
+	if (dec2) Rxinlv2 = new interleave (isize, idepth, INTERLEAVE_REV);
 
 	bitshreg = 0;
 	rxbitstate = 0;
@@ -819,6 +842,9 @@ psk::psk(trx_mode pskmode) : modem()
 		vestigial_sfft = new sfft(sfft_size, bin - 5, bin + 6); // 11 bins
 		for (int i = 0; i < 11; i++) sfft_bins[i] = cmplx(0,0);
 	}
+
+	xmtfilt = new C_FIR_filter();
+
 }
 
 //=============================================================================
@@ -962,6 +988,13 @@ void psk::rx_pskr(unsigned char symbol)
 		//			fecmet2 = -9999.0;
 		//			return;
 		//		}
+		// XPSK and 16PSK have even number of bits/symbol
+		// Punctured 8PSK has even number of bits/symbol (3 real + 1 punctured)
+		// so bit order known: can use only one decoder to reduce CPU usage
+		if ( _xpsk || _16psk || (_8psk && _puncturing) ) {
+			fecmet2 = -9999.0;
+			return;
+		}
 		// copy to avoid scrambling symbolpair for the next bit
 		twosym[0] = symbolpair[0];
 		twosym[1] = symbolpair[1];
@@ -1044,6 +1077,10 @@ int waitcount = 0;
 
 void psk::findsignal()
 {
+	put_Status1("");
+	put_Status2("");
+	put_status("");
+
 	int ftest, f1, f2;
 
 	if (sigsearch > 0) {
@@ -1106,9 +1143,9 @@ void psk::vestigial_afc() {
 	std::setprecision(2); std::setw(5);
 	for (i = 0; i < 11; i++) if (abs(sfft_bins[i]) > 2.0*avg) break;
 	if (i < 11) {
-//		std::cout	<< "bin: " << i 
+//		std::cout	<< "bin: " << i
 //					<< ", freq offset: " << (i - 5)*samplerate/16384.0
-//					<< ", amp: " << abs(sfft_bins[i]) 
+//					<< ", amp: " << abs(sfft_bins[i])
 //					<< ", avg: " << avg << "\n";
 		if (i != 5) {
 			frequency -= 1.0*(i-5)*samplerate/sfft_size;
@@ -1155,7 +1192,6 @@ void psk::afc()
 	if (dcd == true || acquire)
 		phaseafc();
 }
-
 
 void psk::rx_symbol(cmplx symbol, int car)
 {
@@ -1213,22 +1249,26 @@ void psk::rx_symbol(cmplx symbol, int car)
 	// simple low pass filter for quality of signal
 	double decay = SQLDECAY;
 	double attack = SQLDECAY;
+	double cval = cos(n*phase);
+	double sval = sin(n*phase);
+
 	if (_8psk) {
 		attack *= 2;
 		decay *= 4;
 	}
+
 	if (_pskr) {
-		attack *= 2;
 		decay *= 10;
-	}
+		quality = cmplx(
+			decayavg(quality.real(), cval, decay),
+			decayavg(quality.imag(), sval, decay));
+	} else
+		quality = cmplx(
+			decayavg(quality.real(), cval, cval > quality.real() ? attack : decay),
+			decayavg(quality.imag(), sval, sval > quality.real() ? attack : decay));
 
-	double cval = cos(n*phase);
-	double sval = sin(n*phase);
-
-	quality = cmplx(
-					decayavg(quality.real(), cval, cval > quality.real() ? attack : decay),
-					decayavg(quality.imag(), sval, sval > quality.real() ? attack : decay));
 	metric = 100.0 * norm(quality);
+	if (_pskr && (averageamp < 3e-5)) metric = 0;
 
 	if (progdefaults.Pskmails2nreport && (mailserver || mailclient)) {
 		//s2n reporting: rescale depending on mode, clip after scaling
@@ -1259,8 +1299,7 @@ void psk::rx_symbol(cmplx symbol, int car)
 	dcdshreg = ( dcdshreg << (symbits+1) ) | bits;
 
 	int set_dcdON = -1; // 1 sets DCD on ; 0 sets DCD off ; -1 does neither (no-op)
-	imdValid = false;
-	//printf("\n%.8X", dcdshreg);
+
 	switch (dcdshreg) {
 
 			// bpsk DCD on
@@ -1312,7 +1351,7 @@ void psk::rx_symbol(cmplx symbol, int car)
 			if (!_disablefec) break;
 			set_dcdON = 0;
 			break;
-		
+
 		case 0x10410410:	// xpsk DCD on (with FEC enabled)
 			if (_pskr) break;
 			if (_qpsk) break;
@@ -1322,7 +1361,7 @@ void psk::rx_symbol(cmplx symbol, int car)
 			if (_disablefec) break;
 			set_dcdON = 1;
 			break;
- 
+
 		case 0x00000000:	// bpsk DCD off.  x,8,16psk DCD on (with FEC disabled).
 			if (_pskr) break;
 			if (_xpsk || _8psk || _16psk) {
@@ -1341,11 +1380,12 @@ void psk::rx_symbol(cmplx symbol, int car)
 			}
 	}
 
+	displaysn = false;
 	if ( 1 == set_dcdON ) {
+		displaysn = true;
 		dcd = true;
 		acquire = 0;
 		quality = cmplx (1.0, 0.0);
-		imdValid = true;
 		if (progdefaults.Pskmails2nreport && (mailserver || mailclient))
 			s2n_sum = s2n_sum2 = s2n_ncount = 0.0;
 		//printf("\n DCD ON!!");
@@ -1379,7 +1419,7 @@ void psk::rx_symbol(cmplx symbol, int car)
 				phasequality = (phasequality + lastphasequality) / 2; // Differential modem: average probabilities between current and previous symbols
 				lastphasequality = phasequality;
 				int soft_qualityerror = static_cast<int>(128 - (128 * phasequality)) ;
-				
+
 				if (soft_qualityerror > 255-25) // Prevent soft-bit wrap-around (crossing of value 128)
 					softpuncture = true;
 				else if (soft_qualityerror < 128/3) // First 1/3 of phase delta is considered a perfect signal
@@ -1387,8 +1427,8 @@ void psk::rx_symbol(cmplx symbol, int car)
 				else if (soft_qualityerror > 128 - (128/8) ) // Last 1/8 of phase delta triggers a puncture
 					softpuncture = true;
 				else
-					soft_qualityerror /= 2; // Scale the FEC error to prevent premature cutoff 
-			
+					soft_qualityerror /= 2; // Scale the FEC error to prevent premature cutoff
+
 
 				if (softpuncture) {
 					for(int i=0; i<symbits; i++) rx_pskr(128);
@@ -1399,7 +1439,7 @@ void psk::rx_symbol(cmplx symbol, int car)
 							rx_pskr( (graymapped_8psk_softbits[bitindex][i]) - soft_qualityerror );
 						else // Soft-Zero
 							rx_pskr( (graymapped_8psk_softbits[bitindex][i]) + soft_qualityerror  );
-					} 
+					}
 				}
 
 			} else {
@@ -1429,18 +1469,24 @@ void psk::rx_symbol(cmplx symbol, int car)
 	}
 }
 
+static double e0, e1, e2;
+
 void psk::signalquality()
 {
+//	double e0, e1, e2;
+	e0 = e0_filt->run(m_Energy[0]);
+	e1 = e1_filt->run(m_Energy[1]);
+	e2 = e2_filt->run(m_Energy[2]);
 
-	if (m_Energy[1])
-		snratio = snfilt->run(m_Energy[0]/m_Energy[1]);
+	if (((e0 - e1) > 0) && (e1 > 0))
+		snratio = (e0 - e1) / e1;
 	else
-		snratio = snfilt->run(1.0);
+		snratio = 1000.0;
 
-	if (m_Energy[0] && imdValid)
-		imdratio = imdfilt->run(m_Energy[2]/m_Energy[0]);
+	if (((e0 - e1) > 0) && ((e2 - e1) > 0) )
+		imdratio = (e2 - e1) / (e0 - e1);
 	else
-		imdratio = imdfilt->run(0.001);
+		imdratio = 0.001;
 
 }
 
@@ -1451,19 +1497,30 @@ void psk::update_syncscope()
 
 	display_metric(metric);
 
-	memset(msg1, 0, sizeof(msg1));
-	memset(msg2, 0, sizeof(msg2));
+	if (displaysn) {
+		memset(msg1, 0, sizeof(msg1));
+		memset(msg2, 0, sizeof(msg2));
 
-	s2n = 10.0*log10( snratio );
-	snprintf(msg1, sizeof(msg1)-1, "s/n %2d dB", (int)(floor(s2n)));
+		s2n = 10.0*log10( snratio );
+		snprintf(msg1, sizeof(msg1), "s/n %2.0f dB", s2n);
 
-	imd = 10.0*log10( imdratio );
-	snprintf(msg2, sizeof(msg2)-1, "imd %3d dB", (int)(floor(imd)));
+		imd = 10.0*log10( imdratio );
+		snprintf(msg2, sizeof(msg2), "imd %2.0f dB", imd);
 
-	if (imdValid) {
-		put_Status1(msg1, progdefaults.StatusTimeout, progdefaults.StatusDim ? STATUS_DIM : STATUS_CLEAR);
-		put_Status2(msg2, progdefaults.StatusTimeout, progdefaults.StatusDim ? STATUS_DIM : STATUS_CLEAR);
+		put_Status1(	msg1,
+						progdefaults.StatusTimeout,
+						progdefaults.StatusDim ? STATUS_DIM : STATUS_CLEAR);
+		put_Status2(	msg2,
+						progdefaults.StatusTimeout,
+						progdefaults.StatusDim ? STATUS_DIM : STATUS_CLEAR);
 	}
+
+//static char msg3[50];
+//memset(msg3, 0, sizeof(msg3));
+//snprintf(msg3, sizeof(msg3), "%10.3f, %10.3f, %10.3f",
+//e0, e1, e2);
+//put_status(msg3);
+
 }
 
 char bitstatus[100];
@@ -1656,6 +1713,14 @@ int psk::rx_process(const double *buf, int len)
 // transmit processes
 //=====================================================================
 
+void psk::transmit(double *buf, int len)
+{
+//	if (btn_imd_on->value())
+		for (int i = 0; i < len; i++) xmtfilt->Irun(buf[i], buf[i]);
+
+	ModulateXmtr(buf, len);
+}
+
 #define SVP_MASK 0xF
 #define SVP_COUNT (SVP_MASK + 1)
 
@@ -1725,8 +1790,11 @@ void psk::tx_carriers()
 			} else {
 				outbuf[i] = (ival * cos(phaseacc[car]) + qval * sin(phaseacc[car])) / numcarriers;
 			}
-			if (maxamp < fabs(outbuf[i]))
-				maxamp = fabs(outbuf[i]);
+// create an imd value
+			double maxmag = xmtimd->value();
+			if (btn_imd_on->value())
+				if (fabs(outbuf[i]) > maxmag)
+					outbuf[i] = maxmag * (outbuf[i] < 0 ? -1 : 1);
 
 			phaseacc[car] += delta[car];
 			if (phaseacc[car] > TWOPI) phaseacc[car] -= TWOPI;
@@ -1746,11 +1814,16 @@ void psk::tx_carriers()
 		}
 	}
 
+	maxamp = 0;
+	for (int i = 0; i < symbollen; i++)
+		if (maxamp < fabs(outbuf[i])) maxamp = fabs(outbuf[i]);
+	maxamp *= 1.02;
 	if (maxamp) {
-		for (int i = 0; i < symbollen; i++) outbuf[i] *= (0.9 * maxamp);
+		for (int i = 0; i < symbollen; i++)
+			outbuf[i] /= maxamp;
 	}
 
-	ModulateXmtr(outbuf, symbollen);
+	transmit(outbuf, symbollen);
 }
 
 void psk::tx_symbol(int sym)
@@ -2033,11 +2106,17 @@ void psk::tx_flush()
 		for (int i=0; i<symbits; i++) {
 			tx_char(0); // Send <NUL> to clear bit accumulators on both Tx and Rx ends.
 		}
+
 		int symbol;
 		if (_16psk) symbol = 8;
 		else if (_8psk) symbol = 4;
 		else symbol = 2;
-		for (int i = 0; i < dcdbits; i++)
+
+		int _dcdbits = dcdbits - 1;
+		if(progStatus.psk8DCDShortFlag)
+			_dcdbits  = 32/(symbits - 1);
+
+		for (int i = 0; i <= _dcdbits; i++) // DCD window is only 32-bits wide
 			tx_symbol(symbol); // 0 degrees
 							   // Standard BPSK postamble
 							   // DCD off sequence (unmodulated carrier)
@@ -2058,6 +2137,12 @@ void psk::clearbits()
 int psk::tx_process()
 {
 	int c;
+
+	// DCD window is only 32 bits, send a maximum of 3-times.
+	if(progStatus.psk8DCDShortFlag) {
+		if ( (_8psk || _xpsk || _16psk) && preamble > 96)
+			preamble = 96;
+	}
 
 	if (preamble > 0) {
 		if (_pskr || ((_xpsk || _8psk || _16psk) && !_disablefec) ) {
@@ -2135,7 +2220,7 @@ void psk::initSN_IMD()
 	m_NCount = 0;
 
 	COEF[0] = 2.0 * cos(TWOPI * 9 / GOERTZEL);
-	COEF[1] = 2.0 * cos(TWOPI * 18 / GOERTZEL);
+	COEF[1] = 2.0 * cos(TWOPI * 36 / GOERTZEL);
 	COEF[2] = 2.0 * cos(TWOPI  * 27 / GOERTZEL);
 }
 

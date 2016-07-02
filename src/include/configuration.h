@@ -59,6 +59,7 @@
 #  define DEFAULT_HAMRIGDEVICE "/dev/rig"
 #endif
 
+#define DEFAULT_GPIO_PORT 17
 
 // Format: ELEM_(TYPE, VARIABLE-NAME, TAG-STRING, DOC-STRING, DEFAULT-VALUE)
 // Variables that are not saved to the xml file have empty TAG-STRINGs and DOC-STRINGs
@@ -74,6 +75,9 @@
 #define CONFIG_LIST                                                                     \
     ELEM_(bool, confirmExit, "CONFIRMEXIT",                                             \
           "Ensure user wants to leave flgidi",                                          \
+          true)                                                                         \
+        ELEM_(bool, show_tx_timer, "SHOW_TX_TIMER",                                     \
+          "Show tx timer on menu bar",                                                  \
           true)                                                                         \
         ELEM_(bool, SaveConfig, "SAVECONFIG",                                           \
               "Save current configuration on exit",                                     \
@@ -351,6 +355,9 @@
         ELEM_(bool, PseudoFSK, "PSEUDOFSK",                                             \
               "Generate Pseudo-FSK signal on right audio channel",                      \
               false)                                                                    \
+        ELEM_(bool, kml_enabled, "KMLSERVER_ENABLED",                                   \
+              "Enable kml server threads",                                              \
+              true)                                                                     \
         ELEM_(bool, SynopAdifDecoding, "SYNOPADIFDECODING",                             \
               "Decoding of Synop weather information on RTTY to ADIF log",              \
               false)                                                                    \
@@ -517,6 +524,9 @@
         ELEM_(bool, olivia8bit, "OLIVIA8BIT",                                           \
               "8-bit extended characters",                                              \
               true)                                                                     \
+        ELEM_(bool, olivia_start_tones, "OLIVIASTARTTONES",                             \
+              "Send start/stop tones",                                                  \
+              true)                                                                     \
         /* CONTESTIA */                                                                 \
         ELEM_(int, contestiatones, "CONTESTIATONES",                                    \
               "Number of tones. Values are as follows:\n"                               \
@@ -538,6 +548,9 @@
         ELEM_(bool, contestia_reset_fec, "CONTESTIARESETFEC",                           \
               "Force Integration (FEC) depth to be reset when new BW/Tones selected",   \
               false)                                                                    \
+        ELEM_(bool, contestia_start_tones, "CONTESTIASTARTTONES",                       \
+              "Send start/stop tones",                                                  \
+              true)                                                                     \
         /* THOR */                                                                      \
         ELEM_(double, THOR_BW, "THORBW",                                                \
               "Filter bandwidth factor (bandwidth relative to signal width)",           \
@@ -681,7 +694,50 @@
         ELEM_(std::string, fsq_audit_log, "FSQ_AUDIT_LOG",                              \
               "FSQ audit log pathname",                                                 \
               "fsq_audit_log.txt")                                                      \
-        /* Waterfall & UI */                                                            \
+        ELEM_(Fl_Color, fsq_xmt_color, "FSQXMTCOLOR",                                   \
+              "Color for FSQ xmt text",                                                 \
+              FL_RED)                                                                   \
+        ELEM_(Fl_Color, fsq_directed_color, "FSQDIRECTEDCOLOR",                         \
+              "Color for FSQ directed text",                                            \
+              FL_BLUE)                                                                  \
+        ELEM_(Fl_Color, fsq_undirected_color, "FSQUNDIRECTEDCOLOR",                     \
+              "Color for FSQ undirected text",                                          \
+              FL_DARK_GREEN)                                                            \
+        ELEM_(bool, add_fsq_msg_dt, "ADDFSQMSGDT",                                      \
+              "Add date-time stamp to each # type received message",                    \
+              1)                                                                        \
+        ELEM_(bool, always_append, "ALWAYS_APPEND",                                     \
+              "Enable to always append # directive messages to named file",             \
+              1)                                                                        \
+        /* IFKP */                                                                      \
+        ELEM_(int, ifkp_baud, "IFKPBAUD",                                               \
+              "1, 2, 3",                                                                \
+              1)                                                                        \
+         ELEM_(bool, ifkp_enable_heard_log, "IFKP_ENABLE_HEARD_LOG",                    \
+              "IFKP enable heard log file",                                             \
+              1)                                                                        \
+        ELEM_(std::string, ifkp_heard_log, "IFKP_HEARD_LOG",                            \
+              "IFKP heard log pathname",                                                \
+              "ifkp_heard_log.txt")                                                     \
+        ELEM_(bool, ifkp_enable_audit_log, "IFKP_ENABLE_AUDIT_LOG",                     \
+              "IFKP enable audit log file",                                             \
+              1)                                                                        \
+        ELEM_(std::string, ifkp_audit_log, "IFKP_AUDIT_LOG",                            \
+              "IFKP audit log pathname",                                                \
+              "ifkp_audit_log.txt")                                                     \
+        ELEM_(bool, ifkp_lowercase, "IFKPLOWERCASE",                                    \
+              "0 - NO, 1 - YES\n"                                                       \
+              "convert operator MYCALL to lower case for all IFKP macros",              \
+              1)                                                                        \
+        ELEM_(bool, ifkp_lowercase_call, "IFKPCALLLOWERCASE",                           \
+              "0 - NO, 1 - YES\n"                                                       \
+              "convert other CALLSIGN to lower case for all IFKP macros",               \
+              1)                                                                        \
+        ELEM_(bool, ifkp_freqlock, "IFKPFREQLOCK",                                      \
+              "0 - NO, 1 - YES\n"                                                       \
+              "Always t/r at 1500 Hz",                                                  \
+              1)                                                                        \
+       /* Waterfall & UI */                                                             \
         ELEM_(uchar, red, "", "",  0)                                                   \
         ELEM_(uchar, green, "", "",  255)                                               \
         ELEM_(uchar, blue, "", "",  255)                                                \
@@ -822,6 +878,9 @@
         ELEM_(bool, open_flmsg, "OPEN_FLMSG",                                           \
               "Open flmsg with the autoextract file",                                   \
               true)                                                                     \
+        ELEM_(bool, flmsg_transfer_direct, "FLMSG_TRANSFER_DIRECT",                     \
+              "Transfer incoming flmsg autosend file to open flmsg application",        \
+              true)                                                                     \
         ELEM_(bool, open_flmsg_print, "OPEN_FLMSG_PRINT",                               \
               "Open flmsg with the autoextract file\nprint to browser\nclose flmsg",    \
               true)                                                                     \
@@ -853,6 +912,18 @@
               "  4: callook free US calls xml service; 5: hamQTH free xml service.\n"   \
               "  The default is none.",                                                 \
               QRZXMLNONE)                                                               \
+        ELEM_(std::string, hamcallurl, "HAMCALLURL",                                    \
+              "web address of hamcall",                                                 \
+              "http://www.hamcall.net/")                                                \
+        ELEM_(std::string, hamqthurl, "HAMQTHURL",                                      \
+              "web address of hamqth",                                                  \
+              "https://www.hamqth.com/")                                                \
+        ELEM_(std::string, qrzurl, "QRZURL",                                            \
+              "web address of QRZ.com",                                                 \
+              "http://www.qrz.com/")                                                    \
+        ELEM_(std::string, callookurl, "CALLOOKURL",                                    \
+              "web address of callook",                                                 \
+              "http://callook.info/")                                                \
         ELEM_(int, QRZWEB, "QRZWEBTYPE",                                                \
               "Callsign browser query type.  Values are as follows:\n"                  \
               "  0: none; 1: QRZ web browser; 2: HamCall web browser\n"                 \
@@ -870,6 +941,9 @@
         ELEM_(bool, notes_address, "NOTES_ADDRESS",                                     \
               "Populate logbook notes (comment) field with mailing address",            \
               false)                                                                    \
+        ELEM_(bool, clear_notes, "CLEAR_NOTES",                                         \
+              "Clear notes control when making a new QRZ query",                        \
+              true)                                                                     \
         ELEM_(bool, QRZchanged, "", "",  false)                                         \
         /* eQSL */                                                                      \
         ELEM_(std::string, eqsl_id, "EQSL_ID",                                          \
@@ -890,7 +964,36 @@
         ELEM_(bool, eqsl_datetime_off, "EQSL_DATETIME_OFF",                             \
               "Send logbook date/time off vice date on (default)",                      \
               false)                                                                    \
+        /* MacLogger interface */                                                       \
+        ELEM_(bool, connect_to_maclogger, "CONNECT_TO_MACLOGGER",                       \
+              "Connect to MacLogger UDP server on 255.255.255.255 / 9932",              \
+              false)                                                                    \
+        ELEM_(bool, capture_maclogger_radio, "CAPTURE_MACLOGGER_RADIO",                 \
+              "Capture and use UDP Radio Report data",                                  \
+              true)                                                                     \
+        ELEM_(bool, capture_maclogger_spot_tune, "CAPTURE_MACLOGGER_SPOT_TUNE",         \
+              "Capture and use UDP Spot Tune data",                                     \
+              false)                                                                    \
+        ELEM_(bool, capture_maclogger_spot_report, "CAPTURE_MACLOGGER_SPOT_REPORT",     \
+              "Capture and use UDP Spot Report data",                                   \
+              false)                                                                    \
+        ELEM_(bool, capture_maclogger_log, "CAPTURE_MACLOGGER_LOG",                     \
+              "Capture and use UDP Log Report data",                                    \
+              false)                                                                    \
+        ELEM_(bool, capture_maclogger_lookup, "CAPTURE_MACLOGGER_LOOKUP",               \
+              "Capture and use UDP Lookup Report data",                                 \
+              false)                                                                    \
+        ELEM_(bool, enable_maclogger_log, "ENABLE_MACLOGGER_LOG",                       \
+              "Enable UDP string capture to file",                                      \
+              false)                                                                    \
+        ELEM_(std::string, maclogger_log_filename, "MACLOGGER_LOG_FILENAME",            \
+              "Filename for maclogger UDP datastream file",                             \
+              "maclogger_udp_strings.txt")                                              \
         /* Rig control */                                                               \
+        ELEM_(bool, flrig_keys_modem, "FLRIG_KEYS_MODEM",                               \
+              "PTT change at flrig changes Rx/Tx state\n"                               \
+              "set to false if multple instance of fldigi used with single flrig",      \
+              true)                                                                     \
         ELEM_(bool, btnusb, "BTNUSB",                                                   \
               "This setting is currently unused",                                       \
               true)                                                                     \
@@ -921,6 +1024,9 @@
         ELEM_(std::string, PTTdev, "PTTDEV",                                            \
               "PTT device",                                                             \
               DEFAULT_PTTDEV)                                                           \
+        ELEM_(int, GPIOPort, "GPIOPORT",                                                \
+              "PTT GPIO Port",                                                          \
+              DEFAULT_GPIO_PORT)                                                        \
         ELEM_(std::string, CWFSKport, "", "",  DEFAULT_CWFSKPORT)                       \
         ELEM_(std::string, HamRigDevice, "HAMRIGDEVICE",                                \
               "Hamlib rig device",                                                      \
@@ -942,6 +1048,20 @@
         ELEM_(int, HamRigStopbits, "HAMRIGSTOPBITS",                                    \
               "Hamlib stopbits <1/2>.",                                                 \
               2)   /* 600 baud */                                                       \
+        ELEM_(int, hamlib_ptt_on_data, "HAMLIBPTTONDATA",                               \
+              "Hamlib PTT for xmt audio on data port",                                  \
+              1)                                                                        \
+        ELEM_(bool, hamlib_cw_islsb, "HAMLIB_CW_ISLSB",                                 \
+              "Hamlib xcvr uses LSB for CW",                                            \
+              false)                                                                    \
+        ELEM_(bool, hamlib_rtty_isusb, "HAMLIB_RTTY_ISUSB",                             \
+              "Hamlib xcvr uses USB for RTTY",                                          \
+              false)                                                                    \
+        ELEM_(int, hamlib_mode_delay, "HAMRIG_MODE_DELAY",                              \
+              "wait NN msec after sending mode change\n"                                \
+              "before next transceiver CAT query\n"                                     \
+              "0 - 2000 in 100 msec increments",                                        \
+              200)                                                                      \
         ELEM_(std::string, XmlRigFilename, "XMLRIGFILENAME",                            \
               "RigCAT XML file name",                                                   \
               "")                                                                       \
@@ -967,6 +1087,9 @@
               "Use uHRouter PTT (OS X only)",                                           \
               false)                                                                    \
         ELEM_(bool, UsePPortPTT, "USEPPORTPTT",                                         \
+              "Use parallel port PTT",                                                  \
+              false)                                                                    \
+        ELEM_(bool, UseGPIOPTT, "USEGPIOPTT",                                           \
               "Use parallel port PTT",                                                  \
               false)                                                                    \
         /* RigCAT parameters */                                                         \
@@ -1503,6 +1626,9 @@
         ELEM_(Fl_Color, RxIDColor, "RXIDCOLOR",                                         \
               "UI RxID select color",                                                   \
               FL_GREEN)                                                                 \
+        ELEM_(Fl_Color, RxIDwideColor, "RXIDWIDECOLOR",                                 \
+              "UI RxID WIDE search select color",                                       \
+              FL_DARK_RED)                                                              \
         ELEM_(Fl_Color, TxIDColor, "TXIDCOLOR",                                         \
               "UI TxID select color",                                                   \
               FL_GREEN)                                                                 \
@@ -1616,11 +1742,26 @@
               "Number of seconds to wait before transmit resume",                       \
               3)                                                                        \
         ELEM_(int, kpsql_attenuation, "KPSQL_ATTENUATION",                              \
-        "KPSQL Attenuation in 1/n of 1:1 Gain",                                         \
-        2)                                                                              \
+              "KPSQL Attenuation in 1/n of 1:1 Gain",                                   \
+              2)                                                                        \
         ELEM_(bool, csma_enabled, "CSMA_ENABLED",                                       \
               "Use CSMA on heavy traffic channels (AX25)",                              \
               true)                                                                     \
+	    ELEM_(bool, kiss_tcp_io, "KISS_TCP_IO",                                         \
+	          "Connect kiss io via TCP/IP vise UDP/IP",                                 \
+	          false)                                                                    \
+        ELEM_(bool, kiss_tcp_listen, "KISS_TCP_LISTEN",                                 \
+              "Listen for TCP connection (Server mode)",                                \
+              false)                                                                    \
+        ELEM_(bool, kpsql_enabled, "KPSQL_ENABLED",                                     \
+              "Enable/Disable KPSQL",                                                   \
+              false)                                                                    \
+        ELEM_(bool, tcp_udp_auto_connect, "TCP_UDP_AUTO_CONNECT",                       \
+              "Make Connect Attemp on Fldigi Start",                                    \
+              false)                                                                    \
+        ELEM_(bool, kiss_io_modem_change_inhibit, "KISS_IO_MODEM_CHANGE_INHIBIT",       \
+              "Enable/Disable Modem Change to a non 8 bit when KISS IO is in use",      \
+              false)                                                                    \
         ELEM_(std::string, flrig_ip_address, "FLRIG_IP_ADDRESS",                        \
               "IP Address of flrig server",                                             \
               DEFAULT_FLRIG_IP_ADDRESS)                                                 \
@@ -1830,9 +1971,15 @@
         ELEM_(bool, us_units, "US_UNITS",                                               \
               "Use US units of distance for QRB",                                       \
               false)                                                                    \
-        ELEM_(int, MacroEditFontsize, "MACROEDITFONTSIZE",                             \
+        ELEM_(int, MacroEditFontsize, "MACROEDITFONTSIZE",                              \
               "RX text font size",                                                      \
-              16)
+              16)                                                                       \
+        ELEM_(bool, psk8DCDShortFlag, "PSK8DCDSHORTFLAG",                               \
+              "Flag: Change DCD pre-ample length",                                      \
+              false)                                                                    \
+        ELEM_(bool, dockable_macros, "DOCKABLE_MACROS",                                 \
+              "Allow dockable macros",                                                  \
+              true)
 
 
 // declare the struct

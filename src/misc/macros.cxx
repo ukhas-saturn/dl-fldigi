@@ -106,6 +106,7 @@ std::string text2repeat = "";
 size_t repeatchar = 0;
 
 bool macro_idle_on = false;
+bool macro_rx_wait = false;
 
 static float  idleTime = 0;
 static bool TransmitON = false;
@@ -122,9 +123,14 @@ static bool GET = false;
 static bool timed_exec = false;
 static bool within_exec = false;
 
+void rx_que_continue(void *);
+
 static void postQueue(std::string s)
 {
-	ReceiveText->addstr(s, FTextBase::CTRL);
+	if (active_modem->get_mode() == MODE_IFKP)
+		ifkp_rx_text->addstr(s, FTextBase::CTRL);
+	else
+		ReceiveText->addstr(s, FTextBase::CTRL);
 }
 
 static const char cutnumbers[] = "T12345678N";
@@ -225,18 +231,24 @@ chars/sec:    %f",
 			num_cps_chars / (xmttime - overhead));
 	LOG_INFO("%s", results);
 	strcat(results, "\n");
-	ReceiveText->add(results, FTextBase::ALTR);
+	if (active_modem->get_mode() == MODE_IFKP)
+		ifkp_rx_text->add(results, FTextBase::ALTR);
+	else
+		ReceiveText->add(results, FTextBase::ALTR);
 	PERFORM_CPS_TEST = false;
 }
 
 static void pCPS_TEST(std::string &s, size_t &i, size_t endbracket)
 {
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_tx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		s.clear();
 		return;
 	}
@@ -250,7 +262,7 @@ static void pCPS_TEST(std::string &s, size_t &i, size_t endbracket)
 	if (n <= 0) n = 10;
 	if (n > 100) n = 100;
 
-// sample count with 'n' characters 
+// sample count with 'n' characters
 	int s1[256];
 	for (int i = 0; i < 256; i++) s1[i] = 0;
 // converstion from sample count to milliseconds
@@ -285,7 +297,10 @@ static void pCPS_TEST(std::string &s, size_t &i, size_t endbracket)
 	}
 	if (!line_out.empty()) {
 		LOG_INFO("%s", line_out.c_str());
-		ReceiveText->add(line_out.c_str(), FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add(line_out.c_str(), FTextBase::ALTR);
+		else
+			ReceiveText->add(line_out.c_str(), FTextBase::ALTR);
 	}
 	return;
 }
@@ -293,11 +308,14 @@ static void pCPS_TEST(std::string &s, size_t &i, size_t endbracket)
 static void pCPS_FILE(std::string &s, size_t &i, size_t endbracket)
 {
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		s.clear();
 		return;
 	}
@@ -314,7 +332,10 @@ static void pCPS_FILE(std::string &s, size_t &i, size_t endbracket)
 			}
 			s.clear();
 			fclose(toadd);
-			TransmitText->clear();
+			if (active_modem->get_mode() == MODE_IFKP)
+				ifkp_tx_text->clear();
+			else
+				TransmitText->clear();
 			testfilename = fname;
 
 			stopMacroTimer();
@@ -331,7 +352,10 @@ static void pCPS_FILE(std::string &s, size_t &i, size_t endbracket)
 		} else {
 			string resp = "Could not locate ";
 			resp.append(fname).append("\n");
-			ReceiveText->add(resp.c_str(), FTextBase::ALTR);
+			if (active_modem->get_mode() == MODE_IFKP)
+				ifkp_rx_text->add(resp.c_str(), FTextBase::ALTR);
+			else
+				ReceiveText->add(resp.c_str(), FTextBase::ALTR);
 			LOG_WARN("%s not found", fname.c_str());
 			s.replace(i, endbracket - i + 1, "");
 			PERFORM_CPS_TEST = false;
@@ -345,11 +369,14 @@ static void pCPS_FILE(std::string &s, size_t &i, size_t endbracket)
 static void pCPS_STRING(std::string &s, size_t &i, size_t endbracket)
 {
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		s.clear();
 		return;
 	}
@@ -363,7 +390,10 @@ static void pCPS_STRING(std::string &s, size_t &i, size_t endbracket)
 		p = buffer.find("\\n");
 	}
 	if (buffer.length()) {
-		TransmitText->clear();
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_tx_text->clear();
+		else
+			TransmitText->clear();
 
 		stopMacroTimer();
 		active_modem->set_stopflag(false);
@@ -380,7 +410,10 @@ static void pCPS_STRING(std::string &s, size_t &i, size_t endbracket)
 		string resp = "Text not specified";
 		LOG_WARN("%s", resp.c_str());
 		resp.append("\n");
-		ReceiveText->add(resp.c_str(), FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add(resp.c_str(), FTextBase::ALTR);
+		else
+			ReceiveText->add(resp.c_str(), FTextBase::ALTR);
 		PERFORM_CPS_TEST = false;
 	}
 }
@@ -388,11 +421,14 @@ static void pCPS_STRING(std::string &s, size_t &i, size_t endbracket)
 static void pCPS_N(std::string &s, size_t &i, size_t endbracket)
 {
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		s.clear();
 		return;
 	}
@@ -418,7 +454,10 @@ static void pCPS_N(std::string &s, size_t &i, size_t endbracket)
 		else buffer += ' ';
 	}
 
-	TransmitText->clear();
+	if (active_modem->get_mode() == MODE_IFKP)
+		ifkp_tx_text->clear();
+	else
+		TransmitText->clear();
 
 	stopMacroTimer();
 	active_modem->set_stopflag(false);
@@ -438,11 +477,14 @@ static void pWAV_TEST(std::string &s, size_t &i, size_t endbracket)
 {
 	s.clear();
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		return;
 	}
 	testfilename = "internal string";
@@ -459,11 +501,14 @@ static void pWAV_TEST(std::string &s, size_t &i, size_t endbracket)
 static void pWAV_N(std::string &s, size_t &i, size_t endbracket)
 {
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		s.clear();
 		return;
 	}
@@ -489,7 +534,10 @@ static void pWAV_N(std::string &s, size_t &i, size_t endbracket)
 		else buffer += ' ';
 	}
 
-	TransmitText->clear();
+	if (active_modem->get_mode() == MODE_IFKP)
+		ifkp_tx_text->clear();
+	else
+		TransmitText->clear();
 
 	stopMacroTimer();
 	active_modem->set_stopflag(false);
@@ -504,11 +552,14 @@ static void pWAV_N(std::string &s, size_t &i, size_t endbracket)
 static void pWAV_FILE(std::string &s, size_t &i, size_t endbracket)
 {
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		s.clear();
 		return;
 	}
@@ -525,7 +576,10 @@ static void pWAV_FILE(std::string &s, size_t &i, size_t endbracket)
 			}
 			s.clear();
 			fclose(toadd);
-			TransmitText->clear();
+			if (active_modem->get_mode() == MODE_IFKP)
+				ifkp_tx_text->clear();
+			else
+				TransmitText->clear();
 			testfilename = fname;
 
 			stopMacroTimer();
@@ -539,7 +593,10 @@ static void pWAV_FILE(std::string &s, size_t &i, size_t endbracket)
 		} else {
 			string resp = "Could not locate ";
 			resp.append(fname).append("\n");
-			ReceiveText->add(resp.c_str(), FTextBase::ALTR);
+			if (active_modem->get_mode() == MODE_IFKP)
+				ifkp_rx_text->add(resp.c_str(), FTextBase::ALTR);
+			else
+				ReceiveText->add(resp.c_str(), FTextBase::ALTR);
 			LOG_WARN("%s not found", fname.c_str());
 			s.replace(i, endbracket - i + 1, "");
 			PERFORM_CPS_TEST = false;
@@ -553,11 +610,14 @@ static void pWAV_FILE(std::string &s, size_t &i, size_t endbracket)
 static void pWAV_STRING(std::string &s, size_t &i, size_t endbracket)
 {
 	trx_mode id = active_modem->get_mode();
-	if ( id == MODE_SSB || id == MODE_WWV || 
+	if ( id == MODE_SSB || id == MODE_WWV ||
 		id == MODE_ANALYSIS || id == MODE_FFTSCAN ||
 		id == MODE_WEFAX_576 || id == MODE_WEFAX_288 ||
 		id == MODE_SITORB || id == MODE_NAVTEX ) {
-		ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add("Mode not supported\n", FTextBase::ALTR);
+		else
+			ReceiveText->add("Mode not supported\n", FTextBase::ALTR);
 		s.clear();
 		return;
 	}
@@ -571,7 +631,10 @@ static void pWAV_STRING(std::string &s, size_t &i, size_t endbracket)
 		p = buffer.find("\\n");
 	}
 	if (buffer.length()) {
-		TransmitText->clear();
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_tx_text->clear();
+		else
+			TransmitText->clear();
 
 		stopMacroTimer();
 		active_modem->set_stopflag(false);
@@ -585,7 +648,10 @@ static void pWAV_STRING(std::string &s, size_t &i, size_t endbracket)
 		string resp = "Text not specified";
 		LOG_WARN("%s", resp.c_str());
 		resp.append("\n");
-		ReceiveText->add(resp.c_str(), FTextBase::ALTR);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add(resp.c_str(), FTextBase::ALTR);
+		else
+			ReceiveText->add(resp.c_str(), FTextBase::ALTR);
 		PERFORM_CPS_TEST = false;
 	}
 }
@@ -986,7 +1052,7 @@ static void pTxQueIDLE(std::string &s, size_t &i, size_t endbracket)
 }
 
 static bool useTune = false;
-static int  tuneTime = 0;
+static float  tuneTime = 0;
 
 static void pTUNE(std::string &s, size_t &i, size_t endbracket)
 {
@@ -1042,7 +1108,7 @@ static void pNRSID(std::string &s, size_t &i, size_t endbracket)
 }
 
 static bool useWait = false;
-static int  waitTime = 0;
+static float  waitTime = 0;
 
 static void pWAIT(std::string &s, size_t &i, size_t endbracket)
 {
@@ -1050,10 +1116,10 @@ static void pWAIT(std::string &s, size_t &i, size_t endbracket)
 		s.replace(i, endbracket - i + 1, "");
 		return;
 	}
-	int number;
+	float number;
 	std::string sTime = s.substr(i+6, endbracket - i - 6);
 	if (sTime.length() > 0) {
-		sscanf(sTime.c_str(), "%d", &number);
+		sscanf(sTime.c_str(), "%f", &number);
 		useWait = true;
 		waitTime = number;
 	}
@@ -1069,12 +1135,12 @@ static void doneWAIT(void *)
 
 static void doWAIT(std::string s)
 {
-	int number;
+	float number;
 	std::string sTime = s.substr(7, s.length() - 8);
 	if (sTime.length() > 0) {
-		sscanf(sTime.c_str(), "%d", &number);
+		sscanf(sTime.c_str(), "%f", &number);
 		Qwait_time = number;
-		Fl::add_timeout (number * 1.0, doneWAIT);
+		Fl::add_timeout (number, doneWAIT);
 	} else
 		Qwait_time = 0;
 }
@@ -1090,6 +1156,27 @@ static void pTxQueWAIT(std::string &s, size_t &i, size_t endbracket)
 	s.replace(i, endbracket - i + 1, "^!");
 }
 
+static void doRxWAIT(std::string s)
+{
+	float number = 0;
+	std::string sTime = s.substr(7, s.length() - 8);
+	if (sTime.length() > 0) {
+		sscanf(sTime.c_str(), "%f", &number);
+		macro_rx_wait = true;
+		Fl::add_timeout(number, rx_que_continue);
+	}
+}
+
+static void pRxQueWAIT(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRxWAIT };
+	push_rxcmd(cmd);
+	s.replace(i, endbracket - i + 1, "");
+}
 
 static void pINFO1(std::string &s, size_t &i, size_t endbracket)
 {
@@ -1108,7 +1195,14 @@ static void pCLRRX(std::string &s, size_t &i, size_t endbracket)
 		return;
 	}
 	s.replace( i, 7, "" );
-	ReceiveText->clear();
+	trx_mode md = active_modem->get_mode();
+
+	if (md == MODE_IFKP)
+		ifkp_rx_text->clear();
+	else if ((md >= MODE_FELDHELL) && (md <= MODE_HELL80))
+		FHdisp->clear();
+	else
+		ReceiveText->clear();
 }
 
 static void pCLRTX(std::string &s, size_t &i, size_t endbracket)
@@ -1119,7 +1213,10 @@ static void pCLRTX(std::string &s, size_t &i, size_t endbracket)
 	}
 	s.replace( i, 7, "" );
 	queue_reset();
-	TransmitText->clear();
+	if (active_modem->get_mode() == MODE_IFKP)
+		ifkp_tx_text->clear();
+	else
+		TransmitText->clear();
 }
 
 static void pFOCUS(std::string &s, size_t &i, size_t endbracket)
@@ -1127,7 +1224,10 @@ static void pFOCUS(std::string &s, size_t &i, size_t endbracket)
 	if (!within_exec) {
 		if (qsoFreqDisp->is_reversed_colors()) {
 			qsoFreqDisp->restore_colors();
-			TransmitText->take_focus();
+			if (active_modem->get_mode() == MODE_IFKP)
+				ifkp_tx_text->take_focus();
+			else
+				TransmitText->take_focus();
 		} else {
 			qsoFreqDisp->take_focus();
 			qsoFreqDisp->reverse_colors();
@@ -1161,7 +1261,10 @@ static void pQSYPLUS(std::string &s, size_t &i, size_t endbracket)
 
 static void pCALL(std::string &s, size_t &i, size_t endbracket)
 {
-	s.replace( i, 6, inpCall->value() );
+	string call = inpCall->value();
+	if (active_modem->get_mode() == MODE_IFKP && progdefaults.ifkp_lowercase_call)
+		for (size_t n = 0; n < call.length(); n++) call[n] = tolower(call[n]);
+	s.replace( i, 6, call );
 }
 
 static void pGET(std::string &s, size_t &i, size_t endbracket)
@@ -1176,7 +1279,7 @@ static void pFREQ(std::string &s, size_t &i, size_t endbracket)
 }
 
 static void pBAND(std::string &s, size_t &i, size_t endbracket)
-{ 
+{
         s.replace( i, 6, band_name( band( wf->rfcarrier() ) ) );
 }
 
@@ -1213,7 +1316,10 @@ static void pRST(std::string &s, size_t &i, size_t endbracket)
 
 static void pMYCALL(std::string &s, size_t &i, size_t endbracket)
 {
-	s.replace( i, 8, inpMyCallsign->value() );
+	string call = inpMyCallsign->value();
+	if (active_modem->get_mode() == MODE_IFKP && progdefaults.ifkp_lowercase)
+		for (size_t n = 0; n < call.length(); n++) call[n] = tolower(call[n]);
+	s.replace( i, 8, call );
 }
 
 static void pMYLOC(std::string &s, size_t &i, size_t endbracket)
@@ -1237,8 +1343,8 @@ static void pMYRST(std::string &s, size_t &i, size_t endbracket)
 }
 
 static void pANTENNA(std::string &s, size_t &i, size_t endbracket)
-{ 
-        s.replace( i, 9, progdefaults.myAntenna.c_str() );  
+{
+        s.replace( i, 9, progdefaults.myAntenna.c_str() );
 }
 
 static void pLDT(std::string &s, size_t &i, size_t endbracket)
@@ -1790,6 +1896,74 @@ static void pTxQueIMAGE(std::string &s, size_t &i, size_t endbracket)
 	s.replace(i, endbracket - i + 1, "^!");
 }
 
+static void doINSERTIMAGE(std::string s)
+{
+	if (s.length() > 0) {
+
+		bool Greyscale = false;
+		size_t p = string::npos;
+		string fname = s.substr(7);
+		p = fname.find(">");
+		fname.erase(p);
+		p = fname.find("G,");
+		if (p == string::npos) p = fname.find("g,");
+		if (p != string::npos) {
+			Greyscale = true;
+			fname.erase(p,2);
+		}
+		while (fname[0] == ' ') fname.erase(0,1);
+		if (s.empty()) return;
+
+		trx_mode md = active_modem->get_mode();
+		if ((md == MODE_MFSK16 || md == MODE_MFSK32 ||
+			 md == MODE_MFSK64 || md == MODE_MFSK128) &&
+			active_modem->get_cap() & modem::CAP_IMG) {
+				Greyscale ?
+					active_modem->send_Grey_image(fname) :
+					active_modem->send_color_image(fname);
+		}
+		else if (md == MODE_IFKP) {
+			ifkp_load_scaled_image(fname);
+		}
+		else if (md >= MODE_THOR_FIRST && md <= MODE_THOR_LAST)
+			thor_load_scaled_image(fname);
+	}
+	que_ok = true;
+}
+
+void TxQueINSERTIMAGE(std::string s)
+{
+	trx_mode active_mode = active_modem->get_mode();
+	if (! (active_mode == MODE_MFSK16 ||
+		   active_mode == MODE_MFSK32 ||
+		   active_mode == MODE_MFSK64 ||
+		   active_mode == MODE_MFSK128 ||
+		   active_mode == MODE_IFKP ||
+		   (active_mode >= MODE_THOR_FIRST && active_mode <= MODE_THOR_LAST) ) &&
+		   active_modem->get_cap() & modem::CAP_IMG)
+		return;
+
+	string scmd = "<IMAGE:>";
+	scmd.insert(7,s);
+
+	struct CMDS cmd = { scmd, doINSERTIMAGE };
+	push_txcmd(cmd);
+
+	string itext = s;
+	size_t p = itext.rfind("\\");
+	if (p == string::npos) p = itext.rfind("/");
+	if (p != string::npos) itext.erase(0, p+1);
+	p = itext.rfind(".");
+	if (p != string::npos) itext.erase(p);
+	itext.insert(0, "\nImage: ");
+	itext.append(" ^!");
+
+	if (active_mode == MODE_IFKP)
+		ifkp_tx_text->add_text(itext);
+	else
+		TransmitText->add_text(itext);
+}
+
 #include <float.h>
 #include "re.h"
 
@@ -2303,6 +2477,7 @@ static void doGOFREQ(std::string s)
 		if (number > progdefaults.HighFreqCutoff)
 			number = progdefaults.HighFreqCutoff;
 		active_modem->set_freq(number);
+		wf->redraw();
 	}
 	que_ok = true;
 }
@@ -2446,57 +2621,13 @@ static void pTxQueQSY(std::string &s, size_t &i, size_t endbracket)
 	s.replace(i, endbracket - i + 1, "^!");
 }
 
-float  waitFILWID = 0.0;
+float  wait_after_mode_change = 0.0;
 static string sFILWID;
 static void delayedFILWID(void *)
 {
 	qso_opBW->value(sFILWID.c_str());
 	cb_qso_opBW();
-	waitFILWID = 0.0;
-}
-
-static void pRIGMODE(std::string& s, size_t& i, size_t endbracket)
-{
-	if (within_exec) {
-		s.replace(i, endbracket - i + 1, "");
-		return;
-	}
-	std::string sMode = s.substr(i+9, endbracket - i - 9);
-	qso_opMODE->value(sMode.c_str());
-	cb_qso_opMODE();
-	s.replace(i, endbracket - i + 1, "");
-	if (s.find("FILWID") != string::npos)
-		waitFILWID = progdefaults.mbw;
-}
-
-static void doRIGMODE(std::string s)
-{
-	std::string sMode = s.substr(10, s.length() - 11);
-	qso_opMODE->value(sMode.c_str());
-	cb_qso_opMODE();
-	que_ok = true;
-}
-
-static void pTxQueRIGMODE(std::string &s, size_t &i, size_t endbracket)
-{
-	if (within_exec) {
-		s.replace(i, endbracket - i + 1, "");
-		return;
-	}
-	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGMODE };
-	push_txcmd(cmd);
-	s.replace(i, endbracket - i + 1, "^!");
-}
-
-static void pRxQueRIGMODE(std::string &s, size_t &i, size_t endbracket)
-{
-	if (within_exec) {
-		s.replace(i, endbracket - i + 1, "");
-		return;
-	}
-	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGMODE };
-	push_rxcmd(cmd);
-	s.replace(i, endbracket - i + 1, "");
+	wait_after_mode_change = 0.0;
 }
 
 static void pFILWID(std::string& s, size_t& i, size_t endbracket)
@@ -2506,10 +2637,8 @@ static void pFILWID(std::string& s, size_t& i, size_t endbracket)
 		return;
 	}
 	std::string sWidth = s.substr(i+8, endbracket - i - 8);
-//	qso_opBW->value(sWidth.c_str());
-//	cb_qso_opBW();
 	sFILWID = sWidth;
-	Fl::add_timeout(waitFILWID, delayedFILWID);
+	Fl::add_timeout(wait_after_mode_change, delayedFILWID);
 	s.replace(i, endbracket - i + 1, "");
 }
 
@@ -2543,6 +2672,166 @@ static void pRxQueFILWID(std::string &s, size_t &i, size_t endbracket)
 	s.replace(i, endbracket - i + 1, "");
 }
 
+static void pRIGMODE(std::string& s, size_t& i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	std::string sMode = s.substr(i+9, endbracket - i - 9);
+	qso_opMODE->value(sMode.c_str());
+	cb_qso_opMODE();
+	s.replace(i, endbracket - i + 1, "");
+	if ((s.find("FILWID") != string::npos) ||
+		(s.find("RIGLO") != string::npos) ||
+		(s.find("RIGHI") != string::npos) )
+		wait_after_mode_change = progdefaults.mbw;
+	else
+		wait_after_mode_change = 0;
+}
+
+static void doRIGMODE(std::string s)
+{
+	std::string sMode = s.substr(10, s.length() - 11);
+	qso_opMODE->value(sMode.c_str());
+	cb_qso_opMODE();
+	que_ok = true;
+}
+
+static void pTxQueRIGMODE(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGMODE };
+	push_txcmd(cmd);
+	s.replace(i, endbracket - i + 1, "^!");
+}
+
+static void pRxQueRIGMODE(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGMODE };
+	push_rxcmd(cmd);
+	s.replace(i, endbracket - i + 1, "");
+}
+
+static string sRIGLO;
+
+static void delayedRIGLO(void *)
+{
+	qso_opBW2->value(sRIGLO.c_str());
+	cb_qso_opBW2();
+	wait_after_mode_change = 0.0;
+}
+
+static void pRIGLO(std::string& s, size_t& i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	std::string sLO = s.substr(i+7, endbracket - i - 7);
+	sRIGLO = sLO;
+	if (wait_after_mode_change)
+		Fl::add_timeout(wait_after_mode_change, delayedRIGLO);
+	else {
+		qso_opBW2->value(sLO.c_str());
+		cb_qso_opBW2();
+	}
+	s.replace(i, endbracket - i + 1, "");
+}
+
+static void doRIGLO(std::string s)
+{
+	std::string sLO = s.substr(8, s.length() - 9);
+	qso_opBW2->value(sLO.c_str());
+	cb_qso_opBW2();
+	que_ok = true;
+}
+
+static void pTxQueRIGLO(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGLO };
+	push_txcmd(cmd);
+	s.replace(i, endbracket - i + 1, "^!");
+}
+
+static void pRxQueRIGLO(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGLO };
+	push_rxcmd(cmd);
+	s.replace(i, endbracket - i + 1, "");
+}
+
+static string sRIGHI;
+
+static void delayedRIGHI(void *)
+{
+	qso_opBW1->value(sRIGHI.c_str());
+	cb_qso_opBW1();
+	wait_after_mode_change = 0.0;
+}
+
+static void pRIGHI(std::string& s, size_t& i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	std::string sHI = s.substr(i+7, endbracket - i - 7);
+	sRIGHI = sHI;
+	if (wait_after_mode_change)
+		Fl::add_timeout(wait_after_mode_change, delayedRIGHI);
+	else {
+		qso_opBW1->value(sHI.c_str());
+		cb_qso_opBW1();
+	}
+	s.replace(i, endbracket - i + 1, "");
+}
+
+static void doRIGHI(std::string s)
+{
+	std::string sHI = s.substr(8, s.length() - 9);
+	qso_opBW1->value(sHI.c_str());
+	cb_qso_opBW1();
+	que_ok = true;
+}
+
+static void pTxQueRIGHI(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGHI };
+	push_txcmd(cmd);
+	s.replace(i, endbracket - i + 1, "^!");
+}
+
+static void pRxQueRIGHI(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doRIGHI };
+	push_rxcmd(cmd);
+	s.replace(i, endbracket - i + 1, "");
+}
+
 static void pWX(std::string &s, size_t &i, size_t endbracket)
 {
 	string wx;
@@ -2565,21 +2854,82 @@ void set_macro_env(void)
 #ifndef __WOE32__
 		pSKEDH, FLDIGI_RX_IPC_KEY, FLDIGI_TX_IPC_KEY,
 #endif
-		FLDIGI_XMLRPC_ADDRESS, FLDIGI_XMLRPC_PORT,
-		FLDIGI_ARQ_ADDRESS, FLDIGI_ARQ_PORT,
+		FLDIGI_XMLRPC_ADDRESS,
+		FLDIGI_XMLRPC_PORT,
+		FLDIGI_ARQ_ADDRESS,
+		FLDIGI_ARQ_PORT,
 
-		FLDIGI_VERSION_ENVVAR, FLDIGI_PID, FLDIGI_CONFIG_DIR,
+		FLDIGI_VERSION_ENVVAR,
+		FLDIGI_PID,
+		FLDIGI_CONFIG_DIR,
 
-		FLDIGI_MY_CALL, FLDIGI_MY_NAME, FLDIGI_MY_LOCATOR,
+		FLDIGI_MY_CALL,
+		FLDIGI_MY_NAME,
+		FLDIGI_MY_LOCATOR,
 
-		FLDIGI_MODEM, FLDIGI_MODEM_LONG_NAME, FLDIGI_DIAL_FREQUENCY,
-		FLDIGI_AUDIO_FREQUENCY, FLDIGI_FREQUENCY,
+		FLDIGI_MODEM,
+		FLDIGI_MODEM_LONG_NAME,
+		FLDIGI_MODEM_ADIF_NAME,
+		FLDIGI_DIAL_FREQUENCY,
+		FLDIGI_AUDIO_FREQUENCY,
+		FLDIGI_FREQUENCY,
 
 		FLDIGI_MACRO_FILE,
+
 		FLDIGI_LOG_FILE,
-		FLDIGI_LOG_FREQUENCY, FLDIGI_LOG_TIME_ON, FLDIGI_LOG_TIME_OFF, FLDIGI_LOG_CALL, FLDIGI_LOG_NAME,
-		FLDIGI_LOG_RST_IN, FLDIGI_LOG_RST_OUT, FLDIGI_LOG_QTH, FLDIGI_LOG_LOCATOR,
-		FLDIGI_LOG_NOTES, FLDIGI_AZ, ENV_SIZE
+		FLDIGI_LOG_FREQUENCY,
+		FLDIGI_LOG_DATE,
+		FLDIGI_LOG_DATE_OFF,
+		FLDIGI_LOG_TIME_ON,
+		FLDIGI_LOG_TIME_OFF,
+		FLDIGI_LOG_CALL,
+		FLDIGI_LOG_NAME,
+		FLDIGI_LOG_RST_IN,
+		FLDIGI_LOG_RST_OUT,
+		FLDIGI_LOG_QTH,
+		FLDIGI_LOG_LOCATOR,
+		FLDIGI_LOG_NOTES,
+		FLDIGI_LOG_STATE,
+		FLDIGI_LOG_COUNTRY,
+		FLDIGI_LOG_SERNO_IN,
+		FLDIGI_LOG_SERNO_OUT,
+		FLDIGI_XCHG_IN,
+		FLDIGI_XCGH_OUT,
+		FLDIGI_VE_PROV,
+		FLDIGI_AZ,
+
+		FLDIGI_LOGBOOK_CALL,
+		FLDIGI_LOGBOOK_NAME,
+		FLDIGI_LOGBOOK_DATE,
+		FLDIGI_LOGBOOK_TIME_ON,
+		FLDIGI_LOGBOOK_DATE_OFF,
+		FLDIGI_LOGBOOK_TIME_OFF,
+		FLDIGI_LOGBOOK_RST_IN,
+		FLDIGI_LOGBOOK_RST_OUT,
+		FLDIGI_LOGBOOK_FREQUENCY,
+		FLDIGI_LOGBOOK_MODE,
+		FLDIGI_LOGBOOK_STATE,
+		FLDIGI_LOGBOOK_VE_PROV,
+		FLDIGI_LOGBOOK_COUNTRY,
+		FLDIGI_LOGBOOK_SERNO_IN,
+		FLDIGI_LOGBOOK_SERNO_OUT,
+		FLDIGI_LOGBOOK_XCHG_IN,
+		FLDIGI_LOGBOOK_XCHG_OUT,
+		FLDIGI_LOGBOOK_QTH,
+		FLDIGI_LOGBOOK_LOCATOR,
+		FLDIGI_LOGBOOK_QSL_R,
+		FLDIGI_LOGBOOK_QSL_S,
+		FLDIGI_LOGBOOK_NOTES,
+		FLDIGI_LOGBOOK_TX_PWR,
+		FLDIGI_LOGBOOK_COUNTY,
+		FLDIGI_LOGBOOK_IOTA,
+		FLDIGI_LOGBOOK_DXCC,
+		FLDIGI_LOGBOOK_QSL_VIA,
+		FLDIGI_LOGBOOK_CONTINENT,
+		FLDIGI_LOGBOOK_CQZ,
+		FLDIGI_LOGBOOK_ITUZ,
+
+		ENV_SIZE
 	};
 
 	struct {
@@ -2606,6 +2956,8 @@ void set_macro_env(void)
 
 		{ "FLDIGI_MODEM", mode_info[active_modem->get_mode()].sname },
 		{ "FLDIGI_MODEM_LONG_NAME", mode_info[active_modem->get_mode()].name },
+		{ "FLDIGI_MODEM_ADIF_NAME", mode_info[active_modem->get_mode()].adif_name },
+
 		{ "FLDIGI_DIAL_FREQUENCY", "" },
 		{ "FLDIGI_AUDIO_FREQUENCY", "" },
 		{ "FLDIGI_FREQUENCY", "" },
@@ -2614,7 +2966,10 @@ void set_macro_env(void)
 		{ "FLDIGI_MACRO_FILE", progStatus.LastMacroFile.c_str() },
 
 		{ "FLDIGI_LOG_FILE", progdefaults.logbookfilename.c_str() },
+
 		{ "FLDIGI_LOG_FREQUENCY", inpFreq->value() },
+		{ "FLDIGI_LOG_DATE", inpDate_log->value() },
+		{ "FLDIGI_LOG_DATE_OFF", inpDateOff_log->value() },
 		{ "FLDIGI_LOG_TIME_ON", inpTimeOn->value() },
 		{ "FLDIGI_LOG_TIME_OFF", inpTimeOff->value() },
 		{ "FLDIGI_LOG_CALL", inpCall->value() },
@@ -2624,7 +2979,46 @@ void set_macro_env(void)
 		{ "FLDIGI_LOG_QTH", inpQth->value() },
 		{ "FLDIGI_LOG_LOCATOR", inpLoc->value() },
 		{ "FLDIGI_LOG_NOTES", inpNotes->value() },
-		{ "FLDIGI_AZ", inpAZ->value() }
+		{ "FLDIGI_LOG_STATE", inpState->value() },
+		{ "FLDIGI_LOG_COUNTRY", inpCountry->value() },
+		{ "FLDIGI_LOG_SERNO_IN", inpSerNo->value() },
+		{ "FLDIGI_LOG_SERNO_OUT", outSerNo->value() },
+		{ "FLDIGI_XCHG_IN", inpXchgIn->value() },
+		{ "FLDIGI_XCHG_OUT", inpSend1->value() },
+		{ "FLDIGI_VE_PROV", inpVEprov->value() },
+		{ "FLDIGI_AZ", inpAZ->value() },
+
+		{ "FLDIGI_LOGBOOK_CALL", inpCall_log->value() },
+		{ "FLDIGI_LOGBOOK_NAME", inpName_log->value () },
+		{ "FLDIGI_LOGBOOK_DATE", inpDate_log->value() },
+		{ "FLDIGI_LOGBOOK_TIME_ON", inpTimeOn_log->value() },
+		{ "FLDIGI_LOGBOOK_DATE_OFF", inpDateOff_log->value() },
+		{ "FLDIGI_LOGBOOK_TIME_OFF", inpTimeOff_log->value() },
+		{ "FLDIGI_LOGBOOK_RST_IN", inpRstR_log->value() },
+		{ "FLDIGI_LOGBOOK_RST_OUT", inpRstS_log->value() },
+		{ "FLDIGI_LOGBOOK_FREQUENCY", inpFreq_log->value() },
+		{ "FLDIGI_LOGBOOK_MODE", inpMode_log->value() },
+		{ "FLDIGI_LOGBOOK_STATE", inpState_log->value() },
+		{ "FLDIGI_LOGBOOK_VE_PROV", inpVE_Prov_log->value() },
+		{ "FLDIGI_LOGBOOK_COUNTRY", inpCountry_log->value() },
+		{ "FLDIGI_LOGBOOK_SERNO_IN", inpSerNoIn_log->value() },
+		{ "FLDIGI_LOGBOOK_SERNO_OUT", inpSerNoOut_log->value() },
+		{ "FLDIGI_LOGBOOK_XCHG_IN", inpXchgIn_log->value() },
+		{ "FLDIGI_LOGBOOK_XCHG_OUT", inpMyXchg_log->value() },
+		{ "FLDIGI_LOGBOOK_QTH", inpQth_log->value() },
+		{ "FLDIGI_LOGBOOK_LOCATOR", inpLoc_log->value() },
+		{ "FLDIGI_LOGBOOK_QSL_R", inpQSLrcvddate_log->value() },
+		{ "FLDIGI_LOGBOOK_QSL_S", inpQSLsentdate_log->value() },
+		{ "FLDIGI_LOGBOOK_NOTES", inpNotes_log->value() },
+		{ "FLDIGI_LOGBOOK_TX_PWR", inpTX_pwr_log->value() },
+		{ "FLDIGI_LOGBOOK_COUNTY", inpCNTY_log->value() },
+		{ "FLDIGI_LOGBOOK_IOTA", inpIOTA_log->value() },
+		{ "FLDIGI_LOGBOOK_DXCC", inpDXCC_log->value() },
+		{ "FLDIGI_LOGBOOK_QSL_VIA", inpQSL_VIA_log->value() },
+		{ "FLDIGI_LOGBOOK_CONTINENT", inpCONT_log->value() },
+		{ "FLDIGI_LOGBOOK_CQZ", inpCQZ_log->value() },
+		{ "FLDIGI_LOGBOOK_ITUZ", inpITUZ_log->value() }
+
 	};
 
 #ifndef __WOE32__
@@ -2669,8 +3063,13 @@ void set_macro_env(void)
 	unsetenv("MALLOC_PERTURB_");
 #endif
 
-	for (size_t j = 0; j < ENV_SIZE; j++)
-		setenv(env[j].var, env[j].val, 1);
+	string temp;
+	size_t pch;
+	for (size_t j = 0; j < ENV_SIZE; j++) {
+		temp = env[j].val;
+		while ((pch = temp.find("\n")) != string::npos) temp[pch] = ';';
+		setenv(env[j].var, temp.c_str(), 1);
+	}
 
 	string path = getenv("PATH");
 	string mypath = ScriptsDir;
@@ -2982,21 +3381,22 @@ bool queue_must_rx()
 // occurs immediately after the ^r execution
 // AND after TX_STATE returns to Rx
 // ^r is the control string substitute for the <RX> macro tag
-void Rx_queue_execute()
+int time_out = 400;
+void Rx_queue_execution(void *)
 {
-	if (Rx_cmds.empty()) return;
-
-	int time_out = 100; // force return after ten seconds
-	while (trx_state != STATE_RX && time_out) {
-		time_out--;
-		Fl::awake();
-		MilliSleep(100);
-	}
-	if (!time_out) {
-		while (!Rx_cmds.empty()) Rx_cmds.pop();
+	if (trx_state != STATE_RX) {
+		if (time_out-- == 0) {
+			while (!Rx_cmds.empty()) Rx_cmds.pop();
+			LOG_ERROR("%s", "failed");
+			time_out = 200;
+			return;
+		}
+		Fl::repeat_timeout( .050, Rx_queue_execution );
 		return;
 	}
+	LOG_INFO("action delayed by %4.2f seconds", (400 - time_out)*.050);
 
+	time_out = 400;
 	CMDS cmd;
 	while (!Rx_cmds.empty()) {
 		cmd = Rx_cmds.front();
@@ -3006,8 +3406,22 @@ void Rx_queue_execute()
 		cmd.cmd.erase(0,2);
 		cmd.cmd.insert(0,"<!");
 		cmd.fp(cmd.cmd);
+		Fl::awake();
+		if (macro_rx_wait) return;
 	}
 	return;
+}
+
+void Rx_queue_execute()
+{
+	if (Rx_cmds.empty()) return;
+	Fl::add_timeout(0, Rx_queue_execution);
+}
+
+void rx_que_continue(void *)
+{
+	macro_rx_wait = false;
+	Rx_queue_execute();
 }
 
 struct MTAGS { const char *mTAG; void (*fp)(std::string &, size_t&, size_t );};
@@ -3112,6 +3526,8 @@ static const MTAGS mtags[] = {
 {"<QSYFM>",		pQSYFM},
 {"<RIGMODE:",	pRIGMODE},
 {"<FILWID:",	pFILWID},
+{"<RIGHI:",     pRIGHI},
+{"<RIGLO:",     pRIGLO},
 {"<MAPIT:",		pMAPIT},
 {"<MAPIT>",		pMAPIT},
 {"<REPEAT>",	pREPEAT},
@@ -3124,6 +3540,7 @@ static const MTAGS mtags[] = {
 	{"<WX>",		pWX},
 	{"<WX:",		pWX2},
 	{"<IMAGE:",		pTxQueIMAGE},
+// Tx Delayed action
 	{"<!WPM:",		pTxQueWPM},
 	{"<!RISE:",		pTxQueRISETIME},
 	{"<!PRE:",		pTxQuePRE},
@@ -3136,16 +3553,21 @@ static const MTAGS mtags[] = {
 	{"<!MODEM:",	pTxQueMODEM},
 	{"<!RIGMODE:",	pTxQueRIGMODE},
 	{"<!FILWID:",	pTxQueFILWID},
+    {"<!RIGHI:",    pTxQueRIGHI},
+    {"<!RIGLO:",    pTxQueRIGLO},
 	{"<!TXATTEN:",	pTxQueTXATTEN},
 	{"<!RIGCAT:",	pTxQueRIGCAT},
-
+// Rx After action
 	{"<@MODEM:",	pRxQueMODEM},
 	{"<@RIGCAT:",	pRxQueRIGCAT},
 	{"<@GOFREQ:",	pRxQueGOFREQ},
 	{"<@GOHOME>",	pRxQueGOHOME},
 	{"<@RIGMODE:",	pRxQueRIGMODE},
 	{"<@FILWID:",	pRxQueFILWID},
+    {"<@RIGHI:",    pRxQueRIGHI},
+    {"<@RIGLO:",    pRxQueRIGLO},
 	{"<@TXRSID:",	pRxQueTXRSID},
+	{"<@WAIT:",     pRxQueWAIT},
 
 	{0, 0}
 };
@@ -3240,7 +3662,10 @@ void MACROTEXT::loadDefault()
 		LOG_INFO("%s", Macroset.c_str());
 		Macroset.insert(0, "\n");
 		Macroset.append("\n");
-		ReceiveText->addstr(Macroset);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->addstr(Macroset);
+		else
+			ReceiveText->addstr(Macroset);
 	}
 }
 
@@ -3258,15 +3683,17 @@ void MACROTEXT::openMacroFile()
 								 _("Open macro file"),
 								 _("Fldigi macro definition file\t*.{mdf}"),
 								 deffilename.c_str());
-	if (p) {
+	if (p && *p) {
 		loadMacros(p);
 		progStatus.LastMacroFile = p;
-//	}
 		showMacroSet();
 		if (progdefaults.DisplayMacroFilename) {
 			string Macroset;
 			Macroset.assign("\nLoaded macros: ").append(progStatus.LastMacroFile).append("\n");
-			ReceiveText->addstr(Macroset);
+			if (active_modem->get_mode() == MODE_IFKP)
+				ifkp_rx_text->addstr(Macroset);
+			else
+				ReceiveText->addstr(Macroset);
 		}
 	}
 }
@@ -3297,12 +3724,15 @@ void MACROTEXT::saveMacroFile()
 								 _("Save macro file"),
 								 _("Fldigi macro definition file\t*.{mdf}"),
 								 deffilename.c_str());
-	if (p) {
-		string sp = p;
-		if (sp.rfind(".mdf") == string::npos) sp.append(".mdf");
-		saveMacros(sp.c_str());
-		progStatus.LastMacroFile = sp;
-	}
+	if (!p) return;
+	if (!*p) return;
+
+	string sp = p;
+	if (sp.empty()) return;
+	if (sp.rfind(".mdf") == string::npos) sp.append(".mdf");
+	saveMacros(sp.c_str());
+	progStatus.LastMacroFile = sp;
+
 }
 
 void MACROTEXT::savecurrentMACROS(std::string &s, size_t &i, size_t endbracket)
@@ -3404,7 +3834,10 @@ std::string MACROTEXT::expandMacro(std::string &s, bool recurse = false)
 		expanded.erase(idx, 2);
 		expanded.append("^r");
 	}
-	
+
+	if (!TransmitON && !Rx_cmds.empty())
+		Fl::add_timeout(0, rx_que_continue);
+
 	return expanded;
 }
 
@@ -3464,44 +3897,66 @@ static void set_button(Fl_Button* button, bool value)
 void MACROTEXT::timed_execute()
 {
 	queue_reset();
-	TransmitText->clear();
+	if (active_modem->get_mode() == MODE_IFKP)
+		ifkp_tx_text->clear();
+	else
+		TransmitText->clear();
 	if (!rx_only) {
 		text2send = expandMacro(exec_string);
-		TransmitText->add_text(text2send);
+		if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_tx_text->add_text(text2send);
+		else
+			TransmitText->add_text(text2send);
 		exec_string.clear();
 		active_modem->set_stopflag(false);
 		start_tx();
 	}
 }
 
+bool wait_execute = false;
+
 void MACROTEXT::execute(int n)
 {
+	while (wait_execute) { MilliSleep(10); }
+	wait_execute = true;
+
 	mNbr = n;
 	text2send = expandMacro(text[n]);
-	
+
 	if (timed_exec) {
 		progStatus.repeatMacro = -1;
 		exec_string = text[n];
 		timed_exec = false;
 		startTimedExecute(name[n]);
+		wait_execute = false;
 		return;
 	}
-	
+
+	trx_mode mode = active_modem->get_mode();
+
 	if (!rx_only) {
-		if (progStatus.repeatMacro == -1)
-			TransmitText->add_text( text2send );
-		else {
+		if (progStatus.repeatMacro == -1) {
+			if (mode == MODE_IFKP) {
+				ifkp_tx_text->add_text( text2send );
+			} else {
+				TransmitText->add_text( text2send );
+			}
+		} else {
 			size_t p = std::string::npos;
 			text2send = text[n];
 			while ((p = text2send.find('<')) != std::string::npos)
 				text2send[p] = '[';
 			while ((p = text2send.find('>')) != std::string::npos)
 				text2send[p] = ']';
-			TransmitText->add_text( text2send );
+			if (mode == MODE_IFKP) {
+				ifkp_tx_text->add_text( text2send );
+			} else {
+				TransmitText->add_text( text2send );
+			}
 		}
 	}
 	text2send.clear();
-	
+
 	if (ToggleTXRX) {
 		text2send.clear();
 		if (!wf->xmtrcv->value()) {
@@ -3510,27 +3965,31 @@ void MACROTEXT::execute(int n)
 				Fl::add_timeout(idleTime, idleTimer);
 		} else
 			REQ(set_button, wf->xmtrcv, false);
+		wait_execute = false;
 		return;
 	}
 	if (useWait && waitTime > 0) {
 		Fl::add_timeout(waitTime, finishWait);
 		useWait = false;
+		wait_execute = false;
 		return;
 	}
 	if (useTune && tuneTime > 0) {
 		trx_tune();
 		Fl::add_timeout(tuneTime, finishTune);
 		useTune = false;
+		wait_execute = false;
 		return;
 	}
 	if ( TransmitON ) {
 		if (macro_idle_on && idleTime > 0)
 			Fl::add_timeout(idleTime, idleTimer);
-		
+
 		active_modem->set_stopflag(false);
 		start_tx();
 		TransmitON = false;
 	}
+	wait_execute = false;
 }
 
 void MACROTEXT::repeat(int n)
@@ -3564,7 +4023,7 @@ static std::string mtext =
 ";
 
 void MACROTEXT::saveMacros(const std::string& fname) {
-	
+
 	std::string work;
 	std::string output;
 	char temp[200];
@@ -3583,7 +4042,7 @@ void MACROTEXT::saveMacros(const std::string& fname) {
 		output.append(work).append("\n");
 	}
 	UTF8_writefile(fname.c_str(), output);
-	
+
 	changed = false;
 }
 

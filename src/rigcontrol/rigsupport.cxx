@@ -58,9 +58,9 @@ string windowTitle;
 
 vector<qrg_mode_t> freqlist;
 
-const unsigned char nfields = 4;
+const unsigned char nfields = 5;//4;
 int fwidths[nfields];
-enum { max_rfcarrier, max_rmode, max_mode };
+enum { max_rfcarrier, max_rmode, max_mode, max_carrier };
 
 #if !USE_HAMLIB
 
@@ -137,16 +137,19 @@ string modeString(rmode_t m)
 void initOptionMenus()
 {
 	qso_opMODE->clear();
+
 	list<MODE>::iterator MD;
 	list<MODE> *pMD = 0;
+
 	if (lmodes.empty() == false)
 		pMD = &lmodes;
 	else if (lmodeCMD.empty() == false)
 		pMD = &lmodeCMD;
-
+printf("initOptionMenus()\n");
 	if (pMD) {
 		MD = pMD->begin();
 		while (MD != pMD->end()) {
+printf("adding mode: %s\n", (*MD).SYMBOL.c_str());
 			qso_opMODE->add( (*MD).SYMBOL.c_str());
 			MD++;
 		}
@@ -168,6 +171,7 @@ void initOptionMenus()
 	if (pBW) {
 		bw = pBW->begin();
 		while (bw != pBW->end()) {
+printf("adding BW: %s\n", (*bw).SYMBOL.c_str());
 			qso_opBW->add( (*bw).SYMBOL.c_str());
 			bw++;
 		}
@@ -194,13 +198,14 @@ void updateSelect()
 	}
 }
 
-size_t updateList(long rf, int freq, string rmd, trx_mode md)
+size_t updateList(long rf, int freq, string rmd, trx_mode md, string usage = "")
 {
 	qrg_mode_t m;
 	m.rmode = rmd;
 	m.mode = md;
 	m.rfcarrier = rf;
 	m.carrier = freq;
+	m.usage = usage;
 
 	freqlist.push_back(m);
 	sort(freqlist.begin(), freqlist.end());
@@ -232,12 +237,15 @@ size_t addtoList(long val)
 bool readFreqList()
 {
 	ifstream freqfile((HomeDir + "frequencies2.txt").c_str());
-	if (!freqfile)
+	if (!freqfile) {
+		LOG_ERROR("Could not open %s", (HomeDir + "frequencies2.txt").c_str());
 		return false;
+	}
 
 	string line;
 	qrg_mode_t m;
 	while (!getline(freqfile, line).eof()) {
+		LOG_INFO("%s", line.c_str());
 		if (line[0] == '#')
 			continue;
 		istringstream is(line);
@@ -254,32 +262,38 @@ bool readFreqList()
 
 void saveFreqList()
 {
+	if (freqlist.empty()) return;
 
 	ofstream freqfile((HomeDir + "frequencies2.txt").c_str());
-	if (!freqfile)
-		return;
-	freqfile << "# rfcarrier rig_mode carrier mode\n";
-
-	if (freqlist.empty()) {
-		freqfile.close();
+	if (!freqfile) {
+		LOG_ERROR("Could not open %s", (HomeDir + "frequencies2.txt").c_str());
 		return;
 	}
+	freqfile << "# rfcarrier rig_mode carrier mode usage\n";
 
-	copy(freqlist.begin(), freqlist.end(),
-	     ostream_iterator<qrg_mode_t>(freqfile, "\n"));
+	copy(	freqlist.begin(),
+			freqlist.end(),
+			ostream_iterator<qrg_mode_t>(freqfile, "\n") );
+
 	freqfile.close();
 }
 
-void buildlist()
+void build_frequencies2_list()
 {
+	if (!freqlist.empty()) saveFreqList();
+
+	clearList();
 	// calculate the column widths
 	memset(fwidths, 0, sizeof(fwidths));
 	// these need to be a little wider than fl_width thinks
-	fwidths[max_rmode] = fwidths[max_mode] = 10;
+	fwidths[max_rmode] = fwidths[max_mode] = 
+	fwidths[max_carrier] = fwidths[max_rfcarrier]= 15;
 
 	fwidths[max_rfcarrier] += (int)ceil(fl_width("999999.999"));
 
-	fwidths[max_rmode] += (int)ceil(fl_width("XXXX"));
+	fwidths[max_rmode] += (int)ceil(fl_width("XXXXXX"));
+
+	fwidths[max_carrier] += (int)ceil(fl_width("8888"));
 
 	// find mode with longest shortname
 	size_t s, smax = 0, mmax = 0;
@@ -294,7 +308,7 @@ void buildlist()
 
 	if (readFreqList() == true)
 		return;
-//	Fl::lock();
+
 	updateList (1807000L, 1000, "USB", MODE_PSK31 );
 	updateList (3505000L, 800, "USB", MODE_CW);
 	updateList (3580000L, 1000, "USB", MODE_PSK31 );
@@ -312,39 +326,82 @@ void buildlist()
 	updateList (28005000L, 800, "USB", MODE_CW);
 	updateList (28120000, 1000, "USB", MODE_PSK31 );
 	updateSelect();
-//	Fl::unlock();
+
 }
 
 int cb_qso_opMODE()
 {
+	if (connected_to_flrig) {
+		set_flrig_mode(qso_opMODE->value());
+		return 0;
+	}
 #if USE_HAMLIB
 	if (progdefaults.chkUSEHAMLIBis)
 		hamlib_setmode(mode_nums[qso_opMODE->value()]);
 	else
 #endif
+	if (progdefaults.chkUSERIGCATis)
 		rigCAT_setmode(qso_opMODE->value());
-	set_flrig_mode(qso_opMODE->value());
+	else
+		noCAT_setmode(qso_opMODE->value());
 	return 0;
 }
 
 int cb_qso_opBW()
 {
-	if (progdefaults.chkUSERIGCATis)
-//    if (!progdefaults.chkUSEXMLRPCis)
+	if (connected_to_flrig)
+		set_flrig_bw(qso_opBW->index(), -1);
+	else if (progdefaults.chkUSERIGCATis)
 		rigCAT_setwidth(qso_opBW->value());
-	set_flrig_bw(qso_opBW->index());
+	else
+		noCAT_setwidth(qso_opBW->value());
+	return 0;
+}
+
+int  cb_qso_btnBW1()
+{
+	qso_btnBW1->hide();
+	qso_opBW1->hide();
+	qso_btnBW2->show();
+	qso_opBW2->show();
+	return 0;
+}
+
+int cb_qso_btnBW2()
+{
+	qso_btnBW2->hide();
+	qso_opBW2->hide();
+	qso_btnBW1->show();
+	qso_opBW1->show();
+	return 0;
+}
+
+int cb_qso_opBW1()
+{
+//printf("opBW1 %d:%s\n", qso_opBW1->index(), qso_opBW1->value());
+	set_flrig_bw(qso_opBW2->index(), qso_opBW1->index());
+	return 0;
+}
+
+int cb_qso_opBW2()
+{
+//printf("opBW2 %d:%s\n", qso_opBW2->index(), qso_opBW2->value());
+	set_flrig_bw(qso_opBW2->index(), qso_opBW1->index());
 	return 0;
 }
 
 void sendFreq(long int f)
 {
+	if (connected_to_flrig)
+		set_flrig_freq(f);
 #if USE_HAMLIB
-	if (progdefaults.chkUSEHAMLIBis)
-		hamlib_setfreq(f);
-	else
+	else if (progdefaults.chkUSEHAMLIBis)
+			hamlib_setfreq(f);
 #endif
+	else if (progdefaults.chkUSERIGCATis)
 		rigCAT_setfreq(f);
-	set_flrig_freq(f);
+	else
+		noCAT_setfreq(f);
 }
 
 void qso_movFreq(Fl_Widget* w, void *data)
@@ -449,6 +506,15 @@ void qso_addFreq()
 	}
 }
 
+void qso_updateEntry(int i, std::string usage)
+{
+	int v = i - 1;
+	int sz = (int)freqlist.size();
+	if ((v >= 0) && (v < sz)) {
+		freqlist[v].usage = usage;
+	}
+}
+
 void setTitle()
 {
 	if (windowTitle.empty()) return;
@@ -462,8 +528,6 @@ bool init_Xml_RigDialog()
 {
 	LOG_DEBUG("xml rig");
 	initOptionMenus();
-	clearList();
-	buildlist();
 	windowTitle = xmlrig.rigTitle;
 	setTitle();
 	return true;
@@ -475,20 +539,33 @@ bool init_NoRig_RigDialog()
 	qso_opBW->deactivate();
 	qso_opMODE->clear();
 
+printf("init_NoRig_RigDialog()\n");
 	for (size_t i = 0; i < sizeof(modes)/sizeof(modes[0]); i++) {
+printf("adding %s\n", modes[i].name);
 		qso_opMODE->add(modes[i].name);
 	}
+// list of LSB type modes that various xcvrs report via flrig
 	LSBmodes.clear();
 	LSBmodes.push_back("LSB");
-	LSBmodes.push_back("CWR");
+	LSBmodes.push_back("LSB-D");
+	LSBmodes.push_back("LSB-D1");
+	LSBmodes.push_back("LSB-D2");
+	LSBmodes.push_back("LSB-D3");
+	LSBmodes.push_back("CW");
+	LSBmodes.push_back("LCW");
+	LSBmodes.push_back("CW-N");
+	LSBmodes.push_back("CWL");
 	LSBmodes.push_back("RTTY");
+	LSBmodes.push_back("RTTY-L");
 	LSBmodes.push_back("PKTLSB");
+	LSBmodes.push_back("PKT-L");
+	LSBmodes.push_back("USER-L");
+	LSBmodes.push_back("DATA-L");
+	LSBmodes.push_back("DATA");
+	LSBmodes.push_back("D-LSB");
 
-	qso_opMODE->index(0);
+	qso_opMODE->index(3);
 	qso_opMODE->activate();
-
-	clearList();
-	buildlist();
 
 	windowTitle.clear();
 	setTitle();
@@ -509,8 +586,6 @@ bool init_Hamlib_RigDialog()
 		mode_names[modes[i].mode] = modes[i].name;
 		qso_opMODE->add(modes[i].name);
 	}
-	clearList();
-	buildlist();
 
 	windowTitle = "Hamlib ";
 	windowTitle.append(xcvr->getName());

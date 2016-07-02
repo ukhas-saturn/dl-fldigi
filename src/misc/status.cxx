@@ -78,6 +78,7 @@ status progStatus = {
 	false,				// bool Rig_Log_UI;
 	false,				// bool Rig_Contest_UI;
 	false,				// bool DOCKEDSCOPE;
+	false,				// bool tbar_is_docked;
 	50,					// int RxTextHeight;
 	WMIN/2,				// int tiled_group_x;
 	false,				// bool show_channels;
@@ -110,13 +111,14 @@ status progStatus = {
 	200,				// int		tile_w;
 	90,					// int		tile_y;
 	150,				// int		tile_h;
+	0.5,				// double	tile_y_ratio;
 	0.5,				// double	fsq_ratio;
+	0.5,				// double	ifkp_ratio;
 	false,				// bool LOGenabled
 	5.0,				// double sldrSquelchValue
 	5.0,				// double sldrPwrSquelchValue
 	true,				// bool afconoff
 	true,				// bool sqlonoff
-	false,				// bool pwrsqlonoff
 	50,					// int	scopeX;
 	50,					// int	scopeY;
 	false,				// bool	scopeVisible;
@@ -196,14 +198,20 @@ status progStatus = {
 	progdefaults.busyChannelSeconds,
 	progdefaults.kpsql_attenuation,
 	progdefaults.csma_enabled,
+	progdefaults.kiss_tcp_io,
+	progdefaults.kiss_tcp_listen,
+    progdefaults.kpsql_enabled,
+    progdefaults.kiss_io_modem_change_inhibit,
 	true,
 	0.0,
+	progdefaults.psk8DCDShortFlag,
 
 	"CQ",				// string browser_search;
 
 	false,				// meters
 
 	false,				// fsq_rx_abort
+	false,				// ifkp_rx_abort
 
 	false				// bool bLastStateRead;
 };
@@ -249,9 +257,11 @@ void status::saveLastState()
 		tile_w = text_panel->w();
 		tile_y = progdefaults.rxtx_swap ? TransmitText->h() : ReceiveText->h();
 		tile_h = text_panel->h();
+		tile_y_ratio = 1.0 * tile_y / text_group->h();
 		if (text_panel->w() != ReceiveText->w())
 			tile_x = mvgroup->w();
 		fsq_ratio = 1.0 * fsq_rx_text->h() / fsq_group->h();
+		ifkp_ratio = 1.0 * ifkp_rx_text->h() / ifkp_group->h();
 	}
 
 	VIEWERvisible = dlgViewer->visible();
@@ -263,14 +273,11 @@ void status::saveLastState()
 		VIEWERheight = dlgViewer->h();
 	}
 
-	scopeVisible = false;
-	if (scopeview && scopeview->visible()) {
-		scopeVisible = true;
-		scopeX = scopeview->x();
-		scopeY = scopeview->y();
-		scopeW = scopeview->w();
-		scopeH = scopeview->h();
-	}
+	scopeVisible = scopeview->visible();
+	scopeX = scopeview->x();
+	scopeY = scopeview->y();
+	scopeW = scopeview->w();
+	scopeH = scopeview->h();
 
 	contestiatones = progdefaults.contestiatones;
 	contestiabw = progdefaults.contestiabw;
@@ -318,6 +325,10 @@ void status::saveLastState()
 	busyChannelSeconds     = progdefaults.busyChannelSeconds;
     kpsql_attenuation      = progdefaults.kpsql_attenuation;
 	csma_enabled           = progdefaults.csma_enabled;
+	kiss_tcp_io            = progdefaults.kiss_tcp_io;
+	kiss_tcp_listen        = progdefaults.kiss_tcp_listen;
+    kpsql_enabled          = progdefaults.kpsql_enabled;
+    kiss_io_modem_change_inhibit = progdefaults.kiss_io_modem_change_inhibit;
 	squelch_value = 0;
 
 	Fl_Preferences spref(HomeDir.c_str(), "w1hkj.com", PACKAGE_TARNAME);
@@ -327,10 +338,11 @@ void status::saveLastState()
 
 	spref.set("mode_name", mode_info[lastmode].sname);
 	spref.set("squelch_enabled", sqlonoff);
-	spref.set("pwr_squelch_enabled", pwrsqlonoff);
 	spref.set("squelch_level", sldrSquelchValue);
 	spref.set("pwr_squelch_level", sldrPwrSquelchValue);
 	spref.set("afc_enabled", afconoff);
+
+	spref.set("psk8DCDShortFlag", psk8DCDShortFlag);
 
 	spref.set("log_enabled", LOGenabled);
 
@@ -360,6 +372,7 @@ if (!bWF_only) {
 	spref.set("rigcontest_ui", Rig_Contest_UI);
 	spref.set("noriglog", NO_RIGLOG);
 	spref.set("docked_scope", DOCKEDSCOPE);
+	spref.set("tbar_is_docked", tbar_is_docked);
 
 	spref.set("rigctl_x", rigX);
 	spref.set("rigctl_y", rigY);
@@ -384,7 +397,9 @@ if (!bWF_only) {
 	spref.set("tile_y", tile_y);
 	spref.set("tile_w", tile_w);
 	spref.set("tile_h", tile_h);
+	spref.set("tile_y_ratio", tile_y_ratio);
 	spref.set("fsq_ratio", fsq_ratio);
+	spref.set("ifkp_ratio", ifkp_ratio);
 
 	spref.set("scope_visible", scopeVisible);
 	spref.set("scope_x", scopeX);
@@ -465,7 +480,7 @@ if (!bWF_only) {
 		spref.set("kiss_dual_port_enabled", kiss_dual_port_enabled);
 	}
 
-	if(override_data_io_enabled != DISABLED_IO)
+	if(!override_data_io_enabled)
 		spref.set("data_io_enabled", data_io_enabled);
 
 	spref.set("ax25_decode_enabled", ax25_decode_enabled);
@@ -473,6 +488,11 @@ if (!bWF_only) {
 	spref.set("busyChannelSeconds", busyChannelSeconds);
 	spref.set("kpsql_attenuation", kpsql_attenuation);
 	spref.set("csma_enabled", csma_enabled);
+	spref.set("kiss_tcp_io",         kiss_tcp_io);
+	spref.set("kiss_tcp_listen",     kiss_tcp_listen);
+    spref.set("kpsql_enabled",       kpsql_enabled);
+    spref.set("kiss_io_modem_change_inhibit", kiss_io_modem_change_inhibit);
+
 	spref.set("browser_search", browser_search.c_str());
 
 	spref.set("meters", meters);
@@ -510,7 +530,6 @@ void status::loadLastState()
 	}
 
 	spref.get("squelch_enabled", i, sqlonoff); sqlonoff = i;
-	spref.get("pwr_squelch_enabled", i, pwrsqlonoff); pwrsqlonoff = i;
 	spref.get("squelch_level", i, sldrSquelchValue); sldrSquelchValue = i;
 	spref.get("pwr_squelch_level", i, sldrPwrSquelchValue); sldrPwrSquelchValue = i;
 	spref.get("afc_enabled", i, afconoff); afconoff = i;
@@ -553,7 +572,7 @@ void status::loadLastState()
 	if (mainW > Fl::w()) mainW = Fl::w();
 
 	spref.get("main_h", mainH, mainH);
-	if (mainH < HMIN) mainH = HMIN;
+//	if (mainH < HMIN) mainH = HMIN;
 	if (mainH > Fl::w()) mainH = Fl::h();
 
 	spref.get("wf_ui", i, WF_UI); WF_UI = i;
@@ -561,6 +580,7 @@ void status::loadLastState()
 	spref.get("rigcontest_ui", i, Rig_Contest_UI); Rig_Contest_UI = i;
 	spref.get("noriglog", i, NO_RIGLOG); NO_RIGLOG = i;
 	spref.get("docked_scope", i, DOCKEDSCOPE); DOCKEDSCOPE = i;
+	spref.get("tbar_is_docked", i, tbar_is_docked); tbar_is_docked = i;
 
 	spref.get("rigctl_x", rigX, rigX);
 	spref.get("rigctl_y", rigY, rigY);
@@ -585,7 +605,9 @@ void status::loadLastState()
 	spref.get("tile_y", tile_y, tile_y);
 	spref.get("tile_w", tile_w, tile_w);
 	spref.get("tile_h", tile_h, tile_h);
+	spref.get("tile_y_ratio", tile_y_ratio, tile_y_ratio);
 	spref.get("fsq_ratio", fsq_ratio, fsq_ratio);
+	spref.get("ifkp_ratio", ifkp_ratio, ifkp_ratio);
 
 	spref.get("scope_visible", i, scopeVisible); scopeVisible = i;
 	spref.get("scope_x", scopeX, scopeX);
@@ -691,7 +713,7 @@ void status::loadLastState()
 		spref.get("kiss_dual_port_enabled", i, kiss_dual_port_enabled); kiss_dual_port_enabled     = i;
 	}
 
-	if(override_data_io_enabled != DISABLED_IO)
+	if(!override_data_io_enabled)
 		spref.get("data_io_enabled", i, data_io_enabled); data_io_enabled = i;
 
 	spref.get("ax25_decode_enabled",    i, ax25_decode_enabled);    ax25_decode_enabled = i;
@@ -699,6 +721,12 @@ void status::loadLastState()
 	spref.get("busyChannelSeconds",     i, busyChannelSeconds);     busyChannelSeconds  = i;
 	spref.get("kpsql_attenuation",      i, kpsql_attenuation);      kpsql_attenuation   = i;
 	spref.get("csma_enabled",           i, csma_enabled);           csma_enabled        = i;
+	spref.get("kiss_tcp_io",            i, kiss_tcp_io);            kiss_tcp_io         = i;
+	spref.get("kiss_tcp_listen",        i, kiss_tcp_listen);        kiss_tcp_listen     = i;
+    spref.get("kpsql_enabled",          i, kpsql_enabled);          kpsql_enabled       = i;
+    spref.get("kiss_io_modem_change_inhibit", i, kiss_io_modem_change_inhibit); kiss_io_modem_change_inhibit = i;
+
+	spref.get("psk8DCDShortFlag",       i, psk8DCDShortFlag);       psk8DCDShortFlag    = i;
 
 	memset(strbuff, 0, sizeof(strbuff));
 	spref.get("browser_search", strbuff, browser_search.c_str(), sizeof(strbuff) - 1);
@@ -810,13 +838,13 @@ void status::initLastState()
 		data_io_enabled = ARQ_IO;
 		progdefaults.data_io_enabled = ARQ_IO;
 		progStatus.data_io_enabled = ARQ_IO;
-		pwrsqlonoff = false;
+		kpsql_enabled = false;
 	}
 
 	btnSQL->value(sqlonoff);
-	btnPSQL->value(pwrsqlonoff);
+	btnPSQL->value(kpsql_enabled);
 
-	if(pwrsqlonoff)
+	if(kpsql_enabled)
 		sldrSquelch->value(sldrPwrSquelchValue);
 	else
 		sldrSquelch->value(sldrSquelchValue);
@@ -864,6 +892,8 @@ void status::initLastState()
 	cntKPSQLAttenuation->value(kpsql_attenuation);
 	progdefaults.kpsql_attenuation = kpsql_attenuation;
 
+	kiss_io_set_button_state(0);
+
 	if (bWF_only)
 		fl_digi_main->resize(mainX, mainY, mainW, Hmenu + Hwfall + Hstatus);
 	else if (bHAB) {
@@ -887,7 +917,8 @@ void status::initLastState()
 
 	if (scopeview) {
 		scopeview->resize(scopeX, scopeY, scopeW, scopeH);
-		if (scopeVisible == true)
+		digiscope->resize(0,0,scopeW,scopeH);
+		if (scopeVisible)
 			scopeview->show();
 	}
 

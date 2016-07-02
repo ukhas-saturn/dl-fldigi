@@ -46,6 +46,7 @@
 #include "ascii.h"
 #include "icons.h"
 #include "gettext.h"
+#include "macros.h"
 
 #include "FTextView.h"
 
@@ -352,7 +353,7 @@ void FTextBase::saveFile(void)
 
 		char *p1, *p2, *text = tbuf->text();
 		for (p1 = p2 = text; *p1; p1 = p2) {
-			while (*p2 != '\0' && *p2 != '\n')
+			while (*p2 != '\0' && *p2 != '\r')
 				p2++;
 			if (*p2 == '\n') {
 				*p2 = '\0';
@@ -466,6 +467,10 @@ void FTextBase::reset_styles(int set)
 	set_style(CTRL, FL_HELVETICA, FL_NORMAL_SIZE, FL_DARK_GREEN, set);
 	set_style(SKIP, FL_HELVETICA, FL_NORMAL_SIZE, FL_BLUE, set);
 	set_style(ALTR, FL_HELVETICA, FL_NORMAL_SIZE, FL_DARK_MAGENTA, set);
+	set_style(FSQ_TX, FL_HELVETICA, FL_NORMAL_SIZE, FL_RED, set);
+	set_style(FSQ_DIR, FL_HELVETICA, FL_NORMAL_SIZE, FL_BLUE, set);
+	set_style(FSQ_UND, FL_HELVETICA, FL_NORMAL_SIZE, FL_DARK_GREEN, set);
+
 }
 
 // ----------------------------------------------------------------------------
@@ -803,8 +808,33 @@ int FTextEdit::handle_dnd_drop(void)
 			len -= 7;
 		}
 #endif
+
+#ifndef BUILD_FLARQ
+	if ((text.find("jpg") != string::npos) ||
+		(text.find("JPG") != string::npos) ||
+		(text.find("jpeg") != string::npos) ||
+		(text.find("JPEG") != string::npos) ||
+		(text.find("png") != string::npos) ||
+		(text.find("PNG") != string::npos) ||
+		(text.find("bmp") != string::npos) ||
+		(text.find("BMP") != string::npos) ) {
+
+		LOG_INFO("DnD image %s", text.c_str());
+
+		if ((p = text.find("file://")) != string::npos)
+			text.erase(0, p + strlen("file://"));
+		if ((p = text.find('\r')) != string::npos)
+			text.erase(p);
+		if ((p = text.find('\n')) != string::npos)
+			text.erase(p);
+		if (text[text.length()-1] == 0) text.erase(text.length() -1);
+		TxQueINSERTIMAGE(text);
+		return 1;
+	}
+#endif
+
 // paste everything verbatim if we cannot read the first file
-LOG_INFO("DnD file %s", text.c_str());
+		LOG_INFO("DnD file %s", text.c_str());
 		if (readFile(text.c_str()) == -1 && len == text.length())
 			return FTextBase::handle(FL_PASTE);
 		text.erase(0, p + sizeof(sep) - 1);
