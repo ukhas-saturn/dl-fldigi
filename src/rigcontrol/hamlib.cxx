@@ -43,6 +43,7 @@
 #include "misc.h"
 
 #include "rigsupport.h"
+#include "dl_fldigi/hbtint.h"
 
 #include "stacktrace.h"
 #ifdef __WOE32__
@@ -497,6 +498,7 @@ static void *hamlib_loop(void *args)
 	rmode_t  numode = RIG_MODE_USB;
 	bool freqok = false, modeok = false;
 
+	dl_fldigi::hbtint::rig_set_mode(modeString(numode));
 	for (;;) {
 		MilliSleep(100);
 		if (hamlib_exit)
@@ -546,9 +548,12 @@ static void *hamlib_loop(void *args)
 			wf->rfcarrier(hamlib_freq);
 		}
 
+		if (freqok && freq)
+			dl_fldigi::hbtint::rig_set_freq(freq);
+
 		if (modeok && (hamlib_rmode != numode)) {
 			hamlib_rmode = numode;
-			show_mode("None");
+			show_mode(modeString(numode));
 			if (progdefaults.HamlibSideband != SIDEBAND_RIG)
 				wf->USB(progdefaults.HamlibSideband == SIDEBAND_USB);
 			else
@@ -557,6 +562,7 @@ static void *hamlib_loop(void *args)
 					  hamlib_rmode == RIG_MODE_PKTLSB ||
 					  hamlib_rmode == RIG_MODE_ECSSLSB ||
 					  hamlib_rmode == RIG_MODE_RTTY));
+			dl_fldigi::hbtint::rig_set_mode(modeString(numode));
 		}
 
 		if (hamlib_exit)
