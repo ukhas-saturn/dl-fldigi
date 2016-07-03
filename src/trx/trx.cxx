@@ -731,7 +731,7 @@ void trx_close()
 
 //=============================================================================
 
-void trx_transmit(void) { trx_state = STATE_TX; }
+void trx_transmit(void) { if (!bHAB) trx_state = STATE_TX; }
 void trx_tune(void) { trx_state = STATE_TUNE; }
 void trx_receive(void) { trx_state = STATE_RX; }
 
