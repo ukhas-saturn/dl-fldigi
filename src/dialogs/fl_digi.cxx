@@ -8576,6 +8576,8 @@ void create_fl_digi_main_dl_fldigi() {
 		qso_opMODE->callback((Fl_Callback*)cb_qso_opMODE);
 		qso_opMODE->align(FL_ALIGN_TOP);
 		qso_opMODE->when(FL_WHEN_RELEASE);
+		qso_opMODE->readonly(true);
+		qso_opMODE->hide();
 		qso_opMODE->end();
 		
 		{ habString = new Fl_Output(rightof(qso_opMODE) + 2, below(habRXPayload) + 4, w_habString - 8 - freqwidth - w_pmb, Hentry);

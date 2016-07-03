@@ -350,7 +350,7 @@ bool hamlib_init(bool bPtt)
 
 	init_Hamlib_RigDialog();
 	show_mode("-none-");
-        wf->USB(progdefaults.HamlibSideband == SIDEBAND_USB);
+        wf->USB(true);
 
 	hamlib_closed = false;
 	return true;
