@@ -449,11 +449,11 @@ Fl_Output			*habElevation;
 Fl_Output			*habTimeSinceLastRx;
 Fl_Output			*habString;
 
-int w_TopFrameHAB = 800;
+int w_TopFrameHAB = 780;
 
-int w_habFlight = 300;
+int w_habFlight = 210;
 int w_habOpenBrowser = 80;
-int w_habCHPayload = 100;
+int w_habCHPayload = 140;
 int w_habConfigureButton = 120;
 int w_habSwitchModes = 120;
 int w_habCHTransmission = 100;
@@ -466,8 +466,8 @@ int w_habChecksum = 70;
 int w_habBearing = 50;
 int w_habDistance = 60;
 int w_habElevation = 50;
-int w_habTimeSinceLastRx = 80;
-int w_habString = 430;
+int w_habTimeSinceLastRx = 60;
+int w_habString = 440;
 int HAB_width = -1;
 int HAB_height = 0;
 
@@ -8534,7 +8534,7 @@ void create_fl_digi_main_dl_fldigi() {
 		habElevation->labelcolor(FL_FOREGROUND_COLOR);
 		habElevation->align(FL_ALIGN_TOP); }
 	
-		{ habTimeSinceLastRx = new Fl_Output(rightof(habElevation) + 2, habRowTwoY, w_habTimeSinceLastRx, Hentry, _("Time since Rx"));
+		{ habTimeSinceLastRx = new Fl_Output(rightof(habElevation) + 2, habRowTwoY, w_habTimeSinceLastRx, Hentry, _("Last Rx"));
 		habTimeSinceLastRx->tooltip(_("Elapsed time since last line of telemetry received"));
 		habTimeSinceLastRx->box(FL_DOWN_BOX);
 		habTimeSinceLastRx->color(FL_BACKGROUND2_COLOR);
