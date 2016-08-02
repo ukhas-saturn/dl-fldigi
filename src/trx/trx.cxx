@@ -572,13 +572,6 @@ void trx_reset_loop()
 	}
 
 	switch (progdefaults.btnAudioIOis) {
-
-	case SND_IDX_UDP:
-		scard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), true);
-		break;
-	case SND_IDX_TCP:
-		scard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), false);
-		break;
 #if USE_OSS
 	case SND_IDX_OSS:
 		scard = new SoundOSS(scDevice[0].c_str());
@@ -627,13 +620,6 @@ void trx_start(void)
 
 
 	switch (progdefaults.btnAudioIOis) {
-
-	case SND_IDX_UDP:
-		scard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), true);
-		break;
-	case SND_IDX_TCP:
-		scard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), false);
-		break;
 #if USE_OSS
 	case SND_IDX_OSS:
 		scard = new SoundOSS(scDevice[0].c_str());

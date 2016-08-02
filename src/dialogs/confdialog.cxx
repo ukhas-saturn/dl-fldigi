@@ -4085,43 +4085,25 @@ Fl_Tabs *tabsSoundCard=(Fl_Tabs *)0;
 
 Fl_Group *tabAudio=(Fl_Group *)0;
 
-Fl_Group *AudioTCP=(Fl_Group *)0;
+Fl_Group *AudioOSS=(Fl_Group *)0;
 
 static void cb_btnAudioIO(Fl_Round_Button*, void*) {
-  sound_update(SND_IDX_TCP);
+  sound_update(SND_IDX_OSS);
 progdefaults.changed = true;
 resetSoundCard();
 }
 
-Fl_Input2 *inpIPServerHost=(Fl_Input2 *)0;
+Fl_Input_Choice *menuOSSDev=(Fl_Input_Choice *)0;
 
-static void cb_inpIPServerHost(Fl_Input2* o, void*) {
-  scDevice[0] = progdefaults.IPServerHost = o->value();
-progdefaults.changed = true;
+static void cb_menuOSSDev(Fl_Input_Choice* o, void*) {
+  scDevice[0] = scDevice[1] = progdefaults.OSSdevice = o->value();
 resetSoundCard();
-}
-
-Fl_Input2 *inpIPServerPort=(Fl_Input2 *)0;
-
-static void cb_inpIPServerPort(Fl_Input2* o, void*) {
-  scDevice[0] = progdefaults.IPServerPort = o->value();
 progdefaults.changed = true;
-resetSoundCard();
-}
-
-Fl_Group *AudioUDP=(Fl_Group *)0;
-
-Fl_Round_Button *btnAudioIO[5]={(Fl_Round_Button *)0};
-
-static void cb_btnAudioIO1(Fl_Round_Button*, void*) {
-  sound_update(SND_IDX_UDP);
-progdefaults.changed = true;
-resetSoundCard();
 }
 
 Fl_Group *AudioPort=(Fl_Group *)0;
 
-static void cb_btnAudioIO2(Fl_Round_Button*, void*) {
+static void cb_btnAudioIO1(Fl_Round_Button*, void*) {
   sound_update(SND_IDX_PORT);
 progdefaults.changed = true;
 resetSoundCard();
@@ -4147,7 +4129,7 @@ progdefaults.changed = true;
 
 Fl_Group *AudioPulse=(Fl_Group *)0;
 
-static void cb_btnAudioIO3(Fl_Round_Button*, void*) {
+static void cb_btnAudioIO2(Fl_Round_Button*, void*) {
   sound_update(SND_IDX_PULSE);
 progdefaults.changed = true;
 resetSoundCard();
@@ -4163,7 +4145,9 @@ progdefaults.changed = true;
 
 Fl_Group *AudioNull=(Fl_Group *)0;
 
-static void cb_btnAudioIO4(Fl_Round_Button*, void*) {
+Fl_Round_Button *btnAudioIO[4]={(Fl_Round_Button *)0};
+
+static void cb_btnAudioIO3(Fl_Round_Button*, void*) {
   sound_update(SND_IDX_NULL);
 progdefaults.changed = true;
 resetSoundCard();
@@ -8138,7 +8122,7 @@ i on a\ntouch screen device such as a tablet."));
                 o->value(progdefaults.DOMINOEX_BW);
                 o->labelsize(FL_NORMAL_SIZE);
               } // Fl_Counter2* valDominoEX_BW
-              { Fl_Counter2* o = valDominoEX_ADJ = new Fl_Counter2(206, 166, 63, 20, _("Tone-spacing adjust"));
+              { Fl_Counter2* o = valDominoEX_ADJ = new Fl_Counter2(156, 166, 63, 20, _("Tone-spacing adjust"));
                 valDominoEX_ADJ->tooltip(_("Tone-spacing adjust"));
                 valDominoEX_ADJ->type(1);
                 valDominoEX_ADJ->box(FL_UP_BOX);
@@ -9962,63 +9946,28 @@ definition"));
         { tabsSoundCard = new Fl_Tabs(0, 25, 600, 355);
           tabsSoundCard->selection_color(FL_LIGHT1);
           { tabAudio = new Fl_Group(0, 50, 600, 330, _("Devices"));
-            { AudioTCP = new Fl_Group(55, 65, 380, 45);
-              AudioTCP->box(FL_ENGRAVED_FRAME);
-              { btnAudioIO[0] = new Fl_Round_Button(65, 75, 53, 25, _("TCP"));
-                btnAudioIO[0]->tooltip(_("Use TCP audio server"));
+            { AudioOSS = new Fl_Group(55, 65, 490, 45);
+              AudioOSS->box(FL_ENGRAVED_FRAME);
+              { btnAudioIO[0] = new Fl_Round_Button(65, 75, 53, 25, _("OSS"));
+                btnAudioIO[0]->tooltip(_("Use OSS audio server"));
                 btnAudioIO[0]->down_box(FL_DOWN_BOX);
                 btnAudioIO[0]->selection_color((Fl_Color)1);
                 btnAudioIO[0]->callback((Fl_Callback*)cb_btnAudioIO);
               } // Fl_Round_Button* btnAudioIO[0]
-              { Fl_Input2* o = inpIPServerHost = new Fl_Input2(180, 75, 90, 25, _("Host:"));
-                inpIPServerHost->tooltip(_("TCP/UDP Server Host"));
-                inpIPServerHost->box(FL_DOWN_BOX);
-                inpIPServerHost->color(FL_BACKGROUND2_COLOR);
-                inpIPServerHost->selection_color(FL_SELECTION_COLOR);
-                inpIPServerHost->labeltype(FL_NORMAL_LABEL);
-                inpIPServerHost->labelfont(0);
-                inpIPServerHost->labelsize(14);
-                inpIPServerHost->labelcolor(FL_FOREGROUND_COLOR);
-                inpIPServerHost->callback((Fl_Callback*)cb_inpIPServerHost);
-                inpIPServerHost->align(Fl_Align(FL_ALIGN_LEFT));
-                inpIPServerHost->when(FL_WHEN_RELEASE);
-                o->value(progdefaults.IPServerHost.c_str());
-                inpIPServerHost->labelsize(FL_NORMAL_SIZE);
-              } // Fl_Input2* inpIPServerHost
-              { Fl_Input2* o = inpIPServerPort = new Fl_Input2(320, 75, 90, 25, _("Port:"));
-                inpIPServerPort->tooltip(_("TCP/UDP Server Port"));
-                inpIPServerPort->box(FL_DOWN_BOX);
-                inpIPServerPort->color(FL_BACKGROUND2_COLOR);
-                inpIPServerPort->selection_color(FL_SELECTION_COLOR);
-                inpIPServerPort->labeltype(FL_NORMAL_LABEL);
-                inpIPServerPort->labelfont(0);
-                inpIPServerPort->labelsize(14);
-                inpIPServerPort->labelcolor(FL_FOREGROUND_COLOR);
-                inpIPServerPort->callback((Fl_Callback*)cb_inpIPServerPort);
-                inpIPServerPort->align(Fl_Align(FL_ALIGN_LEFT));
-                inpIPServerPort->when(FL_WHEN_RELEASE);
-                o->value(progdefaults.IPServerPort.c_str());
-                inpIPServerPort->labelsize(FL_NORMAL_SIZE);
-              } // Fl_Input2* inpIPServerPort
-              AudioTCP->end();
-            } // Fl_Group* AudioTCP
-            { AudioUDP = new Fl_Group(435, 65, 110, 45);
-              AudioUDP->box(FL_ENGRAVED_FRAME);
-              { btnAudioIO[4] = new Fl_Round_Button(450, 75, 53, 25, _("UDP"));
-                btnAudioIO[4]->tooltip(_("Use UDP audio server"));
-                btnAudioIO[4]->down_box(FL_DOWN_BOX);
-                btnAudioIO[4]->selection_color((Fl_Color)1);
-                btnAudioIO[4]->callback((Fl_Callback*)cb_btnAudioIO1);
-              } // Fl_Round_Button* btnAudioIO[4]
-              AudioUDP->end();
-            } // Fl_Group* AudioUDP
+              { Fl_Input_Choice* o = menuOSSDev = new Fl_Input_Choice(424, 75, 110, 25, _("Device:"));
+                menuOSSDev->tooltip(_("Select device"));
+                menuOSSDev->callback((Fl_Callback*)cb_menuOSSDev);
+                o->value(progdefaults.OSSdevice.c_str());
+              } // Fl_Input_Choice* menuOSSDev
+              AudioOSS->end();
+            } // Fl_Group* AudioOSS
             { AudioPort = new Fl_Group(55, 110, 490, 80);
               AudioPort->box(FL_ENGRAVED_FRAME);
               { btnAudioIO[1] = new Fl_Round_Button(65, 138, 95, 25, _("PortAudio"));
                 btnAudioIO[1]->tooltip(_("Use Port Audio server"));
                 btnAudioIO[1]->down_box(FL_DOWN_BOX);
                 btnAudioIO[1]->selection_color((Fl_Color)1);
-                btnAudioIO[1]->callback((Fl_Callback*)cb_btnAudioIO2);
+                btnAudioIO[1]->callback((Fl_Callback*)cb_btnAudioIO1);
               } // Fl_Round_Button* btnAudioIO[1]
               { menuPortInDev = new Fl_Choice(244, 121, 290, 25, _("Capture:"));
                 menuPortInDev->tooltip(_("Audio input device"));
@@ -10038,7 +9987,7 @@ definition"));
                 btnAudioIO[2]->tooltip(_("Use Pulse Audio server"));
                 btnAudioIO[2]->down_box(FL_DOWN_BOX);
                 btnAudioIO[2]->selection_color((Fl_Color)1);
-                btnAudioIO[2]->callback((Fl_Callback*)cb_btnAudioIO3);
+                btnAudioIO[2]->callback((Fl_Callback*)cb_btnAudioIO2);
               } // Fl_Round_Button* btnAudioIO[2]
               { Fl_Input2* o = inpPulseServer = new Fl_Input2(310, 201, 225, 24, _("Server string:"));
                 inpPulseServer->tooltip(_("Leave this blank or refer to\nhttp://www.pulseaudio.org/wiki/ServerStrings"));
@@ -10063,7 +10012,7 @@ definition"));
                 btnAudioIO[3]->tooltip(_("NO AUDIO DEVICE AVAILABLE (or testing)"));
                 btnAudioIO[3]->down_box(FL_DOWN_BOX);
                 btnAudioIO[3]->selection_color((Fl_Color)1);
-                btnAudioIO[3]->callback((Fl_Callback*)cb_btnAudioIO4);
+                btnAudioIO[3]->callback((Fl_Callback*)cb_btnAudioIO3);
               } // Fl_Round_Button* btnAudioIO[3]
               AudioNull->end();
             } // Fl_Group* AudioNull

@@ -11,8 +11,8 @@
 #include "flinput2.h"
 #include "flslider2.h"
 #include "flmisc.h"
-extern Fl_Double_Window *dlgConfig; 
-extern Mode_Browser* mode_browser; 
+extern Fl_Double_Window *dlgConfig;
+extern Mode_Browser* mode_browser;
 void cbWaterfallFontBrowser(Fl_Widget*, void*);
 void cbViewerFontBrowser(Fl_Widget*, void*);
 void cbFreqControlFontBrowser(Fl_Widget*, void*);
@@ -479,11 +479,9 @@ extern Fl_Counter *mbw_delay;
 extern Fl_Group *tabSoundCard;
 extern Fl_Tabs *tabsSoundCard;
 extern Fl_Group *tabAudio;
-extern Fl_Group *AudioTCP;
-extern Fl_Input2 *inpIPServerHost;
-extern Fl_Input2 *inpIPServerPort;
-extern Fl_Group *AudioUDP;
-extern Fl_Round_Button *btnAudioIO[5];
+extern Fl_Group *AudioOSS;
+#include <FL/Fl_Input_Choice.H>
+extern Fl_Input_Choice *menuOSSDev;
 extern Fl_Group *AudioPort;
 #include <FL/Fl_Choice.H>
 extern Fl_Choice *menuPortInDev;
@@ -491,6 +489,7 @@ extern Fl_Choice *menuPortOutDev;
 extern Fl_Group *AudioPulse;
 extern Fl_Input2 *inpPulseServer;
 extern Fl_Group *AudioNull;
+extern Fl_Round_Button *btnAudioIO[4];
 extern Fl_Group *tabAudioOpt;
 extern Fl_Group *grpAudioSampleRate;
 extern Fl_ListBox *menuInSampleRate;

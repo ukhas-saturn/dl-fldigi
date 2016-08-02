@@ -1054,17 +1054,11 @@
         /* Sound card */                                                                \
         ELEM_(int, btnAudioIOis, "AUDIOIO",                                             \
               "Audio subsystem.  Values are as follows:\n"                              \
-              "  0: TCP; 1: PortAudio; 2: PulseAudio; 3: File I/O",                     \
+              "  0: OSS; 1: PortAudio; 2: PulseAudio; 3: File I/O",                     \
               SND_IDX_NULL)                                                             \
         ELEM_(std::string, OSSdevice, "OSSDEVICE",                                      \
               "OSS device name",                                                        \
               "")                                                                       \
-        ELEM_(std::string, IPServerHost, "IPHOST",                                      \
-              "IP stream host",                                                         \
-              "localhost")                                                              \
-        ELEM_(std::string, IPServerPort, "IPPORT",                                      \
-              "IP stream port",                                                         \
-              "7355")                                                                   \
         ELEM_(std::string, PAdevice, "PADEVICE",                                        \
               "For compatibility with older versions",                                  \
               "")                                                                       \
