@@ -11,8 +11,8 @@
 #include "flinput2.h"
 #include "flslider2.h"
 #include "flmisc.h"
-extern Fl_Double_Window *dlgConfig;
-extern Mode_Browser* mode_browser;
+extern Fl_Double_Window *dlgConfig; 
+extern Mode_Browser* mode_browser; 
 void cbWaterfallFontBrowser(Fl_Widget*, void*);
 void cbViewerFontBrowser(Fl_Widget*, void*);
 void cbFreqControlFontBrowser(Fl_Widget*, void*);
@@ -532,7 +532,6 @@ extern Fl_Group *AudioOSS;
 #include <FL/Fl_Input_Choice.H>
 extern Fl_Input_Choice *menuOSSDev;
 extern Fl_Group *AudioPort;
-#include <FL/Fl_Choice.H>
 extern Fl_Choice *menuPortInDev;
 extern Fl_Choice *menuPortOutDev;
 extern Fl_Group *AudioPulse;
@@ -607,6 +606,15 @@ extern Fl_Counter2 *cntServerACQsn;
 extern Fl_Counter2 *cntServerAFCrange;
 extern Fl_Check_Button *btnPSKmailSweetSpot;
 extern Fl_Check_Button *btn_arq_s2n_report;
+extern Fl_Group *tabSpot;
+extern Fl_Check_Button *btnPSKRepAuto;
+extern Fl_Check_Button *btnPSKRepLog;
+extern Fl_Check_Button *btnPSKRepQRG;
+extern Fl_Check_Button *btn_report_when_visible;
+extern Fl_Input2 *inpPSKRepHost;
+extern Fl_Input2 *inpPSKRepPort;
+extern Fl_Button *btnPSKRepInit;
+extern Fl_Box *boxPSKRepMsg;
 extern Fl_Group *tabSweetSpot;
 extern Fl_Value_Input2 *valCWsweetspot;
 extern Fl_Value_Input2 *valRTTYsweetspot;
@@ -647,6 +655,7 @@ extern Fl_Button *btlTestKmlCommand;
 extern Fl_Button *btnSelectKmlDestDir;
 extern Fl_Button *btlPurge;
 extern Fl_Check_Button *btnKmlPurgeOnStartup;
+extern Fl_Check_Button *btn_kml_enabled;
 extern Fl_Group *tabDL;
 extern Fl_Tabs *tabsDL;
 extern Fl_Group *tabDLEnable;
@@ -660,7 +669,6 @@ extern Fl_Counter2 *cntTrackFreqMax;
 #include <FL/Fl_Float_Input.H>
 extern Fl_Float_Input *stationary_lat;
 extern Fl_Float_Input *stationary_lon;
-#include <FL/Fl_Input_Choice.H>
 extern Fl_Input_Choice *inpGPSdev;
 #include <FL/Fl_Spinner.H>
 extern Fl_Output *gps_pos_lat;
@@ -682,7 +690,6 @@ extern Fl_Button *flight_docs_refresh_b;
 extern Fl_Button *payload_autoconfigure_b;
 extern Fl_Input *payload_search_text;
 extern Fl_Choice *payload_transmission_list;
-extern Fl_Check_Button *btn_kml_enabled;
 extern Fl_Group *tabQRZ;
 extern Fl_Tabs *tabsQRZ;
 extern Fl_Round_Button *btnQRZWEBnotavailable;
