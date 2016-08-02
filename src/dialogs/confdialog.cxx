@@ -6450,7 +6450,6 @@ Fl_Double_Window* ConfigureDialog() {
           { Fl_Check_Button* o = btnNoiseOn = new Fl_Check_Button(93, 269, 70, 15, _("Noise on"));
             btnNoiseOn->down_box(FL_DOWN_BOX);
             btnNoiseOn->callback((Fl_Callback*)cb_btnNoiseOn);
-            btnNoiseOn->deactivate();
             o->value(progdefaults.noise);
           } // Fl_Check_Button* btnNoiseOn
           { Fl_Counter2* o = noiseDB = new Fl_Counter2(340, 264, 130, 21, _("dB"));
@@ -6467,7 +6466,6 @@ Fl_Double_Window* ConfigureDialog() {
             noiseDB->callback((Fl_Callback*)cb_noiseDB);
             noiseDB->align(Fl_Align(FL_ALIGN_LEFT));
             noiseDB->when(FL_WHEN_CHANGED);
-            noiseDB->deactivate();
             o->value(progdefaults.s2n);
             o->lstep(1);
           } // Fl_Counter2* noiseDB
@@ -10850,7 +10848,7 @@ definition"));
         tabSoundCard->hide();
         { tabsSoundCard = new Fl_Tabs(0, 25, 600, 360);
           tabsSoundCard->selection_color(FL_LIGHT1);
-          { tabAudio = new Fl_Group(0, 50, 600, 330, _("Devices"));
+          { tabAudio = new Fl_Group(0, 50, 600, 335, _("Devices"));
             { AudioOSS = new Fl_Group(55, 65, 490, 45);
               AudioOSS->box(FL_ENGRAVED_FRAME);
               { btnAudioIO[0] = new Fl_Round_Button(65, 75, 53, 25, _("OSS"));
