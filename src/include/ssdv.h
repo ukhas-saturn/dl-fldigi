@@ -118,6 +118,7 @@ typedef struct
 } ssdv_t;
 
 typedef struct {
+    uint8_t  type;
 	uint32_t callsign;
 	uint8_t  image_id;
 	uint16_t packet_id;

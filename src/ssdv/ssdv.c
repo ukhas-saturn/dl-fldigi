@@ -1294,7 +1294,6 @@ char ssdv_dec_is_packet(uint8_t *packet, int *errors, uint8_t *erasures)
 	/* Testing is destructive, work on a copy */
 	memcpy(pkt, packet, SSDV_PKT_SIZE);
 	pkt[0] = 0x55;
-	pkt[1] = 0x66;
 	
 	/* Find the erasure positions */
 	no_eras = 0;
@@ -1312,9 +1311,17 @@ char ssdv_dec_is_packet(uint8_t *packet, int *errors, uint8_t *erasures)
 	if(i < 0) return(-1); /* Reed-solomon decoder failed */
 	if(errors) *errors = i;
 	
-	/* Sanity checks */
-	if(pkt[1] != 0x66) return(-1);
-	
+	/* Sanity checks. 0x66 = JPG FEC, 0x68 = CBEC FEC */
+	if((pkt[1] != 0x66) && (pkt[1] != 0x68)) {
+        return(-1);
+    }
+
+    /* Check image properties are sane */
+    /**
+     * This works with both JPG and CBEC types. In CBEC type width
+     * corresponds to sequences, and height corresponds to
+     * blocks. Both must not be zero.
+     */
 	ssdv_dec_header(&p, pkt);
 	if(p.width == 0 || p.height == 0) return(-1);
 	if(p.mcu_id != 0xFFFF)
@@ -1340,6 +1347,7 @@ char ssdv_dec_is_packet(uint8_t *packet, int *errors, uint8_t *erasures)
 
 void ssdv_dec_header(ssdv_packet_info_t *info, uint8_t *packet)
 {
+    info->type       = packet[1];
 	info->callsign  = (packet[2] << 24) | (packet[3] << 16) | (packet[4] << 8) | packet[5];
 	info->image_id   = packet[6];
 	info->packet_id  = (packet[7] << 8) | packet[8];

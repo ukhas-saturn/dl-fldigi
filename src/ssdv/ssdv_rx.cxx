@@ -412,6 +412,32 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 	
 	/* Read the header */
 	ssdv_dec_header(&pkt_info, b);
+
+	/* Display a message on the fldigi interface */
+	put_status("SSDV: Decoded image packet!", 10);
+
+	char msg[200], callsign[10];
+	snprintf(msg, 200, "Decoded image packet. Callsign: %s, Image ID: %02X, Resolution: %dx%d, Packet ID: %d",
+		ssdv_decode_callsign(callsign, pkt_info.callsign),
+		pkt_info.image_id,
+		pkt_info.width,
+		pkt_info.height,
+		pkt_info.packet_id);
+
+	if(bHAB)
+	{
+		habString->value(msg);
+		habString->color(FL_GREEN);
+		habString->damage(FL_DAMAGE_ALL);
+	}
+
+	ReceiveText->addstr("\n");
+	ReceiveText->addstr(msg, FTextBase::QSY);
+	ReceiveText->addstr("\n");
+
+
+    /* Only decode JPG type packets */
+    if (pkt_info.type != 0x66) { return; }
 	
 	/* Does this belong to the same image? */
 	if(pkt_info.callsign != image_callsign ||
@@ -478,29 +504,7 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 	
 	/* Done with the receive buffer */
 	clear_buffer();	
-	
-	/* Display a message on the fldigi interface */
-	put_status("SSDV: Decoded image packet!", 10);
-	
-	char msg[200], callsign[10];
-	snprintf(msg, 200, "Decoded image packet. Callsign: %s, Image ID: %02X, Resolution: %dx%d, Packet ID: %d",
-		ssdv_decode_callsign(callsign, pkt_info.callsign),
-		pkt_info.image_id,
-		pkt_info.width,
-		pkt_info.height,
-		pkt_info.packet_id);
-	
-	if(bHAB)
-	{
-		habString->value(msg);
-		habString->color(FL_GREEN);
-		habString->damage(FL_DAMAGE_ALL);
-	}
-	
-	ReceiveText->addstr("\n");
-	ReceiveText->addstr(msg, FTextBase::QSY);
-	ReceiveText->addstr("\n");
-	
+
 	/* Initialise the decoder */
 	ssdv_t dec;
 	ssdv_dec_init(&dec);
