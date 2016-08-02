@@ -24,6 +24,7 @@
 #define _RASTER_H
 
 #include <FL/Fl_Widget.H>
+#include "feld.h"
 
 class Raster : public Fl_Widget {
 public:
@@ -43,6 +44,7 @@ public:
 	Raster(int, int, int, int);
 	~Raster();
 	void	draw();
+	int		handle(int);
 	void	resize(int x, int y, int w, int h);
 	unsigned char *buffer() { return vidbuf;}
 	int		size() { return width * height;}

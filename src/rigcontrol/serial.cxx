@@ -214,12 +214,12 @@ void Cserial::SetPTT(bool b)
 void Cserial::ClosePort()
 {
 	if (fd < 0) return;
-	LOG_DEBUG("Serial port closed, fd = %d", fd);
 	if (restore_tio) {
 		ioctl(fd, TIOCMSET, &origstatus);
 		tcsetattr (fd, TCSANOW, &oldtio);
 	}
 	close(fd);
+	LOG_INFO("Serial port closed, fd = %d", fd);
 	fd = -1;
 	return;
 }
@@ -331,6 +331,7 @@ BOOL Cserial::OpenPort()
 		LOG_PERROR(win_error_string(errno).c_str());
 		return FALSE;
 	}
+	LOG_INFO("COM port %s opened, handle = %d", device.c_str(), (int)hComm);
 
 	FlushBuffer();
 
@@ -345,10 +346,15 @@ BOOL Cserial::OpenPort()
 ///////////////////////////////////////////////////////
 void Cserial::ClosePort()
 {
-	if (hComm) {
+	LOG_INFO("Closing COM port, handle = %d", (int)hComm);
+
+	if (hComm != INVALID_HANDLE_VALUE) {
 		if (restore_tio)
 			bPortReady = SetCommTimeouts (hComm, &CommTimeoutsSaved);
-		CloseHandle(hComm);
+		if (CloseHandle(hComm) == 0) {
+			errno = GetLastError();
+			LOG_PERROR(win_error_string(errno).c_str());
+		}
 		hComm = INVALID_HANDLE_VALUE;
 	}
 	return;
@@ -419,14 +425,7 @@ int Cserial::WriteBuffer(unsigned char *buff, int n)
 	if (WriteFile (hComm, buff, n, &nBytesWritten, NULL) == 0) {
 		errno = GetLastError();
 		LOG_PERROR(win_error_string(errno).c_str());
-		ClosePort();
-		OpenPort();
-		if (WriteFile (hComm, buff, n, &nBytesWritten, NULL) == 0) {
-			errno = GetLastError();
-			LOG_PERROR(win_error_string(errno).c_str());
-			ClosePort();
-			return 0;
-		}
+		return 0;
 	}
 
 	return nBytesWritten;

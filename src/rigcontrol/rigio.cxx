@@ -58,13 +58,10 @@ static pthread_t		rigCAT_thread;
 
 static bool			rigCAT_exit = false;
 static bool			rigCAT_open = false;
-static bool			rigCAT_bypass = false;
 
 static string		sRigWidth = "";
 static string		sRigMode = "";
 static long long	llFreq = 0;
-
-static bool nonCATrig = false;
 
 static void *rigCAT_loop(void *args);
 
@@ -89,11 +86,19 @@ bool sendCommand (string s, int retnbr, int waitval)
 			numread * (9 + progdefaults.RigCatStopbits) *
 			1000.0 / rigio.Baud() );
 
-	LOG_DEBUG("%s", str2hex(s.data(), s.length()));
+	if (xmlrig.debug)
+		LOG_INFO("%s",
+			xmlrig.ascii ? s.c_str() : str2hex(s.data(), s.length()));
+
+	if (xmlrig.noserial) {
+		memset(replybuff, 0, RXBUFFSIZE + 1);
+		numread = 0;
+		return true;
+	}
 
 	retval = rigio.WriteBuffer((unsigned char *)s.c_str(), numwrite);
 	if (retval <= 0)
-		LOG_VERBOSE("Write error %d", retval);
+		LOG_ERROR("Write error %d", retval);
 
 	if (retnbr == 0) return true;
 
@@ -115,7 +120,9 @@ bool sendCommand (string s, int retnbr, int waitval)
 		replybuff[numread] = retbuf[0];
 		numread++;
 	}
-	LOG_DEBUG("reply %s", str2hex(replybuff, numread));
+	if (xmlrig.debug)
+		LOG_INFO("reply %s",
+			xmlrig.ascii ? (const char *)(replybuff) : str2hex(replybuff, numread));
 	if (numread > retnbr) {
 		memmove(replybuff, replybuff + numread - retnbr, retnbr);
 		numread = retnbr;
@@ -319,27 +326,29 @@ long long fm_freqdata(DATA d, size_t p)
 
 long long rigCAT_getfreq(int retries, bool &failed, int waitval)
 {
+	const char symbol[] = "GETFREQ";
+	failed = false;
+	if (rigCAT_exit || xmlrig.noserial || !xmlrig.xmlok) {
+		failed = true;
+		return progStatus.noCATfreq;
+	}
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	string strCmd;
 	size_t p = 0, len1 = 0, len2 = 0, pData = 0;
 	long long f = 0;
 
-	failed = false;
-	if (nonCATrig) {
-		failed = true;
-		return progStatus.noCATfreq;
-	}
-
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "GETFREQ")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
 
 	if (itrCmd == commands.end()) {
 		failed = true;
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
 		return progStatus.noCATfreq; // get_freq command is not defined!
 	}
 
@@ -381,7 +390,8 @@ long long rigCAT_getfreq(int retries, bool &failed, int waitval)
 			}
 // send the command
 			if ( !sendCommand(strCmd, rTemp.size, waitval) ) {
-				LOG_VERBOSE("sendCommand failed");
+				if (xmlrig.debug)
+					LOG_INFO("sendCommand failed");
 				goto retry_get_freq;
 			}
 // check the pre data string
@@ -390,7 +400,7 @@ long long rigCAT_getfreq(int retries, bool &failed, int waitval)
 			if (len1) {
 				for (size_t i = 0; i < len1; i++) {
 					if ((char)rTemp.str1[i] != (char)replybuff[i]) {
-						LOG_VERBOSE("failed pre data string test @ %" PRIuSZ, i);
+						LOG_ERROR("failed pre data string test @ %" PRIuSZ, i);
 						goto retry_get_freq;
 					}
 				}
@@ -409,7 +419,7 @@ long long rigCAT_getfreq(int retries, bool &failed, int waitval)
 			if (len2) {
 				for (size_t i = 0; i < len2; i++)
 					if ((char)rTemp.str2[i] != (char)replybuff[p + i]) {
-						LOG_VERBOSE("failed post data string test @ %d", static_cast<int>(i));
+						LOG_ERROR("failed post data string test @ %d", static_cast<int>(i));
 						goto retry_get_freq;
 					}
 			}
@@ -422,37 +432,31 @@ retry_get_freq: ;
 		}
 	}
 	if (progdefaults.RigCatVSP == false)
-		LOG_VERBOSE("Retries failed");
+		LOG_ERROR("%s failed", symbol);
 	failed = true;
 	return 0;
 }
 
 void rigCAT_setfreq(long long f)
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return;
+	const char symbol[] = "SETFREQ";
+	if (rigCAT_exit || xmlrig.noserial || !xmlrig.xmlok) {
+		progStatus.noCATfreq = f;
 	}
+	if (rigCAT_exit || !xmlrig.xmlok) return;
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	string strCmd;
 
-	progStatus.noCATfreq = f;
-
-	if (nonCATrig) {
-		return;
-	}
-
-//	LOG_DEBUG("set frequency %lld", f);
-
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "SETFREQ")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
 	if (itrCmd == commands.end()) {
-		LOG_VERBOSE("SET_FREQ not defined");
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
 		return;
 	}
 
@@ -491,15 +495,18 @@ void rigCAT_setfreq(long long f)
 		}
 	}
 	if (progdefaults.RigCatVSP == false)
-		LOG_VERBOSE("Retries failed");
+		LOG_ERROR("%s failed", symbol);
 }
 
 string rigCAT_getmode()
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return "";
-	}
+	const char symbol[] = "GETMODE";
+
+	if (rigCAT_exit || xmlrig.noserial || !xmlrig.xmlok)
+		return progStatus.noCATmode;
+
+//	guard_lock ser_guard( &rigCAT_mutex );
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	list<MODE>::iterator mode;
@@ -507,17 +514,16 @@ string rigCAT_getmode()
 	string strCmd, mData;
 	size_t len;
 
-	if (nonCATrig)
-		return progStatus.noCATmode;
-
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "GETMODE")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
-	if (itrCmd == commands.end())
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
 		return progStatus.noCATmode;
+	}
 
 	modeCmd = *itrCmd;
 
@@ -557,7 +563,7 @@ string rigCAT_getmode()
 			if (len) {
 				for (size_t i = 0; i < len; i++)
 					if ((char)rTemp.str1[i] != (char)replybuff[i]) {
-						LOG_VERBOSE("failed pre data string test @ %" PRIuSZ, i);
+						LOG_ERROR("failed pre data string test @ %" PRIuSZ, i);
 						goto retry_get_mode;
 					}
 				p = len;
@@ -603,29 +609,27 @@ retry_get_mode: ;
 		}
 	}
 	if (progdefaults.RigCatVSP == false)
-		LOG_VERBOSE("Retries failed");
+		LOG_ERROR("%s failed", symbol);
 	return "";
 }
 
 void rigCAT_setmode(const string& md)
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return;
-	}
+	const char symbol[] = "SETMODE";
+
+
+	if (rigCAT_exit || xmlrig.noserial || !xmlrig.xmlok)
+		progStatus.noCATmode = md;
+
+	if (rigCAT_exit || !xmlrig.xmlok) return;
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	string strCmd;
 
-	progStatus.noCATmode = md;
-
-	if (nonCATrig) {
-		return;
-	}
-
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "SETMODE")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
@@ -680,45 +684,46 @@ void rigCAT_setmode(const string& md)
 		}
 	}
 	if (progdefaults.RigCatVSP == false)
-		LOG_VERBOSE("Retries failed");
+		LOG_ERROR("%s failed", symbol);
 }
 
 string rigCAT_getwidth()
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return "";
-	}
-	XMLIOS modeCmd;
+	const char symbol[] = "GETBW";
+
+	if (rigCAT_exit || xmlrig.noserial || !xmlrig.xmlok)
+		return progStatus.noCATwidth;
+
+	XMLIOS widthCmd;
 	list<XMLIOS>::iterator itrCmd;
 	list<BW>::iterator bw;
 	list<BW> *pbw;
 	string strCmd, mData;
 	size_t len = 0, p = 0, pData = 0;
 
-	if (nonCATrig)
-		return progStatus.noCATwidth;
-
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "GETBW")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
-	if (itrCmd == commands.end())
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
 		return "";
-	modeCmd = *itrCmd;
+	}
 
-	if ( modeCmd.str1.empty() == false)
-		strCmd.append(modeCmd.str1);
+	widthCmd = *itrCmd;
 
-	if (modeCmd.str2.empty() == false)
-		strCmd.append(modeCmd.str2);
+	if ( widthCmd.str1.empty() == false)
+		strCmd.append(widthCmd.str1);
 
-	if (!modeCmd.info.size()) return "";
+	if (widthCmd.str2.empty() == false)
+		strCmd.append(widthCmd.str2);
+
+	if (!widthCmd.info.size()) return "";
 
 	for (list<XMLIOS>::iterator preply = reply.begin(); preply != reply.end(); ++preply) {
-		if (preply->SYMBOL != modeCmd.info)
+		if (preply->SYMBOL != widthCmd.info)
 			continue;
 
 		XMLIOS  rTemp = *preply;
@@ -739,14 +744,18 @@ string rigCAT_getwidth()
 
 			p = 0;
 			pData = 0;
+
 // send the command
-			if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) goto retry_get_width;
+			if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) {
+				goto retry_get_width;
+			}
+
 // check the pre data string
 			len = rTemp.str1.size();
 			if (len) {
 				for (size_t i = 0; i < len; i++)
 					if ((char)rTemp.str1[i] != (char)replybuff[i]) {
-						LOG_VERBOSE("failed pre data string test @ %" PRIuSZ, i);
+						LOG_ERROR("failed pre data string test @ %" PRIuSZ, i);
 						goto retry_get_width;
 					}
 				p = pData = len;
@@ -759,13 +768,16 @@ string rigCAT_getwidth()
 			len = rTemp.str2.size();
 			if (len) {
 				for (size_t i = 0; i < len; i++)
-					if ((char)rTemp.str2[i] != (char)replybuff[p + i])
+					if ((char)rTemp.str2[i] != (char)replybuff[p + i]) {
+						LOG_ERROR("failed post data string test @ %" PRIuSZ, i);
 						goto retry_get_width;
+					}
 			}
 // convert the data field
 			mData = "";
 			for (int i = 0; i < rTemp.data.size; i++)
 				mData += (char)replybuff[pData + i];
+
 // new for FT100 and the ilk that use bit fields
 			if (rTemp.data.size == 1) {
 				unsigned char d = mData[0];
@@ -774,12 +786,13 @@ string rigCAT_getwidth()
 				d &= rTemp.data.andmask;
 				mData[0] = d;
 			}
-			if (lbws.empty() == false)
-				pbw = &lbws;
-			else if (lbwREPLY.empty() == false)
+			if (!lbwREPLY.empty())
 				pbw = &lbwREPLY;
+			else if (lbws.empty() == false)
+				pbw = &lbws;
 			else
 				goto retry_get_width;
+
 			bw = pbw->begin();
 			while (bw != pbw->end()) {
 				if ((*bw).BYTES == mData)
@@ -792,32 +805,31 @@ retry_get_width: ;
 		}
 	}
 	if (progdefaults.RigCatVSP == false)
-		LOG_VERBOSE("Retries failed");
+		LOG_ERROR("%s failed", symbol);
 	return "";
 }
 
 void rigCAT_setwidth(const string& w)
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return;
-	}
+	const char symbol[] = "SETBW";
+
+	if (rigCAT_exit || xmlrig.noserial || !xmlrig.xmlok)
+		progStatus.noCATwidth = w;
+
+	if (rigCAT_exit || !xmlrig.xmlok) return;
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	string strCmd;
 
-	if (nonCATrig) {
-		progStatus.noCATwidth = w;
-		return;
-	}
-
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "SETBW")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
 	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
 		progStatus.noCATwidth = w;
 		return;
 	}
@@ -871,31 +883,32 @@ void rigCAT_setwidth(const string& w)
 			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
-	LOG_VERBOSE("Retries failed");
+	LOG_ERROR("%s failed", symbol);
 }
 
 void rigCAT_pttON()
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return;
-	}
+	const char symbol[] = "PTTON";
+
+	if (rigCAT_exit) return;
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	string strCmd;
 
 	rigio.SetPTT(1); // always execute the h/w ptt if enabled
 
-	if (nonCATrig) return;
-
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "PTTON")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
-	if (itrCmd == commands.end())
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
 		return;
+	}
+
 	modeCmd = *itrCmd;
 
 	if ( modeCmd.str1.empty() == false)
@@ -927,30 +940,32 @@ void rigCAT_pttON()
 			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
-	LOG_VERBOSE("Retries failed");
+	LOG_VERBOSE("%s failed", symbol);
 }
 
 void rigCAT_pttOFF()
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return;
-	}
+	const char symbol[] = "PTTOFF";
+
+	if (rigCAT_exit) return;
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	string strCmd;
 
 	rigio.SetPTT(0); // always execute the h/w ptt if enabled
-	if (nonCATrig) return;
 
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
-		if ((*itrCmd).SYMBOL == "PTTOFF")
+		if ((*itrCmd).SYMBOL == symbol)
 			break;
 		++itrCmd;
 	}
-	if (itrCmd == commands.end())
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
 		return;
+	}
+
 	modeCmd = *itrCmd;
 
 	if ( modeCmd.str1.empty() == false)
@@ -982,21 +997,16 @@ void rigCAT_pttOFF()
 			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
 		}
 	}
-	LOG_VERBOSE("Retries failed");
+	LOG_ERROR("%s failed", symbol);
 }
 
 void rigCAT_sendINIT(const string& icmd, int multiplier)
 {
-	{
-		guard_lock ser_guard( &rigCAT_mutex );
-		if (rigCAT_exit) return;
-	}
+	if (rigCAT_exit) return;
+
 	XMLIOS modeCmd;
 	list<XMLIOS>::iterator itrCmd;
 	string strCmd;
-
-	if (nonCATrig)
-		return;
 
 	itrCmd = commands.begin();
 	while (itrCmd != commands.end()) {
@@ -1037,7 +1047,7 @@ void rigCAT_sendINIT(const string& icmd, int multiplier)
 			if (sendCommand(strCmd, 0, progdefaults.RigCatInitDelay)) return;
 		}
 	}
-	LOG_VERBOSE("Retries failed");
+	LOG_ERROR("INIT failed");
 }
 
 void rigCAT_defaults()
@@ -1054,6 +1064,7 @@ void rigCAT_defaults()
 	cntRigCatTimeout->value(xmlrig.timeout);
 	cntRigCatWait->value(xmlrig.write_delay);
 	cntRigCatInitDelay->value(xmlrig.init_delay);
+//	cntRigCatWaitForDevice->value(xmlrig.wait_for_device);
 	btnRigCatEcho->value(xmlrig.echo);
 	btnRigCatCMDptt->value(xmlrig.cmdptt);
 	chkRigCatVSP->value(xmlrig.vsp);
@@ -1074,6 +1085,7 @@ void rigCAT_restore_defaults()
 	cntRigCatTimeout->value(progdefaults.RigCatTimeout);
 	cntRigCatWait->value(progdefaults.RigCatWait);
 	cntRigCatInitDelay->value(progdefaults.RigCatInitDelay);
+//	cntRigCatWaitForDevice->value(progdefaults.RicCatWaitForDevice);
 	btnRigCatEcho->value(progdefaults.RigCatECHO);
 	btnRigCatCMDptt->value(progdefaults.RigCatCMDptt);
 	chkRigCatVSP->value(progdefaults.RigCatVSP);
@@ -1103,7 +1115,7 @@ void rigCAT_init_defaults()
 	progdefaults.RigCatVSP = chkRigCatVSP->value();
 }
 
-bool rigCAT_init(bool useXML)
+bool rigCAT_init()
 {
 
 	if (rigCAT_open == true) {
@@ -1114,19 +1126,18 @@ bool rigCAT_init(bool useXML)
 	sRigMode = "";
 	sRigWidth = "";
 
-	if (useXML == true) {
-		rigCAT_init_defaults();
-		rigio.Device(progdefaults.XmlRigDevice);
-		rigio.Baud(progdefaults.BaudRate(progdefaults.XmlRigBaudrate));
-		rigio.RTS(progdefaults.RigCatRTSplus);
-		rigio.DTR(progdefaults.RigCatDTRplus);
-		rigio.RTSptt(progdefaults.RigCatRTSptt);
-		rigio.DTRptt(progdefaults.RigCatDTRptt);
-		rigio.RestoreTIO(progdefaults.RigCatRestoreTIO);
-		rigio.RTSCTS(progdefaults.RigCatRTSCTSflow);
-		rigio.Stopbits(progdefaults.RigCatStopbits);
+	rigCAT_init_defaults();
+	rigio.Device(progdefaults.XmlRigDevice);
+	rigio.Baud(progdefaults.BaudRate(progdefaults.XmlRigBaudrate));
+	rigio.RTS(progdefaults.RigCatRTSplus);
+	rigio.DTR(progdefaults.RigCatDTRplus);
+	rigio.RTSptt(progdefaults.RigCatRTSptt);
+	rigio.DTRptt(progdefaults.RigCatDTRptt);
+	rigio.RestoreTIO(progdefaults.RigCatRestoreTIO);
+	rigio.RTSCTS(progdefaults.RigCatRTSCTSflow);
+	rigio.Stopbits(progdefaults.RigCatStopbits);
 
-		LOG_VERBOSE("\n\
+	LOG_INFO("\n\
 Serial port parameters:\n\
 device	 : %s\n\
 baudrate   : %d\n\
@@ -1153,64 +1164,57 @@ echo	   : %c\n",
 			(rigio.RTSCTS() ? 'T' : 'F'),
 			progdefaults.RigCatECHO ? 'T' : 'F');
 
+	if (xmlrig.noserial == false && xmlrig.xmlok) {
 		if (rigio.OpenPort() == false) {
-			LOG_VERBOSE("Cannot open serial port %s", rigio.Device().c_str());
-			nonCATrig = true;
-			init_NoRig_RigDialog();
-			return false;
+			LOG_ERROR("Cannot open serial port %s", rigio.Device().c_str());
+			xmlrig.xmlok = true;
 		}
-		sRigMode = "";
-		sRigWidth = "";
+	}
 
-		nonCATrig = false;
-		rigCAT_sendINIT("INIT", progdefaults.RigCatInitDelay);
+	sRigMode = "";
+	sRigWidth = "";
 
-// must be able to get frequency 3 times in sequence or serial port might
-// be shared with another application (flrig)
-		bool failed = false;
-		for (int i = 1; i <= 5; i++) {
-			rigCAT_getfreq(1, failed, progdefaults.RigCatInitDelay);
-			if (failed) break;
-			LOG_INFO("Passed serial port test # %d", i);
-//			MilliSleep(50);
+	if (xmlrig.wait_for_device) {
+		int delay = xmlrig.wait_for_device / 10;
+		while (delay) {
+			MilliSleep(10);
+			if (delay % 10) Fl::awake();
+			delay--;
 		}
+	}
+
+	rigCAT_sendINIT("INIT", progdefaults.RigCatInitDelay);
+	bool failed = false;
+
+	if (xmlrig.noserial)
+		rigCAT_getfreq(1, failed, 0);
+	else if (xmlrig.xmlok) {
+		rigCAT_getfreq(3, failed, progdefaults.RigCatInitDelay);
 
 		if (failed) {
-			LOG_INFO("Failed serial port test");
-			rigio.ClosePort();
-			nonCATrig = true;
-			init_NoRig_RigDialog();
-			return false;
-		} else {
-			nonCATrig = false;
-			init_Xml_RigDialog();
-		}
-	} else { // rigcat thread just being used for the human interface
-		nonCATrig = true;
-		init_NoRig_RigDialog();
-		llFreq = 0;
-		rigCAT_bypass = false;
-
-		if (pthread_create(&rigCAT_thread, NULL, rigCAT_loop, NULL) < 0) {
-			LOG_ERROR("%s", "pthread_create failed");
-			rigio.ClosePort();
-			return false;
-		}
-
-		rigCAT_open = true;
-		return true;
+			LOG_ERROR("*****************Failed to read xcvr frequency");
+			if (xmlrig.noserial == false)
+				rigio.ClosePort();
+			xmlrig.xmlok = false;
+		} else
+			LOG_INFO("Passed serial port test");
 	}
 
 	llFreq = 0;
-	rigCAT_bypass = false;
 
 	if (pthread_create(&rigCAT_thread, NULL, rigCAT_loop, NULL) < 0) {
 		LOG_ERROR("%s", "pthread_create failed");
-		rigio.ClosePort();
+		if (xmlrig.xmlok && !xmlrig.noserial)
+			rigio.ClosePort();
+		xmlrig.xmlok = false;
 		return false;
 	}
 
+	LOG_INFO("Created rigCAT thread");
+
 	rigCAT_open = true;
+
+	init_Xml_RigDialog();
 
 	return true;
 }
@@ -1235,7 +1239,6 @@ void rigCAT_close(void)
 
 	rigCAT_exit = false;
 	rigCAT_open = false;
-	rigCAT_bypass = false;
 	wf->USB(true);
 
 }
@@ -1251,10 +1254,8 @@ void rigCAT_set_ptt(int ptt)
 		return;
 	if (ptt) {
 		rigCAT_pttON();
-		rigCAT_bypass = true;
 	} else{
 		rigCAT_pttOFF();
-		rigCAT_bypass = false;
 	}
 }
 
@@ -1271,13 +1272,12 @@ void rigCAT_set_qsy(long long f)
 }
 #endif
 
-bool ModeIsLSB(const string& s)
+bool ModeIsLSB(string s)
 {
-	if (nonCATrig) {
-		if (s == "LSB" || s == "PKTLSB" || s == "CW" || s == "RTTY")
-			return true;
-		return false;
-	}
+	if (connected_to_flrig) return !xmlrpc_USB();
+#if USE_HAMLIB
+	if (hamlib_active()) return !hamlib_USB();
+#endif
 	list<string>::iterator pM = LSBmodes.begin();
 	while (pM != LSBmodes.end() ) {
 		if (*pM == s)
@@ -1285,6 +1285,997 @@ bool ModeIsLSB(const string& s)
 		pM++;
 	}
 	return false;
+}
+
+int smeter_data(DATA d, size_t p)
+{
+	int val = 0;
+
+	if (d.dtype == "BCD") {
+		if (d.reverse == true)
+			val = (int)(fm_bcd_be(p, d.size));
+		else
+			val = (int)(fm_bcd(p, d.size));
+	} else if (d.dtype == "BINARY") {
+		if (d.reverse == true)
+			val = (int)(fm_binary_be(p, d.size));
+		else
+			val = (int)(fm_binary(p, d.size));
+	} else if (d.dtype == "DECIMAL") {
+		if (d.reverse == true)
+			val = (int)(fm_decimal_be(p, d.size));
+		else
+			val = (int)(fm_decimal(p, d.size));
+	}
+
+	size_t n;
+	int sm1, sm2, val1, val2;
+	for (n = 0; n < xmlrig.smeter.size() - 1; n++) {
+		if ((val >= xmlrig.smeter[n].val) && (val < xmlrig.smeter[n+1].val)) break;
+	}
+	if (n == xmlrig.smeter.size() - 1) return 0;
+	sm1 = xmlrig.smeter[n].mtr;
+	sm2 = xmlrig.smeter[n+1].mtr;
+	val1 = xmlrig.smeter[n].val;
+	val2 = xmlrig.smeter[n+1].val;
+
+	if (val1 == val2) return 0;
+	int mtr = sm1 + (val - val1) * (sm2 - sm1) / (val2 - val1);
+
+	return mtr;
+}
+
+static void rigcat_set_smeter(void *data)
+{
+	if (pwrlevel_grp->visible()) return;
+	if (!smeter && !pwrmeter) return;
+
+	if (smeter && progStatus.meters) {
+		if (!smeter->visible()) {
+			pwrmeter->hide();
+			smeter->show();
+		}
+		int val = reinterpret_cast<long>(data);
+		smeter->value(val);
+	}
+}
+
+void rigCAT_get_smeter()
+{
+	const char symbol[] = "GET_SMETER";
+
+	if (rigCAT_exit || xmlrig.noserial) return;
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+	size_t p = 0, len1 = 0, len2 = 0, pData = 0;
+	long mtr = 0;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+	if ( !modeCmd.str1.empty() ) strCmd.append(modeCmd.str1);
+	if ( !modeCmd.str2.empty() ) strCmd.append(modeCmd.str2);
+	if ( !modeCmd.info.size() ) return;
+
+	list<XMLIOS>::iterator preply;
+
+	for (preply = reply.begin(); preply != reply.end(); ++preply) {
+		if (preply->SYMBOL == modeCmd.info)
+			break;
+	}
+	if (preply == reply.end()) return;
+
+	XMLIOS  rTemp = *preply;
+	len1 = rTemp.str1.size();
+	len2 = rTemp.str2.size();
+
+	int timeout = progdefaults.RigCatTimeout;
+	while (timeout > 50) {
+		MilliSleep(50);
+		Fl::awake();
+		timeout -= 50;
+	}
+	if (timeout) {
+		MilliSleep(timeout);
+		Fl::awake();
+	}
+
+// send the command
+	if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) {
+		LOG_ERROR("sendCommand failed");
+		return;
+	}
+
+// check the pre data string
+	p = 0;
+	pData = 0;
+	if (len1) {
+		for (size_t i = 0; i < len1; i++) {
+			if ((char)rTemp.str1[i] != (char)replybuff[i]) {
+					LOG_ERROR("failed pre data string test @ %" PRIuSZ, i);
+					return;
+			}
+		}
+		p = len1;
+	}
+	if (rTemp.fill1) p += rTemp.fill1;
+	pData = p;
+	if (rTemp.data.dtype == "BCD") {
+		p += rTemp.data.size / 2;
+		if (rTemp.data.size & 1) p++;
+	} else
+		p += rTemp.data.size;
+// check the post data string
+	if (rTemp.fill2) p += rTemp.fill2;
+	if (len2) {
+		for (size_t i = 0; i < len2; i++)
+			if ((char)rTemp.str2[i] != (char)replybuff[p + i]) {
+				LOG_ERROR("failed post data string test @ %d", static_cast<int>(i));
+				return;
+			}
+	}
+// convert the data field
+	mtr = smeter_data(rTemp.data, pData);
+	if (xmlrig.debug) LOG_INFO("Converted %s value to %d", symbol, (int)mtr);
+
+	REQ(rigcat_set_smeter, reinterpret_cast<void *>(mtr));
+}
+
+int pmeter_data(DATA d, size_t p)
+{
+	int val = 0;
+
+	if (d.dtype == "BCD") {
+		if (d.reverse == true)
+			val = (int)(fm_bcd_be(p, d.size));
+		else
+			val = (int)(fm_bcd(p, d.size));
+	} else if (d.dtype == "BINARY") {
+		if (d.reverse == true)
+			val = (int)(fm_binary_be(p, d.size));
+		else
+			val = (int)(fm_binary(p, d.size));
+	} else if (d.dtype == "DECIMAL") {
+		if (d.reverse == true)
+			val = (int)(fm_decimal_be(p, d.size));
+		else
+			val = (int)(fm_decimal(p, d.size));
+	}
+
+	size_t n;
+	int pm1, pm2, val1, val2;
+	for (n = 0; n < xmlrig.pmeter.size() - 1; n++) {
+		if ((val > xmlrig.pmeter[n].val) && (val <= xmlrig.pmeter[n+1].val)) break;
+	}
+	if (n == xmlrig.pmeter.size() - 1) return 0;
+	pm1 = xmlrig.pmeter[n].mtr;
+	pm2 = xmlrig.pmeter[n+1].mtr;
+	val1 = xmlrig.pmeter[n].val;
+	val2 = xmlrig.pmeter[n+1].val;
+
+	if (val1 == val2) return 0;
+	int mtr = pm1 + (val - val1) * (pm2 - pm1) / (val2 - val1);
+
+	return mtr;
+}
+
+static void rigcat_set_pmeter(void *data)
+{
+	if (pwrlevel_grp->visible()) return;
+	if (!smeter && !pwrmeter) return;
+
+	if (pwrmeter && progStatus.meters) {
+		if (!pwrmeter->visible()) {
+			smeter->hide();
+			pwrmeter->show();
+		}
+		int val = reinterpret_cast<long>(data);
+		pwrmeter->value(val);
+	}
+}
+
+void rigCAT_get_pwrmeter()
+{
+	const char symbol[] = "GET_PWRMETER";
+
+	if (rigCAT_exit || xmlrig.noserial) return;
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+	size_t p = 0, len1 = 0, len2 = 0, pData = 0;
+	long mtr = 0;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+	if ( !modeCmd.str1.empty() ) strCmd.append(modeCmd.str1);
+	if ( !modeCmd.str2.empty() ) strCmd.append(modeCmd.str2);
+	if ( !modeCmd.info.size() ) return;
+
+	list<XMLIOS>::iterator preply;
+
+	for (preply = reply.begin(); preply != reply.end(); ++preply) {
+		if (preply->SYMBOL == modeCmd.info)
+			break;
+	}
+	if (preply == reply.end()) return;
+
+	XMLIOS  rTemp = *preply;
+	len1 = rTemp.str1.size();
+	len2 = rTemp.str2.size();
+
+	int timeout = progdefaults.RigCatTimeout;
+	while (timeout > 50) {
+		MilliSleep(50);
+		Fl::awake();
+		timeout -= 50;
+	}
+	if (timeout) {
+		MilliSleep(timeout);
+		Fl::awake();
+	}
+
+// send the command
+	if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) {
+		LOG_ERROR("sendCommand failed");
+		return;
+	}
+
+// check the pre data string
+	p = 0;
+	pData = 0;
+	if (len1) {
+		for (size_t i = 0; i < len1; i++) {
+			if ((char)rTemp.str1[i] != (char)replybuff[i]) {
+					LOG_ERROR("failed pre data string test @ %" PRIuSZ, i);
+					return;
+			}
+		}
+		p = len1;
+	}
+	if (rTemp.fill1) p += rTemp.fill1;
+	pData = p;
+	if (rTemp.data.dtype == "BCD") {
+		p += rTemp.data.size / 2;
+		if (rTemp.data.size & 1) p++;
+	} else
+		p += rTemp.data.size;
+// check the post data string
+	if (rTemp.fill2) p += rTemp.fill2;
+	if (len2) {
+		for (size_t i = 0; i < len2; i++)
+			if ((char)rTemp.str2[i] != (char)replybuff[p + i]) {
+				LOG_ERROR("failed post data string test @ %d", static_cast<int>(i));
+				return;
+			}
+	}
+// convert the data field
+	mtr = pmeter_data(rTemp.data, pData);
+	if (xmlrig.debug) LOG_INFO("Converted %s to %d", symbol, (int)mtr);
+
+	REQ(rigcat_set_pmeter, reinterpret_cast<void *>(mtr));
+
+}
+
+static void rigcat_notch(void *data)
+{
+	int val = reinterpret_cast<long>(data);
+	notch_frequency = val;
+}
+
+int notch_data(DATA d, size_t p)
+{
+	int val = 0;
+
+	if (d.dtype == "BCD") {
+		if (d.reverse == true)
+			val = (int)(fm_bcd_be(p, d.size));
+		else
+			val = (int)(fm_bcd(p, d.size));
+	} else if (d.dtype == "BINARY") {
+		if (d.reverse == true)
+			val = (int)(fm_binary_be(p, d.size));
+		else
+			val = (int)(fm_binary(p, d.size));
+	} else if (d.dtype == "DECIMAL") {
+		if (d.reverse == true)
+			val = (int)(fm_decimal_be(p, d.size));
+		else
+			val = (int)(fm_decimal(p, d.size));
+	}
+
+	size_t n;
+	int ntch1, ntch2, val1, val2;
+	for (n = 0; n < xmlrig.notch.size() - 1; n++) {
+		if ((val > xmlrig.notch[n].val) && (val <= xmlrig.notch[n+1].val))
+			break;
+	}
+	if (n == xmlrig.notch.size() - 1)
+		return 0;
+
+	val1 = xmlrig.notch[n].val;
+	val2 = xmlrig.notch[n+1].val;
+	if (val1 == val2)
+		return 0;
+
+	ntch1 = xmlrig.notch[n].mtr;
+	ntch2 = xmlrig.notch[n+1].mtr;
+
+	return ntch1 + (val - val1) * (ntch2 - ntch1) / (val2 - val1);
+}
+
+int notch_val(int freq)
+{
+	size_t n;
+	int val1, val2, freq1, freq2;
+	for (n = 0; n < xmlrig.notch.size() - 1; n++) {
+		if ((freq > xmlrig.notch[n].mtr) && (freq <= xmlrig.notch[n+1].mtr))
+			break;
+	}
+	if (n == xmlrig.notch.size() - 1)
+		return 0;
+
+	freq1 = xmlrig.notch[n].mtr;
+	freq2 = xmlrig.notch[n+1].mtr;
+
+	if (freq1 == freq2)
+		return 0;
+
+	val1 = xmlrig.notch[n].val;
+	val2 = xmlrig.notch[n+1].val;
+
+	return val1 + (freq - freq1) * (val2 - val1) / (freq2 - freq1);
+
+}
+
+bool rigCAT_notchON()
+{
+	const char symbol[] = "GET_NOTCH_ON";
+
+	if (rigCAT_exit) return 0;
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+	size_t len1 = 0;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return 0;
+	}
+
+	modeCmd = *itrCmd;
+	if ( !modeCmd.str1.empty() ) strCmd.append(modeCmd.str1);
+	if ( !modeCmd.str2.empty() ) strCmd.append(modeCmd.str2);
+	if ( !modeCmd.info.size() ) return 0;
+
+	list<XMLIOS>::iterator preply;
+
+	for (preply = reply.begin(); preply != reply.end(); ++preply) {
+		if (preply->SYMBOL == modeCmd.info)
+			break;
+	}
+	if (preply == reply.end()) return 0;
+
+	XMLIOS  rTemp = *preply;
+	len1 = rTemp.str1.size();
+
+	int timeout = progdefaults.RigCatTimeout;
+	while (timeout > 50) {
+		MilliSleep(50);
+		Fl::awake();
+		timeout -= 50;
+	}
+	if (timeout) {
+		MilliSleep(timeout);
+		Fl::awake();
+	}
+
+// send the command
+	if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) {
+		LOG_ERROR("sendCommand failed");
+		return 0;
+	}
+
+	bool is_on = true;
+	if (len1) {
+		for (size_t i = 0; i < len1; i++) {
+			if ((char)rTemp.str1[i] != (char)replybuff[i]) {
+				is_on = false;
+				break;
+			}
+		}
+	} else
+		is_on = false;
+
+	if (xmlrig.debug) LOG_INFO("%s is %s", symbol, is_on ? "ON" : "OFF");
+	return is_on;
+}
+
+void rigCAT_get_notch()
+{
+	const char symbol[] = "GET_NOTCH";
+
+	if (rigCAT_exit) return;
+
+	if (!rigCAT_notchON()) {
+		REQ(rigcat_notch, reinterpret_cast<void *>(0));
+		return;
+	}
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+	size_t p = 0, len1 = 0, len2 = 0, pData = 0;
+	long ntch = 0;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+	if ( !modeCmd.str1.empty() ) strCmd.append(modeCmd.str1);
+	if ( !modeCmd.str2.empty() ) strCmd.append(modeCmd.str2);
+	if ( !modeCmd.info.size() ) return;
+
+	list<XMLIOS>::iterator preply;
+
+	for (preply = reply.begin(); preply != reply.end(); ++preply) {
+		if (preply->SYMBOL == modeCmd.info)
+			break;
+	}
+	if (preply == reply.end()) return;
+
+	XMLIOS  rTemp = *preply;
+	len1 = rTemp.str1.size();
+	len2 = rTemp.str2.size();
+
+	int timeout = progdefaults.RigCatTimeout;
+	while (timeout > 50) {
+		MilliSleep(50);
+		Fl::awake();
+		timeout -= 50;
+	}
+	if (timeout) {
+		MilliSleep(timeout);
+		Fl::awake();
+	}
+
+// send the command
+	if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) {
+		LOG_ERROR("sendCommand failed");
+		return;
+	}
+
+// check the pre data string
+	p = 0;
+	pData = 0;
+	if (len1) {
+		for (size_t i = 0; i < len1; i++) {
+			if ((char)rTemp.str1[i] != (char)replybuff[i]) {
+					LOG_ERROR("failed pre data string test @ %" PRIuSZ, i);
+					return;
+			}
+		}
+		p = len1;
+	}
+	if (rTemp.fill1) p += rTemp.fill1;
+	pData = p;
+	if (rTemp.data.dtype == "BCD") {
+		p += rTemp.data.size / 2;
+		if (rTemp.data.size & 1) p++;
+	} else
+		p += rTemp.data.size;
+// check the post data string
+	if (rTemp.fill2) p += rTemp.fill2;
+	if (len2) {
+		for (size_t i = 0; i < len2; i++)
+			if ((char)rTemp.str2[i] != (char)replybuff[p + i]) {
+				LOG_ERROR("failed post data string test @ %d", static_cast<int>(i));
+				return;
+			}
+	}
+// convert the data field
+	ntch = notch_data(rTemp.data, pData);
+	if (xmlrig.debug) LOG_INFO("%s converted to %d", symbol, (int)ntch);
+
+	REQ(rigcat_notch, reinterpret_cast<void *>(ntch));
+
+}
+
+void rigCAT_notch_ON()
+{
+	const char symbol[] = "SET_NOTCH_ON";
+
+	if (rigCAT_exit) return;
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+
+	if ( modeCmd.str1.empty() == false)
+		strCmd.append(modeCmd.str1);
+	if (modeCmd.str2.empty() == false)
+		strCmd.append(modeCmd.str2);
+
+	if (modeCmd.ok.size()) {
+		list<XMLIOS>::iterator preply = reply.begin();
+		while (preply != reply.end()) {
+			if (preply->SYMBOL == modeCmd.ok) {
+				XMLIOS  rTemp = *preply;
+// send the command
+				for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+					MilliSleep(50);
+					guard_lock ser_guard( &rigCAT_mutex );
+					if (rigCAT_exit) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
+				}
+				return;
+			}
+			preply++;
+		}
+	} else {
+		for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+			MilliSleep(50);
+			guard_lock ser_guard( &rigCAT_mutex );
+			if (rigCAT_exit) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
+		}
+	}
+	LOG_ERROR("%s failed", symbol);
+}
+
+void rigCAT_notch_OFF()
+{
+	const char symbol[] = "SET_NOTCH_OFF";
+
+	if (rigCAT_exit) return;
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+
+	if ( modeCmd.str1.empty() == false)
+		strCmd.append(modeCmd.str1);
+	if (modeCmd.str2.empty() == false)
+		strCmd.append(modeCmd.str2);
+
+	if (modeCmd.ok.size()) {
+		list<XMLIOS>::iterator preply = reply.begin();
+		while (preply != reply.end()) {
+			if (preply->SYMBOL == modeCmd.ok) {
+				XMLIOS  rTemp = *preply;
+// send the command
+				for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+					MilliSleep(50);
+					guard_lock ser_guard( &rigCAT_mutex );
+					if (rigCAT_exit) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
+				}
+				return;
+			}
+			preply++;
+		}
+	} else {
+		for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+			MilliSleep(50);
+			guard_lock ser_guard( &rigCAT_mutex );
+			if (rigCAT_exit) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
+		}
+	}
+	LOG_ERROR("%s failed", symbol);
+}
+
+void rigCAT_set_notch(int freq)
+{
+	const char symbol[] = "SET_NOTCH_VAL";
+
+	if (rigCAT_exit) return;
+
+	if (!freq) {
+		rigCAT_notch_OFF();
+		return;
+	}
+	rigCAT_notch_ON();
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+
+	if ( modeCmd.str1.empty() == false)
+		strCmd.append(modeCmd.str1);
+
+	string strval = "";
+	long long int val = notch_val(freq);
+
+	if (modeCmd.data.size != 0) {
+		if (modeCmd.data.dtype == "BCD") {
+			if (modeCmd.data.reverse == true)
+				strval = to_bcd_be(val, modeCmd.data.size);
+		else
+			strval = to_bcd(val, modeCmd.data.size);
+		} else if (modeCmd.data.dtype == "BINARY") {
+			if (modeCmd.data.reverse == true)
+				strval = to_binary_be(val, modeCmd.data.size);
+			else
+				strval = to_binary(val, modeCmd.data.size);
+		} else if (modeCmd.data.dtype == "DECIMAL") {
+			if (modeCmd.data.reverse == true)
+				strval = to_decimal_be(val, modeCmd.data.size);
+			else
+				strval = to_decimal(val, modeCmd.data.size);
+		}
+	}
+	strCmd.append(strval);
+
+	if (modeCmd.str2.empty() == false)
+		strCmd.append(modeCmd.str2);
+
+	if (modeCmd.ok.size()) {
+		list<XMLIOS>::iterator preply = reply.begin();
+		while (preply != reply.end()) {
+			if (preply->SYMBOL == modeCmd.ok) {
+				XMLIOS  rTemp = *preply;
+// send the command
+				for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+					MilliSleep(50);
+					guard_lock ser_guard( &rigCAT_mutex );
+					if (rigCAT_exit) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) return;
+				}
+				return;
+			}
+			preply++;
+		}
+	} else {
+		for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+			MilliSleep(50);
+			guard_lock ser_guard( &rigCAT_mutex );
+			if (rigCAT_exit) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) return;
+		}
+	}
+	if (progdefaults.RigCatVSP == false)
+		LOG_ERROR("%s failed", symbol);
+}
+
+int pwrlevel_data(DATA d, size_t p)
+{
+	int val = 0;
+
+	if (d.dtype == "BCD") {
+		if (d.reverse == true)
+			val = (int)(fm_bcd_be(p, d.size));
+		else
+			val = (int)(fm_bcd(p, d.size));
+	} else if (d.dtype == "BINARY") {
+		if (d.reverse == true)
+			val = (int)(fm_binary_be(p, d.size));
+		else
+			val = (int)(fm_binary(p, d.size));
+	} else if (d.dtype == "DECIMAL") {
+		if (d.reverse == true)
+			val = (int)(fm_decimal_be(p, d.size));
+		else
+			val = (int)(fm_decimal(p, d.size));
+	}
+
+	size_t n;
+	int pwr1, pwr2, val1, val2;
+	for (n = 0; n < xmlrig.pwrlevel.size() - 1; n++) {
+		if ((val > xmlrig.pwrlevel[n].val) && (val <= xmlrig.pwrlevel[n+1].val))
+			break;
+	}
+	if (n == xmlrig.pwrlevel.size() - 1)
+		return 0;
+
+	val1 = xmlrig.pwrlevel[n].val;
+	val2 = xmlrig.pwrlevel[n+1].val;
+	if (val1 == val2)
+		return 0;
+
+	pwr1 = xmlrig.pwrlevel[n].mtr;
+	pwr2 = xmlrig.pwrlevel[n+1].mtr;
+
+	return pwr1 + (val - val1) * (pwr2 - pwr1) / (val2 - val1);
+}
+
+int pwrlevel_val(int pwr)
+{
+	size_t n;
+	int val1, val2, pwr1, pwr2;
+	for (n = 0; n < xmlrig.pwrlevel.size() - 1; n++) {
+		if ((pwr >= xmlrig.pwrlevel[n].mtr) && (pwr <= xmlrig.pwrlevel[n+1].mtr))
+			break;
+	}
+	if (n == xmlrig.pwrlevel.size() - 1)
+		return 0;
+
+	pwr1 = xmlrig.pwrlevel[n].mtr;
+	pwr2 = xmlrig.pwrlevel[n+1].mtr;
+
+	if (pwr1 == pwr2)
+		return 0;
+
+	val1 = xmlrig.pwrlevel[n].val;
+	val2 = xmlrig.pwrlevel[n+1].val;
+
+	return val1 + (pwr - pwr1) * (val2 - val1) / (pwr2 - pwr1);
+
+}
+
+// called by rigio thread
+// must use REQ(...) to set the power level control
+
+static void rigCAT_update_pwrlevel(void *v)
+{
+	long pwr = reinterpret_cast<long>(v);
+	char szpwr[10];
+	snprintf(szpwr, sizeof(szpwr), "%ld", pwr);
+	progdefaults.mytxpower = szpwr;
+
+	inpMyPower->value(szpwr);
+	pwr_level->value(pwr);
+
+	if (xmlrig.debug) LOG_INFO("Read power level %s", szpwr);
+}
+
+void rigCAT_get_pwrlevel()
+{
+	const char symbol[] = "GET_PWRLEVEL";
+
+	if (rigCAT_exit || xmlrig.noserial || !xmlrig.xmlok) return;
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+	size_t p = 0, len1 = 0, len2 = 0, pData = 0;
+	long pwr = 0;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+	if ( !modeCmd.str1.empty() ) strCmd.append(modeCmd.str1);
+	if ( !modeCmd.str2.empty() ) strCmd.append(modeCmd.str2);
+	if ( !modeCmd.info.size() ) return;
+
+	list<XMLIOS>::iterator preply;
+
+	for (preply = reply.begin(); preply != reply.end(); ++preply) {
+		if (preply->SYMBOL == modeCmd.info)
+			break;
+	}
+	if (preply == reply.end()) return;
+
+	XMLIOS  rTemp = *preply;
+	len1 = rTemp.str1.size();
+	len2 = rTemp.str2.size();
+
+	int timeout = progdefaults.RigCatTimeout;
+	while (timeout > 50) {
+		MilliSleep(50);
+		Fl::awake();
+		timeout -= 50;
+	}
+	if (timeout) {
+		MilliSleep(timeout);
+		Fl::awake();
+	}
+
+// send the command
+	{
+		guard_lock ser_guard( &rigCAT_mutex );
+		if ( !sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait) ) {
+			LOG_ERROR("sendCommand failed");
+			return;
+		}
+	}
+// check the pre data string
+	p = 0;
+	pData = 0;
+	if (len1) {
+		for (size_t i = 0; i < len1; i++) {
+			if ((char)rTemp.str1[i] != (char)replybuff[i]) {
+					LOG_ERROR("failed pre data string test @ %" PRIuSZ, i);
+					return;
+			}
+		}
+		p = len1;
+	}
+	if (rTemp.fill1) p += rTemp.fill1;
+	pData = p;
+	if (rTemp.data.dtype == "BCD") {
+		p += rTemp.data.size / 2;
+		if (rTemp.data.size & 1) p++;
+	} else
+		p += rTemp.data.size;
+// check the post data string
+	if (rTemp.fill2) p += rTemp.fill2;
+	if (len2) {
+		for (size_t i = 0; i < len2; i++)
+			if ((char)rTemp.str2[i] != (char)replybuff[p + i]) {
+				LOG_ERROR("failed post data string test @ %d", static_cast<int>(i));
+				return;
+			}
+	}
+// convert the data field
+	pwr = pwrlevel_data(rTemp.data, pData);
+
+	REQ(rigCAT_update_pwrlevel, (void *)pwr);
+}
+
+void rigCAT_set_pwrlevel(int pwr)
+{
+	const char symbol[] = "SET_PWRLEVEL";
+
+	if (rigCAT_exit || !xmlrig.use_pwrlevel) return;
+
+	XMLIOS modeCmd;
+	list<XMLIOS>::iterator itrCmd;
+	string strCmd;
+
+	itrCmd = commands.begin();
+	while (itrCmd != commands.end()) {
+		if ((*itrCmd).SYMBOL == symbol)
+			break;
+		++itrCmd;
+	}
+	if (itrCmd == commands.end()) {
+		if (xmlrig.debug) LOG_INFO("%s not defined", symbol);
+		return;
+	}
+
+	modeCmd = *itrCmd;
+
+	if ( modeCmd.str1.empty() == false)
+		strCmd.append(modeCmd.str1);
+
+	string strval = "";
+	int val = pwrlevel_val(pwr);
+
+	if (modeCmd.data.size != 0) {
+		if (modeCmd.data.dtype == "BCD") {
+			if (modeCmd.data.reverse == true)
+				strval = to_bcd_be(val, modeCmd.data.size);
+		else
+			strval = to_bcd(val, modeCmd.data.size);
+		} else if (modeCmd.data.dtype == "BINARY") {
+			if (modeCmd.data.reverse == true)
+				strval = to_binary_be(val, modeCmd.data.size);
+			else
+				strval = to_binary(val, modeCmd.data.size);
+		} else if (modeCmd.data.dtype == "DECIMAL") {
+			if (modeCmd.data.reverse == true)
+				strval = to_decimal_be(val, modeCmd.data.size);
+			else
+				strval = to_decimal(val, modeCmd.data.size);
+		}
+	}
+	strCmd.append(strval);
+
+	if (modeCmd.str2.empty() == false)
+		strCmd.append(modeCmd.str2);
+
+	if (modeCmd.ok.size()) {
+		list<XMLIOS>::iterator preply = reply.begin();
+		while (preply != reply.end()) {
+			if (preply->SYMBOL == modeCmd.ok) {
+				XMLIOS  rTemp = *preply;
+// send the command
+				for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+					MilliSleep(50);
+					guard_lock ser_guard( &rigCAT_mutex );
+					if (rigCAT_exit) return;
+					if (sendCommand(strCmd, rTemp.size, progdefaults.RigCatWait)) {
+						if (xmlrig.debug) LOG_INFO("Power set to %s", strval.c_str());
+						return;
+					}
+				}
+				if (xmlrig.debug) LOG_ERROR("%s failed", symbol);
+				return;
+			}
+			preply++;
+		}
+	} else {
+		for (int n = 0; n < progdefaults.RigCatRetries; n++) {
+			MilliSleep(50);
+			guard_lock ser_guard( &rigCAT_mutex );
+			if (rigCAT_exit) return;
+			if (sendCommand(strCmd, 0, progdefaults.RigCatWait)) {
+				if (xmlrig.debug) LOG_INFO("Power set to %s", strval.c_str());
+				return;
+			}
+		}
+	}
+	if (progdefaults.RigCatVSP == false)
+		if (xmlrig.debug) LOG_ERROR("%s failed", symbol);
 }
 
 static void *rigCAT_loop(void *args)
@@ -1296,44 +2287,56 @@ static void *rigCAT_loop(void *args)
 	bool failed;
 
 	for (;;) {
-		MilliSleep(100);
-
-		{
+		for (int i = 0; i < xmlrig.pollinterval / 10; i++) {
+			MilliSleep(10);
 			guard_lock ser_guard( &rigCAT_mutex );
-
 			if (rigCAT_exit == true) {
-				LOG_INFO("%s", "Exit rigCAT loop");
+				LOG_INFO("%s", "Exited rigCAT loop");
 				return NULL;
 			}
-
-			if (rigCAT_bypass == true)
-				continue;
-
 		}
 
-		freq = rigCAT_getfreq(progdefaults.RigCatRetries, failed);
+		if (trx_state == STATE_RX) {
+			freq = rigCAT_getfreq(progdefaults.RigCatRetries, failed);
+			if (rigCAT_exit) continue;
 
-		if ((freq > 0) && (freq != llFreq)) {
-			llFreq = freq;
-			show_frequency(freq);
-			wf->rfcarrier(freq);
+			if ((freq > 0) && (freq != llFreq)) {
+				llFreq = freq;
+				show_frequency(freq);
+				wf->rfcarrier(freq);
+			}
+
+			sWidth = rigCAT_getwidth();
+			if (rigCAT_exit) continue;
+
+			if (sWidth.size() && sWidth != sRigWidth) {
+				sRigWidth = sWidth;
+				show_bw(sWidth);
+			}
+
+			sMode = rigCAT_getmode();
+			if (rigCAT_exit) continue;
+
+			if (sMode.size() && sMode != sRigMode) {
+				sRigMode = sMode;
+				if (ModeIsLSB(sMode))
+					wf->USB(false);
+				else
+					wf->USB(true);
+				show_mode(sMode);
+			}
+
+			if (xmlrig.use_pwrlevel) rigCAT_get_pwrlevel();
+
+			if (xmlrig.use_smeter) rigCAT_get_smeter();
+
+			if (xmlrig.use_notch) rigCAT_get_notch();
+
+		} else {
+			if ( (trx_state == STATE_TUNE) || (trx_state == STATE_TX) )
+				if (xmlrig.use_pwrmeter) rigCAT_get_pwrmeter();
 		}
 
-		sWidth = rigCAT_getwidth();
-		if (sWidth.size() && sWidth != sRigWidth) {
-			sRigWidth = sWidth;
-			show_bw(sWidth);
-		}
-
-		sMode = rigCAT_getmode();
-		if (sMode.size() && sMode != sRigMode) {
-			sRigMode = sMode;
-			if (ModeIsLSB(sMode))
-				wf->USB(false);
-			else
-				wf->USB(true);
-			show_mode(sMode);
-		}
 	}
 
 	return NULL;

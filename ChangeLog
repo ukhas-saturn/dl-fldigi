@@ -1,8 +1,239 @@
 
 
-=Version 3.22.13=
+=Version 3.23.12=
 
-2015-07-18  David Freese  <iam_w1hkj@w1hkj.com>
+2016-06-21  David Freese  <iam_w1hkj@w1hkj.com>
+
+	fa831b2: xmlrpc add_tx
+	177a8f1: mfsk xmt filter
+	2b57556: FSQ msg append
+	de187d9: FSQ IFKP heard lists
+	76cf0e6: waterfall group
+	5f762f0: thor image
+	8cd6f83: RxID button
+
+
+=Version 3.23.11=
+
+	198f645: RxID color changes
+	b657227: flmsg-arq autostart
+	c6ac0f1: Resize bug
+	3c7392e: Hell Raster Display
+	4841f10: Exit processing
+
+2016-05-29  Roman Bagiñski  <sp4jeu@gmail.com>
+
+	274d500: Polish translation update
+
+2016-05-28  David Freese  <iam_w1hkj@w1hkj.com>
+
+	9c959af: xmlrpc add tx text
+	01245fe: Native Select Save-As dialogs
+
+2016-05-26  Robert Stiles  <kk5vd@yahoo.com>
+
+	5209286: FLDIGI User Manual Update
+	4b2005e: KISS IO Bug fixes/Additions and C++11 Test
+
+
+=Version 3.23.10=
+
+
+2016-05-23  David Freese  <iam_w1hkj@w1hkj.com>
+
+	e14bbb6: logger
+	19e7bad: Restore focus
+	0a99bef: RsID button
+	aa6592c: flmsg interface
+	5b367fb: 4bars
+	b4b8df4: ASCII ctl chars
+	759e6cf: Suppress dockable macros
+	065ead7: Packet Prep
+
+2016-04-13  Edouard Lafargue W6ELA  <edouard@lafargue.name>
+
+	505c8b3: Portaudio Mono
+
+2016-04-13  David Freese  <iam_w1hkj@w1hkj.com>
+
+	68d9b32: FSQ message files
+
+2016-04-12  Robert Stiles  <kk5vd@yahoo.com>
+
+	4ab48d4: KISS, 8PSK, FLARQ icon Modifications
+
+2016-04-12  David Freese  <iam_w1hkj@w1hkj.com>
+
+	76ab77c: FLARQ
+	9c04f07: focus behavior
+	2a3f4d4: PTT delays
+
+
+=Version 3.23.09=
+
+	fc97b4a: FSQ variable Rx
+	58b3940: Export ADIF_NAME
+	91ddd6c: WF only
+	92c3c36: DnD Image
+	0ebcc2a: Frequencies2 use string
+	20ac527: Documentation
+	8eb05e6: View noise
+	7cd0d8d: About
+	9ed6cc3: NAVTEX update
+
+2016-03-07  Kamal Mostafa  <kamal@whence.com>
+
+	6da8d51: Sanitize tile_x, tile_y startup values
+
+2016-03-05  David Freese  <iam_w1hkj@w1hkj.com>
+
+	b1d12b8: RxID enhancement
+	f7662df: TX timer
+	4e055b4: rigcat mod
+	4c9f140: PSK IMD
+
+
+=Version 3.23.08=
+
+
+2016-02-21  Rik van Riel  <riel@surriel.com>
+
+	f80745e: NAVTEX update
+
+2016-02-16  David Freese  <iam_w1hkj@w1hkj.com>
+
+	5b2edad: Save Logbook
+	1c8e0e9: Analysis mode
+	0f650e9: flrig PTT
+	106e3e2: flrig waiting
+	71fa224: COM port close
+	dd1165a: fsq repeat last
+	fb0fd4c: Mac Logger
+
+2016-02-04  Jonathan Wakely  <redi@users.sf.net>
+
+	813b58a: GCC 6 build
+
+2016-02-01  David Freese  <iam_w1hkj@w1hkj.com>
+
+	d808977: CALL capture
+	bea9cfe: Scope View
+	8bcc9e8: RigCAT modifications
+
+
+=Version 3.23.07=
+
+	10266d2: Exit delays
+	e821e49: Contest fields
+	ebc00ed: OS-X start_process
+	f5e3186: LOG RECORD exports
+	c0281ee: HAMLIB CW RTTY
+	ddb084c: PSKR metric
+	68c5a6a: PSKR/8
+	397f570: Audio adjust
+	4280903: WEB query
+	8af53b6: Mode Set
+	e756d93: Tab key docs
+	2fb5648: hamlib PTT_ON_DATA
+	22514a5: Macro Tool Bar
+	94f8362: XmlRpc client update
+	2652387: Log Notes
+	e9e8b36: Misc Updates
+	78baf6c: Set Frequency
+	14a2618: Rx SaveAs
+	16ede08: flrig xmlrpc
+
+
+=Version 3.23.06=
+
+	3f577d9: WO woes
+	482d060: Smeter PWRmeter
+	e08e403: ARQ shutdown
+
+2015-11-20  John Phelps  <kl4yfd@gmail.com>
+
+	0b5b329: Developer Doxygen and BerliOS clean  - Cleaned and Fixed developer Doxygen files  - Added GitStats to the Dev Doxygen info    -- run ./scripts/doxygen/gen_doxygen_docs.sh
+
+2015-11-20  David Freese  <iam_w1hkj@w1hkj.com>
+
+	b19fff8: Documentation
+	55e0d31: Compiler warnings
+
+
+=Version 3.23.05=
+
+	c86ec80: dock macros
+	9b210f7: kml disable
+	2e2c9e9: ADIF record repairs
+	93342e4: gpio ptt
+	d6a34a4: NAVTEX/SYNOP/KML
+
+2015-10-19  John Phelps  <kl4yfd@gmail.com>
+
+	51535ff: Add 8PSK 125FL 250FL
+
+
+=Version 3.23.04=
+
+
+2015-10-15  David Freese  <iam_w1hkj@w1hkj.com>
+
+	2516356: CW filter
+	7f23f3f: Update Check
+	4862141: fsq abort
+	3bed0e3: log merge
+
+
+=Version 3.23.03=
+
+	551d105: thor-image
+	c3b610b: FSQ trigger bug
+
+
+=Version 3.23.02=
+
+	0424764: fsq cqcqcq
+	198c5a0: fsq sounder/heard-aging
+	dbb169b: FSQ directive
+	d47b1e3: rigcat delayed startup
+	e6ebe70: OS-X serial
+
+2015-09-23  Kamal Mostafa  <kamal@whence.com>
+
+	f75b92a: asciidoc timezone
+
+
+=Version 3.23.01=
+
+
+2015-09-22  David Freese  <iam_w1hkj@w1hkj.com>
+
+	8ad0a8b: WX configure
+	0caa5ea: PA debug
+	838e112: WFALL-ONLY
+	f472a17: Logbook read
+	7cb4c66: ifkp avatar depth
+	ea18942: IFKP image slant
+
+
+=Version 3.23.00=
+
+	f78aa38: Clear Tx Panel
+	cbff7c3: Olivia/Contestia start stop tones
+	37175e2: macro bug
+	3d6e0b9: FSQ updates
+	ed3b09d: ifkp modem
+	c82de8e: MXE update
+	7b42e01: Macros
+	0606d1a: Doxygen help
+	d4b6308: QSO rec
+	2df24b8: MS Read logbook
+	30ad2a9: WEFAX hang on INFO
+	6704797: Nu opBW combos
+	db69617: LSB modes
+
+
+=Version 3.22.13=
 
 	7bdf051: FSQ bug fix
 	9319676: XMLRPC commands

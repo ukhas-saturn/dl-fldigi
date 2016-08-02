@@ -9,6 +9,8 @@
 // Copyright (C) 2009
 //		Diane Bruce, VA3DB
 //
+// Added gpio for PTT (Lior KK6BWA)
+//
 // This file is part of fldigi.  Adapted from code contained in gmfsk source code
 // distribution.
 //  gmfsk Copyright (C) 2001, 2002, 2003
@@ -60,6 +62,8 @@
 #include "re.h"
 #include "debug.h"
 
+#include "fl_digi.h"
+
 LOG_FILE_SOURCE(debug::LOG_RIGCONTROL);
 
 using namespace std;
@@ -104,6 +108,9 @@ void PTT::reset(ptt_t dev)
 	case PTT_TTY:
 		open_tty();
 		break;
+	case PTT_GPIO:
+		open_gpio();
+		break;
 	default:
 		break; // nothing to open
 	}
@@ -113,10 +120,8 @@ void PTT::reset(ptt_t dev)
 void PTT::set(bool ptt)
 {
 // add milliseconds - no audio to clear virtual audio card used by Flex systems
-	if (ptt && progdefaults.PTT_off_delay)
+	if (!ptt && progdefaults.PTT_off_delay)
 		MilliSleep(progdefaults.PTT_off_delay);
-	if (!ptt && progdefaults.PTT_on_delay)
-		MilliSleep(progdefaults.PTT_on_delay);
 
 	if (active_modem == cw_modem &&
 	    ((progdefaults.useCWkeylineRTS) || progdefaults.useCWkeylineDTR == true))
@@ -124,6 +129,7 @@ void PTT::set(bool ptt)
 
 	switch (pttdev) {
 	case PTT_NONE: default:
+		noCAT_setPTT(ptt);
 		break;
 #if USE_HAMLIB
 	case PTT_HAMLIB:
@@ -136,6 +142,9 @@ void PTT::set(bool ptt)
 	case PTT_TTY:
 		set_tty(ptt);
 		break;
+	case PTT_GPIO:
+		set_gpio(ptt);
+		break;
 #if HAVE_PARPORT
 	case PTT_PARPORT:
 		set_parport(ptt);
@@ -147,6 +156,11 @@ void PTT::set(bool ptt)
 		break;
 #endif
 	}
+	if (ptt && progdefaults.PTT_on_delay)
+		MilliSleep(progdefaults.PTT_on_delay);
+
+	if (ptt) start_tx_timer();
+	else     stop_tx_timer();
 }
 
 void PTT::close_all(void)
@@ -156,6 +170,9 @@ void PTT::close_all(void)
 	switch (pttdev) {
 	case PTT_TTY:
 		close_tty();
+		break;
+	case PTT_GPIO:
+		close_gpio();
 		break;
 #if HAVE_PARPORT
 	case PTT_PARPORT:
@@ -171,6 +188,38 @@ void PTT::close_all(void)
 		break;
 	}
 	pttfd = -1;
+}
+
+//-------------------- gpio port PTT --------------------//
+void PTT::open_gpio(void)
+{
+}
+
+void PTT::close_gpio(void)
+{
+}
+
+void PTT::set_gpio(bool ptt)
+{
+#define VALUE_MAX 30 
+	static const char s_values_str[] = "01";
+
+	char path[VALUE_MAX];
+
+	snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", progdefaults.GPIOPort);
+	int fd = open(path, O_WRONLY);
+	if (-1 == fd) {
+		LOG_ERROR("Failed to open gpio (%s) value for writing!\n", path);
+		return;
+	}
+
+	if (1 != write(fd, &s_values_str[ ptt ? 1 : 0], 1)) {
+		LOG_ERROR("Failed to write value!\n");
+		return;
+	}
+
+	close(fd);
+
 }
 
 //-------------------- serial port PTT --------------------//

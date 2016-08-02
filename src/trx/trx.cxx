@@ -682,11 +682,13 @@ void trx_start(void)
 //=============================================================================
 void trx_close()
 {
+	LOG_INFO("%s", "closing trx thread");
 	int count = 1000;
 	active_modem->set_stopflag(true);
 	while (trx_state != STATE_RX && count--)
 		MilliSleep(10);
 	if (trx_state != STATE_RX) {
+		LOG_INFO("%s", "trx_state != STATE_RX");
 		exit(1);
 	}
 	count = 1000;
@@ -694,6 +696,7 @@ void trx_close()
 	while (trx_state != STATE_ENDED && count--)
 		MilliSleep(10);
 	if (trx_state != STATE_ENDED) {
+		LOG_INFO("%s", "trx_state != STATE_ENDED");
 		exit(2);
 	}
 #if USE_NAMED_SEMAPHORES
@@ -709,11 +712,12 @@ void trx_close()
 		delete scard;
 		scard = 0;
 	}
+	LOG_INFO("%s", "trx thread closed");
 }
 
 //=============================================================================
 
-void trx_transmit(void) { trx_state = STATE_TX; }
+void trx_transmit(void) { if (!bHAB) trx_state = STATE_TX; }
 void trx_tune(void) { trx_state = STATE_TUNE; }
 void trx_receive(void) { trx_state = STATE_RX; }
 

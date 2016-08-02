@@ -29,9 +29,13 @@
 #include <stdint.h>
 
 #include <semaphore.h>
+#ifndef WIN32
 #if !HAVE_SEM_TIMEDWAIT
 #  include <time.h>
 int sem_timedwait(sem_t* sem, const struct timespec* abs_timeout);
+#endif
+#else
+#include <time.h>
 #endif
 
 int sem_timedwait_rel(sem_t* sem, double rel_timeout);
@@ -48,6 +52,7 @@ enum {
 	XMLRPC_TID,
 	ARQ_TID,
 	ARQSOCKET_TID,
+	MACLOGGER_TID,
 	KISS_TID,
 	KISSSOCKET_TID,
 	FLMAIN_TID,
@@ -103,6 +108,7 @@ bool thread_in_list(int id, const int* list);
 // which will also interrupt blocking calls.  On woe32 we use
 // pthread_cancel and there is no good/sane way to interrupt.
 #ifndef __WOE32__
+#include <signal.h>
 #  define SET_THREAD_CANCEL()					\
 	do {							\
 		sigset_t usr2;					\

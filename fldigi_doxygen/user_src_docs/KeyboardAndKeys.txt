@@ -23,12 +23,20 @@ text into the transmit buffer.  There is one very important
 exception:
 <br>
 
-The caret "^" symbol.  This is used in the macro expansion routine
-and also used by the transmit buffer evaluator.  A ^r puts fldigi into
-receive mode.  So you can enter the ^r (caret followed by the r) at the end
-of your transmit buffer and when the sent character cursor (red chars) gets to
-that point the program will clear the text and return to the receive
-mode.
+The caret "^" symbol, which fldigi uses as a meta character.  The ^ is 
+used in the macro expansion routine and also used by the transmit buffer 
+evaluator.  A ^r puts fldigi into receive mode.  So you can enter the ^r 
+(caret followed by the r) at the end of your transmit buffer and when 
+the sent character cursor (red chars) gets to that point the program will 
+clear the text and return to the receive mode.
+<br>
+
+Other useful meta combinations:
+<ul>
+<li>^l ^L - save the log entry when meta combination parsed</li>
+<li>^p ^P - pause transmission at this point in transmit text</li>
+<li>^r ^R - return to receive clear all transmit text</li>
+</ul>
 <br>
 
 You can load the transmit buffer with any ASCII Text file of your
@@ -81,14 +89,33 @@ fldigi text widget supports some short cuts to make your life easier:
 
   <li>Alt/Meta-R will perform the same function as the Pause/Break key</li>
 
-  <li>Tab moves the cursor to the end of the transmitted text (which
-  also pauses tx). A tab press at that position moves the cursor to the
-  character following the last one transmitted. CW operation is slightly
-  different, see the help for \ref cw_page .</li>
+  <li>Tab moves the text insert cursor to the end of the transmitted text 
+  (which also pauses tx).   Characters entered from the keyboard will be 
+  transmitted as entered until the tx text entry point is returned to the 
+  end of the tx buffer.  A tab press at that position returns the cursor 
+  to the end of the text buffer. Transmitted text and text pending transmit 
+  are color coded red and black respectively (default colors):
+  
+  <center>
+  \image html TxCursor.png "Tx Cursor Position"
+  \image latex TxCursor.png "Tx Cursor Position" width=2.5in
+  </center>
+  
+  Be aware that fldigi will NEVER transmit past the text insert cursor!  You
+  may be caught by that behavior if you are modifying the buffer and transmitting
+  at the same time.  Or you may have accidentally mouse clicked in the middle of 
+  the Tx text with the result that fldigi suddenly stops transmitting.  In either
+  case the Tab key will return the text insert cursor to the end of the tx buffer.
+  
+  CW operation is slightly different, see the help for \ref cw_page .</li>
 
-  <li>Ctrl + three digits will insert the ASCII character designated by
-  that entry.</li>
-
+  <li>Extended UTF-8 characters can be entered into all text entry controls
+  using Ctrl + three digits.  These characters can also be entered using
+  the right-click pop-up menu item \"Spec Char \".  The extended character 
+  transmitted by fldigi will actually be a 2 byte UTF-8 string.
+  
+  see \ref xchar_page "Extended Characters"
+</li>
 </ul>
 
 \section function_keys Function Keys

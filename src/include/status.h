@@ -37,6 +37,7 @@ struct status {
 	bool	Rig_Log_UI;
 	bool	Rig_Contest_UI;
 	bool	DOCKEDSCOPE;
+	bool	tbar_is_docked;
 
 	int		RxTextHeight;
 	int		tiled_group_x;
@@ -71,13 +72,14 @@ struct status {
 	int		tile_w;
 	int		tile_y;
 	int		tile_h;
+	double	tile_y_ratio;
 	double	fsq_ratio;
+	double	ifkp_ratio;
 	bool	LOGenabled;
 	double  sldrSquelchValue;
 	double  sldrPwrSquelchValue;
 	bool	afconoff;
 	bool	sqlonoff;
-	bool	pwrsqlonoff;
 	int		scopeX;
 	int		scopeY;
 	bool	scopeVisible;
@@ -161,14 +163,20 @@ struct status {
 	int busyChannelSeconds;
 	int kpsql_attenuation;
 	bool csma_enabled;
+	bool kiss_tcp_io;
+	bool kiss_tcp_listen;
+    bool kpsql_enabled;
 	bool ip_lock;
+    bool kiss_io_modem_change_inhibit;
 	double squelch_value;
+    bool psk8DCDShortFlag;
 
 	std::string	browser_search;
 
 	bool	meters;
 
 	bool	fsq_rx_abort;
+	bool	ifkp_rx_abort;
 
 	bool	bLastStateRead;
 

@@ -48,10 +48,13 @@
 #include "smeter.h"
 #include "pwrmeter.h"
 #include "picture.h"
+#include "dropwin.h"
 
 extern fre_t seek_re;
 
-extern Fl_Double_Window *fl_digi_main;
+//extern Fl_Double_Window *fl_digi_main;
+extern dropwin			*fl_digi_main;
+
 extern Fl_Double_Window *scopeview;
 //extern Fl_Double_Window *opBrowserView;
 
@@ -59,8 +62,11 @@ extern Fl_Double_Window *dlgRecordLoader;
 
 extern bool first_use;
 
+extern bool		bMOREINFO;
+
 extern FTextRX			*ReceiveText;
 extern FTextTX			*TransmitText;
+extern Raster			*FHdisp;
 extern pskBrowser		*mainViewer;
 extern Fl_Input2		*txtInpSeek;
 extern Fl_Box			*hideViewer;
@@ -79,14 +85,17 @@ extern Fl_Counter2		*cntCW_WPM;
 extern Fl_Counter2		*cntTxLevel;
 extern Fl_Button		*MODEstatus;
 extern Fl_Slider2		*sldrSquelch;
-extern Progress		*pgrsSquelch;
+extern Progress			*pgrsSquelch;
 extern Smeter			*smeter;
-extern PWRmeter		*pwrmeter;
+extern PWRmeter 		*pwrmeter;
+extern Fl_Value_Slider2	*pwr_level;
+extern Fl_Group			*pwrlevel_grp;
 extern Fl_Button 		*btnMacro[];
 extern Fl_Button		*btnAltMacros1;
 extern Fl_Button		*btnAltMacros2;
-extern Fl_Group		*macroFrame1;
-extern Fl_Group		*macroFrame2;
+extern Fl_Button		*btnDockMacro[];
+extern Fl_Group			*macroFrame1;
+extern Fl_Group			*macroFrame2;
 extern Fl_Input2		*inpFreq;
 extern Fl_Input2		*inpTimeOff;
 extern Fl_Input2		*inpTimeOn;
@@ -145,8 +154,14 @@ extern Fl_Group		*QsoInfoFrame1B;
 extern Fl_Group		*qsoFrameView;
 extern Fl_Group		*QsoInfoFrame;
 extern cFreqControl	*qsoFreqDisp;
+extern Fl_Group		*qso_combos;
 extern Fl_ComboBox		*qso_opMODE;
+extern Fl_Group		*qso_opGROUP;
 extern Fl_ComboBox		*qso_opBW;
+extern Fl_Button		*qso_btnBW1;
+extern Fl_ComboBox		*qso_opBW1;
+extern Fl_Button		*qso_btnBW2;
+extern Fl_ComboBox		*qso_opBW2;
 extern Fl_Button		*qso_opPICK;
 extern Fl_Browser		*qso_opBrowser;
 
@@ -170,6 +185,9 @@ extern void				write_fsqDebug(int ch, int style = FTextBase::RECV);
 extern void				write_fsqDebug(std::string s, int style = FTextBase::RECV);
 extern void				fsq_que_clear();
 extern void				write_fsq_que(std::string s);
+
+extern void start_tx_timer();
+extern void stop_tx_timer();
 
 extern void fsq_disableshift();
 extern void fsq_enableshift();
@@ -213,18 +231,46 @@ extern void			clear_heard_list();
 extern void			age_heard_list();
 extern void			add_to_heard_list(std::string, std::string);
 extern void			fsq_transmit_string(std::string s);
+extern void			fsq_xmt_mt(void *s);
+extern void			fsq_xmt(std::string s);
 extern void			fsq_repeat_last_heard();
 extern void			fsq_repeat_last_command();
 extern void 			display_fsq_rx_text(std::string text, int style = FTextBase::SKIP);
 extern void			display_fsq_mon_text(std::string text, int style = FTextBase::SKIP);
 
+extern Fl_Group		*ifkp_group;
+extern Fl_Group		*ifkp_upper;
+extern Fl_Group		*ifkp_upper_left;
+extern FTextRX		*ifkp_rx_text;
+extern Fl_Group		*ifkp_upper_right;
+extern Fl_Browser	*ifkp_heard;
+extern Progress		*ifkp_s2n_progress;
+extern Fl_Group		*ifkp_lower;
+extern FTextTX		*ifkp_tx_text;
+extern picture		*ifkp_avatar;
+extern int			ifkp_load_avatar(std::string image_fname = "", int W=59, int H=74);
+extern void			ifkp_clear_avatar();
+extern void			ifkp_update_avatar(unsigned char data, int pos);
+extern int			ifkp_get_avatar_pixel(int pos, int color);
+extern void			cb_ifkp_send_avatar( Fl_Widget *w, void *);
+
+extern void			cb_ifkp_heard(Fl_Browser*, void*);
+
 extern void			enableSELCAL();
+
+extern unsigned char tux_img[];
 
 extern void			cbFSQQTC(Fl_Widget *w, void *d);
 extern void			cbFSQQTH(Fl_Widget *w, void *d);
+extern void			cbFSQCQ(Fl_Widget *w, void *d);
 extern void			cbMONITOR(Fl_Widget *w, void *d);
 extern void			cbSELCAL(Fl_Widget *w, void *d);
 extern void			cbFSQCALL(Fl_Widget *w, void *d);
+
+extern void			ifkp_showTxViewer(char C = 'T');
+extern void			ifkp_load_scaled_image(std::string);
+extern Fl_Double_Window	*ifkppicRxWin;
+extern Fl_Double_Window	*ifkppicTxWin;
 
 #include <FL/Fl_Bitmap.H>
 extern Fl_Bitmap image_s2n;
@@ -252,6 +298,7 @@ extern Fl_Value_Slider2	*mvsquelch;
 extern Fl_Light_Button		*btnAFC;
 extern Fl_Light_Button		*btnSQL;
 extern Fl_Light_Button		*btnPSQL;
+extern Fl_Box				*rsid_status;
 extern Fl_Light_Button		*btnRSID;
 extern Fl_Light_Button		*btnTxRSID;
 extern Fl_Light_Button		*btnTune;
@@ -337,8 +384,12 @@ extern void put_Status1(const char *msg, double timeout = 0.0, status_timeout ac
 extern void put_Status2(const char *msg, double timeout = 0.0, status_timeout action = STATUS_CLEAR);
 
 extern void show_frequency(long long);
-extern void show_mode(const std::string& mode);
-extern void show_bw(const std::string& sWidth);
+
+extern void show_mode(const std::string sMode);
+extern void show_bw(const std::string sWidth);
+extern void show_bw1(const std::string sVal);
+extern void show_bw2(const std::string sVal);
+
 extern void show_spot(bool v);
 extern void showMacroSet();
 extern void setwfrange();
@@ -460,6 +511,7 @@ extern bool xml_get_record(const char *);
 
 extern const char* zdate(void);
 extern const char* ztime(void);
+extern void ztimer(void* first_call);
 
 extern void setTabColors();
 
@@ -523,5 +575,18 @@ extern void set_smeter_colors();
 extern void log_callback(Fl_Input2 *);
 
 extern void set599();
+
+// thor images
+extern	void				thor_showTxViewer(char C = 'T');
+extern	Fl_Double_Window	*thorpicRxWin;
+extern	Fl_Double_Window	*thorpicTxWin;
+
+extern int			thor_load_avatar(std::string image_fname = "", int W=59, int H=74);
+extern void			thor_clear_avatar();
+extern void			thor_update_avatar(unsigned char data, int pos);
+extern int			thor_get_avatar_pixel(int pos, int color);
+extern void			cb_thor_send_avatar( Fl_Widget *w, void *);
+extern picture		*thor_avatar;
+extern void			thor_load_scaled_image(std::string fname);
 
 #endif

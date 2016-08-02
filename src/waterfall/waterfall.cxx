@@ -70,6 +70,8 @@
 #include "rtty.h"
 #include "flslider2.h"
 #include "debug.h"
+#include "rigsupport.h"
+#include "xmlrpc.h"
 
 using namespace std;
 
@@ -255,7 +257,7 @@ inline void WFdisp::makeMarker_(int width, const RGB* color, int freq, const RGB
 	if (marker_mode >= MODE_MT63_500S && marker_mode <= MODE_MT63_2000L)
 			bw_upper = (int)(width * 31 / 32);
 
-	if (marker_mode == MODE_FSQ)
+	if (marker_mode == MODE_FSQ || marker_mode == MODE_IFKP)
 			bw_upper = (int)(width * 32 / 33);
 
 	if (bw_lower + static_cast<int>(freq+0.5) < 0)
@@ -305,7 +307,7 @@ void WFdisp::makeMarker()
 
 	makeMarker_(marker_width, &RGBmarker, carrierfreq, clrMin, clrM, clrMax);
 
-	if (unlikely(active_modem->freqlocked())) {
+	if (unlikely(active_modem->freqlocked() || mode == MODE_FSQ)) {
 		int txfreq = static_cast<int>(active_modem->get_txfreq());
 		adjust_color_inv(RGBmarker.R, RGBmarker.G, RGBmarker.B, FL_BLACK, FL_RED);
 		makeMarker_( static_cast<int>(bandwidth / 2.0 + 1),
@@ -335,7 +337,7 @@ void WFdisp::makeMarker()
 	int bw_hi = marker_width;
 	if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 		bw_hi = bw_hi * 31 / 32;
-	if (mode == MODE_FSQ) bw_hi = bw_hi * 32 / 33;
+	if (mode == MODE_FSQ || mode == MODE_IFKP) bw_hi = bw_hi * 32 / 33;
 
 	for (int y = 0; y < WFMARKER - 2; y++) {
 		int incr = y * scale_width;
@@ -650,28 +652,27 @@ void WFdisp::sig_data( double *sig, int len, int sr )
 update_freq:
 	static char szFrequency[14];
 	if (active_modem && rfc != 0) { // use a boolean for the waterfall
-		int cwoffset = 0;
-		int rttyoffset = 0;
+		int offset = 0;
+		double afreq = active_modem->get_txfreq();
 		trx_mode mode = active_modem->get_mode();
 		if (mode == MODE_RTTY && progdefaults.useMARKfreq) {
-			rttyoffset = (progdefaults.rtty_shift < rtty::numshifts ?
+			offset = (progdefaults.rtty_shift < rtty::numshifts ?
 				  rtty::SHIFT[progdefaults.rtty_shift] :
 				  progdefaults.rtty_custom_shift);
-			rttyoffset /= 2;
-			if (active_modem->get_reverse()) rttyoffset *= -1;
+			offset /= 2;
+			if (active_modem->get_reverse()) offset *= -1;
 		}
 		string testmode = qso_opMODE->value();
-		if (testmode == "CW" or testmode == "CWR") {
-			cwoffset = progdefaults.CWsweetspot;
-			usb = ! (progdefaults.CWIsLSB ^ (testmode == "CWR"));
-		}
+		usb = !ModeIsLSB(testmode);
+		if (testmode.find("CW") != string::npos)
+			afreq = 0;//-progdefaults.CWsweetspot;
 		if (mode == MODE_ANALYSIS) {
-			dfreq = active_modem->track_freq();
+			dfreq = 0;
 		} else {
 			if (usb)
-				dfreq = rfc + active_modem->get_txfreq() - cwoffset + rttyoffset;
+				dfreq = rfc + afreq + offset;
 			else
-				dfreq = rfc - active_modem->get_txfreq() + cwoffset - rttyoffset;
+				dfreq = rfc - afreq - offset;
 		}
 		snprintf(szFrequency, sizeof(szFrequency), "%-.3f", dfreq / 1000.0);
 	} else {
@@ -805,10 +806,9 @@ void WFdisp::drawScale() {
 		else {
 		    int cwoffset = 0;
 		    string testmode = qso_opMODE->value();
-		    if (testmode == "CW" or testmode == "CWR") {
-				cwoffset = ( progdefaults.CWOffset ? progdefaults.CWsweetspot : 0 );
-				usb = ! (progdefaults.CWIsLSB ^ (testmode == "CWR"));
-		    }
+		    usb = !ModeIsLSB(testmode);
+			if (testmode.find("CW") != string::npos)
+				cwoffset = progdefaults.CWsweetspot;
 			if (usb)
 				fr = (rfc - (rfc%500))/1000.0 + 0.5*i - cwoffset/1000.0;
 			else
@@ -888,7 +888,7 @@ case Step: for (int row = 0; row < image_height; row++) { \
 		trx_mode mode = active_modem->get_mode();
 		if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 			bw_hi = bw_hi * 31 / 32;
-		if (mode == MODE_FSQ) {
+		if (mode == MODE_FSQ || mode == MODE_IFKP) {
 			bw_hi = bw_lo = 69 * bandwidth / 100;
 		}
 		RGBI  *pos1 = fft_img + (carrierfreq - offset - bw_lo) / step;
@@ -957,7 +957,7 @@ void WFdisp::drawcolorWF() {
 		int bw_hi = bandwidth / 2;
 		if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 			bw_hi = bw_hi * 31 / 32;
-		if (mode == MODE_FSQ) bw_hi = bw_hi * 32 / 33;
+		if (mode == MODE_FSQ || mode == MODE_IFKP) bw_hi = bw_hi * 32 / 33;
 		RGBI  *pos0 = (fft_img + cursorpos);
 		RGBI  *pos1 = (fft_img + cursorpos - bw_lo/step);
 		RGBI  *pos2 = (fft_img + cursorpos + bw_hi/step);
@@ -1038,7 +1038,7 @@ void WFdisp::drawspectrum() {
 		int bw_hi = bandwidth / 2;
 		if (mode >= MODE_MT63_500S && mode <= MODE_MT63_2000L)
 			bw_hi = bw_hi * 31 / 32;
-		if (mode == MODE_FSQ) bw_hi = bw_hi * 32 / 33;
+		if (mode == MODE_FSQ || mode == MODE_IFKP) bw_hi = bw_hi * 32 / 33;
 		uchar  *pos0 = pixmap + cursorpos;
 		uchar  *pos1 = (pixmap + cursorpos - bw_lo/step);
 		uchar  *pos2 = (pixmap + cursorpos + bw_hi/step);
@@ -1248,6 +1248,7 @@ void xmtrcv_cb(Fl_Widget *w, void *vi)
 		}
 		else {
 			TransmitText->clear();
+			reset_xmlchars();
 			if (arq_text_available)
 				AbortARQ();
 			if (progStatus.timer)

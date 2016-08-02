@@ -97,6 +97,7 @@
 #include "Viewer.h"
 #include "kmlserver.h"
 #include "data_io.h"
+#include "maclogger.h"
 
 #if USE_HAMLIB
 	#include "rigclass.h"
@@ -132,6 +133,7 @@ string ScriptsDir = "";
 string PalettesDir = "";
 string LogsDir = "";
 string PicsDir = "";
+string AvatarDir = "";
 string HelpDir = "";
 string MacrosDir = "";
 string WrapDir = "";
@@ -181,6 +183,7 @@ FILE	*client;
 bool	mailserver = false, mailclient = false, arqmode = false;
 static bool show_cpucheck = false;
 static bool iconified = false;
+bool	bMOREINFO = false;
 
 string option_help, version_text, build_text;
 
@@ -223,6 +226,16 @@ void start_process(string executable)
 		CloseHandle(pi.hThread);
 		free(cmd);
 #else
+#ifdef __APPLE__
+	if (executable.find(".app") == (executable.length() - 4)) {
+		std::string progname = executable;
+		size_t p = progname.find("/", 1);
+		if (p != std::string::npos) progname.erase(0,p+1);
+		p = progname.find("-");
+		if (p != std::string::npos) progname.erase(p);
+		executable.append("/Contents/MacOS/").append(progname);
+	}
+#endif
 		switch (fork()) {
 			case -1:
 				LOG_PERROR("fork");
@@ -241,16 +254,27 @@ void start_process(string executable)
 
 void toggle_io_port_selection(int io_mode)
 {
+
 	switch(io_mode) {
 		case ARQ_IO:
-			btnEnable_kiss->do_callback();
-			btnEnable_arq->do_callback();
-			progdefaults.changed = false;
-			break;
+            enable_arq();
+            progdefaults.changed = false;
+        break;
 
 		case KISS_IO:
-			btnEnable_arq->do_callback();
-			btnEnable_kiss->do_callback();
+
+            enable_kiss();
+
+            if(progdefaults.tcp_udp_auto_connect) {
+                btn_connect_kiss_io->value(1);
+                btn_connect_kiss_io->do_callback();
+            }
+
+            if(progdefaults.kpsql_enabled) {
+                btnPSQL->value(progdefaults.kpsql_enabled);
+                btnPSQL->do_callback();
+            }
+
 			progdefaults.changed = false;
 			break;
 
@@ -310,7 +334,7 @@ static void auto_start()
 // reset those default values that have been overriden by a command line parameter
 void check_overrides()
 {
-	if (xmlrpc_address_override_flag) 
+	if (xmlrpc_address_override_flag)
 		progdefaults.xmlrpc_address = override_xmlrpc_address;
 	if (xmlrpc_port_override_flag)
 		progdefaults.xmlrpc_port = override_xmlrpc_port;
@@ -336,11 +360,14 @@ void delayed_startup(void *)
 	FLRIG_start_flrig_thread();
 
 	data_io_enabled = DISABLED_IO;
+
 	arq_init();
-	kiss_init();
+
+	if (progdefaults.connect_to_maclogger) maclogger_init();
 	data_io_enabled = progStatus.data_io_enabled;
 
 	toggle_io_port_selection(data_io_enabled);
+    disable_config_p2p_io_widgets();
 
 	notify_start();
 
@@ -353,12 +380,18 @@ void delayed_startup(void *)
 	if (progdefaults.check_for_updates)
 		cb_mnuCheckUpdate((Fl_Widget *)0, NULL);
 
+#if USE_PORTAUDIO
+	LOG_INFO("%s", str_pa_devices.c_str());
+#endif
 }
 
 int main(int argc, char ** argv)
 {
 	// for KISS_IO status information
 	program_start_time = time(0);
+
+	// ztimer must be run by FLTK's timeout handler
+	ztimer((void*)true);
 
 	active_modem = new NULLMODEM;
 
@@ -486,6 +519,10 @@ int main(int argc, char ** argv)
 
 			case KISSSOCKET_TID:
 				cbq[i]->attach(i, "KISSSOCKET_TID");
+				break;
+
+			case MACLOGGER_TID:
+				cbq[i]->attach(i, "MACLOGGER_TID");
 				break;
 
 			case FLMAIN_TID:
@@ -750,21 +787,24 @@ int main(int argc, char ** argv)
 
 void exit_process() {
 
-	KmlServer::Exit();
+	if (progdefaults.kml_enabled)
+		KmlServer::Exit();
 	arq_close();
-	kiss_close();
+	kiss_close(false);
+	maclogger_close();
 	XML_RPC_Server::stop();
 
 	if (progdefaults.usepskrep)
 		pskrep_stop();
 
+LOG_INFO("Detach/delete qrunner threads");
 	for (int i = 0; i < NUM_QRUNNER_THREADS; i++) {
+LOG_INFO("thread %d", i);
 		cbq[i]->detach();
 		delete cbq[i];
 	}
-
+LOG_INFO("FSEL::destroy()");
 	FSEL::destroy();
-
 }
 
 void generate_option_help(void) {
@@ -823,10 +863,10 @@ void generate_option_help(void) {
          << "    The default is: " << progdefaults.data_io_enabled << "\n\n"
 
          << "  --kiss-server-address HOSTNAME\n"
-         << "    Set the KISS UDP server address\n"
+         << "    Set the KISS TCP/UDP server address\n"
          << "    The default is: " << progdefaults.kiss_address << "\n\n"
          << "  --kiss-server-port-io I/O PORT\n"
-         << "    Set the KISS UDP server I/O port\n"
+         << "    Set the KISS TCP/UDP server I/O port\n"
          << "    The default is: " << progdefaults.kiss_io_port << "\n\n"
          << "  --kiss-server-port-o Output PORT\n"
          << "    Set the KISS UDP server output port\n"
@@ -1031,6 +1071,7 @@ int parse_args(int argc, char **argv, int& idx)
 #if USE_PORTAUDIO
                OPT_FRAMES_PER_BUFFER,
 #endif
+           OPT_MORE_INFO,
 	       OPT_NOISE, OPT_DEBUG_LEVEL, OPT_DEBUG_PSKMAIL, OPT_DEBUG_AUDIO,
                OPT_EXIT_AFTER,
                OPT_DEPRECATED, OPT_HELP, OPT_VERSION, OPT_BUILD_INFO };
@@ -1090,6 +1131,7 @@ int parse_args(int argc, char **argv, int& idx)
 #if USE_PORTAUDIO
 		{ "frames-per-buffer",1, 0, OPT_FRAMES_PER_BUFFER },
 #endif
+		{ "more-info",     1, 0, OPT_MORE_INFO },
 		{ "exit-after",    1, 0, OPT_EXIT_AFTER },
 
 		{ "noise", 0, 0, OPT_NOISE },
@@ -1306,6 +1348,10 @@ int parse_args(int argc, char **argv, int& idx)
 			progdefaults.PortFramesPerBuffer = strtol(optarg, 0, 10);
 			break;
 #endif // USE_PORTAUDIO
+
+		case OPT_MORE_INFO:
+			bMOREINFO = true;
+			break;
 
 		case OPT_EXIT_AFTER:
 			Fl::add_timeout(strtod(optarg, 0), exit_cb);
@@ -1592,6 +1638,7 @@ static void checkdirectories(void)
 		{ PalettesDir, "palettes", create_new_palettes },
 		{ LogsDir, "logs", 0 },
 		{ PicsDir, "images", 0 },
+		{ AvatarDir, "avatars", 0},
 		{ HelpDir, "help", 0 },
 		{ MacrosDir, "macros", create_new_macros },
 		{ WrapDir, "wrap", 0 },
@@ -1715,6 +1762,8 @@ static void arg_error(const char* name, const char* arg, bool missing)
 /// Sets or resets the KML parameters, and loads existing files.
 void kml_init(bool load_files)
 {
+	if (progdefaults.kml_enabled == false) return; // disabled kml service
+
 	KmlServer::GetInstance()->InitParams(
 			progdefaults.kml_command,
 			progdefaults.kml_save_dir,
@@ -1750,7 +1799,8 @@ void kml_init(bool load_files)
 			custData );
 	}
 	catch( const std::exception & exc ) {
-		LOG_WARN("Cannot publish user position:%s", exc.what() );
+
+;//		LOG_WARN("Cannot publish user position:%s", exc.what() );
 	}
 }
 

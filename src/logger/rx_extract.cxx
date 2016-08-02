@@ -40,6 +40,7 @@
 #include "icons.h"
 #include "qrunner.h"
 #include "timeops.h"
+#include "xmlrpc.h"
 
 using namespace std;
 
@@ -62,13 +63,14 @@ Save tags and all enclosed text to date-time stamped file, ie:\n\
     ~/.nbems/WRAP/recv/extract-20090127-092515.wrap");
 #endif
 
-#define   bufsize  16
+#define   bufsize  64
 char  rx_extract_buff[bufsize + 1];
 string rx_buff;
 string rx_extract_msg;
 
 bool extract_wrap = false;
 bool extract_flamp = false;
+bool extract_arq = false;
 
 bool bInit = false;
 
@@ -81,6 +83,7 @@ void rx_extract_reset()
 	rx_extract_buff[bufsize] = 0;
 	extract_wrap = false;
 	extract_flamp = false;
+	extract_arq = false;
 	put_status("");
 }
 
@@ -124,6 +127,12 @@ void invoke_flmsg()
 	rx_extract_msg = "File saved in ";
 	rx_extract_msg.append(FLMSG_WRAP_recv_dir);
 	put_status(rx_extract_msg.c_str(), 20, STATUS_CLEAR);
+
+	if (flmsg_online && progdefaults.flmsg_transfer_direct) {
+		guard_lock autolock(server_mutex);
+		flmsg_data.append(rx_buff);
+		return;
+	}
 
 	if (progdefaults.open_nbems_folder)
 		open_recv_folder(FLMSG_WRAP_recv_dir.c_str());
@@ -272,6 +281,36 @@ void invoke_flmsg()
 	}
 }
 
+void start_flmsg()
+{
+	string cmd = progdefaults.flmsg_pathname;
+
+#ifdef __MINGW32__
+	char *cmdstr = strdup(cmd.c_str());
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(si);
+	memset(&pi, 0, sizeof(pi));
+	if (!CreateProcess( NULL, cmdstr,
+		NULL, NULL, FALSE,
+		CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+		LOG_ERROR("CreateProcess failed with error code %ld", GetLastError());
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+	free (cmdstr);
+#else
+	switch (fork()) {
+	case 0:
+		execlp((char*)cmd.c_str(), (char*)cmd.c_str(), (char*)0, (char*)0);
+		exit(EXIT_FAILURE);
+	case -1:
+		fl_alert2(_("Could not start flmsg"));
+	default: ;
+	}
+#endif
+}
+
 void rx_extract_add(int c)
 {
 	if (!c) return;
@@ -286,32 +325,51 @@ void rx_extract_add(int c)
 	memmove(rx_extract_buff, &rx_extract_buff[1], bufsize - 1);
 	rx_extract_buff[bufsize - 1] = ch;
 
-	if ( strstr(rx_extract_buff, wrap_beg) && !extract_flamp) {
+	if (strstr(rx_extract_buff, "~1") && strstr(rx_extract_buff, "~4")) {
+		if (!flmsg_online) start_flmsg();
+		memset(rx_extract_buff, ' ', bufsize);
+		return;
+	}
+	if (!extract_arq && strstr(rx_extract_buff, "ARQ:FILE::FLMSG_XFR")) {
+		extract_arq = true;
+		REQ(rx_remove_timer);
+		REQ(rx_add_timer);
+		memset(rx_extract_buff, ' ', bufsize);
+		rx_extract_msg = "Extracting ARQ msg";
+		put_status(rx_extract_msg.c_str());
+		return;
+	} else if (extract_arq) {
+		REQ(rx_remove_timer);
+		REQ(rx_add_timer);
+		if (strstr(rx_extract_buff, "ARQ::ETX"))
+			rx_extract_reset();
+		return;
+	} else if (!extract_flamp && strstr(rx_extract_buff, flamp_beg)) {
+		extract_flamp = true;
+		memset(rx_extract_buff, ' ', bufsize);
+		rx_extract_msg = "Extracting FLAMP";
+		put_status(rx_extract_msg.c_str());
+		return;
+	} else if (extract_flamp) {
+		REQ(rx_remove_timer);
+		REQ(rx_add_timer);
+		if (strstr(rx_extract_buff, flamp_end) != NULL)
+			rx_extract_reset();
+		return;
+	} else if (!extract_wrap && strstr(rx_extract_buff, wrap_beg)) {
 		rx_buff.assign(wrap_beg);
 		rx_extract_msg = "Extracting WRAP/FLMSG";
-
 		put_status(rx_extract_msg.c_str());
-
-		memset(rx_extract_buff, ' ', bufsize);
 		extract_wrap = true;
 		REQ(rx_remove_timer);
 		REQ(rx_add_timer);
+		return;
 	} else if (extract_wrap) {
 		rx_buff += ch;
 		REQ(rx_remove_timer);
 		REQ(rx_add_timer);
 		if (strstr(rx_extract_buff, wrap_end) != NULL) {
 			invoke_flmsg();
-			rx_extract_reset();
-		}
-	} else if (strstr(rx_extract_buff, flamp_beg) && ! extract_wrap) {
-		extract_flamp = true;
-		rx_extract_msg = "Extracting FLAMP";
-		put_status(rx_extract_msg.c_str());
-	} else if (extract_flamp == true) {
-		REQ(rx_remove_timer);
-		REQ(rx_add_timer);
-		if (strstr(rx_extract_buff, flamp_end) != NULL) {
 			rx_extract_reset();
 		}
 	}
@@ -335,11 +393,13 @@ void select_flmsg_pathname()
 		deffilename = "/usr/local/bin/";
 		const char *p = FSEL::select(_("Locate flmsg executable"), _("flmsg\t*"), deffilename.c_str());
 # endif
-	if (p) {
-		progdefaults.flmsg_pathname = p;
-		progdefaults.changed = true;
-		txt_flmsg_pathname->value(p);
-	}
+	if (!p) return;
+	if (!*p) return;
+
+	progdefaults.flmsg_pathname = p;
+	progdefaults.changed = true;
+	txt_flmsg_pathname->value(p);
+
 #endif
 }
 
@@ -411,7 +471,7 @@ string select_binary_pathname(string deffilename)
 	const char *p = FSEL::select(_("Locate binary"), _("*"), deffilename.c_str());
 # endif
 	string executable = "";
-	if (p) executable = p;
+	if (p && *p) executable = p;
 // do not allow recursion !!
 	if (executable.find("fldigi") != string::npos) return "";
 	return executable;

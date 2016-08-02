@@ -61,6 +61,8 @@ private:
 	static const char *W100_face;
 	static const char *W200_face;
 
+	void (*cbFunc)(Fl_Widget *, void *);
+
 protected:
 	virtual void draw();
 
@@ -69,12 +71,20 @@ public:
 
 	void	value(double v) { value_ = v; redraw(); }
 	double	value() const { return (value_); }
+	void	resize(int x, int y, int w, int h);
+	int		handle(int);
 
 	void	set_background(Fl_Color c1) { bgnd_ = c1; redraw(); }
 	void	set_metercolor(Fl_Color c2) { fgnd_ = c2; redraw(); }
 	void	set_scalecolor(Fl_Color c3) { scale_color = c3; redraw(); }
 
 	void	select(int sel);
+
+	void callback (void (*cbf)(Fl_Widget *, void *) ){ cbFunc = cbf;}
+	void do_callback() { 
+		if (cbFunc) cbFunc(this, (void*)0);
+	}
+
 private:
 	void	select_auto();
 	void	select_25W();
@@ -82,6 +92,7 @@ private:
 	void	select_100W();
 	void	select_200W();
 };
+
 
 #endif // !pwrmeter
 
