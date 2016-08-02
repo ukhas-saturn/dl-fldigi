@@ -19,6 +19,7 @@
 #include "fl_digi.h"
 #include "configuration.h"
 #include "confdialog.h"
+#include "timeops.h"
 
 #include "jsoncpp.h"
 #include "habitat/RFC3339.h"
