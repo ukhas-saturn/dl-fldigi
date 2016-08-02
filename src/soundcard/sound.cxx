@@ -688,7 +688,7 @@ size_t SoundOSS::Read(float *buffer, size_t buffersize)
 		src_buffer[i] = ibuff[i] / MAXSC;
 
 	for (size_t i = 0; i < buffersize; i++)
-		buffer[i] = src_buffer[2*i + 
+		buffer[i] = src_buffer[2*i +
 							   progdefaults.ReverseRxAudio ? 1 : 0];
 
 #if USE_SNDFILE
@@ -1062,11 +1062,11 @@ int SoundPort::Open(int mode, int freq)
 {
     int old_sample_rate = (int)req_sample_rate;
     req_sample_rate = sample_frequency = freq;
-    
+
     // do we need to (re)initialise the streams?
     int ret = 0;
     int sr[2] = { progdefaults.in_sample_rate, progdefaults.out_sample_rate };
-    
+
     // initialize stream if it is a JACK device, regardless of mode
     device_iterator idev;
     int device_type = 0;
@@ -1076,7 +1076,7 @@ int SoundPort::Open(int mode, int freq)
     if (mode == O_RDONLY && (idev = name_to_device(sd[1].device, 1)) != devs.end() &&
         (device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
         mode = O_RDWR;
-    
+
     size_t start = (mode == O_RDONLY || mode == O_RDWR) ? 0 : 1,
     end = (mode == O_WRONLY || mode == O_RDWR) ? 1 : 0;
     for (size_t i = start; i <= end; i++) {
@@ -1086,7 +1086,7 @@ int SoundPort::Open(int mode, int freq)
             Close(i);
             init_stream(i);
             src_data_reset(i);
-            
+
             // reset the semaphore
             while (sem_trywait(sd[i].rwsem) == 0);
             if (errno && errno != EAGAIN) {
@@ -1094,7 +1094,7 @@ int SoundPort::Open(int mode, int freq)
                 throw SndException(errno);
             }
             start_stream(i);
-            
+
             ret = 1;
         }
         else {
@@ -1103,7 +1103,7 @@ int SoundPort::Open(int mode, int freq)
             sd[i].state = spa_continue;
         }
     }
-    
+
     static char pa_open_str[500];
     snprintf(pa_open_str, sizeof(pa_open_str),
 "\
@@ -1112,8 +1112,8 @@ device type = %s\n\
 device name = %s\n\
 # input channels %d\n\
 # output channels %d",
-		mode == O_WRONLY ? "Write" : 
-		mode == O_RDONLY ? "Read" : 
+		mode == O_WRONLY ? "Write" :
+		mode == O_RDONLY ? "Read" :
 		mode == O_RDWR ? "Read/Write" : "unknown",
 		device_type == 0 ? "paInDevelopment" :
 		device_type == 1 ? "paDirectSound" :
@@ -1874,7 +1874,7 @@ SoundPulse::SoundPulse(const char *dev)
 {
 	sd[0].stream = 0;
 	sd[0].stream_params.channels = 2;
-	sd[0].dir = PA_STREAM_RECORD; 
+	sd[0].dir = PA_STREAM_RECORD;
 	sd[0].stream_params.format = PA_SAMPLE_FLOAT32LE;
 	sd[0].buffer_attrs.maxlength = (uint32_t)-1;
 	sd[0].buffer_attrs.minreq = (uint32_t)-1;
@@ -2100,7 +2100,7 @@ long SoundPulse::src_read_cb(void* arg, float** data)
 
 	int err;
 	int nread = 0;
-	if ((nread = pa_simple_read(p->sd[0].stream, p->snd_buffer, 
+	if ((nread = pa_simple_read(p->sd[0].stream, p->snd_buffer,
 			p->sd[0].stream_params.channels * sizeof(float) * p->sd[0].blocksize, &err)) == -1) {
 		LOG_ERROR("%s", pa_strerror(err));
 		*data = 0;
@@ -2143,7 +2143,7 @@ size_t SoundPulse::Read(float *buf, size_t count)
 	}
 	else {
 		int err;
-		if ((r = pa_simple_read(sd[0].stream, rbuf, 
+		if ((r = pa_simple_read(sd[0].stream, rbuf,
 				sd[0].stream_params.channels * sizeof(float) * count, &err)) == -1)
 			throw SndPulseException(err);
 	}
@@ -2238,119 +2238,3 @@ size_t SoundNull::Read(float *buf, size_t count)
 	return count;
 
 }
-
-#include "netcat.c"
-SoundIP::SoundIP(const char* inithost, const char* initport, bool udp_flag)
-{
-	stream = -1;
-	m_host = inithost;
-	m_port = initport;
-	portmode_udp = udp_flag;
-	udp_connected = false;
-
-        snd_buffer = new float[SND_BUF_LEN]; // floats out for fldigi
-	cbuff   =  new uint8_t[SND_BUF_LEN]; // 64K, max tcp/ip packet size
-	buffend = buffptr = 0;
-}
-
-SoundIP::~SoundIP()
-{
-	SoundIP::closestream();
-
-	delete [] snd_buffer;
-	delete [] cbuff;
-}
-
-int SoundIP::Open(int mode, int freq)
-{
-	resamplerate = freq;
-	m_step = 0.0;
-
-	if (stream < 0)
-		SoundIP::getstream();
-	return 0;
-}
-
-void SoundIP::Close(unsigned unused)
-{
-	SoundIP::closestream();
-}
-
-void SoundIP::Abort(unsigned unused)
-{
-	SoundIP::closestream();
-}
-
-size_t  SoundIP::Write(double* buf, size_t count)
-{
-	MilliSleep((long)ceil((1e3 * count) / resamplerate));
-	return count;
-}
-
-size_t  SoundIP::Write_stereo(double* bufleft, double* bufright, size_t count)
-{
-	MilliSleep((long)ceil((1e3 * count) / resamplerate));
-	return count;
-}
-
-size_t  SoundIP::Read(float *buff, size_t count)
-{
-	int n, s, out, rate, idlecount;
-	unsigned i, j, c;
-	float ratio;
-
-	rate = progdefaults.in_sample_rate;
-        if (rate < 8000)
-                rate = 48000; // unset / native default
-        ratio = 1.0 * rate / resamplerate;
-
-	if (stream < 0) {
-		// keep trying to open stream
-		MilliSleep(1000);
-		SoundIP::getstream();
-		for (i = 0; i < count; i++)
-			buff[i] = 0.0f;
-		return count;
-	}
-
-	idlecount = 10;
-	out = 0;
-	c = count;
-	for (;;) {
-		i = buffend - buffptr;
-		if ( i > c )
-			i = c;
-		if ( i > 0) {
-			for ( j = 0; j < i; j++)
-			buff[out + j] = snd_buffer[buffptr + j];
-		}
-		buffptr += i;
-		out += i;
-		c -= i;
-		if ( 0 == c)
-			return count;
-
-		n = readstream(cbuff);
-		if (n <= 0) {
-			MilliSleep(100);
-			if (--idlecount < 0) {
-				for (i = 0; i < count; i++)
-					buff[i] = 0.0f;
-				return count;
-			}
-		}
-
-		buffend = buffptr = 0;
-		// S16LE to float, resampled
-		for (s = 0; s * 2 < n; s++) {
-			m_step = m_step - 1.0;
-			if (m_step < 0) {
-				short s16le = cbuff[2*s] | ( cbuff[2*s+1] << 8);
-				snd_buffer[buffend++] = (1.0 / 32768) * s16le;
-				m_step += ratio;
-			}
-		}
-	}
-	return count;
-}
-

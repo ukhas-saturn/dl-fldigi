@@ -30,7 +30,6 @@
 #include <string>
 #include <cstring>
 #include <climits>
-#include <sys/socket.h>
 
 #if USE_SNDFILE
 #  include <sndfile.h>
@@ -350,38 +349,4 @@ public:
 	void	flush(unsigned) { }
 };
 
-
-class SoundIP : public SoundBase
-{
-public:
-	SoundIP(const char* host="", const char* port="9999", bool udp_flag=false);
-	~SoundIP();
-
-	int     Open(int mode, int freq = 8000);
-	void    Close(unsigned);
-	void    Abort(unsigned);
-	size_t  Write(double* buf, size_t count);
-	size_t  Write_stereo(double* bufleft, double* bufright, size_t count);
-	size_t  Read(float *buf, size_t count);
-	bool    must_close(int dir = 0) { return false; }
-	void    flush(unsigned) { }
-private:
-	void	readport();
-	int	remote_connect(const char *, const char *, struct addrinfo);
-	int	timeout_connect(int, const struct sockaddr *, socklen_t);
-	int	getstream();
-	void	closestream();
-	int	readstream(uint8_t *buffer);
-
-	int	portmode_udp;
-	int	resamplerate;
-	int	stream;
-	bool	udp_connected;
-	const char	*m_host, *m_port;
-
-	int	buffptr, buffend;
-	uint8_t	*cbuff;
-	float	*snd_buffer;
-	float	m_step;
-};
 #endif // SOUND_H

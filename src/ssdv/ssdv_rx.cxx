@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <setjmp.h>
 #include "ssdv_rx.h"
+#include "timeops.h"
 
 #include <curl/curl.h>
 
