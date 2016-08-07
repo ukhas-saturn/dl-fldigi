@@ -404,7 +404,7 @@ int main(int argc, char ** argv)
 	FLMSG_dir.clear();
 
 #ifdef __WOE32__
-	size_t p = appdir.rfind("dl_fldigi.exe");
+	size_t p = appdir.rfind("dl-fldigi.exe");
 	appdir.erase(p);
 	p = appdir.find("FL_APPS\\");
 	if (p != string::npos) {
