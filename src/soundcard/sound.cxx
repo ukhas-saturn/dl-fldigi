@@ -2317,3 +2317,141 @@ size_t SoundNull::Read(float *buf, size_t count)
 	return count;
 
 }
+
+/*  Code for GQRX udp direct input (c) 2016 UKHAS
+ *
+ *  Simple downsampling assumes that the SDR (GQRX, 48k) runs at a
+ *         multiple of the modem being used (normally 8k or 12k)
+ */
+SoundIP::SoundIP(const char* inithost, const char* initport, bool udp_flag)
+{
+	snd_buffer = new float[SND_BUF_LEN]; // floats out
+	cbuff   =  new uint8_t[SND_BUF_LEN]; // s16le stream in
+
+	m_stream = -1;
+	m_step = 0.0;
+	buffend = buffptr = 0;
+	usingTCP = !udp_flag;
+	if (udp_flag)
+		soundSock = new Socket( Address( "localhost", initport, "udp") );
+	else
+		soundSock = new Socket( Address( inithost, initport, "tcp") );
+}
+
+SoundIP::~SoundIP()
+{
+	SoundIP::Close(0);
+
+	delete soundSock;
+	delete [] snd_buffer;
+	delete [] cbuff;
+}
+
+void SoundIP::Abort(unsigned unused)
+{
+	SoundIP::Close(0);
+}
+
+size_t  SoundIP::Write(double* buf, size_t count)
+{
+	return count;
+}
+
+size_t  SoundIP::Write_stereo(double* bufleft, double* bufright, size_t count)
+{
+	return count;
+}
+
+size_t  SoundIP::Read(float *buff, size_t count)
+{
+	size_t n, s;
+	int out, rate, idlecount;
+	unsigned i, j, c;
+	float ratio;
+
+	rate = progdefaults.in_sample_rate;
+        if (rate < 8000)
+                rate = 48000; // unset / native default
+        ratio = 1.0 * rate / resamplerate;
+
+	if (m_stream < 0) {
+		// keep trying to open stream
+		MilliSleep(1000);
+		try {
+			soundSock->connect();
+			m_stream = 1;
+		} catch (...) {
+			m_stream =-1;
+		}
+		for (i = 0; i < count; i++)
+			buff[i] = 0.0f;
+		return count;
+	}
+
+	idlecount = 20;
+	out = 0;
+	c = count;
+	for (;;) {
+		i = buffend - buffptr;
+		if ( i > c )
+			i = c;
+		if ( i > 0) {
+			for ( j = 0; j < i; j++)
+			buff[out + j] = snd_buffer[buffptr + j];
+		}
+		buffptr += i;
+		out += i;
+		c -= i;
+		if ( 0 == c)
+			return count;
+
+		// SND_BUF_LEN is 65536
+		n = soundSock->recv((void*)cbuff, 4096);
+		if (n == 0) {
+			MilliSleep(100);
+			if (--idlecount < 0) {
+				/* Pad data after 2s of silence
+				 * Try to reopen the port for TCP */
+				if (usingTCP)
+					m_stream = -1;
+				for (i = out; i < count; i++)
+					buff[i] = 0.0f;
+				return count;
+			}
+		}
+
+		buffend = buffptr = 0;
+		// S16LE to float, resampled
+		for (s = 0; s * 2 < n; s++) {
+			m_step = m_step - 1.0;
+			while (m_step < 0) {
+				short s16le = cbuff[2*s] | ( cbuff[2*s+1] << 8);
+				snd_buffer[buffend++] = (1.0 / 32768) * s16le;
+				m_step += ratio;
+			}
+		}
+	}
+	return count;
+}
+
+int SoundIP::Open(int mode, int freq)
+{
+        resamplerate = freq;
+	if (m_stream > 0)
+		return m_stream;
+
+	soundSock->set_timeout(0.0);
+	soundSock->set_nonblocking(true);
+
+	// defer opening until Read()
+	return 1;
+}
+
+void SoundIP::Close(unsigned unused)
+{
+	if (m_stream < 0)
+		return;
+	m_stream = -1;
+	soundSock->close();
+}
+

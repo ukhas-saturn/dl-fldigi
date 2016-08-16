@@ -3766,7 +3766,7 @@ progdefaults.changed = true;}
                 callback {progdefaults.DOMINOEX_ADJ = o->value();
 resetDOMEX();
 progdefaults.changed = true;}
-                tooltip {Tone-spacing adjust} xywh {156 166 63 20} type Simple align 8 minimum -100 maximum 100 value 0
+                tooltip {Tone-spacing adjust} xywh {206 166 63 20} type Simple align 8 minimum -100 maximum 100 value 0
                 code0 {o->value(progdefaults.DOMINOEX_ADJ);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Counter2
@@ -5835,24 +5835,49 @@ progdefaults.changed = true;}
             label Devices open
             xywh {0 50 600 340}
           } {
-            Fl_Group AudioOSS {open
-              xywh {55 65 490 45} box ENGRAVED_FRAME
+            Fl_Group AudioTCP {open
+              xywh {55 65 380 45} box ENGRAVED_FRAME
             } {
               Fl_Round_Button {btnAudioIO[0]} {
-                label OSS
-                callback {sound_update(SND_IDX_OSS);
+                label TCP
+                callback {sound_update(SND_IDX_TCP);
 progdefaults.changed = true;
 resetSoundCard();}
-                tooltip {Use OSS audio server} xywh {65 75 53 25} down_box DOWN_BOX selection_color 1
+                tooltip {Use TCP audio server} xywh {65 75 53 25} down_box DOWN_BOX selection_color 1
               }
-              Fl_Input_Choice menuOSSDev {
-                label {Device:}
-                callback {scDevice[0] = scDevice[1] = progdefaults.OSSdevice = o->value();
-resetSoundCard();
-progdefaults.changed = true;} open
-                tooltip {Select device} xywh {424 75 110 25}
-                code0 {o->value(progdefaults.OSSdevice.c_str());}
-              } {}
+       Fl_Input inpIPServerHost {
+                label {Host:}
+                callback {scDevice[0] = progdefaults.IPServerHost = o->value();
+scDevice[1] = progdefaults.IPServerPort;
+progdefaults.changed = true;
+resetSoundCard();}
+               tooltip {TCP/UDP Server Host} xywh {180 75 90 25}
+               code0 {o->value(progdefaults.IPServerHost.c_str());}
+                code1 {inpIPServerHost->labelsize(FL_NORMAL_SIZE);}
+                class Fl_Input2
+              }
+       Fl_Input inpIPServerPort {
+                label {Port:}
+                callback {scDevice[1] = progdefaults.IPServerPort = o->value();
+scDevice[0] = progdefaults.IPServerHost;
+progdefaults.changed = true;
+resetSoundCard();}
+                tooltip {TCP/UDP Server Port} xywh {320 75 90 25}
+                code0 {o->value(progdefaults.IPServerPort.c_str());}
+                code1 {inpIPServerPort->labelsize(FL_NORMAL_SIZE);}
+                class Fl_Input2
+              }
+            }
+            Fl_Group AudioUDP {open
+              xywh {435 65 110 45} box ENGRAVED_FRAME
+            } {
+                Fl_Round_Button {btnAudioIO[4]} {
+                label UDP
+                callback {sound_update(SND_IDX_UDP);
+progdefaults.changed = true;
+resetSoundCard();}
+                tooltip {Use UDP audio server} xywh {450 75 53 25} down_box DOWN_BOX selection_color 1
+              }
             }
             Fl_Group AudioPort {open
               xywh {55 110 490 80} box ENGRAVED_FRAME
