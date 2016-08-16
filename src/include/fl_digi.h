@@ -48,12 +48,11 @@
 #include "smeter.h"
 #include "pwrmeter.h"
 #include "picture.h"
-#include "dropwin.h"
 
 extern fre_t seek_re;
 
-//extern Fl_Double_Window *fl_digi_main;
-extern dropwin			*fl_digi_main;
+extern Fl_Double_Window *fl_digi_main;
+//extern dropwin			*fl_digi_main;
 
 extern Fl_Double_Window *scopeview;
 //extern Fl_Double_Window *opBrowserView;
@@ -258,7 +257,7 @@ extern void			cb_ifkp_heard(Fl_Browser*, void*);
 
 extern void			enableSELCAL();
 
-extern unsigned char tux_img[];
+extern unsigned char tux_img[59*74*3];
 
 extern void			cbFSQQTC(Fl_Widget *w, void *d);
 extern void			cbFSQQTH(Fl_Widget *w, void *d);
@@ -311,11 +310,14 @@ extern int				altMacros;
 extern waterfall		*wf;
 extern Digiscope		*digiscope;
 
+extern std::string		argv_window_title;
 extern std::string		main_window_title;
+extern std::string		xcvr_title;
 
 extern int Qwait_time;
 extern int Qidle_time;
 extern bool idling;
+extern bool csma_idling;
 
 extern void toggleRSID();
 
@@ -340,7 +342,7 @@ extern void cb_mnuVisitURL(Fl_Widget*, void* arg);
 
 extern void put_freq(double frequency);
 extern void put_Bandwidth(int bandwidth);
-extern void global_display_metric(double metric);
+extern void callback_set_metric(double metric);
 extern void put_cwRcvWPM(double wpm);
 
 extern void set_scope_mode(Digiscope::scope_mode md);
@@ -395,6 +397,11 @@ extern void showMacroSet();
 extern void setwfrange();
 extern void showDTMF(const std::string s);
 
+extern void * set_xmtrcv_button_false(void);
+extern void * set_xmtrcv_button_true(void);
+extern void * set_xmtrcv_selection_color_pending(void);
+extern void * set_xmtrcv_selection_color_transmitting(void);
+extern void xmtrcv_selection_color(Fl_Color clr);
 extern void xmtrcv_selection_color();
 extern void rev_selection_color();
 extern void xmtlock_selection_color();
@@ -553,6 +560,10 @@ extern void notch_off();
 // Set IO port
 extern void enable_kiss(void);
 extern void enable_arq(void);
+
+// PSM Configuration.
+extern void psm_set_defaults(void);
+extern void update_csma_io_config(int which);
 
 // thread terminators
 extern void ADIF_RW_close(void);

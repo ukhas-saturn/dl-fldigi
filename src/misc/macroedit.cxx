@@ -78,6 +78,7 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<ANTENNA>\tmy antenna"));
 	w->add(_("<BAND>\toperating band"));
 	w->add(_("<VER>\tFldigi version"));
+	w->add(_("<DIGI>\tdigital mode (adif)"));
 
 	w->add(LINE_SEP);
 	w->add(_("<CALL>\tother call"));
@@ -220,6 +221,10 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<CSV:on|off|t>\tAnalysis CSV on,off,toggle"));
 
 	w->add(LINE_SEP);
+	w->add(_("<PUSH>\tpush current mode to stack"));
+	w->add(_("<PUSH:m|f\tpush current mode / audio freq to stack"));
+	w->add(_("<POP>\tpop current mode/freq from stack"));
+	w->add(LINE_SEP);
 	assert(MODE_CONTESTIA < MODE_OLIVIA);
 	char s[256];
 	for (trx_mode i = 0; i <= MODE_CONTESTIA; i++) {
@@ -320,10 +325,9 @@ void update_macro_button(int iMacro, const char *text, const char *name)
 		btnMacro[iMacro % NUMMACKEYS]->label( macros.name[iMacro].c_str() );
 		btnMacro[iMacro % NUMMACKEYS]->redraw_label();
 	}
-	if (progdefaults.dockable_macros) {
-		btnDockMacro[iMacro]->label(macros.name[iMacro].c_str());
-		btnDockMacro[iMacro]->redraw_label();
-	}
+	btnDockMacro[iMacro]->label(macros.name[iMacro].c_str());
+	btnDockMacro[iMacro]->redraw_label();
+
 	macros.changed = true;
 }
 

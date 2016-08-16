@@ -72,6 +72,8 @@
 #include "debug.h"
 #include "rigsupport.h"
 #include "xmlrpc.h"
+#include "psm/psm.h"
+#include "kiss_io.h"
 
 using namespace std;
 
@@ -804,9 +806,9 @@ void WFdisp::drawScale() {
 		if (progdefaults.wf_audioscale)
 			fr = 500.0 * i;
 		else {
-		    int cwoffset = 0;
-		    string testmode = qso_opMODE->value();
-		    usb = !ModeIsLSB(testmode);
+			int cwoffset = 0;
+			string testmode = qso_opMODE->value();
+			usb = !ModeIsLSB(testmode);
 			if (testmode.find("CW") != string::npos)
 				cwoffset = progdefaults.CWsweetspot;
 			if (usb)
@@ -943,6 +945,11 @@ case Step: for (int row = 0; row < image_height; row++) { \
 			notch += disp_width;
 		}
 	}
+
+	if (progdefaults.show_psm_btn &&
+		progStatus.kpsql_enabled && 
+		(trx_state == STATE_RX))
+		signal_psm();
 }
 
 void WFdisp::drawcolorWF() {
@@ -992,7 +999,8 @@ void WFdisp::drawcolorWF() {
 
 void WFdisp::drawspectrum() {
 	int sig;
-	int ynext,
+	long offset_idx = 0;
+	long ynext,
 		h1 = image_height - 1,
 		ffty = 0,
 		fftpixel = IMAGE_WIDTH * h1,
@@ -1011,9 +1019,27 @@ void WFdisp::drawspectrum() {
 		else
 			sig = MAX( MAX ( MAX ( tmp_fft_db[c], tmp_fft_db[c+1] ), tmp_fft_db[c+2] ), tmp_fft_db[c+3]);
 		ynext = h1 * sig / 256;
-		while (ffty < ynext) { fft_sig_img[fftpixel -= IMAGE_WIDTH/step] = graylevel; ffty++;}
-		while (ffty > ynext) { fft_sig_img[fftpixel += IMAGE_WIDTH/step] = graylevel; ffty--;}
-		fft_sig_img[fftpixel++] = graylevel;
+		offset_idx = (IMAGE_WIDTH/step);
+		while ((ffty < ynext)) {
+			fft_sig_img[fftpixel -= offset_idx] = graylevel; 
+			ffty++;
+			if (fftpixel < offset_idx) {
+				cout << "corrupt index 1\n";
+				break;
+			}
+		}
+		while ((ffty > ynext)) {
+			fft_sig_img[fftpixel += offset_idx] = graylevel; 
+			ffty--;
+			if (fftpixel >= (image_area - 1)) {
+				cout << "corrupt index 2\n";
+				break;
+			}
+		}
+		if (fftpixel >= 0 && fftpixel <= image_area)
+			fft_sig_img[fftpixel++] = graylevel;
+		else
+			cout << "fft_sig_image index out of bounds: " << fftpixel << endl;
 	}
 
 	if (progdefaults.UseBWTracks) {
@@ -1093,6 +1119,13 @@ void WFdisp::draw() {
 
 	checkoffset();
 	checkWidth();
+
+	if (progdefaults.show_psm_btn && progStatus.kpsql_enabled) {
+		drawcolorWF();
+		drawMarker();
+		return;
+	}
+
 	switch (mode) {
 	case SPECTRUM :
 		drawspectrum();
@@ -1226,6 +1259,8 @@ void rate_cb(Fl_Widget *w, void *v) {
 	restoreFocus();
 }
 
+//extern void reset_xmlchars();
+
 void xmtrcv_cb(Fl_Widget *w, void *vi)
 {
 	if (!active_modem) return;
@@ -1240,19 +1275,35 @@ void xmtrcv_cb(Fl_Widget *w, void *vi)
 	if (v == 1) {
 		stopMacroTimer();
 		active_modem->set_stopflag(false);
+
+		if (progdefaults.show_psm_btn && progStatus.kpsql_enabled)
+			set_xmtrcv_selection_color_pending();
 		trx_transmit();
 	} else {
+		if (progdefaults.show_psm_btn && progStatus.kpsql_enabled) {
+			psm_transmit_ended(PSM_ABORT);
+			xmtrcv_selection_color(progdefaults.XmtColor);
+		}
+
 		if (btnTune->value()) {
 			btnTune->value(0);
 			btnTune->do_callback();
 		}
 		else {
 			TransmitText->clear();
-			reset_xmlchars();
+
 			if (arq_text_available)
 				AbortARQ();
+
+			if(xmltest_char_available)
+				reset_xmlchars();
+
+			if(kiss_text_available)
+				flush_kiss_tx_buffer();
+
 			if (progStatus.timer)
 				progStatus.timer = 0;
+
 			queue_reset();
 			active_modem->set_stopflag(true);
 		}
@@ -1282,10 +1333,20 @@ void waterfall::set_XmtRcvBtn(bool val)
 	FL_UNLOCK_D();
 }
 
-void mode_cb(Fl_Widget* w, void*)
+void set_wf_mode(void)
 {
-	static const char* names[NUM_WF_MODES] = { "WF", "FFT", "SIG" };
-	int m = wf->wfdisp->Mode() + (Fl::event_button() == FL_LEFT_MOUSE ? 1 : -1);
+   static const char* names[NUM_WF_MODES] = { "WF", "FFT", "SIG" };
+   int m = 0;
+
+   if (progdefaults.show_psm_btn && progStatus.kpsql_enabled) {
+	  if(wf->wfdisp->Mode() == WATERFALL) {
+		 return;
+	  }
+	  m = WATERFALL;
+   } else {
+	  m = wf->wfdisp->Mode() + (Fl::event_button() == FL_LEFT_MOUSE ? 1 : -1);
+   }
+
 	m = WCLAMP(m, WATERFALL, NUM_WF_MODES-1);
 
 	Fl_Widget* b[] = { wf->x1, wf->wfcarrier, wf->wfRefLevel, wf->wfAmpSpan };
@@ -1297,8 +1358,14 @@ void mode_cb(Fl_Widget* w, void*)
 	}
 
 	wf->wfdisp->Mode(static_cast<WFmode>(m));
-	w->label(names[m]);
+	wf->mode->label(names[m]);
 	restoreFocus();
+
+}
+
+void mode_cb(Fl_Widget* w, void*)
+{
+	set_wf_mode();
 }
 
 void reflevel_cb(Fl_Widget *w, void *v) {
@@ -1412,8 +1479,8 @@ void btnMem_cb(Fl_Widget *, void *menu_event)
 					do {
 						if (i % 3 == 0 && i)
 							*--p = '.';
-							*--p = '0' + m.rfcarrier % 10;
-							++i;
+						*--p = '0' + m.rfcarrier % 10;
+						++i;
 					} while ((m.rfcarrier /= 10) && p > s);
 
 					o << p << (wf->USB() ? " + " : " - ");
@@ -1775,7 +1842,7 @@ int waterfall::handle(int event)
 		for (;;) {
 			mode = WCLAMP(mode + d, 0, NUM_MODES - 1);
 			if ((mode >= NUM_RXTX_MODES && mode < NUM_MODES) ||
-			    progdefaults.visible_modes.test(mode))
+				progdefaults.visible_modes.test(mode))
 				break;
 		}
 		init_modem(mode);
@@ -1817,7 +1884,7 @@ void waterfall::insert_text(bool check)
 		m.mode = active_modem->get_mode();
 		extern qrg_mode_t last_marked_qrg;
 		if (last_marked_qrg.mode == m.mode && last_marked_qrg.rfcarrier == m.rfcarrier &&
-		    abs(last_marked_qrg.carrier - m.carrier) <= 16)
+			abs(last_marked_qrg.carrier - m.carrier) <= 16)
 			return;
 		last_marked_qrg = m;
 	}
@@ -1851,7 +1918,7 @@ static void find_signal_text(void)
 		// try the other direction
 		int pos = ReceiveText->insert_position();
 		if (ReceiveText->buffer()->search_backward(pos, i->first.c_str(), &pos, 1) ||
-		    ReceiveText->buffer()->search_forward(pos, i->first.c_str(), &pos, 1)) {
+			ReceiveText->buffer()->search_forward(pos, i->first.c_str(), &pos, 1)) {
 			ReceiveText->insert_position(pos);
 			ReceiveText->show_insert_position();
 		}
@@ -1937,8 +2004,8 @@ int WFdisp::handle(int event)
 				if (!progdefaults.WaterfallHistoryDefault)
 					bHistory = true;
 				if (eb == FL_LEFT_MOUSE) {
-				       restoreFocus();
-				       break;
+					   restoreFocus();
+					   break;
 				}
 			}
 			if (progdefaults.WaterfallHistoryDefault)
@@ -2053,8 +2120,8 @@ int WFdisp::handle(int event)
 		if (Fl::event_inside(this)) {
 			int k = Fl::event_key();
 			if (k == FL_Shift_L || k == FL_Shift_R || k == FL_Control_L ||
-			    k == FL_Control_R || k == FL_Meta_L || k == FL_Meta_R ||
-			    k == FL_Alt_L || k == FL_Alt_R)
+				k == FL_Control_R || k == FL_Meta_L || k == FL_Meta_R ||
+				k == FL_Alt_L || k == FL_Alt_R)
 				restoreFocus();
 		}
 		break;

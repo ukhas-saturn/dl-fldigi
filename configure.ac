@@ -9,7 +9,7 @@ dnl major and minor must be integers; patch may
 dnl contain other characters or be empty
 m4_define(FLDIGI_MAJOR, [3])
 m4_define(FLDIGI_MINOR, [23])
-m4_define(FLDIGI_PATCH, [.12])
+m4_define(FLDIGI_PATCH, [.13])
 m4_define(FLARQ_MAJOR,  [4])
 m4_define(FLARQ_MINOR,  [3])
 m4_define(FLARQ_PATCH,  [.6])
@@ -87,6 +87,9 @@ AC_SUBST([FLARQ_DOCS], [$FLARQ_DOCS])
 AC_PROG_CXX
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
+
+#Check for C++11 compliance
+AX_CXX_COMPILE_STDCXX_11(, optional)
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -290,7 +293,7 @@ fi
 # Define USE_FLXMLRPC in config.h
 # Substitute FLXMLRPC_CFLAGS and FLXMLRPC_LIBS in Makefile
 
-AC_FLDIGI_PKG_CHECK([flxmlrpc], [flxmlrpc >= 0.1.0], 
+AC_FLDIGI_PKG_CHECK([flxmlrpc], [flxmlrpc >= 0.1.0],
   [yes], [yes], [use external flxmlrpc library @<:@autodetect@:>@],
   [ENABLE_FLXMLRPC])
 

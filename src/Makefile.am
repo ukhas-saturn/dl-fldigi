@@ -555,12 +555,6 @@ dl_fldigi_SOURCES += \
 	include/habitat/RFC3339.h \
 	include/utf8file_io.h \
 	include/weather.h \
-	include/dock_events.h \
-	include/dock_gp.h \
-	include/drag_btn.h \
-	include/dropwin.h \
-	include/toolgrp.h \
-	include/toolwin.h \
 	irrxml/CXMLReaderImpl.h \
 	irrxml/fast_atof.h \
 	irrxml/heapsort.h \
@@ -569,6 +563,8 @@ dl_fldigi_SOURCES += \
 	irrxml/irrTypes.h \
 	irrxml/irrXML.cpp \
 	irrxml/irrXML.h \
+   psm/psm.cxx \
+   psm/psm.h \
 	logbook/adif_io.cxx \
 	logbook/calendar.cxx \
 	logbook/date.cxx \
@@ -678,11 +674,6 @@ dl_fldigi_SOURCES += \
 	widgets/psk_browser.cxx \
 	widgets/smeter.cxx \
 	widgets/pwrmeter.cxx \
-	widgets/dock_gp.cxx \
-	widgets/drag_btn.cxx \
-	widgets/dropwin.cxx \
-	widgets/toolgrp.cxx \
-	widgets/toolwin.cxx \
 	fsq/fsq.cxx \
 	ifkp/ifkp.cxx \
 	ifkp/tux.cxx \

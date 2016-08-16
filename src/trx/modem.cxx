@@ -337,11 +337,13 @@ void modem::set_metric(double m)
 	metric = m;
 }
 
+extern void callback_set_metric(double metric);
+
 void modem::display_metric(double m)
 {
 	set_metric(m);
-	if(!progStatus.kpsql_enabled)
-	::global_display_metric(m);
+	if (!progStatus.kpsql_enabled) 
+		REQ(callback_set_metric, m);
 }
 
 bool modem::get_cwTrack()
@@ -499,7 +501,7 @@ void modem::ModulateXmtr(double *buffer, int len)
 	if (progdefaults.PTTrightchannel) {
 		for (int i = 0; i < len; i++)
 			PTTchannel[i] = PTTnco();
-			ModulateStereo( buffer, PTTchannel, len, false);
+		ModulateStereo( buffer, PTTchannel, len, false);
 		return;
 	}
 
@@ -623,7 +625,7 @@ void modem::ModulateVideo(double *buffer, int len)
 	if (progdefaults.PTTrightchannel) {
 		for (int i = 0; i < len; i++)
 			PTTchannel[i] = PTTnco();
-			ModulateVideoStereo( buffer, PTTchannel, len, false);
+		ModulateVideoStereo( buffer, PTTchannel, len, false);
 		return;
 	}
 
