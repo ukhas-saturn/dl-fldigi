@@ -989,6 +989,23 @@
         ELEM_(std::string, maclogger_log_filename, "MACLOGGER_LOG_FILENAME",            \
               "Filename for maclogger UDP datastream file",                             \
               "maclogger_udp_strings.txt")                                              \
+        /* N3FJP tcpip interface */                                                     \
+        ELEM_(std::string, N3FJP_address, "N3FJP_ADDRESS",                              \
+              "IP Address of N3FJP socket",                                             \
+              "127.0.0.1")                                                              \
+        ELEM_(std::string, N3FJP_port, "N3FJP_PORT",                                    \
+              "IP port number of N3FJP socket",                                         \
+              "1100")                                                                   \
+        ELEM_(bool, enable_N3FJP_log, "ENABLE_N3FJP_LOG",                               \
+              "Enable data stream logging.",                                            \
+              true)                                                                     \
+        ELEM_(bool, connect_to_n3fjp, "CONNECT_TO_N3FJP",                               \
+              "Connect to the N3FJP log server",                                        \
+              false)                                                                    \
+        ELEM_(bool, N3FJP_sweet_spot, "N3FJP_SWEET_SPOT",                               \
+              "Use N3FJP spot report as signal center freq.\n"                          \
+              "Center the target at mode sweet spot",                                   \
+              false)                                                                    \
         /* Rig control */                                                               \
         ELEM_(bool, flrig_keys_modem, "FLRIG_KEYS_MODEM",                               \
               "PTT change at flrig changes Rx/Tx state\n"                               \
@@ -1241,6 +1258,10 @@
               "0 - 8000, 1 - 11025, 2 - 16000, 3 - 22050\n"                             \
               "4 - 24000, 5 - 44100, 6 - 48000",                                        \
               0)                                                                        \
+        ELEM_(bool, record_both_channels, "RECORD_BOTH_CHANNELS",                       \
+              "Enabled - record wav file in stereo\n"                                   \
+              "Disabled - record wav file in monaural (left channel only)",             \
+              false)                                                                    \
         ELEM_(bool, loop_playback, "LOOPPLAYBACK",                                      \
               "true = continuous loop of sound file playback\n"                         \
               "false = single pass through playback file.",                             \
@@ -1324,6 +1345,38 @@
         ELEM_(std::string, mytxpower, "TXPOWER",                                        \
               "TX power used for logbook entries",                                      \
               "")                                                                       \
+        ELEM_(std::string, my_FD_call, "FD_CALL",                                       \
+              "Field Day call sign",                                                    \
+              "")                                                                       \
+        ELEM_(std::string, fd_op_call, "FD_OP_CALL",                                    \
+              "Field Day (w1hkj) server position operator call",                        \
+              "")                                                                       \
+        ELEM_(std::string, my_FD_class, "FDCLASS",                                      \
+              "Field Day class",                                                        \
+              "")                                                                       \
+        ELEM_(std::string, my_FD_section, "FDSECTION",                                  \
+              "Field Day section",                                                      \
+              "")                                                                       \
+        ELEM_(std::string, my_FD_mult, "FDMULT",                                        \
+              "Field Day multiplier",                                                   \
+              "5")                                                                      \
+        ELEM_(int, logging, "LOGGING",                                                  \
+              "Logging for:\n"                                                          \
+              "  0 - generic QSO\n"                                                     \
+              "  1 - generic contest\n"                                                 \
+              "  2 - Field Day\n"                                                       \
+              "  3 - CQWW RTTY\n"                                                       \
+              "  4 - BART",                                                             \
+              0)                                                                        \
+        ELEM_(bool, connect_to_fdserver, "CONNECT_TO_FDSERVER",                         \
+              "Connect to field day server",                                            \
+              false)                                                                    \
+        ELEM_(std::string, fd_tcpip_addr, "FD_TCPIP_ADDR",                              \
+              "Field Day (w1hkj) server tcpip address",                                 \
+              "127.0.0.1")                                                              \
+        ELEM_(std::string, fd_tcpip_port, "FD_TCPIP_PORT",                              \
+              "Field Day (w1hkj) server tcpip port",                                    \
+              "20001")                                                                  \
         /* Macro controls */                                                            \
         ELEM_(bool, UseLastMacro, "USELASTMACRO",                                       \
               "Load last used macro file on startup",                                   \
@@ -1874,6 +1927,9 @@
              "Minimum length of logged messages",                                       \
              0 )                                                                        \
         /* WX fetch from NOAA */                                                        \
+        ELEM_(std::string, wx_url, "WX_URL",                                            \
+             "Internet URL used to fetch METAR data using wget symbology",              \
+             "http://tgftp.nws.noaa.gov/data/observations/metar/decoded/" )             \
         ELEM_(std::string, wx_eoh, "WX_EOH",                                            \
              "Text at end of METAR report header\n"                                     \
              "default = Connection: close",                                             \

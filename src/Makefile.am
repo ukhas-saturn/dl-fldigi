@@ -272,7 +272,8 @@ FLDIGI_FL_SRC = \
 		dialogs/confdialog.fl \
 		dialogs/notifydialog.fl \
 		dialogs/record_browse.fl \
-		logbook/lgbook.fl
+		logbook/lgbook.fl \
+		logbook/fd_view.fl
 FLARQ_FL_SRC = flarq-src/arqdialogs.fl
 
 if HAVE_FLUID
@@ -413,6 +414,7 @@ dl_fldigi_SOURCES += \
 	include/thorvaricode.h \
 	include/dominoex.h \
 	include/dominovar.h \
+	include/fd_logger.h \
 	include/feld.h \
 	include/fftfilt.h \
 	include/filters.h \
@@ -438,6 +440,7 @@ dl_fldigi_SOURCES += \
 	include/jalocha/pj_struc.h \
 	include/kiss_io.h \
 	include/maclogger.h \
+	include/n3fjp_logger.h \
 	include/ax25_decode.h \
 	include/coordinate.h \
 	include/gfft.h \
@@ -532,6 +535,7 @@ dl_fldigi_SOURCES += \
 	include/field_def.h \
 	include/logbook.h \
 	include/lgbook.h \
+	include/fd_view.h \
 	include/logsupport.h \
 	include/outputencoder.h \
 	include/qso_db.h \
@@ -563,16 +567,19 @@ dl_fldigi_SOURCES += \
 	irrxml/irrTypes.h \
 	irrxml/irrXML.cpp \
 	irrxml/irrXML.h \
-   psm/psm.cxx \
-   psm/psm.h \
+	psm/psm.cxx \
+	psm/psm.h \
 	logbook/adif_io.cxx \
 	logbook/calendar.cxx \
 	logbook/date.cxx \
+	logbook/fd_logger.cxx \
 	logbook/lgbook.cxx \
+	logbook/fd_view.cxx \
 	logbook/logbook.cxx \
 	logbook/logsupport.cxx \
 	logbook/lookupcall.cxx \
 	logbook/maclogger.cxx \
+	logbook/n3fjp_logger.cxx \
 	logbook/qrzlib.cxx \
 	logbook/qso_db.cxx \
 	logbook/table.cxx \

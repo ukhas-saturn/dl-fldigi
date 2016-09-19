@@ -38,6 +38,7 @@
 #endif
 
 enum savetype {ADIF, CSV, TEXT, LO};
+enum logtype {LOG_QSO, LOG_CONT, LOG_FD, LOG_CQWW, LOG_BART};
 
 extern cQsoDb        qsodb;
 extern cAdifIO       adifFile;
@@ -91,7 +92,5 @@ extern void dxcc_entity_cache_enable(bool v);
 extern bool qsodb_dxcc_entity_find(const char* country);
 
 extern void adif_read_OK();
-
-extern bool read_logbook;
 
 #endif

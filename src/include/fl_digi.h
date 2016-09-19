@@ -108,6 +108,8 @@ extern Fl_Input2		*inpCountry;
 extern Fl_Input2		*inpSerNo;
 extern Fl_Input2		*outSerNo;
 extern Fl_Input2		*inpXchgIn;
+extern Fl_Input2		*inpXchgIn1;
+extern Fl_Input2		*inpXchgIn2;
 extern Fl_Input2		*inpVEprov;
 extern Fl_Input2		*inpLoc;
 extern Fl_Input2		*inpNotes;
@@ -115,9 +117,9 @@ extern Fl_Input2		*inpAZ;	// WA5ZNU
 extern Fl_Button		*qsoSave;
 extern Fl_Box			*txtRigName;
 
-extern cFreqControl	*qsoFreqDisp1;
+extern cFreqControl		*qsoFreqDisp1;
 extern cFreqControl 	*qsoFreqDisp2;
-extern cFreqControl	*qsoFreqDisp3;
+extern cFreqControl		*qsoFreqDisp3;
 extern Fl_Input2		*inpFreq2;
 
 extern Fl_Input2		*inpCall1;
@@ -487,6 +489,7 @@ extern void abort_tx();
 extern void set_rx_tx();
 extern void set_rx_only();
 
+extern void connect_to_fdserver(bool);
 extern void LOGGING_colors_font();
 extern void LOGBOOK_colors_font();
 
@@ -599,5 +602,18 @@ extern int			thor_get_avatar_pixel(int pos, int color);
 extern void			cb_thor_send_avatar( Fl_Widget *w, void *);
 extern picture		*thor_avatar;
 extern void			thor_load_scaled_image(std::string fname);
+
+// field day
+extern Fl_Input2	*inp_FD_class;
+extern Fl_Input2	*inp_FD_section;
+extern Fl_Input2	*inp_FD_class1;
+extern Fl_Input2	*inp_FD_section1;
+extern Fl_Input2	*inp_FD_class2;
+extern Fl_Input2	*inp_FD_section2;
+
+// CQWW RTTY
+extern Fl_Input2	*inp_CQzone;
+extern Fl_Input2	*inp_CQstate;
+
 
 #endif

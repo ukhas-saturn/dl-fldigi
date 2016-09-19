@@ -40,10 +40,12 @@
 #include "date.h"
 
 #include "logger.h"
+#include "n3fjp_logger.h"
 #include "adif_io.h"
 #include "textio.h"
 #include "logbook.h"
 #include "rigsupport.h"
+#include "fd_logger.h"
 
 #include "fl_digi.h"
 #include "fileselect.h"
@@ -71,8 +73,6 @@ sorttype lastsort = SORTDATE;
 bool callfwd = true;
 bool modefwd = true;
 bool freqfwd = true;
-
-bool read_logbook = false;
 
 void restore_sort();
 
@@ -366,14 +366,8 @@ int comparerecs (const void *rp1, const void *rp2) { // rp1 needle, rp2 haystack
 	if (cmp != 0) return cmp;
 
 // compare by time
-	int t1 = atoi(r1->getField(TIME_ON));
-	int t2 = atoi(r2->getField(TIME_ON));
-	if (abs(t1 - t2) > 200) { // changed from 2 to accommodate seconds
-		if (t1 < t2)
-			return -1;
-		if (t1 > t2)
-			return 1;
-	} // matched with +/- 2 minutes
+	cmp = strcmp( r1->getField(TIME_ON), r2->getField(TIME_ON) );
+	if (cmp != 0) return cmp;
 
 // compare by mode
 	const char *m1 = r1->getField(MODE); // needle
@@ -386,12 +380,12 @@ int comparerecs (const void *rp1, const void *rp2) { // rp1 needle, rp2 haystack
 		cmp = strcasecmp(m1, m2);
 	if (cmp != 0) return cmp;
 
-// compare by band
-	cmp = strcasecmp( r1->getField(BAND), r2->getField(BAND));
-
-if (cmp == 0) printf("r1: %s, %s, %s, %s, %s\nr2: %s, %s, %s, %s, %s\n",
-r1->getField(CALL), r1->getField(QSO_DATE), r1->getField(TIME_ON), r1->getField(MODE), r1->getField(BAND),
-r2->getField(CALL), r2->getField(QSO_DATE), r2->getField(TIME_ON), r2->getField(MODE), r2->getField(BAND));
+// compare by FREQ
+//	cmp = strcasecmp( r1->getField(FREQ), r2->getField(FREQ));
+	double f1, f2;
+	f1 = atof(r1->getField(FREQ));
+	f2 = atof(r2->getField(FREQ));
+	cmp = (f1 == f2 ? 0 : f1 < f2 ? -1 : 1);
 
 	return cmp;
 }
@@ -412,10 +406,11 @@ void merge_recs( cQsoDb *db, cQsoDb *mrgdb ) // (haystack, needle)
 	cQsoDb *copy = new cQsoDb(db);
 	cQsoDb *merged = new cQsoDb;
 
+	string disptxt;
 	snprintf(msg1, sizeof(msg1), "Read %d records", mrgdb->nbrRecs());
 	LOG_INFO("%s", msg1);
-	REQ(rxtext, "\n*** ");
-	REQ(rxtext, msg1);
+	disptxt.assign("\n\
+=============================================\n").append(msg1).append("\n");
 
 	db->clearDatabase();
 
@@ -429,41 +424,41 @@ void merge_recs( cQsoDb *db, cQsoDb *mrgdb ) // (haystack, needle)
 
 	int cmp;
 	for (;;) {
-		if (n == N && m == M) break;
-		if (n < N && m < M) {
-			if ((cmp = comparerecs(copy->getRec(n), mrgdb->getRec(m))) <= 0) {
-				db->qsoNewRec(copy->getRec(n));
-				n++;
-				if (cmp == 0) {
-					reject->qsoNewRec(mrgdb->getRec(m));
-					m++;
-				}
-			} else {
-				if (db->nbrRecs() == 0) {
-					db->qsoNewRec(mrgdb->getRec(m));
-					merged->qsoNewRec(mrgdb->getRec(m));
-				} else if (comparerecs(db->getRec(db->nbrRecs()-1), mrgdb->getRec(m)) != 0) {
-						db->qsoNewRec(mrgdb->getRec(m));
-						merged->qsoNewRec(mrgdb->getRec(m));
-				} else {
-					reject->qsoNewRec(mrgdb->getRec(m));
-}
-				m++;
-			}
-		} else if (n == N) {
-			if (db->nbrRecs() == 0) {
-				db->qsoNewRec(mrgdb->getRec(m));
-				merged->qsoNewRec(mrgdb->getRec(m));
-			} else if (comparerecs(db->getRec(db->nbrRecs()-1), mrgdb->getRec(m)) != 0) {
-				db->qsoNewRec(mrgdb->getRec(m));
-				merged->qsoNewRec(mrgdb->getRec(m));
-			} else {
-				reject->qsoNewRec(mrgdb->getRec(m));
-			}
+		if (N == 0) {
+			db->qsoNewRec(mrgdb->getRec(m));
+			merged->qsoNewRec(mrgdb->getRec(m));
 			m++;
-		} else {
+			if (m == M) break;
+			continue;
+		}
+
+		if (n == N && m == M) break;
+
+		if (n == N) {
+			db->qsoNewRec(mrgdb->getRec(m));
+			merged->qsoNewRec(mrgdb->getRec(m));
+			m++;
+		} else if (m == M) {
 			db->qsoNewRec(copy->getRec(n));
 			n++;
+		} else {
+			cmp = comparerecs(copy->getRec(n), mrgdb->getRec(m));
+			if (cmp == 0) {
+				reject->qsoNewRec(mrgdb->getRec(m));
+				m++;
+			} else if (cmp < 0) {
+				db->qsoNewRec(copy->getRec(n));
+				n++;
+			} else {
+//				cQsoRec *r1 = copy->getRec(n);
+//				cQsoRec *r2 = mrgdb->getRec(m);
+//printf("original:\n%s, %s, %s, %s, %s\nmerge:\n%s, %s, %s, %s, %s\n",
+//r1->getField(CALL), r1->getField(QSO_DATE), r1->getField(TIME_ON), r1->getField(MODE), r1->getField(FREQ),
+//r2->getField(CALL), r2->getField(QSO_DATE), r2->getField(TIME_ON), r2->getField(MODE), r2->getField(FREQ));
+				db->qsoNewRec(mrgdb->getRec(m));
+				merged->qsoNewRec(mrgdb->getRec(m));
+				m++;
+			}
 		}
 	}
 
@@ -476,13 +471,13 @@ void merge_recs( cQsoDb *db, cQsoDb *mrgdb ) // (haystack, needle)
 		mergedname.append(".adif");
 #endif
 		adifFile.writeLog (mergedname.c_str(), merged, true);
-		snprintf(msg2, sizeof(msg2), "%d merged records saved in\n*** %s",
+		snprintf(msg2, sizeof(msg2), "%d merged records saved in %s",
 			merged->nbrRecs(), mergedname.c_str());
-		REQ(rxtext, "\n*** ");
-		REQ(rxtext, msg2);
 		LOG_INFO("%s", msg2);
+		disptxt.append(msg2).append("\n");
 		db->isdirty(1);
-	}
+	} else
+		disptxt.append("No records to merge\n");
 
 	if (reject->nbrRecs()) {
 		string rejname = LogsDir;
@@ -493,12 +488,13 @@ void merge_recs( cQsoDb *db, cQsoDb *mrgdb ) // (haystack, needle)
 		rejname.append(".adif");
 #endif
 		adifFile.writeLog (rejname.c_str(), reject, true);
-		snprintf(msg3, sizeof(msg3), "%d duplicates's saved in\n    %s", 
+		snprintf(msg3, sizeof(msg3), "%d duplicates's saved in %s", 
 			reject->nbrRecs(), rejname.c_str());
-		REQ(rxtext, "\n*** ");
-		REQ(rxtext, msg3);
 		LOG_INFO("%s", msg3);
+		disptxt.append(msg3).append("\n");
 	}
+	disptxt.append("=============================================\n");
+	rxtext(disptxt.c_str());
 
 	delete reject;
 	delete copy;
@@ -510,16 +506,23 @@ void merge_recs( cQsoDb *db, cQsoDb *mrgdb ) // (haystack, needle)
 }
 
 void cb_mnuMergeADIF_log(Fl_Menu_* m, void* d) {
+
+	ENSURE_THREAD(FLMAIN_TID);
+
 	const char* p = FSEL::select(_("Merge ADIF file"), "ADIF\t*.{adi,adif}", LogsDir.c_str());
-	Fl::wait();
+
 	fl_digi_main->redraw();
-	Fl::awake();
+	Fl::flush();
+
 	if (!p) return;
 	if (!*p) return;
 
 	cQsoDb *mrgdb = new cQsoDb;
 	adifFile.do_readfile (p, mrgdb);
+
+printf("base %d, merge with %d\n", qsodb.nbrRecs(), mrgdb->nbrRecs());
 	merge_recs(&qsodb, mrgdb);
+
 	delete mrgdb;
 
 }
@@ -595,10 +598,6 @@ void cb_mnuExportTEXT_log(Fl_Menu_* m, void *d) {
 
 void cb_mnuShowLogbook(Fl_Menu_* m, void* d)
 {
-	if (read_logbook) {
-		adif_read_OK();
-		read_logbook = false;
-	}
 	dlgLogbook->show();
 }
 
@@ -742,14 +741,30 @@ void DupCheck()
 {
 	Fl_Color call_clr = progdefaults.LOGGINGcolor;
 
-	if (progdefaults.xml_logbook)
+	if (n3fjp_connected) {
+		if (n3fjp_dupcheck())
+			call_clr = fl_rgb_color(
+				progdefaults.dup_color.R,
+				progdefaults.dup_color.G,
+				progdefaults.dup_color.B);
+	}
+
+	else if ( FD_logged_on && strlen(inpCall->value()) > 2) {
+		if ( FD_dupcheck())
+			call_clr = fl_rgb_color(
+				progdefaults.dup_color.R,
+				progdefaults.dup_color.G,
+				progdefaults.dup_color.B);
+	}
+
+	else if ( progdefaults.xml_logbook) {
 		if (xml_check_dup())
 			call_clr = fl_rgb_color(
 				progdefaults.dup_color.R,
 				progdefaults.dup_color.G,
 				progdefaults.dup_color.B);
-
-	if (!progdefaults.xml_logbook && qsodb.duplicate(
+	}
+	else if ( !progdefaults.xml_logbook && qsodb.duplicate(
 			inpCall->value(),
 			zdate(), ztime(), progdefaults.timespan, progdefaults.duptimespan,
 			inpFreq->value(), progdefaults.dupband,
@@ -784,7 +799,13 @@ cQsoRec* SearchLog(const char *callsign)
 
 void SearchLastQSO(const char *callsign)
 {
+	if (n3fjp_connected) {
+		n3fjp_get_record(callsign);
+		return;
+	}
+
 	size_t len = strlen(callsign);
+
 	if (len < 3)
 		return;
 
@@ -869,7 +890,7 @@ int log_search_handler(int)
 
 static int editNbr = 0;
 
-void cb_btnDialFreq(Fl_Button* b, void* d) 
+void cb_btnRetrieve(Fl_Button* b, void* d) 
 {
 	double drf  = atof(inpFreq_log->value());
 	if (!drf) return;
@@ -911,6 +932,9 @@ void cb_btnDialFreq(Fl_Button* b, void* d)
 	inpNotes->value (qsoPtr->getField(NOTES));
 
 	wBrowser->take_focus();
+	if (n3fjp_connected)
+		n3fjp_get_record(inpCall->value());
+
 }
 
 void clearRecord() {
@@ -978,6 +1002,8 @@ void saveRecord() {
 	rec.putField(SRX, inpSerNoIn_log->value());
 	rec.putField(STX, inpSerNoOut_log->value());
 	rec.putField(XCHG1, inpXchgIn_log->value());
+	rec.putField(FDCLASS, inp_FD_class_log->value());
+	rec.putField(FDSECTION, inp_FD_section_log->value());
 	if (!qso_exchange.empty()) {
 		rec.putField(MYXCHG, qso_exchange.c_str());
 		qso_exchange.clear();
@@ -1013,8 +1039,9 @@ void saveRecord() {
 	adifFile.writeLog (logbook_filename.c_str(), &qsodb);
 }
 
+
 void updateRecord() {
-cQsoRec rec;
+	cQsoRec rec;
 	if (qsodb.nbrRecs() == 0) return;
 	rec.putField(CALL, inpCall_log->value());
 	rec.putField(NAME, inpName_log->value());
@@ -1045,6 +1072,8 @@ cQsoRec rec;
 	rec.putField(STX, inpSerNoOut_log->value());
 	rec.putField(XCHG1, inpXchgIn_log->value());
 	rec.putField(MYXCHG, inpMyXchg_log->value());
+	rec.putField(FDCLASS, inp_FD_class_log->value());
+	rec.putField(FDSECTION, inp_FD_section_log->value());
 	rec.putField(CNTY, inpCNTY_log->value());
 	rec.putField(IOTA, inpIOTA_log->value());
 	rec.putField(DXCC, inpDXCC_log->value());
@@ -1116,6 +1145,8 @@ void EditRecord( int i )
 	inpSerNoIn_log->value(editQSO->getField(SRX));
 	inpSerNoOut_log->value(editQSO->getField(STX));
 	inpXchgIn_log->value(editQSO->getField(XCHG1));
+	inp_FD_class_log->value(editQSO->getField(FDCLASS));
+	inp_FD_section_log->value(editQSO->getField(FDSECTION));
 	inpMyXchg_log->value(editQSO->getField(MYXCHG));
 	inpCNTY_log->value(editQSO->getField(CNTY));
 	inpIOTA_log->value(editQSO->getField(IOTA));
@@ -1131,6 +1162,13 @@ std::string sDate_on = "";
 std::string sTime_on = "";
 std::string sDate_off = "";
 std::string sTime_off = "";
+
+static string ucasestr(string str)
+{
+	string s = str;
+	for (size_t n = 0; n < s.length(); n++) s[n] = toupper(s[n]);
+	return s;
+}
 
 void AddRecord ()
 {
@@ -1155,8 +1193,8 @@ void AddRecord ()
 		inpFreq_log->value(Mhz);
 	}
 	inpMode_log->value (logmode);
-	inpState_log->value (inpState->value());
-	inpVE_Prov_log->value (inpVEprov->value());
+	inpState_log->value (ucasestr(inpState->value()).c_str());
+	inpVE_Prov_log->value (ucasestr(inpVEprov->value()).c_str());
 	inpCountry_log->value (inpCountry->value());
 
 	inpSerNoIn_log->value(inpSerNo->value());
@@ -1176,8 +1214,12 @@ void AddRecord ()
 	inpDXCC_log->value("");
 	inpQSL_VIA_log->value("");
 	inpCONT_log->value("");
-	inpCQZ_log->value("");
+
+	inpCQZ_log->value(inp_CQzone->value());
 	inpITUZ_log->value("");
+
+	inp_FD_class_log->value(ucasestr(inp_FD_class->value()).c_str());
+	inp_FD_section_log->value(ucasestr(inp_FD_section->value()).c_str());
 
 	saveRecord();
 
@@ -1355,7 +1397,6 @@ void cb_Export_Cabrillo(Fl_Menu_* m, void* d) {
  			rec->getField(CALL),
 			szfreq(rec->getField(FREQ)),
 			rec->getField(MODE) );
-std::cout << line << "\n";
         chkCabBrowser->add(line);
 	}
 	wCabrillo->show();
@@ -1431,7 +1472,10 @@ void cabrillo_append_qso (FILE *fp, cQsoRec *rec)
 		toff = toff.append(" ");
 		exch_out.append(toff);
 	}
-
+//
+// ADD CONTESTNBR == FD
+//
+//
 	if (exch_out.length() > 20) exch_out = exch_out.substr(0,20);
 	len = exch_out.length();
 	if (len < 20) exch_out.append(20 - len, ' ');
@@ -1506,7 +1550,7 @@ void WriteCabrillo()
 
 	string sp = p;
 	if (sp.find(".txt") == string::npos) sp.append(".txt");
-    FILE *cabFile = fopen (p, "w");
+    FILE *cabFile = fl_fopen (p, "w");
     if (!cabFile)
         return;
 

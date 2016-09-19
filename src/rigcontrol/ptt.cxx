@@ -64,6 +64,8 @@
 
 #include "fl_digi.h"
 
+#include "n3fjp_logger.h"
+
 LOG_FILE_SOURCE(debug::LOG_RIGCONTROL);
 
 using namespace std;
@@ -156,6 +158,9 @@ void PTT::set(bool ptt)
 		break;
 #endif
 	}
+	if (n3fjp_connected)
+		n3fjp_set_ptt(ptt);
+
 	if (ptt && progdefaults.PTT_on_delay)
 		MilliSleep(progdefaults.PTT_on_delay);
 
@@ -207,7 +212,7 @@ void PTT::set_gpio(bool ptt)
 	char path[VALUE_MAX];
 
 	snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", progdefaults.GPIOPort);
-	int fd = open(path, O_WRONLY);
+	int fd = fl_open(path, O_WRONLY);
 	if (-1 == fd) {
 		LOG_ERROR("Failed to open gpio (%s) value for writing!\n", path);
 		return;
@@ -254,7 +259,7 @@ void PTT::open_tty(void)
 		oflags = oflags | O_CLOEXEC;
 #	endif
 
-	if ((pttfd = open(pttdevName.c_str(), oflags)) < 0) {
+	if ((pttfd = fl_open(pttdevName.c_str(), oflags)) < 0) {
 		LOG_ERROR("Could not open \"%s\": %s", pttdevName.c_str(), strerror(errno));
 		return;
 	}
@@ -351,7 +356,7 @@ void PTT::open_parport(void)
 		oflags = oflags | O_CLOEXEC;
 #	endif
 
-	if ((pttfd = open(progdefaults.PTTdev.c_str(),  oflags)) == -1) {
+	if ((pttfd = fl_open(progdefaults.PTTdev.c_str(),  oflags)) == -1) {
 		LOG_ERROR("Could not open %s: %s", progdefaults.PTTdev.c_str(), strerror(errno));
 		return;
 	}
@@ -478,7 +483,7 @@ static bool open_fifos(const char* base, int fd[2])
 		oflags = oflags | O_CLOEXEC;
 #	endif
 
-	if ((fd[0] = open(fifo.c_str(), oflags)) == -1) {
+	if ((fd[0] = fl_open(fifo.c_str(), oflags)) == -1) {
 		LOG_ERROR("Could not open %s: %s", fifo.c_str(), strerror(errno));
 		return false;
 	}
@@ -495,7 +500,7 @@ static bool open_fifos(const char* base, int fd[2])
 		oflags = oflags | O_CLOEXEC;
 #	endif
 
-	if ((fd[1] = open(fifo.c_str(), oflags)) == -1) {
+	if ((fd[1] = fl_open(fifo.c_str(), oflags)) == -1) {
 		LOG_ERROR("Could not open %s: %s", fifo.c_str(), strerror(errno));
 		return false;
 	}
@@ -535,7 +540,7 @@ static bool start_uhrouter(void)
 
 	appPath.assign("/Applications/µH Router.app/Contents/MacOS/µH Router");
 
-	fd = fopen(appPath.c_str(), "r");
+	fd = fl_fopen(appPath.c_str(), "r");
 	if(fd) {
 		found = true;
 		fclose(fd);

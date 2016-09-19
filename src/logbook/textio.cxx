@@ -78,6 +78,7 @@ void cTextFile::writeCSVHeader(FILE *txtFile)
 	if (btnSelectCNTY->value())      fprintf (txtFile, "%s", ",\"CNTY\"");
 	if (btnSelectCountry->value())   fprintf (txtFile, "%s", ",\"CNTRY\"");
 	if (btnSelectDXCC->value())      fprintf (txtFile, "%s", ",\"DXCC\"");
+	if (btnSelectCQZ->value())       fprintf (txtFile, "%s", ",\"CQZONE\"");
 	if (btnSelectIOTA->value())      fprintf (txtFile, "%s", ",\"IOTA\"");
 	if (btnSelectCONT->value())      fprintf (txtFile, "%s", ",\"CONT\"");
 	if (btnSelectITUZ->value())      fprintf (txtFile, "%s", ",\"ITUZ\"");
@@ -89,12 +90,14 @@ void cTextFile::writeCSVHeader(FILE *txtFile)
 	if (btnSelectSerialOUT->value()) fprintf (txtFile, "%s", ",\"SERIAL_SENT\"");
 	if (btnSelectXchgIn->value())    fprintf (txtFile, "%s", ",\"XCHG1\"");
 	if (btnSelectMyXchg->value())    fprintf (txtFile, "%s", ",\"MYXCHG\"");
+	if (btnSelectClass->value())     fprintf (txtFile, "%s", ",\"FD_CLASS\"");
+	if (btnSelectSection->value())   fprintf (txtFile, "%s", ",\"FD_SECTION\"");
 	fprintf (txtFile, "%s", szEOL);
 }
 
 int cTextFile::writeCSVFile (const char *fname, cQsoDb *db) {
 	cQsoRec *pRec = (cQsoRec *)0;
-	FILE *txtFile = fopen (fname, "w");
+	FILE *txtFile = fl_fopen (fname, "w");
 	if (!txtFile) return 1;
   
 	if (txtFile) {
@@ -138,6 +141,8 @@ int cTextFile::writeCSVFile (const char *fname, cQsoDb *db) {
 					fprintf (txtFile, ",\"%s\"", pRec->getField(COUNTRY));
 				if (btnSelectDXCC->value())
 					fprintf (txtFile, ",\"%s\"", pRec->getField(DXCC));
+				if (btnSelectCQZ->value())
+					fprintf (txtFile, ",\"%s\"", pRec->getField(CQZ));
 				if (btnSelectIOTA->value())
 					fprintf (txtFile, ",\"%s\"", pRec->getField(IOTA));
 				if (btnSelectCONT->value())
@@ -164,6 +169,12 @@ int cTextFile::writeCSVFile (const char *fname, cQsoDb *db) {
 					fprintf (txtFile, ",\"%s\"", pRec->getField(XCHG1));
 				if (btnSelectMyXchg->value())
 					fprintf (txtFile, ",\"%s\"", pRec->getField(MYXCHG));
+
+				if (btnSelectClass->value())
+					fprintf (txtFile, ",\"%s\"", pRec->getField(FDCLASS));
+				if (btnSelectSection->value())
+					fprintf (txtFile, ",\"%s\"", pRec->getField(FDSECTION));
+
 				fprintf (txtFile, "%s", szEOL);
 				pRec->putField(EXPORT,"");
 				db->qsoUpdRec(i, pRec);
@@ -196,6 +207,7 @@ void cTextFile::writeTXTHeader(FILE *txtFile)
 	if (btnSelectCountry->value())   fprintf (txtFile, "%-15s", "CNTRY");
 	if (btnSelectCNTY->value())      fprintf (txtFile, "%-8s",  "CNTY");
 	if (btnSelectDXCC->value())      fprintf (txtFile, "%-8s",  "DXCC");
+	if (btnSelectCQZ->value())       fprintf (txtFile, "%-8s",  "CQZONE");
 	if (btnSelectIOTA->value())      fprintf (txtFile, "%-8s", "IOTA");
 	if (btnSelectCONT->value())      fprintf (txtFile, "%-8s",  "CONT");
 	if (btnSelectITUZ->value())      fprintf (txtFile, "%-8s",  "ITUZ");
@@ -208,12 +220,16 @@ void cTextFile::writeTXTHeader(FILE *txtFile)
 	if (btnSelectSerialOUT->value()) fprintf (txtFile, "%-7s", "STX");
 	if (btnSelectXchgIn->value())    fprintf (txtFile, "%-15s", "XCHG1");
 	if (btnSelectMyXchg->value())    fprintf (txtFile, "%-15s", "MYXCHG");
+
+	if (btnSelectClass->value())     fprintf (txtFile, "%-15s", "FDCLASS");
+	if (btnSelectSection->value())   fprintf (txtFile, "%-15s", "FDSECTION");
+
 	fprintf (txtFile, "%s", szEOL);
 }
 
 int cTextFile::writeTXTFile (const char *fname, cQsoDb *db) {
 	cQsoRec *pRec = (cQsoRec *)0;
-	FILE *txtFile = fopen (fname, "w");
+	FILE *txtFile = fl_fopen (fname, "w");
 	if (!txtFile) return 1;
   
 	if (txtFile) {
@@ -257,6 +273,8 @@ int cTextFile::writeTXTFile (const char *fname, cQsoDb *db) {
 					fprintf (txtFile, "%-8s", pRec->getField(CNTY));
 				if (btnSelectDXCC->value())
 					fprintf (txtFile, "%-8s", pRec->getField(DXCC));
+				if (btnSelectCQZ->value())
+					fprintf (txtFile, "%-8s", pRec->getField(CQZ));
 				if (btnSelectIOTA->value())
 					fprintf (txtFile, "%-8s", pRec->getField(IOTA));
 				if (btnSelectCONT->value())
@@ -283,6 +301,12 @@ int cTextFile::writeTXTFile (const char *fname, cQsoDb *db) {
 					fprintf (txtFile, "%-15s", pRec->getField(XCHG1));
 				if (btnSelectMyXchg->value())
 					fprintf (txtFile, "%-15s", pRec->getField(MYXCHG));
+
+				if (btnSelectClass->value())
+					fprintf (txtFile, "%-15s", pRec->getField(FDCLASS));
+				if (btnSelectSection->value())
+					fprintf (txtFile, "%-15s", pRec->getField(FDSECTION));
+
 				fprintf (txtFile, "%s", szEOL);
 				pRec->putField(EXPORT,"");
 				db->qsoUpdRec(i, pRec);

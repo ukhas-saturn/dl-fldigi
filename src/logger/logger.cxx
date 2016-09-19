@@ -47,6 +47,9 @@
 
 #include "logsupport.h"
 #include "lookupcall.h"
+#include "fd_logger.h"
+
+#include "n3fjp_logger.h"
 
 #include <FL/fl_ask.H>
 
@@ -70,7 +73,7 @@ void writeADIF () {
 
     sfname = TempDir;
     sfname.append("log.adif");
-	adiFile = fopen (sfname.c_str(), "a");
+	adiFile = fl_fopen (sfname.c_str(), "a");
 	if (adiFile) {
 // write the current record to the file  
 		fprintf(adiFile,"%s<EOR>\n", adif.c_str());
@@ -205,6 +208,7 @@ void submit_record(cQsoRec &rec)
 #else
 	submit_ADIF(rec);
 #endif
+	n3fjp_add_record(rec);
 }
 
 //---------------------------------------------------------------------
@@ -226,5 +230,6 @@ void submit_log(void)
 	else
 		AddRecord();
 
+	if (FD_logged_on) FD_add_record();
 }
 
