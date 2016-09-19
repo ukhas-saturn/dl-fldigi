@@ -2893,7 +2893,7 @@ void cb_mnuContest(Fl_Menu_ *m, void *) {
 
 void set_macroLabels()
 {
-	if (bWF_only) return;
+	if (bWF_only || bHAB) return;
 	if (progdefaults.mbar_scheme > MACRO_SINGLE_BAR_MAX) {
 		altMacros = 1;
 		for (int i = 0; i < NUMMACKEYS; i++) {
@@ -8334,10 +8334,7 @@ void noop_controls() // create and then hide all controls not being used
 	qso_inpAct = new Fl_Input2(defwidget); qso_inpAct->hide();
 
 	if (bHAB) {
-		QsoInfoFrame1A =  new Fl_Group(defwidget);
-		QsoInfoFrame1B =  new Fl_Group(defwidget);
-		QsoInfoFrame1A->hide();
-		QsoInfoFrame1B->hide();
+		QSO_frame_1 = new Fl_Group(defwidget); QSO_frame_1->hide();
 	}
 	pwrmeter = new PWRmeter(defwidget); pwrmeter->hide();
 	smeter = new Smeter(defwidget); smeter->hide();
