@@ -565,12 +565,16 @@ bool rtty::rx(bool bit) // original modified for probability test
 char snrmsg[80];
 void rtty::Metric()
 {
-	double delta = rtty_baud/8.0;
-	double np = wf->powerDensity(frequency, delta) * 3000 / delta;
+	double delta = rtty_baud * 0.2;
+	double np = 2 * wf->powerDensity(frequency, delta) + 1e-10;
+		// occupupied bandwidth is (baud + shift), but that would break squelch metric
 	double sp =
 		wf->powerDensity(frequency - shift/2, delta) +
-		wf->powerDensity(frequency + shift/2, delta) + 1e-10;
+		wf->powerDensity(frequency + shift/2, delta) - np;
 	double snr = 0;
+
+	if (sp * 100 < np)
+		sp = np *0.01;
 
 	sigpwr = decayavg( sigpwr, sp, sp > sigpwr ? 2 : 8);
 	noisepwr = decayavg( noisepwr, np, 16 );
@@ -578,7 +582,7 @@ void rtty::Metric()
 
 	snprintf(snrmsg, sizeof(snrmsg), "s/n %-3.0f dB", snr);
 	put_Status2(snrmsg);
-	metric = CLAMP((3000 / delta) * (sigpwr/noisepwr), 0.0, 100.0);
+	metric = CLAMP(10 * (sigpwr/noisepwr), 0.0, 100.0);
 	display_metric(metric);
 }
 
