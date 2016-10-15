@@ -417,8 +417,9 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 	put_status("SSDV: Decoded image packet!", 10);
 
 	char msg[200], callsign[10];
+	ssdv_decode_callsign(callsign, pkt_info.callsign);
 	snprintf(msg, 200, "Decoded image packet. Callsign: %s, Image ID: %02X, Resolution: %dx%d, Packet ID: %d",
-		ssdv_decode_callsign(callsign, pkt_info.callsign),
+		callsign,
 		pkt_info.image_id,
 		pkt_info.width,
 		pkt_info.height,
@@ -436,8 +437,9 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 	ReceiveText->addstr("\n");
 
 
-    /* Only decode JPG type packets */
-    if (pkt_info.type != 0x66) { return; }
+	/* Only decode JPG type packets */
+	if (pkt_info.type != SSDV_TYPE_NORMAL)
+		return;
 	
 	/* Does this belong to the same image? */
 	if(pkt_info.callsign != image_callsign ||
@@ -460,6 +462,7 @@ void ssdv_rx::put_byte(uint8_t byte, int lost)
 		if(image) delete image;
 		image_len = image_width * image_height * 3;
 		image = new unsigned char[image_len];
+		memset(&image[0], 50, image_len);
 		
 		/* Create the Fl_RGB_Image object */
 		if(flrgb) delete flrgb;
