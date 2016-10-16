@@ -101,6 +101,8 @@
 #include "psm/psm.h"
 #include "fd_logger.h"
 #include "n3fjp_logger.h"
+#include "dx_cluster.h"
+#include "dx_dialog.h"
 
 #if USE_HAMLIB
 	#include "rigclass.h"
@@ -369,6 +371,7 @@ void delayed_startup(void *)
 	n3fjp_init();
 	arq_init();
 	FD_init();
+	DXcluster_init();
 
 	start_psm_thread();
 
@@ -546,6 +549,10 @@ int main(int argc, char ** argv)
 				cbq[i]->attach(i, "N3FJP_TID");
 				break;
 
+			case DXCC_TID:
+				cbq[i]->attach(i, "DXCC_TID");
+				break;
+
 			case FLMAIN_TID:
 				cbq[i]->attach(i, "FLMAIN_TID");
 				break;
@@ -719,6 +726,7 @@ int main(int argc, char ** argv)
 			 progdefaults.slowcpu ? "true" : "false",
 			 src_get_name(progdefaults.sample_converter));
 	}
+
 	if (progdefaults.XmlRigFilename.empty())
 		progdefaults.XmlRigFilename = xmlfname;
 
@@ -764,6 +772,9 @@ int main(int argc, char ** argv)
 
 	dlgViewer = createViewer();
 	create_logbook_dialogs();
+	dxcluster_viewer = dxc_window();
+	dxcluster_viewer->hide();
+
 	LOGBOOK_colors_font();
 
 	if( progdefaults.kml_save_dir.empty() ) {
@@ -812,6 +823,8 @@ void exit_process() {
 	stop_psm_thread();
 	arq_close();
 	FD_close();
+	DXcluster_close();
+
 	kiss_close(false);
 	maclogger_close();
 	XML_RPC_Server::stop();
@@ -1564,14 +1577,18 @@ void set_platform_ui(void)
 #define OUT_RATE 8000
 double speed_test(int converter, unsigned repeat)
 {
+	float input_frames[IN_RATE];
+	float output_frames[OUT_RATE];
+
 	SRC_DATA src;
+
 	src.src_ratio = (double)OUT_RATE / IN_RATE;
 	src.input_frames = IN_RATE;
 	src.output_frames = OUT_RATE;
-	src.data_in = new float[src.input_frames];
-	src.data_out = new float[src.output_frames];
+	src.data_in = &input_frames[0];
+	src.data_out = &output_frames[0];
 
-	memset(src.data_in, 0, src.input_frames * sizeof(float));
+	memset(input_frames, 0, sizeof(input_frames));
 
 	// warm up
 	src_simple(&src, converter, 1);
@@ -1589,9 +1606,6 @@ double speed_test(int converter, unsigned repeat)
 #else
 	clock_gettime(CLOCK_REALTIME, &t1);
 #endif
-
-	delete [] src.data_in;
-	delete [] src.data_out;
 
 	t0 = t1 - t0;
 	return repeat / (t0.tv_sec + t0.tv_nsec/1e9);

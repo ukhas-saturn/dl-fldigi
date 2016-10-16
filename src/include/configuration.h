@@ -1006,6 +1006,9 @@
               "Use N3FJP spot report as signal center freq.\n"                          \
               "Center the target at mode sweet spot",                                   \
               false)                                                                    \
+        ELEM_(bool, N3FJP_modem_carrier, "N3FJP_MODEM_CARRIER",                         \
+              "Use actual modem carrier frequency for logging",                         \
+              true)                                                                     \
         /* Rig control */                                                               \
         ELEM_(bool, flrig_keys_modem, "FLRIG_KEYS_MODEM",                               \
               "PTT change at flrig changes Rx/Tx state\n"                               \
@@ -1013,7 +1016,7 @@
               true)                                                                     \
         ELEM_(bool, fldigi_client_to_flrig, "CLIENT_TO_FLRIG",                          \
               "True if flrig xmlrpc server is used for xcvr control",                   \
-              true)                                                                     \
+              false)                                                                    \
         ELEM_(bool, btnusb, "BTNUSB",                                                   \
               "This setting is currently unused",                                       \
               true)                                                                     \
@@ -1378,6 +1381,34 @@
               "Field Day (w1hkj) server tcpip port",                                    \
               "20001")                                                                  \
         /* Macro controls */                                                            \
+        /* DX Cluster */                                                                \
+        ELEM_(std::string, dxcc_host_url, "DXCC_HOST_URL",                              \
+              "DXCC cluster tcpip address",                                             \
+              "")                                                                       \
+        ELEM_(Fl_Color, DXC_color, "DXC_COLOR",                                         \
+              "Background color in dxcluster dialog",                                   \
+              FL_BACKGROUND2_COLOR)                                                     \
+        ELEM_(Fl_Color, DXC_even_color, "DXC_EVEN_COLOR",                               \
+              "Even line background color in dxcluster dialog",                         \
+              7)                                                                        \
+        ELEM_(Fl_Color, DXC_odd_color, "DXC_ODD_COLOR",                                 \
+              "Odd line background color in dxcluster dialog",                          \
+              246)                                                                      \
+        ELEM_(Fl_Color, DXC_textcolor, "DXC_TEXTCOLOR",                                 \
+              "Text color in dxcluster dialog",                                         \
+              FL_BLACK)                                                                 \
+        ELEM_(Fl_Font, DXC_textfont, "DXC_TEXTFONT",                                    \
+              "DX cluster browsers font number",                                        \
+              FL_COURIER)                                                               \
+        ELEM_(int, DXC_textsize, "DXC_TEXTSIZE",                                        \
+              "DX cluster browsers font size",                                          \
+              14)                                                                       \
+        ELEM_(std::string, dxcc_host_port, "DXCC_HOST_PORT",                            \
+              "DXCC cluster tcpip port number",                                         \
+              "")                                                                       \
+        ELEM_(std::string, dxcc_login, "DXCC_LOGIN",                                    \
+              "DXCC cluster login call sign",                                           \
+              "")                                                                       \
         ELEM_(bool, UseLastMacro, "USELASTMACRO",                                       \
               "Load last used macro file on startup",                                   \
               false)                                                                    \

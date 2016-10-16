@@ -157,6 +157,9 @@
 #include "psm/psm.h"
 #include "n3fjp_logger.h"
 
+#include "dx_cluster.h"
+#include "dx_dialog.h"
+
 #include "notifydialog.h"
 #include "macroedit.h"
 #include "rx_extract.h"
@@ -191,13 +194,11 @@ bool bHAB = false;
 #define WEFAX_RX_IMAGE_MLABEL  _("&Weather Fax Image RX")
 #define WEFAX_fsq_tx_image_MLABEL  _("&Weather Fax Image TX")
 #define CONTEST_MLABEL         _("Contest")
-#define CONTEST_FIELDS_MLABEL  _("&Contest fields")
 #define COUNTRIES_MLABEL       _("C&ountries")
 #define UI_MLABEL              _("&UI")
 #define RIGLOG_FULL_MLABEL     _("Full")
+#define RIGLOG_PARTIAL_MLABEL  _("Partial")
 #define RIGLOG_NONE_MLABEL     _("None")
-#define RIGLOG_MLABEL          _("Rig control and logging")
-#define RIGCONTEST_MLABEL      _("Rig control and contest")
 #define DOCKEDSCOPE_MLABEL     _("Docked scope")
 #define WF_MLABEL              _("Minimal controls")
 #define SHOW_CHANNELS          _("Show channels")
@@ -241,6 +242,8 @@ Fl_Double_Window	*scopeview         = (Fl_Double_Window *)0;
 ssdv_rx			*ssdv              = (ssdv_rx *)0;
 
 Fl_Double_Window	*field_day_viewer  = (Fl_Double_Window *)0;
+
+Fl_Double_Window	*dxcluster_viewer  = (Fl_Double_Window *)0;
 
 static Fl_Group		*mnuFrame;
 Fl_Menu_Bar 		*mnu;
@@ -1397,86 +1400,107 @@ void cb_mnuSaveMacro(Fl_Menu_*, void*) {
 void remove_windows()
 {
 	if (scopeview) {
+LOG_ERROR("Deleting %s", "scopeview");
 		scopeview->hide();
 		delete scopeview;
 	}
 	if (dlgViewer) {
+LOG_ERROR("Deleting %s", "dlgViewer");
 		dlgViewer->hide();
 		delete dlgViewer;
 	}
 	if (dlgLogbook) {
+LOG_ERROR("Deleting %s", "dlgLogbook");
 		dlgLogbook->hide();
 		delete dlgLogbook;
 	}
 	if (dlgConfig) {
+LOG_ERROR("Deleting %s", "dlgConfig");
 		dlgConfig->hide();
 		delete cboHamlibRig;
 		delete dlgConfig;
 	}
 	if (font_browser) {
+LOG_ERROR("Deleting %s", "font-browser");
 		font_browser->hide();
 		delete font_browser;
 	}
 	if (notify_window) {
+LOG_ERROR("Deleting %s", "notify_window");
 		notify_window->hide();
 		delete notify_window;
 	}
 	if (dxcc_window) {
+LOG_ERROR("Deleting %s", "dxcc_window");
 		dxcc_window->hide();
 		delete dxcc_window;
 	}
 	if (picRxWin) {
+LOG_ERROR("Deleting %s", "picRxWin");
 		picRxWin->hide();
 		delete picRxWin;
 	}
 	if (picTxWin) {
+LOG_ERROR("Deleting %s", "picTxWin");
 		picTxWin->hide();
 		delete picTxWin;
 	}
 	if (fsqpicRxWin){
+LOG_ERROR("Deleting %s", "fsqpicRxWin");
 		fsqpicRxWin->hide();
 		delete fsqpicRxWin;
 	}
 	if (fsqpicTxWin){
+LOG_ERROR("Deleting %s", "fsqpicTxWin");
 		fsqpicTxWin->hide();
 		delete fsqpicTxWin;
 	}
 	if (ifkppicRxWin){
+LOG_ERROR("Deleting %s", "ifppicRxWin");
 		ifkppicRxWin->hide();
 		delete ifkppicRxWin;
 	}
 	if (ifkppicTxWin){
+LOG_ERROR("Deleting %s", "ifppicTxWin");
 		ifkppicTxWin->hide();
 		delete ifkppicTxWin;
 	}
 	if (thorpicRxWin){
+LOG_ERROR("Deleting %s", "thorpicRxWin");
 		thorpicRxWin->hide();
 		delete thorpicRxWin;
 	}
 	if (thorpicTxWin){
+LOG_ERROR("Deleting %s", "thorpicTxWin");
 		thorpicTxWin->hide();
 		delete thorpicTxWin;
 	}
 	if (wefax_pic_rx_win) {
+LOG_ERROR("Deleting %s", "wefax_pic_rxin");
 		wefax_pic_rx_win->hide();
 		delete wefax_pic_rx_win;
 	}
 	if (wefax_pic_tx_win) {
+LOG_ERROR("Deleting %s", "wefax_pic_txin");
 		wefax_pic_tx_win->hide();
 		delete wefax_pic_tx_win;
 	}
 	if (wExport) {
+LOG_ERROR("Deleting %s", "wExport");
 		wExport->hide();
 		delete wExport;
 	}
 	if (wCabrillo) {
+LOG_ERROR("Deleting %s", "wCabrillo");
 		wCabrillo->hide();
 		delete wCabrillo;
 	}
 	if (MacroEditDialog) {
+LOG_ERROR("Deleting %s", "MacroEditDialog");
 		MacroEditDialog->hide();
 		delete MacroEditDialog;
 	}
+LOG_ERROR("Deleting %s", "fsqMonitor");
 	if (fsqMonitor) {
 		fsqMonitor->hide();
 		delete fsqMonitor;
@@ -1486,7 +1510,7 @@ void remove_windows()
 //		fsqDebug->hide();
 //		delete fsqDebug;
 //	}
-
+LOG_ERROR("stopping debug session\n");
 	debug::stop();
 }
 
@@ -2328,6 +2352,13 @@ void cb_fd_viewer(Fl_Widget* w, void*)
 		field_day_viewer->show();
 }
 
+void cb_dxc_viewer(Fl_Widget* w, void*)
+{
+	if (dxcluster_viewer->visible())
+		dxcluster_viewer->hide();
+	else
+		dxcluster_viewer->show();
+}
 
 void set_server_label(bool val)
 {
@@ -2563,26 +2594,9 @@ void cb_mnuCheckUpdate(Fl_Widget *, void *)
 
 	if (is_ok)
 		fl_message2(_("You are running the latest version"));
-	else {
-		int choice =
-				fl_choice2(_("Version %s is available at Source Forge\n\nWhat would you like to do?"),
-				  _("Close"), _("Visit URL"), _("Copy URL"),
+	else
+		fl_message2(_("Version %s is available at Source Forge"),
 				  version_str.c_str());
-		switch (choice) {
-			case 1:
-				cb_mnuVisitURL(NULL, (void*)url);
-				break;
-			case 2: {
-				size_t n = strlen(url);
-				Fl::copy(url, n, 0);
-				Fl::copy(url, n, 1);
-				break;
-			}
-			default:
-			case 0:
-				break;
-		}
-	}
 #endif
 	put_status("");
 }
@@ -2845,50 +2859,6 @@ void cb_mnuShowSSDVRX(Fl_Menu_ *, void *) {
 void cb_mnuShowCountries(Fl_Menu_ *, void *)
 {
 	notify_dxcc_show();
-}
-
-void adjust_contest_frames()
-{
-	if (!progStatus.contest) {
-			FD_frame_1->hide();
-			CQWW_RTTY_frame_1->hide();
-			Contest_frame_1->hide();
-			QSO_frame_1->show();
-		return;
-	}
-	switch (progdefaults.logging) {
-		case LOG_CONT:
-			QSO_frame_1->hide();
-			FD_frame_1->hide();
-			CQWW_RTTY_frame_1->hide();
-			Contest_frame_1->show();
-			break;
-		case LOG_FD:
-			QSO_frame_1->hide();
-			Contest_frame_1->hide();
-			CQWW_RTTY_frame_1->hide();
-			FD_frame_1->show();
-			break;
-		case LOG_CQWW:
-			QSO_frame_1->hide();
-			Contest_frame_1->hide();
-			FD_frame_1->hide();
-			CQWW_RTTY_frame_1->show();
-			break;
-		case LOG_BART:
-		case LOG_QSO:
-		default:
-			FD_frame_1->hide();
-			CQWW_RTTY_frame_1->hide();
-			Contest_frame_1->hide();
-			QSO_frame_1->show();
-			break;
-	}
-}
-
-void cb_mnuContest(Fl_Menu_ *m, void *) {
-	progStatus.contest = m->mvalue()->value();
-	adjust_contest_frames();
 }
 
 void set_macroLabels()
@@ -3384,7 +3354,6 @@ void qso_save_now()
 	submit_log();
 	if (progdefaults.ClearOnSave)
 		clearQSO();
-//	ReceiveText->mark(FTextBase::XMIT);
 }
 
 
@@ -3829,6 +3798,10 @@ LOG_INFO("exit_process");
 	if (field_day_viewer)
 		if (field_day_viewer->visible())
 			field_day_viewer->hide();
+
+	if (dxcluster_viewer)
+		if (dxcluster_viewer->visible())
+			dxcluster_viewer->hide();
 
 	return true;
 }
@@ -4344,19 +4317,6 @@ void UI_select()
 		return;
 	}
 
-	Fl_Menu_Item* cf = getMenuItem(CONTEST_FIELDS_MLABEL);
-
-	if (progStatus.NO_RIGLOG || progStatus.Rig_Contest_UI || progStatus.Rig_Log_UI) {
-		cf->clear();
-		cf->deactivate();
-	}
-	else {
-		cf->activate();
-		if (progStatus.contest)
-			cf->set();
-		getMenuItem(RIGLOG_FULL_MLABEL)->setonly();
-	}
-
 	int x =   0;
 	int y1 =  Hmenu;
 	int w =   fl_digi_main->w();
@@ -4385,8 +4345,7 @@ void UI_select()
 		goto UI_return;
 	}
 
-	if ((!progStatus.Rig_Log_UI && ! progStatus.Rig_Contest_UI) ||
-			restore_minimize) {
+	if (!progStatus.Rig_Log_UI || restore_minimize) {
 		TopFrame1->resize( x, y1, w, Hqsoframe );
 		y1 += (TopFrame1->h());
 		HTh -= (TopFrame1->h());
@@ -4405,10 +4364,6 @@ void UI_select()
 		outSerNo = outSerNo1;
 		inpXchgIn = inpXchgIn1;
 		inpState = inpState1;
-		inp_FD_class = inp_FD_class1;
-		inp_FD_section = inp_FD_section1;
-		inp_CQstate = inp_CQstate1;
-		inp_CQzone = inp_CQzone1;
 
 		QSO_frame_1->hide();
 		Contest_frame_1->hide();
@@ -4417,50 +4372,69 @@ void UI_select()
 
 		switch (progdefaults.logging) {
 			case LOG_FD:
+				inp_FD_class = inp_FD_class1;
+				inp_FD_section = inp_FD_section1;
+				QSO_frame_1->hide();
+				Contest_frame_1->hide();
+				CQWW_RTTY_frame_1->hide();
 				FD_frame_1->show();
 				break;
 			case LOG_CQWW:
-				inpState = inp_CQstate;
+				inpState = inp_CQstate = inp_CQstate1;
+				inp_CQzone = inp_CQzone1;
+				QSO_frame_1->hide();
+				Contest_frame_1->hide();
+				FD_frame_1->hide();
 				CQWW_RTTY_frame_1->show();
 				break;
 			case LOG_BART:
 //				break;
 			case LOG_CONT:
+				QSO_frame_1->hide();
+				FD_frame_1->hide();
+				CQWW_RTTY_frame_1->hide();
 				Contest_frame_1->show();
 				break;
-			default:
+			default: // no contest
+				FD_frame_1->hide();
+				CQWW_RTTY_frame_1->hide();
+				Contest_frame_1->hide();
 				QSO_frame_1->show();
 		}
+		QSO_frame_1->redraw();
+		Contest_frame_1->redraw();
+		CQWW_RTTY_frame_1->redraw();
+		FD_frame_1->redraw();
 
 		qsoFreqDisp = qsoFreqDisp1;
 		TopFrame1->init_sizes();
+
 		goto UI_return;
 	}
+	else {
+		if (progdefaults.logging == 0) { // generic QSO
+			TopFrame2->resize( x, y1, w, Hentry + 2 * pad);
+			y1 += TopFrame2->h();
+			HTh -= TopFrame2->h();
+			UI_position_macros(x, y1, w, HTh);
+			TopFrame1->hide();
+			TopFrame3->hide();
+			TopFrame2->show();
+			inpCall = inpCall2;
+			inpTimeOn = inpTimeOn2;
+			inpTimeOff = inpTimeOff2;
+			inpName = inpName2;
+			inpSerNo = inpSerNo1;
+			outSerNo = outSerNo1;
+			inpRstIn = inpRstIn2;
+			inpRstOut = inpRstOut2;
+			inpState = inpState1;
+			qsoFreqDisp = qsoFreqDisp2;
+			inpCall4->hide();
+			Status2->show();
+			goto UI_return;
+		}
 
-	if (progStatus.Rig_Log_UI) {
-		TopFrame2->resize( x, y1, w, Hentry + 2 * pad);
-		y1 += TopFrame2->h();
-		HTh -= TopFrame2->h();
-		UI_position_macros(x, y1, w, HTh);
-		TopFrame1->hide();
-		TopFrame3->hide();
-		TopFrame2->show();
-		inpCall = inpCall2;
-		inpTimeOn = inpTimeOn2;
-		inpTimeOff = inpTimeOff2;
-		inpName = inpName2;
-		inpSerNo = inpSerNo1;
-		outSerNo = outSerNo1;
-		inpRstIn = inpRstIn2;
-		inpRstOut = inpRstOut2;
-		inpState = inpState1;
-		qsoFreqDisp = qsoFreqDisp2;
-		inpCall4->hide();
-		Status2->show();
-		goto UI_return;
-	}
-
-	if (progStatus.Rig_Contest_UI) {
 		TopFrame3->resize( x, y1, w, Hentry + 2 * pad);
 		y1 += TopFrame3->h();
 		HTh -= TopFrame3->h();
@@ -4476,15 +4450,10 @@ void UI_select()
 		outSerNo = outSerNo2;
 		inpXchgIn = inpXchgIn2;
 
-		inp_FD_class = inp_FD_class2;
-		inp_FD_section = inp_FD_section2;
-
-		inpState = inp_CQstate = inp_CQstate2;
-		inp_CQzone = inp_CQzone2;
-
-
 		switch (progdefaults.logging) {
 			case LOG_FD:
+				inp_FD_class = inp_FD_class2;
+				inp_FD_section = inp_FD_section2;
 				inpSerNo2->hide();
 				outSerNo2->hide();
 				inpXchgIn2->hide();
@@ -4494,6 +4463,8 @@ void UI_select()
 				inp_FD_section2->show();
 				break;
 			case LOG_CQWW:
+				inpState = inp_CQstate = inp_CQstate2;
+				inp_CQzone = inp_CQzone2;
 				inpSerNo2->hide();
 				outSerNo2->hide();
 				inpXchgIn2->hide();
@@ -4502,6 +4473,7 @@ void UI_select()
 				inp_CQstate2->show();
 				inp_CQzone2->show();
 				break;
+			case LOG_BART:
 			case LOG_CONT:
 			default:
 				inp_FD_class2->hide();
@@ -4585,9 +4557,6 @@ UI_return:
 	macroFrame1->redraw();
 	macroFrame2->redraw();
 	viewer_redraw();
-//	hpack->redraw();
-
-	adjust_contest_frames();
 
 	fl_digi_main->init_sizes();
 
@@ -4601,30 +4570,20 @@ void cb_mnu_wf_all(Fl_Menu_* w, void *d)
 	wf->UI_select(progStatus.WF_UI = w->mvalue()->value());
 }
 
-void cb_mnu_riglog(Fl_Menu_* w, void *d)
+void cb_mnu_riglog_all(Fl_Menu_* w, void *d)
 {
 	getMenuItem(w->mvalue()->label())->setonly();
-	progStatus.Rig_Log_UI = true;
-	progStatus.Rig_Contest_UI = false;
-	progStatus.NO_RIGLOG = false;
-
-	UI_select();
-}
-
-void cb_mnu_rigcontest(Fl_Menu_* w, void *d)
-{
-	getMenuItem(w->mvalue()->label())->setonly();
-	progStatus.Rig_Contest_UI = true;
 	progStatus.Rig_Log_UI = false;
 	progStatus.NO_RIGLOG = false;
 
 	UI_select();
 }
 
-void cb_mnu_riglog_all(Fl_Menu_* w, void *d)
+void cb_mnu_riglog_partial(Fl_Menu_* w, void *d)
 {
 	getMenuItem(w->mvalue()->label())->setonly();
-	progStatus.NO_RIGLOG = progStatus.Rig_Log_UI = progStatus.Rig_Contest_UI = false;
+	progStatus.Rig_Log_UI = true;
+	progStatus.NO_RIGLOG = false;
 
 	UI_select();
 }
@@ -4634,7 +4593,6 @@ void cb_mnu_riglog_none(Fl_Menu_* w, void *d)
 	getMenuItem(w->mvalue()->label())->setonly();
 	progStatus.NO_RIGLOG = true;
 	progStatus.Rig_Log_UI = false;
-	progStatus.Rig_Contest_UI = false;
 
 	UI_select();
 }
@@ -4976,12 +4934,10 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Signal browser")), 's', (Fl_Callback*)cb_mnuViewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(COUNTRIES_MLABEL), 'o', (Fl_Callback*)cb_mnuShowCountries, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
-{ icons::make_icon_label(_("Controls")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Rig/Log Controls")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
 { RIGLOG_FULL_MLABEL, 0, (Fl_Callback*)cb_mnu_riglog_all, 0, FL_MENU_RADIO, FL_NORMAL_LABEL, 0, 14, 0},
-{ RIGLOG_MLABEL, 0, (Fl_Callback*)cb_mnu_riglog, 0, FL_MENU_RADIO, FL_NORMAL_LABEL, 0, 14, 0},
-{ RIGCONTEST_MLABEL, 0, (Fl_Callback*)cb_mnu_rigcontest, 0, FL_MENU_RADIO, FL_NORMAL_LABEL, 0, 14, 0},
+{ RIGLOG_PARTIAL_MLABEL, 0, (Fl_Callback*)cb_mnu_riglog_partial, 0, FL_MENU_RADIO, FL_NORMAL_LABEL, 0, 14, 0},
 { RIGLOG_NONE_MLABEL, 0, (Fl_Callback*)cb_mnu_riglog_none, 0, FL_MENU_RADIO, FL_NORMAL_LABEL, 0, 14, 0},
-{ CONTEST_FIELDS_MLABEL, 'c', (Fl_Callback*)cb_mnuContest, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 { icons::make_icon_label(_("Waterfall")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
@@ -5007,6 +4963,7 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Save")), 0, (Fl_Callback*)cb_mnuSaveLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { LOG_CONNECT_SERVER, 0, (Fl_Callback*)cb_log_server, 0, FL_MENU_TOGGLE | FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Field Day Viewer")), 0, (Fl_Callback*)cb_fd_viewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("DX Cluster Viewer")), 0, (Fl_Callback*)cb_dxc_viewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 {_("DL Client"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
@@ -5049,8 +5006,6 @@ static int count_visible_items(Fl_Menu_Item* menu)
 	while (menu->label()) {
 		if (!(menu->flags & FL_SUBMENU) && menu->visible())
 			n++;
-//		if (menu->visible())
-//			n++;
 		menu++;
 	}
 	return n;
@@ -5691,7 +5646,8 @@ void LOGGING_colors_font()
 		inpXchgIn1, inpXchgIn2,
 		inp_FD_class1, inp_FD_class2,
 		inp_FD_section1, inp_FD_section2,
-		inp_CQzone1 };
+		inp_CQzone1, inp_CQzone2,
+		inp_CQstate1, inp_CQstate2 };
 	for (size_t i = 0; i < sizeof(in)/sizeof(*in); i++) {
 		input_color_font(in[i]);
 //		in[i]->size(in[i]->w(), wh);
@@ -5728,8 +5684,10 @@ inline void inp_font_pos(Fl_Input2* inp, int x, int y, int w, int h)
 	inp->textfont(progdefaults.LOGBOOKtextfont);
 	inp->textcolor(progdefaults.LOGBOOKtextcolor);
 	inp->color(progdefaults.LOGBOOKcolor);
-	int ls = progdefaults.LOGBOOKtextsize;
-	inp->labelsize(ls < 14 ? ls : 14);
+	inp->labelfont(progdefaults.LOGBOOKtextfont);
+	int ls = progdefaults.LOGBOOKtextsize - 1;
+	ls = ls < 10 ? 10 : (ls > 14 ? 14 : ls);
+	inp->labelsize(ls);
 	inp->redraw_label();
 	inp->resize(x, y, w, h);
 }
@@ -5740,22 +5698,61 @@ inline void date_font_pos(Fl_DateInput* inp, int x, int y, int w, int h)
 	inp->textfont(progdefaults.LOGBOOKtextfont);
 	inp->textcolor(progdefaults.LOGBOOKtextcolor);
 	inp->color(progdefaults.LOGBOOKcolor);
-	int ls = progdefaults.LOGBOOKtextsize;
-	inp->labelsize(ls < 14 ? ls : 14);
+	inp->labelfont(progdefaults.LOGBOOKtextfont);
+	int ls = progdefaults.LOGBOOKtextsize - 1;
+	ls = ls < 10 ? 10 : (ls > 14 ? 14 : ls);
+	inp->labelsize(ls);
 	inp->redraw_label();
 	inp->resize(x, y, w, h);
+}
+
+inline void btn_font_pos(Fl_Widget* btn, int x, int y, int w, int h)
+{
+	btn->labelfont(progdefaults.LOGBOOKtextfont);
+	int ls = progdefaults.LOGBOOKtextsize - 1;
+	ls = ls < 10 ? 10 : (ls > 14 ? 14 : ls);
+	btn->labelsize(ls);
+	btn->redraw_label();
+	btn->resize(x, y, w, h);
+	btn->redraw();
+}
+
+inline void tab_font_pos(Fl_Widget* tab, int x, int y, int w, int h, int ls)
+{
+	tab->labelfont(progdefaults.LOGBOOKtextfont);
+	tab->labelsize(ls);
+	tab->redraw_label();
+	tab->resize(x, y, w, h);
+	tab->redraw();
+}
+
+inline void chc_font_pos(Fl_Choice* chc, int x, int y, int w, int h)
+{
+	chc->labelfont(progdefaults.LOGBOOKtextfont);
+	int ls = progdefaults.LOGBOOKtextsize - 1;
+	ls = ls < 10 ? 10 : (ls > 14 ? 14 : ls);
+	chc->labelsize(ls);
+	chc->redraw_label();
+	chc->resize(x, y, w, h);
+	chc->redraw();
+}
+
+void DXC_colors_font()
+{
+	return;
 }
 
 void LOGBOOK_colors_font()
 {
 	if (!dlgLogbook) return;
 
+	int ls = progdefaults.LOGBOOKtextsize;
+
 // input / output / date / text fields
-	fl_font(progdefaults.LOGBOOKtextfont, progdefaults.LOGBOOKtextsize);
+	fl_font(progdefaults.LOGBOOKtextfont, ls);
 	int wh = fl_height() + 4;// + 8;
 	int width_date = fl_width("888888888") + wh;
 	int width_time = fl_width("23:59:599");
-//	int width_call = fl_width("WW/WW8WWW/WW.");
 	int width_freq = fl_width("WW/WW8WWW/WW.");//fl_width("99.9999999");
 	int width_rst  = fl_width("5999");
 	int width_pwr  = fl_width("0000");
@@ -5810,13 +5807,7 @@ void LOGBOOK_colors_font()
 	inp_font_pos(inpRstR_log, xpos, ypos, width_rst, wh);
 // nbr records
 	xpos += width_rst + 2;
-	txtNbrRecs_log->textcolor(progdefaults.LOGBOOKtextcolor);
-	txtNbrRecs_log->color(progdefaults.LOGBOOKcolor);
-	txtNbrRecs_log->resize(xpos, ypos, width_loc, wh);
-
-	int ls = progdefaults.LOGBOOKtextsize;
-	txtNbrRecs_log->labelsize(ls < 14 ? ls : 14);
-	txtNbrRecs_log->redraw_label();
+	inp_font_pos(txtNbrRecs_log, xpos, ypos, width_loc, wh);
 
 // row2
 	ypos += wh + 20;
@@ -5860,7 +5851,23 @@ void LOGBOOK_colors_font()
 	inp_font_pos(inpCountry_log, xpos, ypos, width_country, wh);
 
 	ypos += wh + 2;
+
 	Tabs->position(2, ypos);
+
+	inp_font_pos(inpSearchString,
+		dlg_width - 2 - width_freq, ypos, 
+		width_freq, wh);
+
+	int tab_h = wh * 14 / progdefaults.LOGBOOKtextsize;
+	int tab_grp_h = 4 * wh + 4;
+	Tabs->resize(2, ypos, dlg_width - 6 - inpSearchString->w(), tab_grp_h + tab_h);
+	Tabs->selection_color(progdefaults.TabsColor);
+
+	tab_font_pos(tab_log_qsl, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
+	tab_font_pos(tab_log_qsl_2, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
+	tab_font_pos(tab_log_contest, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
+	tab_font_pos(tab_log_other, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
+	tab_font_pos(tab_log_notes, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
 
 	Fl_Input2* inp[] = {
 		inpQSL_VIA_log,
@@ -5877,73 +5884,72 @@ void LOGBOOK_colors_font()
 		statusQSLrcvd, statusEQSLrcvd, statusLOTWrcvd,
 		statusQSLsent, statusEQSLsent, statusLOTWsent
 	};
-	for (size_t i = 0; i < sizeof(inp) / sizeof(*inp); i++) {
-		inp[i]->resize(inp[i]->x(), inp[i]->y(), inp[i]->w(), wh);
-		inp[i]->labelsize(ls < 14 ? ls : 14);
-		inp[i]->redraw_label();
-	}
-	for (size_t i = 0; i < sizeof(dti) / sizeof(*dti); i++) {
-		dti[i]->resize(dti[i]->x(), dti[i]->y(), dti[i]->w(), wh);
-		dti[i]->labelsize(ls < 14 ? ls : 14);
-		dti[i]->redraw_label();
-	}
-	for (size_t i = 0; i < sizeof(chc) / sizeof(*chc); i++) {
-		chc[i]->resize(chc[i]->x(), chc[i]->y(), chc[i]->w(), wh);
-		chc[i]->labelsize(ls < 14 ? ls : 14);
-		chc[i]->redraw_label();
-	}
-	inpNotes_log->resize(4, ypos+26, Tabs->w() - 4, 4*wh - 4);
+	for (size_t i = 0; i < sizeof(inp) / sizeof(*inp); i++)
+		inp_font_pos(inp[i], inp[i]->x(), inp[i]->y(), inp[i]->w(), wh);
 
-	Tabs->resize(2, ypos, dlg_width - 6 - inpSearchString->w(), 4*wh + 24);
-	tab_log_qsl->resize(2, ypos + 24, Tabs->w(), 4*wh);
-	tab_log_qsl_2->resize(2, ypos + 24, Tabs->w(), 4*wh);
-	tab_log_contest->resize(2, ypos + 24, Tabs->w(), 4*wh);
-	tab_log_other->resize(2, ypos + 24, Tabs->w(), 4*wh);
-	tab_log_notes->resize(2, ypos + 24, Tabs->w(), 4*wh);
+	for (size_t i = 0; i < sizeof(dti) / sizeof(*dti); i++)
+		date_font_pos(	dti[i], dti[i]->x(), dti[i]->y(), dti[i]->w(), wh);
 
-	inpSearchString->resize(
-		2 + Tabs->w() + 2, tab_log_qsl->y(),
-		inpSearchString->w(), wh);
-	inpSearchString->labelsize(ls < 14 ? ls : 14);
-	inpSearchString->redraw_label();
-	bSearchPrev->resize(
-		inpSearchString->x() + inpSearchString->w()/2 - bSearchPrev->w() - 3,
+	for (size_t i = 0; i < sizeof(chc) / sizeof(*chc); i++)
+		chc_font_pos(chc[i], chc[i]->x(), chc[i]->y(), chc[i]->w(), wh);
+
+	inpNotes_log->resize(
+		tab_log_notes->x() + 2, 
+		tab_log_notes->y() + 4,
+		tab_log_notes->w() - 4,
+		tab_log_notes->h() - 6);
+
+	btn_font_pos(inpSearchString,
+		2 + Tabs->w() + 2,
+		tab_log_qsl->y(),
+		inpSearchString->w(),
+		wh);
+
+	int bSPwidth = bSearchPrev->w() * ls / 14;
+	btn_font_pos(bSearchPrev,
+		inpSearchString->x() + inpSearchString->w()/2 - bSPwidth - 3,
 		inpSearchString->y() + wh + 2,
-		bSearchPrev->w(), bSearchPrev->h());
-	bSearchNext->resize(
-		bSearchPrev->x() +bSearchPrev->w() + 6, bSearchPrev->y(),
-		bSearchNext->w(), bSearchNext->h());
-	bRetrieve->resize(
-		bSearchPrev->x(), bSearchNext->y() + bSearchNext->h() + 2,
-		bSearchPrev->w() + bSearchNext->w() + 6, bRetrieve->h());
+		bSPwidth,
+		wh);
+	btn_font_pos(bSearchNext,
+		bSearchPrev->x() + bSPwidth + 6,
+		bSearchPrev->y(),
+		bSPwidth,
+		wh);
+
+	btn_font_pos(bRetrieve,
+		inpSearchString->x() + inpSearchString->w()/2 - (bRetrieve->w() * ls/14)/2,
+		bSearchNext->y() + bSearchNext->h() + 2,
+		bRetrieve->w()*ls/14,
+		wh);
 
 	ypos += Tabs->h() + 2;
 
 	Fl_Button* btns[] = { bNewSave, bUpdateCancel, bDelete };
+	int btnwidth = bNewSave->w() * ls / 14;
 
 	xpos = 2;
-	int wlogfile = dlg_width - 6 - 3*(btns[0]->w() + 2);
+	int wlogfile = dlg_width - 6 - 3*(btnwidth + 2);
 
-	txtLogFile->textsize(progdefaults.LOGBOOKtextsize);
+	txtLogFile->textsize(ls);
 	txtLogFile->textfont(progdefaults.LOGBOOKtextfont);
 	txtLogFile->textcolor(progdefaults.LOGBOOKtextcolor);
 	txtLogFile->color(progdefaults.LOGBOOKcolor);
-	txtLogFile->labelsize(ls < 14 ? ls : 14);
+	txtLogFile->labelsize(ls);
 	txtLogFile->redraw_label();
 	txtLogFile->resize(xpos, ypos, wlogfile, wh);
 
 	xpos = 2 + wlogfile + 2;
 	for (size_t i = 0; i < sizeof(btns)/sizeof(*btns); i++) {
-		btns[i]->resize(xpos, ypos, btns[i]->w(), wh);
-		xpos += btns[i]->w() + 2;
-		btns[i]->redraw();
+		btn_font_pos(btns[i], xpos, ypos, btnwidth, wh);
+		xpos += btnwidth + 2;
 	}
 
 // browser (table)
 	ypos += wh + 2;
 
 	wBrowser->font(progdefaults.LOGBOOKtextfont);
-	wBrowser->fontsize(progdefaults.LOGBOOKtextsize);
+	wBrowser->fontsize(ls);
 	wBrowser->color(progdefaults.LOGBOOKcolor);
 	wBrowser->selection_color(FL_SELECTION_COLOR);
 
@@ -7054,6 +7060,7 @@ void create_fl_digi_main_primary() {
 
 			TopFrame3->end();
 		}
+		
 		TopFrame3->resizable(inpXchgIn2);
 		TopFrame3->hide();
 
@@ -7070,6 +7077,8 @@ void create_fl_digi_main_primary() {
 		inpXchgIn = inpXchgIn1;
 		inp_FD_class = inp_FD_class1;
 		inp_FD_section = inp_FD_section1;
+		inp_CQzone = inp_CQzone1;
+		inp_CQstate = inp_CQstate1;
 
 		qsoFreqDisp1->set_lsd(progdefaults.sel_lsd);
 		qsoFreqDisp2->set_lsd(progdefaults.sel_lsd);
@@ -7840,10 +7849,9 @@ void create_fl_digi_main_primary() {
 		bool var; const char* label;
 	} toggles[] = {
 		{ progStatus.LOGenabled, LOG_TO_FILE_MLABEL },
-		{ progStatus.contest, CONTEST_FIELDS_MLABEL },
 		{ progStatus.WF_UI, WF_MLABEL },
-		{ progStatus.Rig_Log_UI, RIGLOG_MLABEL },
-		{ progStatus.Rig_Contest_UI, RIGCONTEST_MLABEL },
+		{ progStatus.Rig_Log_UI, RIGLOG_PARTIAL_MLABEL },
+		{ !progStatus.Rig_Log_UI, RIGLOG_FULL_MLABEL },
 		{ progStatus.NO_RIGLOG, RIGLOG_NONE_MLABEL },
 		{ progStatus.DOCKEDSCOPE, DOCKEDSCOPE_MLABEL }
 	};
