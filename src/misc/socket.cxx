@@ -856,17 +856,17 @@ void Socket::connect(void)
     connected_flag = false;
 #ifndef NDEBUG
 	LOG_DEBUG("Connecting to %s", address.get_str(ainfo).c_str());
-#endif
+#else
 	LOG_INFO("Connecting to %s", address.get_str(ainfo).c_str());
+#endif
 	int res = ::connect(sockfd, ainfo->ai_addr, ainfo->ai_addrlen);
 	if (res == -1) {
 		LOG_INFO("Response %d, error %d", res, errno);
-		if ( (errno == EAGAIN) || (errno == EINPROGRESS) )
-			throw SocketException(errno, "connect");
-		if (errno == EALREADY) {
-			connected_flag = true;
-			return;
-		}
+		/* EINPROGRESS or EALREADY indicate a non-blocking connection
+		 *					that is still pending.
+		 * EAGAIN should not occur on Linux */
+		throw SocketException(errno, "connect");
+		return;
 	}
     connected_flag = true;
 }
