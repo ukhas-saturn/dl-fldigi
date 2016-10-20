@@ -861,12 +861,19 @@ void Socket::connect(void)
 #endif
 	int res = ::connect(sockfd, ainfo->ai_addr, ainfo->ai_addrlen);
 	if (res == -1) {
+#ifdef __MINGW32__
+		if(WSAEISCONN == errno) {
+#else
+		if(EISCONN == errno) {
+#endif
+			connected_flag = true;
+			return;
+		}
 		LOG_INFO("Response %d, error %d", res, errno);
 		/* EINPROGRESS or EALREADY indicate a non-blocking connection
 		 *					that is still pending.
-		 * EAGAIN should not occur on Linux */
+		 * Keep trying until EISCONN */
 		throw SocketException(errno, "connect");
-		return;
 	}
     connected_flag = true;
 }

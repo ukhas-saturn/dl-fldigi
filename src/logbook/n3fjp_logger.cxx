@@ -826,11 +826,8 @@ void n3fjp_rcv_data()
 static void connect_to_n3fjp_server()
 {
 	try {
-		if (!n3fjp_connected) {
-			n3fjp_socket->set_nonblocking(false);
+		if (!n3fjp_connected)
 			n3fjp_socket->connect();
-			n3fjp_socket->set_nonblocking(true);
-		}
 
 		std::string pathname = TempDir;
 		pathname.append("n3fjp_data_stream.txt");
@@ -882,7 +879,6 @@ static void connect_to_n3fjp_server()
 
 	} catch (const SocketException& e) {
 		LOG_INFO("%s(%d)", e.what(), e.error());
-		n3fjp_socket->set_nonblocking(true);
 	}
 
 }
