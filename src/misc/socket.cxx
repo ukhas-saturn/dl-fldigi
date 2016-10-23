@@ -661,6 +661,7 @@ bool Socket::wait(int dir)
 void Socket::bind(void)
 {
 	int r = 1;
+	 LOG_INFO("Binding to %s", address.get_str(ainfo).c_str());
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&r, sizeof(r)) == -1)
 
 #ifndef NDEBUG
@@ -669,6 +670,7 @@ void Socket::bind(void)
 		;
 #endif
 	if (::bind(sockfd, ainfo->ai_addr, ainfo->ai_addrlen) == -1) {
+		LOG_INFO("Failed to bind UDP: error %d", errno);
 		if(errno != EADDRINUSE) // EADDRINUSE == 48
 		throw SocketException(errno, "bind");
 }
@@ -681,7 +683,6 @@ void Socket::bind(void)
 
 void Socket::bindUDP(void)
 {
-
 #ifdef HAVE_GETADDRINFO
 	struct addrinfo hints;
 	struct addrinfo *res = NULL;
@@ -690,8 +691,10 @@ void Socket::bindUDP(void)
 	struct sockaddr addr;
 
 	int r = 1;
-	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&r, sizeof(r)) == -1)
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&r, sizeof(r)) == -1) {
+		LOG_INFO("Failed binding UDP to %s: setsockopt()", address.get_str(ainfo).c_str());
 		throw SocketException(r, "setsockopt SO_REUSEADDR");
+	}
 
 	memset(&hints, 0, sizeof(hints));
 
@@ -706,27 +709,32 @@ void Socket::bindUDP(void)
 	std::string port_io = address.get_service();
 	std::string addrStr = address.get_node();
 
-	if ((r = getaddrinfo(NULL, port_io.c_str(), &hints, &res)) < 0)
+	if ((r = getaddrinfo(NULL, port_io.c_str(), &hints, &res)) < 0) {
+		LOG_INFO("Failed binding UDP to %s: getaddrinfo()", address.get_str(ainfo).c_str());
 		throw SocketException(r, "getaddrinfo");
+	}
 
 	memset(&addr, 0, sizeof(addr));
 	addr_in = (sockaddr_in *) &addr;
 
 	for(ai_p = res; ai_p != NULL; ai_p = ai_p->ai_next) {
-        if (ai_p->ai_family == AF_INET) {
+		if (ai_p->ai_family == AF_INET) {
 			memcpy(addr_in, ai_p->ai_addr, sizeof(addr));
 			break;
-        }
+		}
 	}
 
 	addr_in->sin_addr.s_addr = INADDR_ANY;
 
-	if (::bind(sockfd, (const struct sockaddr *)&addr, sizeof(struct sockaddr)) == -1) {
+	r = ::bind(sockfd, (const struct sockaddr *)&addr, sizeof(struct sockaddr));
+	if (r == -1) {
+		LOG_INFO("Failed to bind: error %d", errno);
 		freeaddrinfo(res);
 		throw SocketException(errno, "bind");
 	}
 
 	freeaddrinfo(res);
+	LOG_INFO("Bound UDP to %s", address.get_str(ainfo).c_str());
 #else
 	int r = 1;
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&r, sizeof(r)) == -1)

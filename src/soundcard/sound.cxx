@@ -2333,7 +2333,7 @@ SoundIP::SoundIP(const char* inithost, const char* initport, bool udp_flag)
 	buffend = buffptr = 0;
 	usingTCP = !udp_flag;
 	if (udp_flag)
-		soundSock = new Socket( Address( "localhost", initport, "udp") );
+		soundSock = new Socket( Address( "127.0.0.1", initport, "udp") );
 	else
 		soundSock = new Socket( Address( inithost, initport, "tcp") );
 }
@@ -2365,7 +2365,7 @@ size_t  SoundIP::Write_stereo(double* bufleft, double* bufright, size_t count)
 size_t  SoundIP::Read(float *buff, size_t count)
 {
 	size_t n, s;
-	int out, rate, idlecount;
+	int out, rate;
 	unsigned i, j, c;
 	float ratio;
 
@@ -2376,40 +2376,48 @@ size_t  SoundIP::Read(float *buff, size_t count)
 
 	if (m_stream < 0) {
 		// keep trying to open stream
-		MilliSleep(1000);
+		MilliSleep(2000);
 		try {
-			soundSock->connect();
+			if (usingTCP)
+				soundSock->connect();
+			else
+				soundSock->bindUDP();
 			m_stream = 1;
 		} catch (...) {
 			m_stream =-1;
+			for (i = 0; i < count; i++)
+				buff[i] = 0.0f;
+			return count;
 		}
-		for (i = 0; i < count; i++)
-			buff[i] = 0.0f;
-		return count;
 	}
 
-	idlecount = 20;
 	out = 0;
 	c = count;
 	for (;;) {
 		i = buffend - buffptr;
 		if ( i > c )
 			i = c;
-		if ( i > 0) {
-			for ( j = 0; j < i; j++)
+		for ( j = 0; j < i; j++)
 			buff[out + j] = snd_buffer[buffptr + j];
-		}
 		buffptr += i;
 		out += i;
 		c -= i;
 		if ( 0 == c)
 			return count;
 
-		// SND_BUF_LEN is 65536
-		n = soundSock->recv((void*)cbuff, 4096);
+		try {
+			// SND_BUF_LEN is 65536
+			if (usingTCP)
+				n = soundSock->recv((void*)cbuff, 4096);
+			else
+				n = soundSock->recvFrom((void*)cbuff, 4096);
+		} catch (...) {
+			n = 0;
+		}
+
 		if (n == 0) {
 			MilliSleep(100);
-			if (--idlecount < 0) {
+			if (m_idlecount++ > 20) {
 				/* Pad data after 2s of silence
 				 * Try to reopen the port for TCP */
 				if (usingTCP)
@@ -2418,7 +2426,8 @@ size_t  SoundIP::Read(float *buff, size_t count)
 					buff[i] = 0.0f;
 				return count;
 			}
-		}
+		} else
+			m_idlecount = 0;
 
 		buffend = buffptr = 0;
 		// S16LE to float, resampled
@@ -2440,7 +2449,7 @@ int SoundIP::Open(int mode, int freq)
 	if (m_stream > 0)
 		return m_stream;
 
-	soundSock->set_timeout(0.0);
+	soundSock->set_timeout(0.1);
 	soundSock->set_nonblocking(true);
 
 	// defer opening until Read()

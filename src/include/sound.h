@@ -378,6 +378,7 @@ private:
 	Socket	*soundSock;
 	bool	usingTCP;
 	int	buffptr, buffend;
+	unsigned int	m_idlecount;
 	uint8_t	*cbuff;
 	float	*snd_buffer;
 	float	m_step;
