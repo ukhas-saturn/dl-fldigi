@@ -144,6 +144,7 @@ string MacrosDir = "";
 string WrapDir = "";
 string TalkDir = "";
 string TempDir = "";
+string LoTWDir = "";
 string KmlDir = "";
 string PskMailDir = "";
 
@@ -647,6 +648,7 @@ int main(int argc, char ** argv)
 	LOG_INFO("WrapDir: %s", WrapDir.c_str());
 	LOG_INFO("TalkDir: %s", TalkDir.c_str());
 	LOG_INFO("TempDir: %s", TempDir.c_str());
+	LOG_INFO("LoTWDir: %s", LoTWDir.c_str());
 	LOG_INFO("KmlDir: %s", KmlDir.c_str());
 	LOG_INFO("PskMailDir: %s", PskMailDir.c_str());
 
@@ -1680,6 +1682,7 @@ static void checkdirectories(void)
 		{ WrapDir, "wrap", 0 },
 		{ TalkDir, "talk", 0 },
 		{ TempDir, "temp", 0 },
+		{ LoTWDir, "LOTW", 0 },
 		{ KmlDir, "kml", 0 },
 		{ DATA_dir, "data", 0 },
 	};

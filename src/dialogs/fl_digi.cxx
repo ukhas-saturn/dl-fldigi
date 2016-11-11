@@ -2318,6 +2318,13 @@ void cb_maclogger(Fl_Menu_ *, void*) {
 	dlgConfig->show();
 }
 
+void cb_mnuConfigLoTW(Fl_Menu_ *, void *) {
+	progdefaults.loadDefaults();
+	tabsConfigure->value(tabQRZ);
+	tabsQRZ->value(tabLOTW);
+	dlgConfig->show();
+}
+
 void cb_logfile(Fl_Widget* w, void*)
 {
 	progStatus.LOGenabled = reinterpret_cast<Fl_Menu_*>(w)->mvalue()->value();
@@ -2567,6 +2574,19 @@ void cb_mnuBeginnersURL(Fl_Widget*, void*)
 #else
 	cb_mnuVisitURL(NULL, (void *)deffname.c_str());
 #endif
+}
+
+void cb_mnuOnLineDOCS(Fl_Widget *, void *)
+{
+	string helpfile = HelpDir;
+	helpfile.append("fldigi-help/index.html");
+	ifstream f(helpfile.c_str());
+	if (!f) {
+		cb_mnuVisitURL(0, (void *)PACKAGE_DOCS);
+	} else {
+		f.close();
+		cb_mnuVisitURL(0, (void *)helpfile.c_str());
+	}
 }
 
 void cb_mnuCheckUpdate(Fl_Widget *, void *)
@@ -4949,18 +4969,21 @@ _FL_MULTI_LABEL, 0, 14, 0},
 
 { _("&Logbook"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("View")), 'l', (Fl_Callback*)cb_mnuShowLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("ADIF")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("New")), 0, (Fl_Callback*)cb_mnuNewLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Open...")), 0, (Fl_Callback*)cb_mnuOpenLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Save")), 0, (Fl_Callback*)cb_mnuSaveLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("ADIF")), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Merge...")), 0, (Fl_Callback*)cb_mnuMergeADIF_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Export...")), 0, (Fl_Callback*)cb_mnuExportADIF_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
+
+{ icons::make_icon_label(_("LoTW")), 0, (Fl_Callback*)cb_mnuConfigLoTW,  0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Reports")), 0, 0, 0, FL_SUBMENU | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Text...")), 0, (Fl_Callback*)cb_mnuExportTEXT_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("CSV...")), 0, (Fl_Callback*)cb_mnuExportCSV_log, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Cabrillo...")), 0, (Fl_Callback*)cb_Export_Cabrillo, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
-{ icons::make_icon_label(_("New")), 0, (Fl_Callback*)cb_mnuNewLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Open...")), 0, (Fl_Callback*)cb_mnuOpenLogbook, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Save")), 0, (Fl_Callback*)cb_mnuSaveLogbook, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+
 { LOG_CONNECT_SERVER, 0, (Fl_Callback*)cb_log_server, 0, FL_MENU_TOGGLE | FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Field Day Viewer")), 0, (Fl_Callback*)cb_fd_viewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("DX Cluster Viewer")), 0, (Fl_Callback*)cb_dxc_viewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
@@ -4983,7 +5006,7 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Create sunspots"), weather_clear_icon), 0, cb_mnuFun, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 #endif
 { icons::make_icon_label(_("Beginners' Guide"), start_here_icon), 0, cb_mnuBeginnersURL, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Online documentation..."), help_browser_icon), 0, cb_mnuVisitURL, (void *)PACKAGE_DOCS, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Online documentation..."), help_browser_icon), 0, cb_mnuOnLineDOCS, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Fldigi web site..."), net_icon), 0, cb_mnuVisitURL, (void *)PACKAGE_HOME, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Reception reports..."), pskr_icon), 0, cb_mnuVisitPSKRep, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Command line options"), utilities_terminal_icon), 0, cb_mnuCmdLineHelp, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
@@ -5864,7 +5887,6 @@ void LOGBOOK_colors_font()
 	Tabs->selection_color(progdefaults.TabsColor);
 
 	tab_font_pos(tab_log_qsl, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
-	tab_font_pos(tab_log_qsl_2, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
 	tab_font_pos(tab_log_contest, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
 	tab_font_pos(tab_log_other, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
 	tab_font_pos(tab_log_notes, 2, ypos + tab_h, Tabs->w(), tab_grp_h, 14);
@@ -5880,18 +5902,11 @@ void LOGBOOK_colors_font()
 		inpEQSLrcvddate_log, inpEQSLsentdate_log,
 		inpLOTWrcvddate_log, inpLOTWsentdate_log
 	};
-	Fl_Choice* chc[] = {
-		statusQSLrcvd, statusEQSLrcvd, statusLOTWrcvd,
-		statusQSLsent, statusEQSLsent, statusLOTWsent
-	};
 	for (size_t i = 0; i < sizeof(inp) / sizeof(*inp); i++)
 		inp_font_pos(inp[i], inp[i]->x(), inp[i]->y(), inp[i]->w(), wh);
 
 	for (size_t i = 0; i < sizeof(dti) / sizeof(*dti); i++)
 		date_font_pos(	dti[i], dti[i]->x(), dti[i]->y(), dti[i]->w(), wh);
-
-	for (size_t i = 0; i < sizeof(chc) / sizeof(*chc); i++)
-		chc_font_pos(chc[i], chc[i]->x(), chc[i]->y(), chc[i]->w(), wh);
 
 	inpNotes_log->resize(
 		tab_log_notes->x() + 2, 

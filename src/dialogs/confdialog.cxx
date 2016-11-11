@@ -4234,9 +4234,17 @@ Fl_Round_Button *btnRigCatCMDptt=(Fl_Round_Button *)0;
 
 static void cb_btnRigCatCMDptt(Fl_Round_Button* o, void*) {
   if (o->value()== 1) {
-  btnRigCatRTSptt->value(0);
-  btnRigCatDTRptt->value(0);
-}
+btnRigCatRTSptt->value(0);
+btnRigCatDTRptt->value(0);
+progdefaults.RigCatCMDptt = true;
+progdefaults.TTYptt = 
+progdefaults.UsePPortPTT =
+progdefaults.UseUHrouterPTT =
+progdefaults.RigCatRTSptt =
+progdefaults.RigCatDTRptt =
+progdefaults.HamlibCMDptt = false;
+} else
+progdefaults.RigCatCMDptt = false;
 
 btnInitRIGCAT->labelcolor(FL_RED);
 btnInitRIGCAT->redraw();
@@ -4247,9 +4255,15 @@ Fl_Round_Button *btnRigCatRTSptt=(Fl_Round_Button *)0;
 
 static void cb_btnRigCatRTSptt(Fl_Round_Button* o, void*) {
   if (o->value() == 1) {
-//  btnRigCatDTRptt->value(0);
-  btnRigCatCMDptt->value(0);
-}
+btnRigCatCMDptt->value(0);
+progdefaults.RigCatRTSptt = true;
+progdefaults.TTYptt = 
+progdefaults.UsePPortPTT =
+progdefaults.UseUHrouterPTT =
+progdefaults.RigCatCMDptt =
+progdefaults.HamlibCMDptt = false;
+} else
+progdefaults.RigCatRTSptt = false;
 
 btnInitRIGCAT->labelcolor(FL_RED);
 btnInitRIGCAT->redraw_label();
@@ -4260,9 +4274,15 @@ Fl_Round_Button *btnRigCatDTRptt=(Fl_Round_Button *)0;
 
 static void cb_btnRigCatDTRptt(Fl_Round_Button* o, void*) {
   if (o->value() == 1) {
-//  btnRigCatRTSptt->value(0);
-  btnRigCatCMDptt->value(0);
-}
+btnRigCatCMDptt->value(0);
+progdefaults.RigCatDTRptt = true;
+progdefaults.TTYptt = 
+progdefaults.UsePPortPTT =
+progdefaults.UseUHrouterPTT =
+progdefaults.RigCatCMDptt =
+progdefaults.HamlibCMDptt = false;
+} else
+progdefaults.RigCatDTRptt = false;
 
 btnInitRIGCAT->labelcolor(FL_RED);
 btnInitRIGCAT->redraw_label();
@@ -4441,10 +4461,23 @@ progdefaults.changed = true;
 
 Fl_Check_Button *btnHamlibCMDptt=(Fl_Check_Button *)0;
 
-static void cb_btnHamlibCMDptt(Fl_Check_Button*, void*) {
+static void cb_btnHamlibCMDptt(Fl_Check_Button* o, void*) {
   btnInitHAMLIB->labelcolor(FL_RED);
 btnInitHAMLIB->redraw_label();
 btnRevertHAMLIB->activate();
+
+if (o->value()) {
+progdefaults.HamlibCMDptt = true;
+progdefaults.TTYptt = 
+progdefaults.UsePPortPTT =
+progdefaults.UseUHrouterPTT =
+progdefaults.RigCatRTSptt =
+progdefaults.RigCatDTRptt =
+progdefaults.RigCatCMDptt = false;
+} else
+progdefaults.HamlibCMDptt = false;
+
+progdefaults.changed = true;
 }
 
 Fl_Check_Button *btnHamlibPTT_ON_DATA=(Fl_Check_Button *)0;
@@ -4567,14 +4600,16 @@ Fl_Check_Button *btnPTTrightchannel=(Fl_Check_Button *)0;
 static void cb_btnPTTrightchannel(Fl_Check_Button* o, void*) {
   progdefaults.PTTrightchannel = o->value();
 btnPTTrightchannel2->value(o->value());
+
 if (o->value()) {
-  progdefaults.QSK = false;
-  btnQSK->value(0);
-  progdefaults.PseudoFSK = false;
-  chkPseudoFSK->value(0);
-  progdefaults.sig_on_right_channel = false;
-  chkAudioStereoOut->value(0);
+progdefaults.QSK = false;
+btnQSK->value(0);
+progdefaults.PseudoFSK = false;
+chkPseudoFSK->value(0);
+progdefaults.sig_on_right_channel = false;
+chkAudioStereoOut->value(0);
 }
+
 progdefaults.changed = true;
 }
 
@@ -4586,9 +4621,17 @@ static void cb_btnTTYptt(Fl_Round_Button* o, void*) {
   btnUsePPortPTT->value(false);
 btnUseUHrouterPTT->value(false);
 
-progdefaults.TTYptt = o->value();
-progdefaults.UsePPortPTT = false;
-progdefaults.UseUHrouterPTT = false;
+if (o->value()) {
+progdefaults.TTYptt = true;
+progdefaults.UsePPortPTT =
+progdefaults.UseUHrouterPTT =
+progdefaults.RigCatRTSptt =
+progdefaults.RigCatDTRptt =
+progdefaults.RigCatCMDptt =
+progdefaults.HamlibCMDptt = false;
+} else
+progdefaults.TTYptt = false;
+
 btnInitHWPTT->labelcolor(FL_RED);
 btnInitHWPTT->redraw();
 progdefaults.changed = true;
@@ -4645,12 +4688,20 @@ progdefaults.changed = true;
 Fl_Round_Button *btnUsePPortPTT=(Fl_Round_Button *)0;
 
 static void cb_btnUsePPortPTT(Fl_Round_Button* o, void*) {
-  btnTTYptt->value(false);
-btnUseUHrouterPTT->value(false);
+  btnTTYptt->value(0);
+btnUseUHrouterPTT->value(0);
 
-progdefaults.TTYptt = false;
-progdefaults.UsePPortPTT = o->value();
-progdefaults.UseUHrouterPTT = false;
+if (o->value()) {
+progdefaults.UsePPortPTT = true;
+progdefaults.TTYptt =
+progdefaults.UseUHrouterPTT =
+progdefaults.RigCatRTSptt =
+progdefaults.RigCatDTRptt =
+progdefaults.RigCatCMDptt =
+progdefaults.HamlibCMDptt = false;
+} else
+progdefaults.UsePPortPTT = false;
+
 btnInitHWPTT->labelcolor(FL_RED);
 btnInitHWPTT->redraw();
 progdefaults.changed = true;
@@ -4659,38 +4710,21 @@ progdefaults.changed = true;
 Fl_Round_Button *btnUseUHrouterPTT=(Fl_Round_Button *)0;
 
 static void cb_btnUseUHrouterPTT(Fl_Round_Button* o, void*) {
-  btnTTYptt->value(false);
-btnUsePPortPTT->value(false);
+  btnTTYptt->value(0);
+btnUsePPortPTT->value(0);
 
-progdefaults.TTYptt = false;
-progdefaults.UsePPortPTT = false;
-progdefaults.UseUHrouterPTT = o->value();
-btnInitHWPTT->labelcolor(FL_RED);
-btnInitHWPTT->redraw();
-progdefaults.changed = true;
-}
-
-Fl_Round_Button *btnUseGPIOPTT=(Fl_Round_Button *)0;
-
-static void cb_btnUseGPIOPTT(Fl_Round_Button* o, void*) {
-  btnTTYptt->value(false);
-btnUsePPortPTT->value(false);
-btnUseUHrouterPTT->value(false);
-
-progdefaults.TTYptt = false;
-progdefaults.UsePPortPTT = false;
+if (o->value()) {
+progdefaults.UseUHrouterPTT = true;
+progdefaults.TTYptt =
+progdefaults.UsePPortPTT =
+progdefaults.RigCatRTSptt =
+progdefaults.RigCatDTRptt =
+progdefaults.RigCatCMDptt =
+progdefaults.HamlibCMDptt = false;
+} else
 progdefaults.UseUHrouterPTT = false;
-progdefaults.UseGPIOPTT = o->value();
 
 btnInitHWPTT->labelcolor(FL_RED);
-btnInitHWPTT->redraw();
-progdefaults.changed = true;
-}
-
-Fl_Counter2 *inpGPIOPort=(Fl_Counter2 *)0;
-
-static void cb_inpGPIOPort(Fl_Counter2*, void*) {
-  btnInitHWPTT->labelcolor(FL_RED);
 btnInitHWPTT->redraw();
 progdefaults.changed = true;
 }
@@ -4708,6 +4742,367 @@ Fl_Counter *cntPTT_off_delay=(Fl_Counter *)0;
 
 static void cb_cntPTT_off_delay(Fl_Counter* o, void*) {
   progdefaults.PTT_off_delay = o->value();
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= 1;
+  export_gpio(0);
+} else {
+  progdefaults.enable_gpio &= ~1;
+  unexport_gpio(0);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio1(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<1);
+  export_gpio(1);
+} else {
+  progdefaults.enable_gpio &= ~(1<<1);
+  unexport_gpio(1);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio2(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<2);
+  export_gpio(2);
+} else {
+  progdefaults.enable_gpio &= ~(1<<2);
+  unexport_gpio(2);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio3(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<3);
+  export_gpio(3);
+} else {
+  progdefaults.enable_gpio &= ~(1<<3);
+  unexport_gpio(3);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio4(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<4);
+  export_gpio(4);
+} else {
+  progdefaults.enable_gpio &= ~(1<<4);
+  unexport_gpio(4);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio5(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<5);
+  export_gpio(5);
+} else {
+  progdefaults.enable_gpio &= ~(1<<5);
+  unexport_gpio(5);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio6(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<6);
+  export_gpio(6);
+} else {
+  progdefaults.enable_gpio &= ~(1<<6);
+  unexport_gpio(6);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio7(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<7);
+  export_gpio(7);
+} else {
+  progdefaults.enable_gpio &= ~(1<<7);
+  unexport_gpio(7);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio8(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<8);
+  export_gpio(8);
+} else {
+  progdefaults.enable_gpio &= ~(1<<8);
+  unexport_gpio(8);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpio9(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<9);
+  export_gpio(9);
+} else {
+  progdefaults.enable_gpio &= ~(1<<9);
+  unexport_gpio(9);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpioa(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<10);
+  export_gpio(10);
+} else {
+  progdefaults.enable_gpio &= ~(1<<10);
+  unexport_gpio(10);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpiob(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<11);
+  export_gpio(11);
+} else {
+  progdefaults.enable_gpio &= ~(1<<11);
+  unexport_gpio(11);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpioc(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<12);
+  export_gpio(12);
+} else {
+  progdefaults.enable_gpio &= ~(1<<12);
+  unexport_gpio(12);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpiod(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<13);
+  export_gpio(13);
+} else {
+  progdefaults.enable_gpio &= ~(1<<13);
+  unexport_gpio(13);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpioe(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<14);
+  export_gpio(14);
+} else {
+  progdefaults.enable_gpio &= ~(1<<14);
+  unexport_gpio(14);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_enable_gpiof(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<15);
+  export_gpio(15);
+} else {
+  progdefaults.enable_gpio &= ~(1<<15);
+  unexport_gpio(15);
+}
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_enable_gpio[17]={(Fl_Check_Button *)0};
+
+static void cb_btn_enable_gpio10(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.enable_gpio |= (1<<16);
+  export_gpio(16);
+} else {
+  progdefaults.enable_gpio &= ~(1<<16);
+  unexport_gpio(16);
+}
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= 1;
+} else {
+  progdefaults.gpio_on &= ~1;
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on1(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<1);
+} else {
+  progdefaults.gpio_on &= ~(1<<1);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on2(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<2);
+} else {
+  progdefaults.gpio_on &= ~(1<<2);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on3(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<3);
+} else {
+  progdefaults.gpio_on &= ~(1<<3);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on4(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<4);
+} else {
+  progdefaults.gpio_on &= ~(1<<4);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on5(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<5);
+} else {
+  progdefaults.gpio_on &= ~(1<<5);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on6(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<6);
+} else {
+  progdefaults.gpio_on &= ~(1<<6);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on7(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<7);
+} else {
+  progdefaults.gpio_on &= ~(1<<7);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on8(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<8);
+} else {
+  progdefaults.gpio_on &= ~(1<<8);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_on9(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<9);
+} else {
+  progdefaults.gpio_on &= ~(1<<9);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_ona(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<10);
+} else {
+  progdefaults.gpio_on &= ~(1<<10);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_onb(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<11);
+} else {
+  progdefaults.gpio_on &= ~(1<<11);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_onc(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<12);
+} else {
+  progdefaults.gpio_on &= ~(1<<12);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_ond(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<13);
+} else {
+  progdefaults.gpio_on &= ~(1<<13);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_one(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<14);
+} else {
+  progdefaults.gpio_on &= ~(1<<14);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+static void cb_btn_gpio_onf(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<15);
+} else {
+  progdefaults.gpio_on &= ~(1<<15);
+}
+wf->xmtrcv->value(0);
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_gpio_on[17]={(Fl_Check_Button *)0};
+
+static void cb_btn_gpio_on10(Fl_Check_Button* o, void*) {
+  if (o->value()){
+  progdefaults.gpio_on |= (1<<16);
+} else {
+  progdefaults.gpio_on &= ~(1<<16);
+}
+wf->xmtrcv->value(0);
 progdefaults.changed = true;
 }
 
@@ -6009,6 +6404,8 @@ static void cb_btn_clear_notes(Fl_Check_Button* o, void*) {
 progdefaults.changed= true;
 }
 
+Fl_Group *tabEQSL=(Fl_Group *)0;
+
 Fl_Input2 *inpEQSL_id=(Fl_Input2 *)0;
 
 static void cb_inpEQSL_id(Fl_Input2* o, void*) {
@@ -6038,6 +6435,8 @@ static void cb_inpEQSL_nick(Fl_Input2* o, void*) {
 progdefaults.changed = true;
 }
 
+Fl_Button *btn_verify_eqsl=(Fl_Button *)0;
+
 Fl_Check_Button *btn_send_when_logged=(Fl_Check_Button *)0;
 
 static void cb_btn_send_when_logged(Fl_Check_Button* o, void*) {
@@ -6064,6 +6463,87 @@ static void cb_btn_send_datetime_off(Fl_Check_Button* o, void*) {
   progdefaults.eqsl_datetime_off = o->value();
 progdefaults.changed = true;
 }
+
+Fl_Group *tabLOTW=(Fl_Group *)0;
+
+Fl_Input2 *txt_lotw_pathname=(Fl_Input2 *)0;
+
+static void cb_txt_lotw_pathname(Fl_Input2* o, void*) {
+  progdefaults.lotw_pathname = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Input2 *inpLOTW_pwd=(Fl_Input2 *)0;
+
+static void cb_inpLOTW_pwd(Fl_Input2* o, void*) {
+  progdefaults.lotw_pwd = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_submit_lotw_password=(Fl_Check_Button *)0;
+
+static void cb_btn_submit_lotw_password(Fl_Check_Button* o, void*) {
+  progdefaults.submit_lotw_password=o->value();
+progdefaults.changed=true;
+}
+
+Fl_Input2 *inpLOTW_location=(Fl_Input2 *)0;
+
+static void cb_inpLOTW_location(Fl_Input2* o, void*) {
+  progdefaults.lotw_location = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Button *btn_select_lotw=(Fl_Button *)0;
+
+static void cb_btn_select_lotw(Fl_Button*, void*) {
+  std::string str = select_binary_pathname(progdefaults.lotw_pathname);
+txt_lotw_pathname->value(str.c_str());
+progdefaults.lotw_pathname = str;
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_lotw_quiet_mode=(Fl_Check_Button *)0;
+
+static void cb_btn_lotw_quiet_mode(Fl_Check_Button* o, void*) {
+  progdefaults.lotw_quiet_mode=o->value();
+progdefaults.changed=true;
+}
+
+Fl_Check_Button *btn_submit_lotw=(Fl_Check_Button *)0;
+
+static void cb_btn_submit_lotw(Fl_Check_Button* o, void*) {
+  progdefaults.submit_lotw=o->value();
+progdefaults.changed=true;
+}
+
+Fl_Button *btn_export_lotw=(Fl_Button *)0;
+
+static void cb_btn_export_lotw(Fl_Button*, void*) {
+  cb_btnExportLoTW();
+}
+
+Fl_Button *btn_review_lotw=(Fl_Button *)0;
+
+static void cb_btn_review_lotw(Fl_Button*, void*) {
+  cb_review_lotw();
+}
+
+Fl_Button *btn_send_lotw=(Fl_Button *)0;
+
+static void cb_btn_send_lotw(Fl_Button*, void*) {
+  cb_send_lotw();
+}
+
+Fl_Button *btnLOTW_pwd_show=(Fl_Button *)0;
+
+static void cb_btnLOTW_pwd_show(Fl_Button* o, void*) {
+  inpLOTW_pwd->type(inpLOTW_pwd->type() ^ FL_SECRET_INPUT);
+inpLOTW_pwd->redraw();
+o->label((inpLOTW_pwd->type() & FL_SECRET_INPUT) ? _("Show") : _("Hide"));
+}
+
+Fl_Button *btn_verify_lotw=(Fl_Button *)0;
 
 Fl_Group *tabAutoStart=(Fl_Group *)0;
 
@@ -6746,19 +7226,20 @@ Fl_Double_Window* ConfigureDialog() {
   static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";
   static const int flight_browser_columns[] = { 180, 160, 190 };
   static const int payload_browser_columns[] = { 180, 350 };
-  { Fl_Double_Window* o = new Fl_Double_Window(600, 420, _("Fldigi configuration"));
+  { Fl_Double_Window* o = new Fl_Double_Window(600, 425, _("Fldigi configuration"));
     w = o;
     o->color(FL_DARK2);
     o->selection_color((Fl_Color)51);
     o->labelsize(18);
     o->align(Fl_Align(FL_ALIGN_CLIP|FL_ALIGN_INSIDE));
-    { tabsConfigure = new Fl_Tabs(0, 0, 600, 390);
+    { tabsConfigure = new Fl_Tabs(0, 0, 600, 395);
       tabsConfigure->color(FL_LIGHT1);
       tabsConfigure->selection_color(FL_LIGHT1);
       { tabOperator = new Fl_Group(0, 25, 600, 365, _("Operator"));
         tabOperator->tooltip(_("Operator information"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
+        tabOperator->hide();
         { Fl_Group* o = new Fl_Group(55, 35, 490, 200, _("Station"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -6905,6 +7386,7 @@ Fl_Double_Window* ConfigureDialog() {
           tabsUI->selection_color(FL_LIGHT1);
           { tabBrowser = new Fl_Group(0, 50, 600, 340, _("Browser"));
             tabBrowser->tooltip(_("User Interface - Browser"));
+            tabBrowser->hide();
             { Fl_Group* o = new Fl_Group(30, 65, 540, 300);
               o->box(FL_ENGRAVED_FRAME);
               { Fl_Spinner2* o = cntChannels = new Fl_Spinner2(46, 75, 50, 24, _("Channels, first channel starts at waterfall lower limit"));
@@ -7173,10 +7655,8 @@ Fl_Double_Window* ConfigureDialog() {
           } // Fl_Group* tabUserInterface
           { tabLogServer = new Fl_Group(0, 50, 600, 340, _("Log"));
             tabLogServer->tooltip(_("User Interface - Colors / Fonts"));
-            tabLogServer->hide();
             { tabsLog = new Fl_Tabs(0, 50, 600, 340);
               { grp_Log_QSO = new Fl_Group(0, 75, 600, 315, _("QSO"));
-                grp_Log_QSO->hide();
                 { Fl_Group* o = new Fl_Group(60, 112, 496, 198, _("QSO logging"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -7369,6 +7849,7 @@ ab and newline are automatically included."));
                 grpMacLogger->end();
               } // Fl_Group* grpMacLogger
               { grpN3FJP_logs = new Fl_Group(0, 75, 600, 315, _("N3FJP logs"));
+                grpN3FJP_logs->hide();
                 { Fl_Text_Display* o = txt_N3FJP_data = new Fl_Text_Display(5, 148, 590, 170, _("TCP/IP Data Stream"));
                 txt_N3FJP_data->align(Fl_Align(FL_ALIGN_TOP_LEFT));
                 Fl_Text_Buffer *txtbuffer = new Fl_Text_Buffer();
@@ -7889,6 +8370,7 @@ ab and newline are automatically included."));
             tabColorsFonts->hide();
             { tabsColors = new Fl_Tabs(0, 55, 600, 335);
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("Rx/Tx"));
+                o->hide();
                 { Fl_ListBox* o = listbox_charset_status = new Fl_ListBox(96, 90, 165, 24, _("Rx/Tx Character set"));
                 listbox_charset_status->tooltip(_("Select Rx/Tx Character Set"));
                 listbox_charset_status->box(FL_BORDER_BOX);
@@ -8265,7 +8747,6 @@ ab and newline are automatically included."));
                 o->end();
               } // Fl_Group* o
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("SigLvl"));
-                o->hide();
                 { btnLowSignal = new Fl_Button(210, 142, 70, 21, _("Low"));
                 btnLowSignal->callback((Fl_Callback*)cb_btnLowSignal);
                 } // Fl_Button* btnLowSignal
@@ -8351,6 +8832,7 @@ i on a\ntouch screen device such as a tablet."));
           tabsWaterfall->color(FL_LIGHT1);
           tabsWaterfall->selection_color(FL_LIGHT1);
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Display"));
+            o->hide();
             { Fl_Group* o = new Fl_Group(50, 63, 496, 190, _("Colors and cursors"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -8682,7 +9164,6 @@ i on a\ntouch screen device such as a tablet."));
             o->end();
           } // Fl_Group* o
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Mouse"));
-            o->hide();
             { Fl_Group* o = new Fl_Group(55, 73, 490, 170);
               o->box(FL_ENGRAVED_FRAME);
               { Fl_Check_Button* o = btnWaterfallHistoryDefault = new Fl_Check_Button(65, 87, 340, 20, _("Left or right click always replays audio history"));
@@ -8745,10 +9226,12 @@ i on a\ntouch screen device such as a tablet."));
           tabsModems->selection_color(FL_LIGHT1);
           tabsModems->align(Fl_Align(FL_ALIGN_TOP_RIGHT));
           { tabCW = new Fl_Group(0, 50, 600, 340, _("CW"));
+            tabCW->hide();
             { tabsCW = new Fl_Tabs(0, 50, 600, 340);
               tabsCW->selection_color(FL_LIGHT1);
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("General"));
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+                o->hide();
                 { Fl_Group* o = new Fl_Group(35, 85, 530, 130, _("Receive"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -9163,7 +9646,6 @@ i on a\ntouch screen device such as a tablet."));
               } // Fl_Group* o
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("Prosigns"));
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-                o->hide();
                 { Fl_Group* o = new Fl_Group(35, 85, 530, 283);
                 o->box(FL_ENGRAVED_FRAME);
                 { Fl_Check_Button* o = btnCW_use_paren = new Fl_Check_Button(266, 244, 68, 15, _("Use \'(\' paren not KN"));
@@ -10630,9 +11112,9 @@ le Earth)"));
             tabTHOR->end();
           } // Fl_Group* tabTHOR
           { tabOther = new Fl_Group(0, 50, 600, 340, _("Other"));
-            tabOther->hide();
             { tabsOther = new Fl_Tabs(0, 50, 600, 340);
               { tabNavtex = new Fl_Group(0, 75, 600, 315, _("Nav"));
+                tabNavtex->hide();
                 { Fl_Check_Button* o = btnNvtxAdifLog = new Fl_Check_Button(181, 109, 235, 30, _("Log Navtex messages to Adif file"));
                 btnNvtxAdifLog->down_box(FL_DOWN_BOX);
                 btnNvtxAdifLog->callback((Fl_Callback*)cb_btnNvtxAdifLog);
@@ -10716,7 +11198,6 @@ le Earth)"));
                 tabWefax->end();
               } // Fl_Group* tabWefax
               { tabDFTscan = new Fl_Group(0, 75, 600, 315, _("Scan"));
-                tabDFTscan->hide();
                 { Fl_Counter* o = cnt_dft_scans = new Fl_Counter(235, 154, 132, 21, _("# scans"));
                 cnt_dft_scans->minimum(10);
                 cnt_dft_scans->maximum(1000);
@@ -10752,10 +11233,10 @@ le Earth)"));
       } // Fl_Group* tabModems
       { tabRig = new Fl_Group(0, 25, 600, 365, _("Rig"));
         tabRig->tooltip(_("Transceiver control"));
-        tabRig->hide();
         { tabsRig = new Fl_Tabs(0, 25, 600, 365);
           tabsRig->selection_color(FL_LIGHT1);
           { tabFLRIG = new Fl_Group(0, 50, 600, 340, _("flrig"));
+            tabFLRIG->hide();
             { Fl_Group* o = new Fl_Group(10, 210, 580, 90, _("\"Disable PTT keys modem if multiple instances of fldigi (client)\nare connec\
 ted to a single flrig (server)."));
               o->box(FL_ENGRAVED_BOX);
@@ -11412,29 +11893,6 @@ definition"));
                 btnUseUHrouterPTT->selection_color((Fl_Color)1);
                 btnUseUHrouterPTT->callback((Fl_Callback*)cb_btnUseUHrouterPTT);
               } // Fl_Round_Button* btnUseUHrouterPTT
-              { btnUseGPIOPTT = new Fl_Round_Button(74, 252, 170, 20, _("Use GPIO PTT"));
-                btnUseGPIOPTT->down_box(FL_DOWN_BOX);
-                btnUseGPIOPTT->selection_color((Fl_Color)1);
-                btnUseGPIOPTT->callback((Fl_Callback*)cb_btnUseGPIOPTT);
-              } // Fl_Round_Button* btnUseGPIOPTT
-              { inpGPIOPort = new Fl_Counter2(286, 252, 65, 20, _("GPIO:"));
-                inpGPIOPort->tooltip(_("Select GPIO port"));
-                inpGPIOPort->type(1);
-                inpGPIOPort->box(FL_UP_BOX);
-                inpGPIOPort->color(FL_BACKGROUND_COLOR);
-                inpGPIOPort->selection_color(FL_INACTIVE_COLOR);
-                inpGPIOPort->labeltype(FL_NORMAL_LABEL);
-                inpGPIOPort->labelfont(0);
-                inpGPIOPort->labelsize(14);
-                inpGPIOPort->labelcolor(FL_FOREGROUND_COLOR);
-                inpGPIOPort->minimum(0);
-                inpGPIOPort->maximum(31);
-                inpGPIOPort->step(1);
-                inpGPIOPort->value(17);
-                inpGPIOPort->callback((Fl_Callback*)cb_inpGPIOPort);
-                inpGPIOPort->align(Fl_Align(FL_ALIGN_LEFT));
-                inpGPIOPort->when(FL_WHEN_CHANGED);
-              } // Fl_Counter2* inpGPIOPort
               grpHWPTT->end();
             } // Fl_Group* grpHWPTT
             { grpPTTdelays = new Fl_Group(55, 284, 490, 91, _("PTT delays valid for all CAT/PTT types"));
@@ -11464,6 +11922,257 @@ definition"));
             } // Fl_Group* grpPTTdelays
             o->end();
           } // Fl_Group* o
+          { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("GPIO"));
+            { Fl_Box* o = new Fl_Box(70, 96, 189, 17, _("BCM GPIO  pin    Value"));
+              o->labelfont(4);
+              o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            { Fl_Check_Button* o = btn_enable_gpio[0] = new Fl_Check_Button(60, 121, 125, 15, _("17   00   11"));
+              btn_enable_gpio[0]->tooltip(_("Select pin number"));
+              btn_enable_gpio[0]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[0]->labelfont(4);
+              btn_enable_gpio[0]->callback((Fl_Callback*)cb_btn_enable_gpio);
+              o->value(progdefaults.enable_gpio & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[0]
+            { Fl_Check_Button* o = btn_enable_gpio[1] = new Fl_Check_Button(60, 150, 125, 15, _("18   01   12"));
+              btn_enable_gpio[1]->tooltip(_("Select pin number"));
+              btn_enable_gpio[1]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[1]->labelfont(4);
+              btn_enable_gpio[1]->callback((Fl_Callback*)cb_btn_enable_gpio1);
+              o->value((progdefaults.enable_gpio >> 1) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[1]
+            { Fl_Check_Button* o = btn_enable_gpio[2] = new Fl_Check_Button(60, 180, 125, 15, _("27   02   13"));
+              btn_enable_gpio[2]->tooltip(_("Select pin number"));
+              btn_enable_gpio[2]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[2]->labelfont(4);
+              btn_enable_gpio[2]->callback((Fl_Callback*)cb_btn_enable_gpio2);
+              o->value((progdefaults.enable_gpio >> 2) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[2]
+            { Fl_Check_Button* o = btn_enable_gpio[3] = new Fl_Check_Button(60, 210, 125, 15, _("22   03   15"));
+              btn_enable_gpio[3]->tooltip(_("Select pin number"));
+              btn_enable_gpio[3]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[3]->labelfont(4);
+              btn_enable_gpio[3]->callback((Fl_Callback*)cb_btn_enable_gpio3);
+              o->value((progdefaults.enable_gpio >> 3) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[3]
+            { Fl_Check_Button* o = btn_enable_gpio[4] = new Fl_Check_Button(60, 240, 125, 15, _("23   04   16"));
+              btn_enable_gpio[4]->tooltip(_("Select pin number"));
+              btn_enable_gpio[4]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[4]->labelfont(4);
+              btn_enable_gpio[4]->callback((Fl_Callback*)cb_btn_enable_gpio4);
+              o->value((progdefaults.enable_gpio >> 4) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[4]
+            { Fl_Check_Button* o = btn_enable_gpio[5] = new Fl_Check_Button(60, 270, 125, 15, _("24   05   18"));
+              btn_enable_gpio[5]->tooltip(_("Select pin number"));
+              btn_enable_gpio[5]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[5]->labelfont(4);
+              btn_enable_gpio[5]->callback((Fl_Callback*)cb_btn_enable_gpio5);
+              o->value((progdefaults.enable_gpio >> 5) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[5]
+            { Fl_Check_Button* o = btn_enable_gpio[6] = new Fl_Check_Button(60, 300, 125, 15, _("25   06   22"));
+              btn_enable_gpio[6]->tooltip(_("Select pin number"));
+              btn_enable_gpio[6]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[6]->labelfont(4);
+              btn_enable_gpio[6]->callback((Fl_Callback*)cb_btn_enable_gpio6);
+              o->value((progdefaults.enable_gpio >> 6) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[6]
+            { Fl_Check_Button* o = btn_enable_gpio[7] = new Fl_Check_Button(60, 330, 125, 15, _(" 4   07    7"));
+              btn_enable_gpio[7]->tooltip(_("Select pin number"));
+              btn_enable_gpio[7]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[7]->labelfont(4);
+              btn_enable_gpio[7]->callback((Fl_Callback*)cb_btn_enable_gpio7);
+              o->value((progdefaults.enable_gpio >> 7) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[7]
+            { Fl_Check_Button* o = btn_enable_gpio[8] = new Fl_Check_Button(320, 121, 125, 15, _(" 5   21   29"));
+              btn_enable_gpio[8]->tooltip(_("Select pin number"));
+              btn_enable_gpio[8]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[8]->labelfont(4);
+              btn_enable_gpio[8]->callback((Fl_Callback*)cb_btn_enable_gpio8);
+              o->value((progdefaults.enable_gpio >> 8) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[8]
+            { Fl_Check_Button* o = btn_enable_gpio[9] = new Fl_Check_Button(320, 150, 125, 15, _(" 6   22   31"));
+              btn_enable_gpio[9]->tooltip(_("Select pin number"));
+              btn_enable_gpio[9]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[9]->labelfont(4);
+              btn_enable_gpio[9]->callback((Fl_Callback*)cb_btn_enable_gpio9);
+              o->value((progdefaults.enable_gpio >> 9) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[9]
+            { Fl_Check_Button* o = btn_enable_gpio[10] = new Fl_Check_Button(320, 180, 125, 15, _("13   23   33"));
+              btn_enable_gpio[10]->tooltip(_("Select pin number"));
+              btn_enable_gpio[10]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[10]->labelfont(4);
+              btn_enable_gpio[10]->callback((Fl_Callback*)cb_btn_enable_gpioa);
+              o->value((progdefaults.enable_gpio >> 10) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[10]
+            { Fl_Check_Button* o = btn_enable_gpio[11] = new Fl_Check_Button(320, 210, 125, 15, _("19   24   35"));
+              btn_enable_gpio[11]->tooltip(_("Select pin number"));
+              btn_enable_gpio[11]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[11]->labelfont(4);
+              btn_enable_gpio[11]->callback((Fl_Callback*)cb_btn_enable_gpiob);
+              o->value((progdefaults.enable_gpio >> 11) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[11]
+            { Fl_Check_Button* o = btn_enable_gpio[12] = new Fl_Check_Button(320, 240, 125, 15, _("26   25   37"));
+              btn_enable_gpio[12]->tooltip(_("Select pin number"));
+              btn_enable_gpio[12]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[12]->labelfont(4);
+              btn_enable_gpio[12]->callback((Fl_Callback*)cb_btn_enable_gpioc);
+              o->value((progdefaults.enable_gpio >> 12) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[12]
+            { Fl_Check_Button* o = btn_enable_gpio[13] = new Fl_Check_Button(320, 270, 125, 15, _("12   26   32"));
+              btn_enable_gpio[13]->tooltip(_("Select pin number"));
+              btn_enable_gpio[13]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[13]->labelfont(4);
+              btn_enable_gpio[13]->callback((Fl_Callback*)cb_btn_enable_gpiod);
+              o->value((progdefaults.enable_gpio >> 13) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[13]
+            { Fl_Check_Button* o = btn_enable_gpio[14] = new Fl_Check_Button(320, 300, 125, 15, _("16   27   36"));
+              btn_enable_gpio[14]->tooltip(_("Select pin number"));
+              btn_enable_gpio[14]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[14]->labelfont(4);
+              btn_enable_gpio[14]->callback((Fl_Callback*)cb_btn_enable_gpioe);
+              o->value((progdefaults.enable_gpio >> 14) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[14]
+            { Fl_Check_Button* o = btn_enable_gpio[15] = new Fl_Check_Button(320, 330, 125, 15, _("20   28   38"));
+              btn_enable_gpio[15]->tooltip(_("Select pin number"));
+              btn_enable_gpio[15]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[15]->labelfont(4);
+              btn_enable_gpio[15]->callback((Fl_Callback*)cb_btn_enable_gpiof);
+              o->value((progdefaults.enable_gpio >> 15) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[15]
+            { Fl_Check_Button* o = btn_enable_gpio[16] = new Fl_Check_Button(320, 360, 125, 15, _("21   29   40"));
+              btn_enable_gpio[16]->tooltip(_("Select pin number"));
+              btn_enable_gpio[16]->down_box(FL_DOWN_BOX);
+              btn_enable_gpio[16]->labelfont(4);
+              btn_enable_gpio[16]->callback((Fl_Callback*)cb_btn_enable_gpio10);
+              o->value((progdefaults.enable_gpio >> 16) & 0x01);
+            } // Fl_Check_Button* btn_enable_gpio[16]
+            { Fl_Check_Button* o = btn_gpio_on[0] = new Fl_Check_Button(200, 120, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[0]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[0]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[0]->labelfont(4);
+              btn_gpio_on[0]->callback((Fl_Callback*)cb_btn_gpio_on);
+              o->value((progdefaults.gpio_on) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[0]
+            { Fl_Check_Button* o = btn_gpio_on[1] = new Fl_Check_Button(200, 150, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[1]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[1]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[1]->labelfont(4);
+              btn_gpio_on[1]->callback((Fl_Callback*)cb_btn_gpio_on1);
+              o->value((progdefaults.gpio_on >> 1) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[1]
+            { Fl_Check_Button* o = btn_gpio_on[2] = new Fl_Check_Button(200, 180, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[2]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[2]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[2]->labelfont(4);
+              btn_gpio_on[2]->callback((Fl_Callback*)cb_btn_gpio_on2);
+              o->value((progdefaults.gpio_on >> 2) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[2]
+            { Fl_Check_Button* o = btn_gpio_on[3] = new Fl_Check_Button(200, 210, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[3]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[3]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[3]->labelfont(4);
+              btn_gpio_on[3]->callback((Fl_Callback*)cb_btn_gpio_on3);
+              o->value((progdefaults.gpio_on >> 3) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[3]
+            { Fl_Check_Button* o = btn_gpio_on[4] = new Fl_Check_Button(200, 240, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[4]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[4]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[4]->labelfont(4);
+              btn_gpio_on[4]->callback((Fl_Callback*)cb_btn_gpio_on4);
+              o->value((progdefaults.gpio_on >> 4) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[4]
+            { Fl_Check_Button* o = btn_gpio_on[5] = new Fl_Check_Button(200, 270, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[5]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[5]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[5]->labelfont(4);
+              btn_gpio_on[5]->callback((Fl_Callback*)cb_btn_gpio_on5);
+              o->value((progdefaults.gpio_on >> 5) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[5]
+            { Fl_Check_Button* o = btn_gpio_on[6] = new Fl_Check_Button(200, 300, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[6]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[6]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[6]->labelfont(4);
+              btn_gpio_on[6]->callback((Fl_Callback*)cb_btn_gpio_on6);
+              o->value((progdefaults.gpio_on >> 6) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[6]
+            { Fl_Check_Button* o = btn_gpio_on[7] = new Fl_Check_Button(200, 330, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[7]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[7]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[7]->labelfont(4);
+              btn_gpio_on[7]->callback((Fl_Callback*)cb_btn_gpio_on7);
+              o->value((progdefaults.gpio_on >> 7) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[7]
+            { Fl_Check_Button* o = btn_gpio_on[8] = new Fl_Check_Button(460, 121, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[8]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[8]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[8]->labelfont(4);
+              btn_gpio_on[8]->callback((Fl_Callback*)cb_btn_gpio_on8);
+              o->value((progdefaults.gpio_on >> 8) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[8]
+            { Fl_Check_Button* o = btn_gpio_on[9] = new Fl_Check_Button(460, 150, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[9]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[9]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[9]->labelfont(4);
+              btn_gpio_on[9]->callback((Fl_Callback*)cb_btn_gpio_on9);
+              o->value((progdefaults.gpio_on >> 9) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[9]
+            { Fl_Check_Button* o = btn_gpio_on[10] = new Fl_Check_Button(460, 180, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[10]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[10]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[10]->labelfont(4);
+              btn_gpio_on[10]->callback((Fl_Callback*)cb_btn_gpio_ona);
+              o->value((progdefaults.gpio_on >> 10) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[10]
+            { Fl_Check_Button* o = btn_gpio_on[11] = new Fl_Check_Button(460, 210, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[11]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[11]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[11]->labelfont(4);
+              btn_gpio_on[11]->callback((Fl_Callback*)cb_btn_gpio_onb);
+              o->value((progdefaults.gpio_on >> 11) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[11]
+            { Fl_Check_Button* o = btn_gpio_on[12] = new Fl_Check_Button(460, 240, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[12]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[12]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[12]->labelfont(4);
+              btn_gpio_on[12]->callback((Fl_Callback*)cb_btn_gpio_onc);
+              o->value((progdefaults.gpio_on >> 12) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[12]
+            { Fl_Check_Button* o = btn_gpio_on[13] = new Fl_Check_Button(460, 270, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[13]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[13]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[13]->labelfont(4);
+              btn_gpio_on[13]->callback((Fl_Callback*)cb_btn_gpio_ond);
+              o->value((progdefaults.gpio_on >> 13) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[13]
+            { Fl_Check_Button* o = btn_gpio_on[14] = new Fl_Check_Button(460, 300, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[14]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[14]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[14]->labelfont(4);
+              btn_gpio_on[14]->callback((Fl_Callback*)cb_btn_gpio_one);
+              o->value((progdefaults.gpio_on >> 14) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[14]
+            { Fl_Check_Button* o = btn_gpio_on[15] = new Fl_Check_Button(460, 330, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[15]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[15]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[15]->labelfont(4);
+              btn_gpio_on[15]->callback((Fl_Callback*)cb_btn_gpio_onf);
+              o->value((progdefaults.gpio_on >> 15) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[15]
+            { Fl_Check_Button* o = btn_gpio_on[16] = new Fl_Check_Button(460, 360, 84, 15, _("= 1 (on)"));
+              btn_gpio_on[16]->tooltip(_("Select PTT on state"));
+              btn_gpio_on[16]->down_box(FL_DOWN_BOX);
+              btn_gpio_on[16]->labelfont(4);
+              btn_gpio_on[16]->callback((Fl_Callback*)cb_btn_gpio_on10);
+              o->value((progdefaults.gpio_on >> 16) & 0x01);
+            } // Fl_Check_Button* btn_gpio_on[16]
+            { Fl_Box* o = new Fl_Box(330, 96, 194, 17, _("BCM GPIO  pin    Value"));
+              o->labelfont(4);
+              o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            { new Fl_Box(170, 68, 283, 17, _("Enable GPIO PTT (Pi specific controls)"));
+            } // Fl_Box* o
+            o->end();
+          } // Fl_Group* o
           tabsRig->end();
         } // Fl_Tabs* tabsRig
         tabRig->end();
@@ -11474,6 +12183,7 @@ definition"));
         { tabsSoundCard = new Fl_Tabs(0, 25, 600, 365);
           tabsSoundCard->selection_color(FL_LIGHT1);
           { tabAudio = new Fl_Group(0, 50, 600, 340, _("Devices"));
+            tabAudio->hide();
             { AudioTCP = new Fl_Group(55, 65, 380, 45);
               AudioTCP->box(FL_ENGRAVED_FRAME);
               { btnAudioIO[0] = new Fl_Round_Button(65, 75, 53, 25, _("TCP"));
@@ -11752,7 +12462,6 @@ nce.\nYou may change the state from either location.\n..."));
             tabAudioRightChannel->end();
           } // Fl_Group* tabAudioRightChannel
           { tabWavFile = new Fl_Group(0, 50, 600, 340, _("Wav"));
-            tabWavFile->hide();
             { Fl_ListBox* o = listbox_wav_samplerate = new Fl_ListBox(225, 96, 150, 24, _("Wav write sample rate"));
               listbox_wav_samplerate->tooltip(_("Pick baud rate from list"));
               listbox_wav_samplerate->box(FL_DOWN_BOX);
@@ -11785,6 +12494,7 @@ nce.\nYou may change the state from either location.\n..."));
         tabID->hide();
         { tabsID = new Fl_Tabs(0, 25, 600, 365);
           { tabRsID = new Fl_Group(0, 50, 600, 340, _("RsID"));
+            tabRsID->hide();
             { Fl_Group* o = new Fl_Group(32, 55, 535, 210, _("Reed-Solomon ID (Rx)"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -11985,7 +12695,6 @@ gured on the\n\"Notifications\" configure dialog."));
             tabVideoID->end();
           } // Fl_Group* tabVideoID
           { tabCwID = new Fl_Group(0, 50, 600, 340, _("CW"));
-            tabCwID->hide();
             { sld = new Fl_Group(32, 146, 536, 127, _("CW Postamble ID"));
               sld->box(FL_ENGRAVED_FRAME);
               sld->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -12032,6 +12741,7 @@ gured on the\n\"Notifications\" configure dialog."));
         { tabsMisc = new Fl_Tabs(0, 25, 600, 365);
           tabsMisc->selection_color(FL_LIGHT1);
           { tabCPUspeed = new Fl_Group(0, 50, 600, 340, _("CPU"));
+            tabCPUspeed->hide();
             { Fl_Group* o = new Fl_Group(55, 75, 490, 51);
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -12525,7 +13235,6 @@ gured on the\n\"Notifications\" configure dialog."));
             tabWX->end();
           } // Fl_Group* tabWX
           { tabKML = new Fl_Group(0, 50, 600, 340, _("KML"));
-            tabKML->hide();
             { Fl_Input* o = btnKmlSaveDir = new Fl_Input(26, 75, 390, 24, _("KML files directory"));
               btnKmlSaveDir->tooltip(_("Where generated KML documents are stored."));
               btnKmlSaveDir->callback((Fl_Callback*)cb_btnKmlSaveDir);
@@ -12899,6 +13608,7 @@ and restarted if needed."));
         tabQRZ->hide();
         { tabsQRZ = new Fl_Tabs(0, 25, 600, 365);
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Call Lookup"));
+            o->hide();
             { Fl_Group* o = new Fl_Group(34, 56, 538, 122, _("Web Browser lookup"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -13076,9 +13786,9 @@ and restarted if needed."));
             } // Fl_Group* o
             o->end();
           } // Fl_Group* o
-          { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("eQSL"));
-            o->hide();
-            { Fl_Input2* o = inpEQSL_id = new Fl_Input2(225, 58, 150, 20, _("User ID"));
+          { tabEQSL = new Fl_Group(0, 50, 600, 340, _("eQSL"));
+            tabEQSL->hide();
+            { Fl_Input2* o = inpEQSL_id = new Fl_Input2(154, 60, 150, 22, _("User ID"));
               inpEQSL_id->tooltip(_("Your login name"));
               inpEQSL_id->box(FL_DOWN_BOX);
               inpEQSL_id->color(FL_BACKGROUND2_COLOR);
@@ -13093,7 +13803,7 @@ and restarted if needed."));
               o->value(progdefaults.eqsl_id.c_str());
               inpEQSL_id->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpEQSL_id
-            { Fl_Input2* o = inpEQSL_pwd = new Fl_Input2(225, 85, 150, 20, _("Password"));
+            { Fl_Input2* o = inpEQSL_pwd = new Fl_Input2(154, 87, 150, 22, _("Password"));
               inpEQSL_pwd->tooltip(_("Your login password"));
               inpEQSL_pwd->box(FL_DOWN_BOX);
               inpEQSL_pwd->color(FL_BACKGROUND2_COLOR);
@@ -13109,11 +13819,11 @@ and restarted if needed."));
               o->type(FL_SECRET_INPUT);
               inpEQSL_pwd->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpEQSL_pwd
-            { btnEQSL_pwd_show = new Fl_Button(395, 85, 70, 20, _("Show"));
+            { btnEQSL_pwd_show = new Fl_Button(310, 87, 70, 22, _("Show"));
               btnEQSL_pwd_show->tooltip(_("Show password in plain text"));
               btnEQSL_pwd_show->callback((Fl_Callback*)cb_btnEQSL_pwd_show);
             } // Fl_Button* btnEQSL_pwd_show
-            { Fl_Input2* o = inpEQSL_nick = new Fl_Input2(225, 114, 150, 20, _("QTH Nickname"));
+            { Fl_Input2* o = inpEQSL_nick = new Fl_Input2(154, 115, 150, 22, _("QTH Nickname"));
               inpEQSL_nick->tooltip(_("Your login name"));
               inpEQSL_nick->box(FL_DOWN_BOX);
               inpEQSL_nick->color(FL_BACKGROUND2_COLOR);
@@ -13128,16 +13838,20 @@ and restarted if needed."));
               o->value(progdefaults.eqsl_nick.c_str());
               inpEQSL_nick->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpEQSL_nick
-            { Fl_Group* o = new Fl_Group(30, 141, 516, 223, _("Options"));
+            { btn_verify_eqsl = new Fl_Button(475, 111, 70, 24, _("Verify"));
+              btn_verify_eqsl->tooltip(_("Verify database with eQSL download file"));
+              btn_verify_eqsl->callback((Fl_Callback*)cb_btn_verify_eqsl);
+            } // Fl_Button* btn_verify_eqsl
+            { Fl_Group* o = new Fl_Group(42, 141, 516, 223, _("Options"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_send_when_logged = new Fl_Check_Button(79, 166, 70, 15, _("send when logged (log button, <LOG>, <LNW>)"));
+              { Fl_Check_Button* o = btn_send_when_logged = new Fl_Check_Button(91, 166, 70, 15, _("send when logged (log button, <LOG>, <LNW>)"));
                 btn_send_when_logged->tooltip(_("automatic data upload"));
                 btn_send_when_logged->down_box(FL_DOWN_BOX);
                 btn_send_when_logged->callback((Fl_Callback*)cb_btn_send_when_logged);
                 o->value(progdefaults.eqsl_when_logged);
               } // Fl_Check_Button* btn_send_when_logged
-              { Fl_Input2* o = txt_eqsl_default_message = new Fl_Input2(83, 226, 451, 40, _("Default message"));
+              { Fl_Input2* o = txt_eqsl_default_message = new Fl_Input2(95, 226, 451, 40, _("Default message"));
                 txt_eqsl_default_message->tooltip(_("default text to send with <LOG> etc"));
                 txt_eqsl_default_message->type(4);
                 txt_eqsl_default_message->box(FL_DOWN_BOX);
@@ -13152,23 +13866,23 @@ and restarted if needed."));
                 txt_eqsl_default_message->when(FL_WHEN_CHANGED);
                 o->value(progdefaults.eqsl_default_message.c_str());
               } // Fl_Input2* txt_eqsl_default_message
-              { Fl_Group* o = new Fl_Group(30, 270, 513, 90, _("Text Tags (tags use {} delimiters)"));
+              { Fl_Group* o = new Fl_Group(49, 270, 481, 90, _("Text Tags (tags use {} delimiters)"));
                 o->box(FL_FLAT_BOX);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-                { eqsl_txt1 = new Fl_Box(32, 317, 220, 17, _("  {CALL} other ops call sign"));
+                { eqsl_txt1 = new Fl_Box(64, 317, 220, 17, _("  {CALL} other ops call sign"));
                 eqsl_txt1->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
                 } // Fl_Box* eqsl_txt1
-                { eqsl_txt2 = new Fl_Box(30, 336, 220, 17, _("  {MODE} full mode / submode"));
+                { eqsl_txt2 = new Fl_Box(62, 336, 220, 17, _("  {MODE} full mode / submode"));
                 eqsl_txt2->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
                 } // Fl_Box* eqsl_txt2
-                { eqsl_txt3 = new Fl_Box(278, 317, 220, 17, _("{NAME} other ops name"));
+                { eqsl_txt3 = new Fl_Box(310, 317, 220, 17, _("{NAME} other ops name"));
                 eqsl_txt3->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
                 } // Fl_Box* eqsl_txt3
-                { new Fl_Box(68, 293, 440, 17, _("These tags can also be used in <EQSL:[message]>"));
+                { new Fl_Box(80, 293, 440, 17, _("These tags can also be used in <EQSL:[message]>"));
                 } // Fl_Box* o
                 o->end();
               } // Fl_Group* o
-              { Fl_Check_Button* o = btn_send_datetime_off = new Fl_Check_Button(80, 188, 70, 15, _("Use date/time off for log entry"));
+              { Fl_Check_Button* o = btn_send_datetime_off = new Fl_Check_Button(92, 188, 70, 15, _("Use date/time off for log entry"));
                 btn_send_datetime_off->tooltip(_("default uses date/time on"));
                 btn_send_datetime_off->down_box(FL_DOWN_BOX);
                 btn_send_datetime_off->callback((Fl_Callback*)cb_btn_send_datetime_off);
@@ -13176,8 +13890,117 @@ and restarted if needed."));
               } // Fl_Check_Button* btn_send_datetime_off
               o->end();
             } // Fl_Group* o
-            o->end();
-          } // Fl_Group* o
+            tabEQSL->end();
+          } // Fl_Group* tabEQSL
+          { tabLOTW = new Fl_Group(0, 50, 600, 340, _("LoTW"));
+            { Fl_Input2* o = txt_lotw_pathname = new Fl_Input2(90, 91, 379, 24, _("tqsl:"));
+              txt_lotw_pathname->tooltip(_("Enter full path-filename for tqsl executable"));
+              txt_lotw_pathname->box(FL_DOWN_BOX);
+              txt_lotw_pathname->color(FL_BACKGROUND2_COLOR);
+              txt_lotw_pathname->selection_color(FL_SELECTION_COLOR);
+              txt_lotw_pathname->labeltype(FL_NORMAL_LABEL);
+              txt_lotw_pathname->labelfont(0);
+              txt_lotw_pathname->labelsize(14);
+              txt_lotw_pathname->labelcolor(FL_FOREGROUND_COLOR);
+              txt_lotw_pathname->callback((Fl_Callback*)cb_txt_lotw_pathname);
+              txt_lotw_pathname->align(Fl_Align(FL_ALIGN_LEFT));
+              txt_lotw_pathname->when(FL_WHEN_CHANGED);
+              o->value(progdefaults.lotw_pathname.c_str());
+            } // Fl_Input2* txt_lotw_pathname
+            { Fl_Input2* o = inpLOTW_pwd = new Fl_Input2(90, 126, 200, 24, _("Password"));
+              inpLOTW_pwd->tooltip(_("Your tqsl login password"));
+              inpLOTW_pwd->box(FL_DOWN_BOX);
+              inpLOTW_pwd->color(FL_BACKGROUND2_COLOR);
+              inpLOTW_pwd->selection_color(FL_SELECTION_COLOR);
+              inpLOTW_pwd->labeltype(FL_NORMAL_LABEL);
+              inpLOTW_pwd->labelfont(0);
+              inpLOTW_pwd->labelsize(14);
+              inpLOTW_pwd->labelcolor(FL_FOREGROUND_COLOR);
+              inpLOTW_pwd->callback((Fl_Callback*)cb_inpLOTW_pwd);
+              inpLOTW_pwd->align(Fl_Align(FL_ALIGN_LEFT));
+              inpLOTW_pwd->when(FL_WHEN_RELEASE);
+              o->value(progdefaults.lotw_pwd.c_str());
+              o->type(FL_SECRET_INPUT);
+              inpLOTW_pwd->labelsize(FL_NORMAL_SIZE);
+            } // Fl_Input2* inpLOTW_pwd
+            { Fl_Check_Button* o = btn_submit_lotw_password = new Fl_Check_Button(90, 161, 234, 16, _("Use password for tqsl access"));
+              btn_submit_lotw_password->tooltip(_("Submit password with each upload"));
+              btn_submit_lotw_password->down_box(FL_DOWN_BOX);
+              btn_submit_lotw_password->callback((Fl_Callback*)cb_btn_submit_lotw_password);
+              o->value(progdefaults.submit_lotw_password);
+            } // Fl_Check_Button* btn_submit_lotw_password
+            { Fl_Input2* o = inpLOTW_location = new Fl_Input2(90, 188, 200, 24, _("Location"));
+              inpLOTW_location->tooltip(_("tqsl station location"));
+              inpLOTW_location->box(FL_DOWN_BOX);
+              inpLOTW_location->color(FL_BACKGROUND2_COLOR);
+              inpLOTW_location->selection_color(FL_SELECTION_COLOR);
+              inpLOTW_location->labeltype(FL_NORMAL_LABEL);
+              inpLOTW_location->labelfont(0);
+              inpLOTW_location->labelsize(14);
+              inpLOTW_location->labelcolor(FL_FOREGROUND_COLOR);
+              inpLOTW_location->callback((Fl_Callback*)cb_inpLOTW_location);
+              inpLOTW_location->align(Fl_Align(FL_ALIGN_LEFT));
+              inpLOTW_location->when(FL_WHEN_RELEASE);
+              o->value(progdefaults.lotw_location.c_str());
+              inpLOTW_pwd->labelsize(FL_NORMAL_SIZE);
+            } // Fl_Input2* inpLOTW_location
+            { btn_select_lotw = new Fl_Button(477, 91, 70, 24, _("Locate"));
+              btn_select_lotw->tooltip(_("Locate tqsl executable"));
+              btn_select_lotw->callback((Fl_Callback*)cb_btn_select_lotw);
+            } // Fl_Button* btn_select_lotw
+            { Fl_Check_Button* o = btn_lotw_quiet_mode = new Fl_Check_Button(90, 223, 309, 16, _("Quiet mode [-q], do not open tqsl dialog"));
+              btn_lotw_quiet_mode->tooltip(_("Operate tqsl in batch mode (no dialog)"));
+              btn_lotw_quiet_mode->down_box(FL_DOWN_BOX);
+              btn_lotw_quiet_mode->callback((Fl_Callback*)cb_btn_lotw_quiet_mode);
+              o->value(progdefaults.lotw_quiet_mode);
+            } // Fl_Check_Button* btn_lotw_quiet_mode
+            { Fl_Check_Button* o = btn_submit_lotw = new Fl_Check_Button(90, 247, 289, 16, _("Send QSO data to LoTW when logged"));
+              btn_submit_lotw->tooltip(_("Submit each QSO as logged"));
+              btn_submit_lotw->down_box(FL_DOWN_BOX);
+              btn_submit_lotw->callback((Fl_Callback*)cb_btn_submit_lotw);
+              o->value(progdefaults.submit_lotw);
+            } // Fl_Check_Button* btn_submit_lotw
+            { btn_export_lotw = new Fl_Button(90, 273, 70, 24, _("Export"));
+              btn_export_lotw->tooltip(_("Export records for LoTW upload"));
+              btn_export_lotw->callback((Fl_Callback*)cb_btn_export_lotw);
+            } // Fl_Button* btn_export_lotw
+            { btn_review_lotw = new Fl_Button(90, 300, 70, 24, _("Check"));
+              btn_review_lotw->tooltip(_("Review lotw.adif file before sending with tqsl"));
+              btn_review_lotw->callback((Fl_Callback*)cb_btn_review_lotw);
+            } // Fl_Button* btn_review_lotw
+            { btn_send_lotw = new Fl_Button(90, 328, 70, 24, _("Send"));
+              btn_send_lotw->tooltip(_("Send lotw.adif via tqsl"));
+              btn_send_lotw->callback((Fl_Callback*)cb_btn_send_lotw);
+            } // Fl_Button* btn_send_lotw
+            { Fl_Box* o = new Fl_Box(175, 273, 395, 24, _("Export all or a set of logbook records for LoTW upload"));
+              o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            { Fl_Box* o = new Fl_Box(175, 300, 395, 24, _("Review / edit the exported LoTW upload adif file"));
+              o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            { Fl_Box* o = new Fl_Box(175, 328, 395, 24, _("Submit the upload adif file to LoTW"));
+              o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            { Fl_Box* o = new Fl_Box(11, 60, 574, 24, _("You must have tqsl installed and it\'s location recorded for LoTW updates to \
+work!"));
+              o->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            { btnLOTW_pwd_show = new Fl_Button(297, 126, 70, 24, _("Show"));
+              btnLOTW_pwd_show->tooltip(_("Show password in plain text"));
+              btnLOTW_pwd_show->callback((Fl_Callback*)cb_btnLOTW_pwd_show);
+            } // Fl_Button* btnLOTW_pwd_show
+            { Fl_Box* o = new Fl_Box(300, 188, 285, 24, _("Use this tqsl station location"));
+              o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            { btn_verify_lotw = new Fl_Button(90, 356, 70, 24, _("Match"));
+              btn_verify_lotw->tooltip(_("Verify database with LoTW download file"));
+              btn_verify_lotw->callback((Fl_Callback*)cb_btn_verify_lotw);
+            } // Fl_Button* btn_verify_lotw
+            { Fl_Box* o = new Fl_Box(175, 356, 395, 24, _("Match logbook records with LoTW download file"));
+              o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
+            } // Fl_Box* o
+            tabLOTW->end();
+          } // Fl_Group* tabLOTW
           tabsQRZ->end();
         } // Fl_Tabs* tabsQRZ
         tabQRZ->end();
@@ -13896,13 +14719,13 @@ ed)"));
       } // Fl_Group* tabKPSM
       tabsConfigure->end();
     } // Fl_Tabs* tabsConfigure
-    { btnSaveConfig = new Fl_Button(330, 394, 130, 22, _("Save"));
+    { btnSaveConfig = new Fl_Button(330, 400, 130, 22, _("Save"));
       btnSaveConfig->callback((Fl_Callback*)cb_btnSaveConfig);
     } // Fl_Button* btnSaveConfig
-    { btnCloseConfig = new Fl_Return_Button(462, 394, 130, 22, _("Close"));
+    { btnCloseConfig = new Fl_Return_Button(462, 400, 130, 22, _("Close"));
       btnCloseConfig->callback((Fl_Callback*)cb_btnCloseConfig);
     } // Fl_Return_Button* btnCloseConfig
-    { btnResetConfig = new Fl_Button(20, 394, 130, 22, _("Restore defaults"));
+    { btnResetConfig = new Fl_Button(20, 400, 130, 22, _("Restore defaults"));
       btnResetConfig->tooltip(_("WARNING - this will over write ALL settings"));
       btnResetConfig->callback((Fl_Callback*)cb_btnResetConfig);
     } // Fl_Button* btnResetConfig
