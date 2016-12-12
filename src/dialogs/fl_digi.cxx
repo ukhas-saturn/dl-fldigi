@@ -415,7 +415,7 @@ cFreqControl 		*qsoFreqDisp1 = (cFreqControl *)0;
 // Top Frame 2 group controls - no contest
 Fl_Group			*TopFrame2 = (Fl_Group *)0;
 cFreqControl		*qsoFreqDisp2 = (cFreqControl *)0;
-static Fl_Input2	*inpTimeOff2 = (Fl_Input2 *)0;
+Fl_Input2	        *inpTimeOff2 = (Fl_Input2 *)0;
 static Fl_Input2	*inpTimeOn2 = (Fl_Input2 *)0;
 static Fl_Button	*btnTimeOn2;
 Fl_Input2			*inpCall2 = (Fl_Input2 *)0;
@@ -434,7 +434,7 @@ static Fl_Button	*qso_opPICK3;
 static Fl_Button	*qsoClear3;
 static	Fl_Button	*qsoSave3;
 
-static Fl_Input2	*inpTimeOff3 = (Fl_Input2 *)0;
+Fl_Input2	        *inpTimeOff3 = (Fl_Input2 *)0;
 static Fl_Input2	*inpTimeOn3 = (Fl_Input2 *)0;
 static Fl_Button	*btnTimeOn3;
 Fl_Input2			*inpCall3 = (Fl_Input2 *)0;
@@ -1505,7 +1505,11 @@ LOG_ERROR("Deleting %s", "fsqMonitor");
 		fsqMonitor->hide();
 		delete fsqMonitor;
 	}
-
+	if (dxcluster_viewer) {
+LOG_ERROR("Deleting %s", "dxcluster_viewer");
+		dxcluster_viewer->hide();
+		delete dxcluster_viewer;
+	}
 //	if (fsqDebug) {
 //		fsqDebug->hide();
 //		delete fsqDebug;
@@ -2930,6 +2934,7 @@ void cb_sldrSquelch(Fl_Slider* o, void*) {
 	restoreFocus(13);
 }
 
+/*
 static char ztbuf[20] = "20120602 123000";
 
 const char* zdate(void) { return ztbuf; }
@@ -3016,6 +3021,7 @@ void ztimer(void* first_call)
 	inpTimeOff2->value(zshowtime());
 	inpTimeOff3->value(zshowtime());
 }
+*/
 
 bool oktoclear = true;
 
@@ -3811,6 +3817,9 @@ LOG_INFO("stop_flrig_thread");
 
 LOG_INFO("Stopping N3FJP thread");
 	n3fjp_close();
+
+LOG_INFO("Stopping TOD clock");
+	TOD_close();
 
 LOG_INFO("exit_process");
 	exit_process();
@@ -4947,6 +4956,8 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("View/Hide Channels")), 'v', (Fl_Callback*)cb_view_hide_channels, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("View/Hide 48 macros")), 0, (Fl_Callback*)cb_48macros, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
+{ icons::make_icon_label(_("DX Cluster")), 0, (Fl_Callback*)cb_dxc_viewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+
 { icons::make_icon_label(_("Floating scope"), utilities_system_monitor_icon), 'd', (Fl_Callback*)cb_mnuDigiscope, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(MFSK_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuPicViewer, 0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(WEFAX_RX_IMAGE_MLABEL, image_icon), 'w', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_rx,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
@@ -4985,8 +4996,9 @@ _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 { LOG_CONNECT_SERVER, 0, (Fl_Callback*)cb_log_server, 0, FL_MENU_TOGGLE | FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Field Day Viewer")), 0, (Fl_Callback*)cb_fd_viewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("DX Cluster Viewer")), 0, (Fl_Callback*)cb_dxc_viewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("Field Day Logging")), 0, (Fl_Callback*)cb_fd_viewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+
 {0,0,0,0,0,0,0,0,0},
 
 {_("DL Client"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
@@ -5517,6 +5529,11 @@ void setTabColors()
 	tabsID->selection_color(progdefaults.TabsColor);
 	tabsQRZ->selection_color(progdefaults.TabsColor);
 	if (dlgConfig->visible()) dlgConfig->redraw();
+
+	if (dxcluster_viewer) {
+		cluster_tabs->selection_color(progdefaults.TabsColor);
+		if (dxcluster_viewer->visible()) dxcluster_viewer->redraw();
+	}
 }
 
 void showMacroSet() {
@@ -5758,11 +5775,6 @@ inline void chc_font_pos(Fl_Choice* chc, int x, int y, int w, int h)
 	chc->redraw_label();
 	chc->resize(x, y, w, h);
 	chc->redraw();
-}
-
-void DXC_colors_font()
-{
-	return;
 }
 
 void LOGBOOK_colors_font()

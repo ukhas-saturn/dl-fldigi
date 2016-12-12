@@ -97,6 +97,9 @@ extern Fl_Group			*macroFrame1;
 extern Fl_Group			*macroFrame2;
 extern Fl_Input2		*inpFreq;
 extern Fl_Input2		*inpTimeOff;
+extern Fl_Input2		*inpTimeOff1;
+extern Fl_Input2		*inpTimeOff2;
+extern Fl_Input2		*inpTimeOff3;
 extern Fl_Input2		*inpTimeOn;
 extern Fl_Input2		*inpCall;
 extern Fl_Input2		*inpName;
@@ -186,6 +189,8 @@ extern void				write_fsqDebug(int ch, int style = FTextBase::RECV);
 extern void				write_fsqDebug(std::string s, int style = FTextBase::RECV);
 extern void				fsq_que_clear();
 extern void				write_fsq_que(std::string s);
+
+extern Fl_Box *tx_timer;
 
 extern void start_tx_timer();
 extern void stop_tx_timer();
@@ -616,6 +621,9 @@ extern Fl_Input2	*inp_CQzone;
 extern Fl_Input2	*inp_CQstate;
 
 extern Fl_Double_Window	*dxcluster_viewer;
-extern void DXC_colors_font();
+
+// TOD clock
+extern void  TOD_init();
+extern void  TOD_close();
 
 #endif

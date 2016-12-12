@@ -32,7 +32,9 @@
 #include "macroedit.h"
 #include "fileselect.h"
 #include "psm/psm.h"
+#include "dx_cluster.h"
 extern void WefaxDestDirSet(Fl_File_Chooser *w, void *userdata);
+#include "dx_dialog.h"
 #if USE_HAMLIB
   #include "hamlib.h"
 #endif
@@ -104,6 +106,63 @@ static void cbTxFontBrowser(Fl_Widget*, void*) {
       ifkp_rx_text->setFontColor(progdefaults.RxFontcolor, FTextBase::RECV);
   
        font_browser->hide();
+  
+      progdefaults.changed = true;
+}
+
+static void cbDXfont_browser(Fl_Widget*, void*) {
+  Fl_Font font = font_browser->fontNumber();
+  int size = font_browser->fontSize();
+  Fl_Color color = font_browser->fontColor();
+  
+  progdefaults.DXfontcolor = color;
+  progdefaults.DXfontnbr = font;
+  progdefaults.DXfontsize = size;
+  
+  brws_tcpip_stream->setFont(font);
+  brws_tcpip_stream->setFontSize(size);
+  brws_tcpip_stream->setFontColor(color, FTextBase::RECV);
+  brws_tcpip_stream->redraw();
+  
+  ed_telnet_cmds->setFont(font);
+  ed_telnet_cmds->setFontSize(size);
+  ed_telnet_cmds->setFontColor(color);
+  ed_telnet_cmds->redraw();
+  
+  StreamText->textcolor(color);
+  StreamText->redraw();
+  
+  brws_dxc_help->color(fl_rgb_color(
+      progdefaults.DX_Color.R,
+      progdefaults.DX_Color.G,
+      progdefaults.DX_Color.B));    
+  brws_dxc_help->setFont(font);
+  brws_dxc_help->setFontSize(size);
+  brws_dxc_help->setFontColor(color, FTextBase::RECV);
+  brws_dxc_help->redraw();
+         
+  font_browser->hide();
+  
+  dxcluster_hosts_load();
+  
+  progdefaults.changed = true;
+}
+
+static void cbDXC_FontBrowser(Fl_Widget*, void*) {
+  Fl_Font font = font_browser->fontNumber();
+      int size = font_browser->fontSize();
+      Fl_Color color = font_browser->fontColor();
+  
+      progdefaults.DXC_textfont = font;
+      progdefaults.DXC_textsize = size;
+      progdefaults.DXC_textcolor = color;
+  
+      DXC_display->textsize(size);
+      DXC_display->textcolor(color);
+      DXC_display->textfont(font);
+      DXC_display->redraw();
+  
+      font_browser->hide();
   
       progdefaults.changed = true;
 }
@@ -228,27 +287,6 @@ static void cbLOGBOOKFontBrowser(Fl_Widget*, void*) {
       LOGBOOKdisplay->redraw();
   
       LOGBOOK_colors_font();
-  
-      font_browser->hide();
-  
-      progdefaults.changed = true;
-}
-
-static void cbDXC_FontBrowser(Fl_Widget*, void*) {
-  Fl_Font font = font_browser->fontNumber();
-      int size = font_browser->fontSize();
-      Fl_Color color = font_browser->fontColor();
-  
-      progdefaults.DXC_textfont = font;
-      progdefaults.DXC_textsize = size;
-      progdefaults.DXC_textcolor = color;
-  
-      DXC_display->textsize(size);
-      DXC_display->textcolor(color);
-      DXC_display->textfont(font);
-      DXC_display->redraw();
-  
-      DXC_colors_font();
   
       font_browser->hide();
   
@@ -1988,18 +2026,6 @@ progdefaults.changed = true;
 
 Fl_Output *DXC_display=(Fl_Output *)0;
 
-Fl_Button *btn_DXC_color=(Fl_Button *)0;
-
-static void cb_btn_DXC_color(Fl_Button* o, void*) {
-  progdefaults.DXC_color = fl_show_colormap((Fl_Color)progdefaults.DXC_color);
-o->color(progdefaults.DXC_color);
-o->redraw();
-DXC_display->color(progdefaults.DXC_color);
-DXC_display->redraw();
-
-progdefaults.changed = true;
-}
-
 Fl_Button *btn_DXC_font=(Fl_Button *)0;
 
 static void cb_btn_DXC_font(Fl_Button*, void*) {
@@ -2014,19 +2040,17 @@ font_browser->show();
 Fl_Button *btnDXCdefault_colors_font=(Fl_Button *)0;
 
 static void cb_btnDXCdefault_colors_font(Fl_Button*, void*) {
-  progdefaults.DXC_color = FL_BACKGROUND2_COLOR;
-progdefaults.DXC_textfont = FL_COURIER;
+  progdefaults.DXC_textfont = FL_COURIER;
 progdefaults.DXC_textsize = 14;
 progdefaults.DXC_textcolor = FL_BLACK;
+progdefaults.DXC_even_color = 7;
+progdefaults.DXC_odd_color = 246;
 
-DXC_display->color(progdefaults.DXC_color);
 DXC_display->textsize(progdefaults.DXC_textsize);
 DXC_display->textcolor(progdefaults.DXC_textcolor);
 DXC_display->textfont(progdefaults.DXC_textfont);
 
 DXC_display->redraw();
-
-progdefaults.changed = true;
 }
 
 Fl_Button *btn_DXC_even_lines=(Fl_Button *)0;
@@ -2044,6 +2068,133 @@ static void cb_btn_DXC_odd_lines(Fl_Button* o, void*) {
   progdefaults.DXC_odd_color = fl_show_colormap((Fl_Color)progdefaults.DXC_odd_color);
 o->color(progdefaults.DXC_odd_color);
 o->redraw();
+progdefaults.changed = true;
+}
+
+Fl_Input *StreamText=(Fl_Input *)0;
+
+Fl_Button *btnDXcolor=(Fl_Button *)0;
+
+static void cb_btnDXcolor(Fl_Button*, void*) {
+  uchar r, g, b;
+r = progdefaults.DX_Color.R;
+g = progdefaults.DX_Color.G;
+b = progdefaults.DX_Color.B;
+
+if (!fl_color_chooser("DX Color", r, g, b))
+    return;
+
+progdefaults.DX_Color.R = r;
+progdefaults.DX_Color.G = g;
+progdefaults.DX_Color.B = b;
+
+StreamText->color(fl_rgb_color(r,g,b));
+StreamText->redraw();
+
+brws_tcpip_stream->color(fl_rgb_color(r,g,b));
+brws_tcpip_stream->redraw();
+
+brws_dxcluster_hosts->color(fl_rgb_color(
+    progdefaults.DX_Color.R,
+    progdefaults.DX_Color.G,
+    progdefaults.DX_Color.B));
+brws_dxcluster_hosts->textcolor(progdefaults.DXfontcolor);
+brws_dxcluster_hosts->textfont(progdefaults.DXfontnbr);
+brws_dxcluster_hosts->textsize(progdefaults.DXfontsize);
+brws_dxcluster_hosts->redraw();
+
+brws_dxc_help->color(fl_rgb_color(r,g,b));
+brws_dxc_help->setFont(progdefaults.DXfontnbr);
+brws_dxc_help->setFontSize(progdefaults.DXfontsize);
+brws_dxc_help->setFontColor(progdefaults.DXfontcolor, FTextBase::RECV);
+brws_dxc_help->redraw();
+    
+ed_telnet_cmds->color(fl_rgb_color(r,g,b));
+ed_telnet_cmds->redraw();
+
+dxcluster_hosts_load();
+
+progdefaults.changed = true;
+}
+
+Fl_Button *btnDXfont=(Fl_Button *)0;
+
+static void cb_btnDXfont(Fl_Button*, void*) {
+  font_browser->fontNumber(progdefaults.DXfontnbr);
+    font_browser->fontSize(progdefaults.DXfontsize);
+    font_browser->fontColor(progdefaults.DXfontcolor);
+    font_browser->fontFilter(Font_Browser::FIXED_WIDTH);
+    font_browser->callback(cbDXfont_browser);
+font_browser->show();
+}
+
+Fl_Button *btnDXalt_color=(Fl_Button *)0;
+
+static void cb_btnDXalt_color(Fl_Button* o, void*) {
+  choose_color(progdefaults.DXalt_color);
+
+o->labelcolor(progdefaults.DXalt_color);
+o->redraw_label();
+
+brws_tcpip_stream->setFontColor(progdefaults.DXalt_color, FTextBase::XMIT);
+brws_tcpip_stream->redraw();
+
+progdefaults.changed = true;
+}
+
+Fl_Button *btnDXdefault_colors_font=(Fl_Button *)0;
+
+static void cb_btnDXdefault_colors_font(Fl_Button*, void*) {
+  progdefaults.DX_Color.R = 255;
+progdefaults.DX_Color.G = 255;
+progdefaults.DX_Color.B = 255;
+
+progdefaults.DXfontnbr = FL_COURIER;
+progdefaults.DXfontsize = 14;
+progdefaults.DXfontcolor = FL_BLACK;
+progdefaults.DXalt_color = fl_rgb_color(200, 0, 0);
+btnDXalt_color->labelcolor(progdefaults.DXalt_color);
+btnDXalt_color->redraw_label();
+
+brws_tcpip_stream->color(fl_rgb_color(
+    progdefaults.DX_Color.R,
+    progdefaults.DX_Color.G,
+    progdefaults.DX_Color.B));
+brws_tcpip_stream->setFont(progdefaults.DXfontnbr);
+brws_tcpip_stream->setFontSize(progdefaults.DXfontsize);
+brws_tcpip_stream->setFontColor(progdefaults.DXfontcolor, FTextBase::RECV);
+brws_tcpip_stream->setFontColor(progdefaults.DXalt_color, FTextBase::XMIT);
+brws_tcpip_stream->redraw();
+
+ed_telnet_cmds->color(fl_rgb_color(
+    progdefaults.DX_Color.R,
+    progdefaults.DX_Color.G,
+    progdefaults.DX_Color.B));
+ed_telnet_cmds->setFont(progdefaults.DXfontnbr);
+ed_telnet_cmds->setFontSize(progdefaults.DXfontsize);
+ed_telnet_cmds->setFontColor(progdefaults.DXfontcolor);
+ed_telnet_cmds->redraw();
+
+brws_dxc_help->color(fl_rgb_color(
+    progdefaults.DX_Color.R,
+    progdefaults.DX_Color.G,
+    progdefaults.DX_Color.B));
+brws_dxc_help->setFont(progdefaults.DXfontnbr);
+brws_dxc_help->setFontSize(progdefaults.DXfontsize);
+brws_dxc_help->setFontColor(progdefaults.DXfontcolor, FTextBase::RECV);
+brws_dxc_help->redraw();
+
+StreamText->color(fl_rgb_color(
+    progdefaults.DX_Color.R,
+    progdefaults.DX_Color.G,
+    progdefaults.DX_Color.B));
+StreamText->textcolor(progdefaults.DXfontcolor);
+StreamText->redraw();
+
+dxcluster_hosts_load();
+
+font_browser->hide();
+
 progdefaults.changed = true;
 }
 
@@ -5106,6 +5257,13 @@ wf->xmtrcv->value(0);
 progdefaults.changed = true;
 }
 
+Fl_Counter *cnt_gpio_pulse_width=(Fl_Counter *)0;
+
+static void cb_cnt_gpio_pulse_width(Fl_Counter* o, void*) {
+  progdefaults.gpio_pulse_width=(int)o->value();
+progdefaults.changed=true;
+}
+
 Fl_Group *tabSoundCard=(Fl_Group *)0;
 
 Fl_Tabs *tabsSoundCard=(Fl_Tabs *)0;
@@ -7184,7 +7342,6 @@ Fl_Button *btnSaveConfig=(Fl_Button *)0;
 
 static void cb_btnSaveConfig(Fl_Button*, void*) {
   progdefaults.saveDefaults();
-	dl_fldigi::commit();
 }
 
 Fl_Return_Button *btnCloseConfig=(Fl_Return_Button *)0;
@@ -7381,7 +7538,6 @@ Fl_Double_Window* ConfigureDialog() {
       } // Fl_Group* tabOperator
       { tabUI = new Fl_Group(0, 25, 600, 365, _("UI"));
         tabUI->tooltip(_("User Interface"));
-        tabUI->hide();
         { tabsUI = new Fl_Tabs(0, 25, 600, 365);
           tabsUI->selection_color(FL_LIGHT1);
           { tabBrowser = new Fl_Group(0, 50, 600, 340, _("Browser"));
@@ -7655,6 +7811,7 @@ Fl_Double_Window* ConfigureDialog() {
           } // Fl_Group* tabUserInterface
           { tabLogServer = new Fl_Group(0, 50, 600, 340, _("Log"));
             tabLogServer->tooltip(_("User Interface - Colors / Fonts"));
+            tabLogServer->hide();
             { tabsLog = new Fl_Tabs(0, 50, 600, 340);
               { grp_Log_QSO = new Fl_Group(0, 75, 600, 315, _("QSO"));
                 { Fl_Group* o = new Fl_Group(60, 112, 496, 198, _("QSO logging"));
@@ -8367,7 +8524,6 @@ ab and newline are automatically included."));
           } // Fl_Group* tabWF_UI
           { tabColorsFonts = new Fl_Group(0, 50, 600, 340, _("Clrs/Fnts"));
             tabColorsFonts->tooltip(_("User Interface - Colors / Fonts"));
-            tabColorsFonts->hide();
             { tabsColors = new Fl_Tabs(0, 55, 600, 335);
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("Rx/Tx"));
                 o->hide();
@@ -8542,11 +8698,10 @@ ab and newline are automatically included."));
                 o->end();
               } // Fl_Group* o
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("Log"));
-                o->hide();
-                { Fl_Group* o = new Fl_Group(70, 101, 457, 65, _("Logging Panel Controls"));
+                { Fl_Group* o = new Fl_Group(5, 101, 590, 65, _("Logging Panel Controls"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-                { Fl_Output* o = LOGGINGdisplay = new Fl_Output(84, 125, 184, 25);
+                { Fl_Output* o = LOGGINGdisplay = new Fl_Output(33, 125, 184, 25);
                 o->textfont(progdefaults.LOGGINGtextfont);o->textsize(progdefaults.LOGGINGtextsize);o->textcolor(progdefaults.LOGGINGtextcolor);
                 o->color(progdefaults.LOGGINGcolor);
                 o->value("W1HKJ");
@@ -8563,55 +8718,71 @@ ab and newline are automatically included."));
                 } // Fl_Button* btnLOGGINGdefault_colors_font
                 o->end();
                 } // Fl_Group* o
-                { Fl_Group* o = new Fl_Group(70, 176, 457, 65, _("Logbook Dialog"));
+                { Fl_Group* o = new Fl_Group(5, 167, 590, 65, _("Logbook Dialog"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-                { Fl_Output* o = LOGBOOKdisplay = new Fl_Output(84, 200, 184, 25);
+                { Fl_Output* o = LOGBOOKdisplay = new Fl_Output(33, 191, 184, 25);
                 o->textfont(progdefaults.LOGGINGtextfont);o->textsize(progdefaults.LOGGINGtextsize);o->textcolor(progdefaults.LOGBOOKtextcolor);
                 o->color(progdefaults.LOGBOOKcolor);
                 o->value("14.070000");
                 o->redraw();
                 } // Fl_Output* LOGBOOKdisplay
-                { btnLOGBOOK_color = new Fl_Button(275, 200, 80, 25, _("Bg Color"));
+                { btnLOGBOOK_color = new Fl_Button(275, 191, 80, 25, _("Bg Color"));
                 btnLOGBOOK_color->callback((Fl_Callback*)cb_btnLOGBOOK_color);
                 } // Fl_Button* btnLOGBOOK_color
-                { btn_LOGBOOK_font = new Fl_Button(365, 200, 55, 25, _("Font"));
+                { btn_LOGBOOK_font = new Fl_Button(365, 191, 55, 25, _("Font"));
                 btn_LOGBOOK_font->callback((Fl_Callback*)cb_btn_LOGBOOK_font);
                 } // Fl_Button* btn_LOGBOOK_font
-                { btnLOGBOOKdefault_colors_font = new Fl_Button(431, 200, 80, 25, _("Default"));
+                { btnLOGBOOKdefault_colors_font = new Fl_Button(431, 191, 80, 25, _("Default"));
                 btnLOGBOOKdefault_colors_font->callback((Fl_Callback*)cb_btnLOGBOOKdefault_colors_font);
                 } // Fl_Button* btnLOGBOOKdefault_colors_font
                 o->end();
                 } // Fl_Group* o
-                { Fl_Group* o = new Fl_Group(70, 255, 457, 101, _("DX Cluster Dialog"));
+                { Fl_Group* o = new Fl_Group(5, 236, 590, 147, _("DX Cluster Dialog"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-                { Fl_Output* o = DXC_display = new Fl_Output(84, 279, 184, 25);
-                o->textfont(progdefaults.LOGGINGtextfont);o->textsize(progdefaults.LOGGINGtextsize);o->textcolor(progdefaults.DXC_textcolor);
-                o->color(progdefaults.DXC_color);
+                { Fl_Output* o = DXC_display = new Fl_Output(33, 271, 184, 25, _("Report Browser"));
+                DXC_display->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+                o->textfont(progdefaults.LOGGINGtextfont);o->textsize(progdefaults.LOGGINGtextsize);
                 o->value("DX de W1HKJ-1");
                 o->redraw();
                 } // Fl_Output* DXC_display
-                { Fl_Button* o = btn_DXC_color = new Fl_Button(275, 279, 80, 25, _("Bg Color"));
-                btn_DXC_color->callback((Fl_Callback*)cb_btn_DXC_color);
-                o->color(progdefaults.DXC_color);
-                } // Fl_Button* btn_DXC_color
-                { btn_DXC_font = new Fl_Button(365, 279, 55, 25, _("Font"));
+                { btn_DXC_font = new Fl_Button(222, 271, 86, 25, _("Font"));
                 btn_DXC_font->callback((Fl_Callback*)cb_btn_DXC_font);
                 } // Fl_Button* btn_DXC_font
-                { btnDXCdefault_colors_font = new Fl_Button(431, 279, 80, 25, _("Default"));
+                { btnDXCdefault_colors_font = new Fl_Button(314, 271, 86, 25, _("Default"));
                 btnDXCdefault_colors_font->callback((Fl_Callback*)cb_btnDXCdefault_colors_font);
                 } // Fl_Button* btnDXCdefault_colors_font
-                { Fl_Button* o = btn_DXC_even_lines = new Fl_Button(275, 315, 86, 25, _("Even Lines"));
+                { Fl_Button* o = btn_DXC_even_lines = new Fl_Button(222, 302, 86, 25, _("Even Lines"));
                 btn_DXC_even_lines->color((Fl_Color)55);
                 btn_DXC_even_lines->callback((Fl_Callback*)cb_btn_DXC_even_lines);
                 o->color(progdefaults.DXC_even_color);
                 } // Fl_Button* btn_DXC_even_lines
-                { Fl_Button* o = btn_DXC_odd_lines = new Fl_Button(365, 315, 86, 25, _("Odd Lines"));
+                { Fl_Button* o = btn_DXC_odd_lines = new Fl_Button(314, 302, 86, 25, _("Odd Lines"));
                 btn_DXC_odd_lines->color((Fl_Color)246);
                 btn_DXC_odd_lines->callback((Fl_Callback*)cb_btn_DXC_odd_lines);
                 o->color(progdefaults.DXC_odd_color);
                 } // Fl_Button* btn_DXC_odd_lines
+                { Fl_Input* o = StreamText = new Fl_Input(33, 341, 184, 25, _("Stream Text"));
+                StreamText->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+                o->value("DX de W1HKJ...");
+                o->color(fl_rgb_color(progdefaults.DX_Color.R, progdefaults.DX_Color.G, progdefaults.DX_Color.B));
+                o->textfont(progdefaults.DXfontnbr); o->textsize(progdefaults.DXfontsize); o->textcolor(progdefaults.DXfontcolor);
+                } // Fl_Input* StreamText
+                { btnDXcolor = new Fl_Button(222, 341, 86, 25, _("Bg color"));
+                btnDXcolor->callback((Fl_Callback*)cb_btnDXcolor);
+                } // Fl_Button* btnDXcolor
+                { btnDXfont = new Fl_Button(314, 341, 86, 25, _("Font"));
+                btnDXfont->callback((Fl_Callback*)cb_btnDXfont);
+                } // Fl_Button* btnDXfont
+                { Fl_Button* o = btnDXalt_color = new Fl_Button(406, 340, 86, 25, _("Alt Color"));
+                btnDXalt_color->tooltip(_("Color for outgoing telnet text"));
+                btnDXalt_color->callback((Fl_Callback*)cb_btnDXalt_color);
+                o->labelcolor(progdefaults.DXalt_color);
+                } // Fl_Button* btnDXalt_color
+                { btnDXdefault_colors_font = new Fl_Button(500, 340, 86, 25, _("Default"));
+                btnDXdefault_colors_font->callback((Fl_Callback*)cb_btnDXdefault_colors_font);
+                } // Fl_Button* btnDXdefault_colors_font
                 o->end();
                 } // Fl_Group* o
                 o->end();
@@ -8747,6 +8918,7 @@ ab and newline are automatically included."));
                 o->end();
               } // Fl_Group* o
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("SigLvl"));
+                o->hide();
                 { btnLowSignal = new Fl_Button(210, 142, 70, 21, _("Low"));
                 btnLowSignal->callback((Fl_Callback*)cb_btnLowSignal);
                 } // Fl_Button* btnLowSignal
@@ -10977,7 +11149,6 @@ ency"));
               } // Fl_Group* o
               { Fl_Group* o = new Fl_Group(0, 75, 600, 315, _("Synop"));
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-                o->hide();
                 { Fl_Check_Button* o = btnSynopAdifDecoding = new Fl_Check_Button(190, 91, 126, 22, _("SYNOP to ADIF"));
                 btnSynopAdifDecoding->tooltip(_("Decodes SYNOP messages (Ex: Deutsche Wetterdienst) to ADIF log file"));
                 btnSynopAdifDecoding->down_box(FL_DOWN_BOX);
@@ -11233,6 +11404,7 @@ le Earth)"));
       } // Fl_Group* tabModems
       { tabRig = new Fl_Group(0, 25, 600, 365, _("Rig"));
         tabRig->tooltip(_("Transceiver control"));
+        tabRig->hide();
         { tabsRig = new Fl_Tabs(0, 25, 600, 365);
           tabsRig->selection_color(FL_LIGHT1);
           { tabFLRIG = new Fl_Group(0, 50, 600, 340, _("flrig"));
@@ -12171,6 +12343,16 @@ definition"));
             } // Fl_Box* o
             { new Fl_Box(170, 68, 283, 17, _("Enable GPIO PTT (Pi specific controls)"));
             } // Fl_Box* o
+            { Fl_Counter* o = cnt_gpio_pulse_width = new Fl_Counter(60, 357, 80, 21, _("Pulse width (msec)"));
+              cnt_gpio_pulse_width->tooltip(_("Set >0 if pulsed PTT used"));
+              cnt_gpio_pulse_width->type(1);
+              cnt_gpio_pulse_width->minimum(0);
+              cnt_gpio_pulse_width->maximum(50);
+              cnt_gpio_pulse_width->step(1);
+              cnt_gpio_pulse_width->callback((Fl_Callback*)cb_cnt_gpio_pulse_width);
+              cnt_gpio_pulse_width->align(Fl_Align(FL_ALIGN_RIGHT));
+              o->value(progdefaults.gpio_pulse_width);
+            } // Fl_Counter* cnt_gpio_pulse_width
             o->end();
           } // Fl_Group* o
           tabsRig->end();
@@ -14719,17 +14901,17 @@ ed)"));
       } // Fl_Group* tabKPSM
       tabsConfigure->end();
     } // Fl_Tabs* tabsConfigure
-    { btnSaveConfig = new Fl_Button(330, 400, 130, 22, _("Save"));
+    { btnSaveConfig = new Fl_Button(310, 400, 130, 22, _("Save"));
       btnSaveConfig->callback((Fl_Callback*)cb_btnSaveConfig);
     } // Fl_Button* btnSaveConfig
-    { btnCloseConfig = new Fl_Return_Button(462, 400, 130, 22, _("Close"));
+    { btnCloseConfig = new Fl_Return_Button(460, 400, 130, 22, _("Close"));
       btnCloseConfig->callback((Fl_Callback*)cb_btnCloseConfig);
     } // Fl_Return_Button* btnCloseConfig
-    { btnResetConfig = new Fl_Button(20, 400, 130, 22, _("Restore defaults"));
+    { btnResetConfig = new Fl_Button(10, 400, 130, 22, _("Restore defaults"));
       btnResetConfig->tooltip(_("WARNING - this will over write ALL settings"));
       btnResetConfig->callback((Fl_Callback*)cb_btnResetConfig);
     } // Fl_Button* btnResetConfig
-    { btnApplyConfig = new Fl_Button(175, 388, 115, 22, _("Apply (dl)"));
+    { btnApplyConfig = new Fl_Button(160, 400, 130, 22, _("Apply (dl)"));
       btnApplyConfig->callback((Fl_Callback*)cb_btnApplyConfig);
       btnApplyConfig->deactivate();
     } // Fl_Button* btnApplyConfig
