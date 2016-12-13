@@ -867,7 +867,8 @@ if (mnum < 2 * filter_length)
 						(!reverse ?
 							arg(conj(mark_history[mp1]) * mark_history[mp0]) :
 							arg(conj(space_history[mp1]) * space_history[mp0]));
-				if (fabs(ferr) > rtty_baud / 2) ferr = 0;
+				if (fabs(ferr) > rtty_baud * progdefaults.RTTY_BW)
+					ferr = 0;
 				freqerr = decayavg ( freqerr, ferr / 8,
 					progdefaults.rtty_afcspeed == 0 ? 8 :
 					progdefaults.rtty_afcspeed == 1 ? 4 : 1 );
