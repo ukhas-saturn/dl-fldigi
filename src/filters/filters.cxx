@@ -45,7 +45,7 @@
 
 C_FIR_filter::C_FIR_filter () {
 	pointer = counter = length = 0;
-	decimateratio = 0;
+	decimateratio = 1;
 	ifilter = qfilter = (double *)0;
 	ffreq = 0.0;
 }
@@ -277,10 +277,11 @@ double Cmovavg::run(double a)
 	}
 	if (empty) {
 		empty = false;
+		out = 0;
 		for (int i = 0; i < len; i++) {
 			in[i] = a;
+			out += a;
 		}
-		out = a * len;
 		pint = 0;
 		return a;
 	}

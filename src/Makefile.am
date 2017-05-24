@@ -362,6 +362,8 @@ dl_fldigi_SOURCES += \
 	cw_rtty/morse.cxx \
 	cw_rtty/rtty.cxx \
 	cw_rtty/view_rtty.cxx \
+	cw_rtty/winkeyer.cxx \
+	cw_rtty/view_cw.cxx \
 	contestia/contestia.cxx \
 	dialogs/confdialog.cxx \
 	dialogs/fl_digi.cxx \
@@ -408,6 +410,7 @@ dl_fldigi_SOURCES += \
 	include/configuration.h \
 	include/contestia.h \
 	include/cw.h \
+	include/view_cw.h \
 	include/data_io.h \
 	include/debug.h \
 	include/digiscope.h \
@@ -563,6 +566,7 @@ dl_fldigi_SOURCES += \
 	include/habitat/RFC3339.h \
 	include/utf8file_io.h \
 	include/weather.h \
+	include/winkeyer.h \
 	irrxml/CXMLReaderImpl.h \
 	irrxml/fast_atof.h \
 	irrxml/heapsort.h \

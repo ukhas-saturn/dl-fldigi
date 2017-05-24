@@ -54,6 +54,7 @@
 #include "weather.h"
 #include "utf8file_io.h"
 #include "xmlrpc.h"
+#include "rigio.h"
 
 #include <FL/Fl.H>
 #include <FL/filename.H>
@@ -1491,7 +1492,7 @@ static void pRST(std::string &s, size_t &i, size_t endbracket)
 
 static void pMYCALL(std::string &s, size_t &i, size_t endbracket)
 {
-	string call = inpMyCallsign->value();
+	string call = inpOperCallsign->value();
 	if (active_modem->get_mode() == MODE_IFKP && progdefaults.ifkp_lowercase)
 		for (size_t n = 0; n < call.length(); n++) call[n] = tolower(call[n]);
 	s.replace( i, 8, call );
@@ -1535,89 +1536,177 @@ static void pMYSECTION(std::string &s, size_t &i, size_t endbracket)
 static void pLDT(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%x %H:%M %Z";
+	std::string timefmt = s.substr(i, endbracket-i);
+
+	size_t p = timefmt.find(":");
+	if (p == 4) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	localtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%x %H:%M %Z", &sTime);
-	s.replace( i, 5, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void pILDT(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%Y-%m-%d %H:%M%z";
+	std::string timefmt = s.substr(i, endbracket-i);
+
+	size_t p = timefmt.find(":");
+	if (p == 5) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	localtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%Y-%m-%d %H:%M%z", &sTime);
-	s.replace( i, 6, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void pZDT(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%x %H:%MZ";
+	std::string timefmt = s.substr(i, endbracket - i);
+
+	size_t p = timefmt.find(":");
+	if (p == 4) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	gmtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%x %H:%MZ", &sTime);
-	s.replace( i, 5, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void pIZDT(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%Y-%m-%d %H:%MZ";
+	std::string timefmt = s.substr(i, endbracket-i);
+
+	size_t p = timefmt.find(":");
+	if (p == 5) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	gmtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%Y-%m-%d %H:%MZ", &sTime);
-	s.replace( i, 6, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void pLT(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%H%MZ";
+	std::string timefmt = s.substr(i, endbracket-i);
+
+	size_t p = timefmt.find(":");
+	if (p == 3) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	localtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%H%M", &sTime);
-	s.replace( i, 4, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void pZT(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%H%MZ";
+	std::string timefmt = s.substr(i, endbracket-i);
+
+	size_t p = timefmt.find(":");
+	if (p == 3) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	gmtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%H%MZ", &sTime);
-	s.replace( i, 4, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void pLD(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%Y-%m-%d";
+	std::string timefmt = s.substr(i, endbracket - i);
+
+	size_t p = timefmt.find(":");
+	if (p == 3) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	localtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%Y-%m-%d", &sTime);
-	s.replace( i, 4, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void pZD(std::string &s, size_t &i, size_t endbracket)
 {
 	char szDt[80];
+
+	std::string fmt = "%Y-%m-%d";
+	std::string timefmt = s.substr(i, endbracket - i);
+
+	size_t p = timefmt.find(":");
+	if (p == 3) {
+		fmt = timefmt.substr(p + 1, timefmt.length() - p - 1);
+		if (fmt[0] == '"') fmt.erase(0,1);
+		if (fmt[fmt.length()-1] == '"') fmt.erase(fmt.length()-1);
+	}
+
 	time_t tmptr;
 	tm sTime;
 	time (&tmptr);
 	gmtime_r(&tmptr, &sTime);
-	mystrftime(szDt, 79, "%Y-%m-%d", &sTime);
-	s.replace( i, 4, szDt);
+	mystrftime(szDt, 79, fmt.c_str(), &sTime);
+	s.replace(i, endbracket - i + 1, szDt);
 }
 
 static void p_ID(std::string &s, size_t &i, size_t endbracket)
@@ -1889,6 +1978,40 @@ static void pVER(std::string &s, size_t &i, size_t endbracket)
 	s.replace( i, 5, progname );
 }
 
+static void pSERNO(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	int  contestval;
+	contestval = atoi(outSerNo->value());
+	if (contestval) {
+		char serstr[10];
+		contest_count.Format(progdefaults.ContestDigits, progdefaults.UseLeadingZeros);
+		snprintf(serstr, sizeof(serstr), contest_count.fmt.c_str(), contestval);
+		s.replace (i, 7, cut_string(serstr));
+	} else
+		s.replace (i, 7, "");
+}
+
+static void pLASTNO(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+	int  contestval;
+	contestval = atoi(outSerNo->value()) - 1;
+	if (contestval) {
+		char serstr[10];
+		contest_count.Format(progdefaults.ContestDigits, progdefaults.UseLeadingZeros);
+		snprintf(serstr, sizeof(serstr), contest_count.fmt.c_str(), contestval);
+		s.replace (i, 8, cut_string(serstr));
+	} else
+		s.replace (i, 8, "");
+}
+
 static void pCNTR(std::string &s, size_t &i, size_t endbracket)
 {
 	if (within_exec) {
@@ -2060,10 +2183,14 @@ static void doIMAGE(std::string s)
 			 active_mode == MODE_MFSK32 ||
 			 active_mode == MODE_MFSK64 ||
 			 active_mode == MODE_MFSK128) &&
-			active_modem->get_cap() & modem::CAP_IMG) {
-				Greyscale ?
-					active_modem->send_Grey_image(fname) :
-					active_modem->send_color_image(fname);
+			 active_modem->get_cap() & modem::CAP_IMG) {
+			Greyscale ?
+				active_modem->send_Grey_image(fname) :
+				active_modem->send_color_image(fname);
+		} else if (active_mode >= MODE_THOR_FIRST && active_mode <= MODE_THOR_LAST) {
+			thor_load_scaled_image(fname);
+        } else if (active_mode == MODE_IFKP) {
+			ifkp_load_scaled_image(fname);
 		}
 	}
 	que_ok = true;
@@ -3179,6 +3306,7 @@ void set_macro_env(void)
 		{ "FLDIGI_LOGBOOK_RST_IN", inpRstR_log->value() },
 		{ "FLDIGI_LOGBOOK_RST_OUT", inpRstS_log->value() },
 		{ "FLDIGI_LOGBOOK_FREQUENCY", inpFreq_log->value() },
+		{ "FLDIGI_LOGBOOK_BAND", inpBand_log->value() },
 		{ "FLDIGI_LOGBOOK_MODE", inpMode_log->value() },
 		{ "FLDIGI_LOGBOOK_STATE", inpState_log->value() },
 		{ "FLDIGI_LOGBOOK_VE_PROV", inpVE_Prov_log->value() },
@@ -3644,13 +3772,17 @@ static const MTAGS mtags[] = {
 {"<INFO1>",		pINFO1},
 {"<INFO2>",		pINFO2},
 {"<LDT>",		pLDT},
-{"<ILDT>",		pILDT},
+{"<LDT:",		pLDT},
+{"<ILDT",		pILDT},
 {"<ZDT>",		pZDT},
-{"<IZDT>",		pIZDT},
-{"<LT>",		pLT},
-{"<ZT>",		pZT},
+{"<ZDT:",		pZDT},
+{"<IZDT",		pIZDT},
+{"<LT",			pLT},
+{"<ZT",			pZT},
 {"<LD>",		pLD},
+{"<LD:",		pLD},
 {"<ZD>",		pZD},
+{"<ZD:",		pZD},
 {"<ID>",		p_ID},
 {"<TEXT>",		pTEXT},
 {"<VIDEO:",		pVIDEO},
@@ -3669,6 +3801,8 @@ static const MTAGS mtags[] = {
 {"<XBEG>",		pXBEG},
 {"<XEND>",		pXEND},
 {"<SAVEXCHG>",	pSAVEXCHG},
+{"<SERNO>",		pSERNO},
+{"<LASTNO>",	pLASTNO},
 {"<LOG",		pLOG},
 {"<LNW",		pLNW},
 {"<CLRLOG>",	pCLRLOG},
@@ -3934,7 +4068,7 @@ void MACROTEXT::saveMacroFile()
 
 void MACROTEXT::savecurrentMACROS(std::string &s, size_t &i, size_t endbracket)
 {
-	saveMacros(progStatus.LastMacroFile.c_str());
+	writeMacroFile();
 	s.replace(i, endbracket - i + 1, "");
 }
 

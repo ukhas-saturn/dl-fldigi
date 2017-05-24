@@ -96,7 +96,7 @@ public:
 
 // these processes must be declared in the derived class
 	virtual void init();
-	virtual void tx_init (SoundBase *sc) = 0;
+	virtual void tx_init () = 0;
 	virtual void rx_init () = 0;
 	virtual void restart () = 0;
 	virtual void rx_flush() {};
@@ -182,7 +182,7 @@ public:
 	virtual void		decWPM() {};
 	virtual void		toggleWPM() {};
 	virtual void		sync_parameters() {};
-	virtual void		reset_rx_filter(bool) {};
+	virtual void		reset_rx_filter() {};
 	virtual void		update_Status() {};
 
 // for waterfall id transmission
@@ -389,6 +389,7 @@ extern modem *olivia_64_2000_modem;
 
 extern modem *contestia_modem;
 
+extern modem *thormicro_modem;
 extern modem *thor4_modem;
 extern modem *thor5_modem;
 extern modem *thor8_modem;
@@ -400,6 +401,7 @@ extern modem *thor50x1_modem;
 extern modem *thor50x2_modem;
 extern modem *thor100_modem;
 
+extern modem *dominoexmicro_modem;
 extern modem *dominoex4_modem;
 extern modem *dominoex5_modem;
 extern modem *dominoex8_modem;

@@ -85,7 +85,7 @@ bool DXcluster_enabled = false;
 #define DXCLUSTER_CONNECT_TIMEOUT 5000 // 5 second timeout
 #define DXCLUSTER_SOCKET_TIMEOUT 100 // milliseconds
 #define DXCLUSTER_LOOP_TIME 100 // milliseconds
-int  DXcluster_connect_timeout = 
+int  DXcluster_connect_timeout =
 	(DXCLUSTER_CONNECT_TIMEOUT) / (DXCLUSTER_SOCKET_TIMEOUT + DXCLUSTER_LOOP_TIME);
 
 
@@ -159,7 +159,7 @@ void show_tx_stream(string buff)
 #ifdef DXC_DEBUG
 	string pname = "TempDir";
 	pname.append("dxcdebug.txt", "a");
-	FILE *dxcdebug = fopen(pname.c_str(), "a");
+	FILE *dxcdebug = fl_fopen(pname.c_str(), "a");
 	fprintf(dxcdebug, "[T]:%s\n", buff.c_str());
 	fclose(dxcdebug);
 #endif
@@ -183,7 +183,7 @@ void show_rx_stream(string buff)
 #ifdef DXC_DEBUG
 	string pname = "TempDir";
 	pname.append("dxcdebug.txt", "a");
-	FILE *dxcdebug = fopen(pname.c_str(), "a");
+	FILE *dxcdebug = fl_fopen(pname.c_str(), "a");
 	fprintf(dxcdebug, "[R]:%s\n", buff.c_str());
 	fclose(dxcdebug);
 #endif
@@ -200,7 +200,7 @@ void show_error(string buff)
 #ifdef DXC_DEBUG
 	string pname = "TempDir";
 	pname.append("dxcdebug.txt", "a");
-	FILE *dxcdebug = fopen(pname.c_str(), "a");
+	FILE *dxcdebug = fl_fopen(pname.c_str(), "a");
 	fprintf(dxcdebug, "[E]:%s\n", buff.c_str());
 	fclose(dxcdebug);
 #endif
@@ -301,7 +301,7 @@ void show_help_line(string buff)
 #ifdef DXC_DEBUG
 	string pname = "TempDir";
 	pname.append("dxcdebug.txt", "a");
-	FILE *dxcdebug = fopen(pname.c_str(), "a");
+	FILE *dxcdebug = fl_fopen(pname.c_str(), "a");
 	fprintf(dxcdebug, "[W]:%s\n", buff.c_str());
 	fclose(dxcdebug);
 #endif
@@ -310,6 +310,30 @@ void show_help_line(string buff)
 enum server_type {NIL, DX_SPIDER, AR_CLUSTER, CC_CLUSTER};
 static int  cluster_login = NIL;
 static bool logged_in = false;
+
+void register_dxspider()
+{
+	string login;
+
+	login.assign("set/page 0\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/name ").append(progdefaults.myName);
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/qth ").append(progdefaults.myQth);
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/qra ").append(progdefaults.myLocator);
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+}
 
 void login_to_dxspider()
 {
@@ -320,24 +344,8 @@ void login_to_dxspider()
 		DXcluster_socket->send(login);
 		REQ(show_tx_stream, login);
 
-		login.assign("set/page 0\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/name ").append(progdefaults.myName);
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/qth ").append(progdefaults.myQth);
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/qra ").append(progdefaults.myLocator);
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
+		if (progdefaults.dxcc_password.empty())
+			register_dxspider();
 
 		logged_in = true;
 		cluster_login = NIL;
@@ -420,6 +428,41 @@ Connection closed by foreign host.
 
 */
 
+void register_cccluster()
+{
+	string login;
+
+	login.assign("set/name ").append(progdefaults.myName);
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/qth ").append(progdefaults.myQth);
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/qra ").append(progdefaults.myLocator);
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/noskimmer");
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/noown");
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+
+	login.assign("set/nobeacon");
+	login.append("\r\n");
+	DXcluster_socket->send(login);
+	REQ(show_tx_stream, login);
+}
+
 void login_to_cccluster()
 {
 	if (!DXcluster_socket) return;
@@ -430,35 +473,8 @@ void login_to_cccluster()
 		DXcluster_socket->send(login);
 		REQ(show_tx_stream, login);
 
-		login.assign("set/name ").append(progdefaults.myName);
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/qth ").append(progdefaults.myQth);
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/qra ").append(progdefaults.myLocator);
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/noskimmer");
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/noown");
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
-
-		login.assign("set/nobeacon");
-		login.append("\r\n");
-		DXcluster_socket->send(login);
-		REQ(show_tx_stream, login);
+		if (progdefaults.dxcc_password.empty())
+			register_cccluster();
 
 		logged_in = true;
 		cluster_login = NIL;
@@ -467,6 +483,32 @@ void login_to_cccluster()
 		REQ(show_error, e.what());
 	}
 }
+
+void send_password()
+{
+	if (!DXcluster_socket ||
+		logged_in == false ||
+		inp_dxcc_password->value()[0] == 0) return;
+
+	try {
+		string password = inp_dxcc_password->value();
+		password.append("\r\n");
+		DXcluster_socket->send(password);
+		REQ(show_tx_stream, password);
+
+		switch (cluster_login) {
+			case AR_CLUSTER: break;
+			case CC_CLUSTER: register_cccluster(); break;
+			case DX_SPIDER:  register_dxspider(); break;
+		}
+
+	} catch (const SocketException& e) {
+		LOG_ERROR("%s", e.what() );
+		REQ(show_error, e.what());
+	}
+
+}
+
 
 static bool help_lines = false;
 
@@ -546,6 +588,9 @@ void parse_DXcluster_stream(string input_buffer)
 
 		if (cluster_login == DX_SPIDER && ucasebuffer.find("LOGIN:") != string::npos)
 			login_to_dxspider();
+
+		if (cluster_login == DX_SPIDER && ucasebuffer.find("PASSWORD:") != string::npos)
+			send_password();
 	}
 }
 
@@ -680,8 +725,11 @@ void rf_af(long &rf, long &af)
 
 	if (md == MODE_CW) {
 		af = progdefaults.CWsweetspot;
-		if (wf->USB()) rf -= af;
-		else           rf += af;
+		string smode = qso_opMODE->value();
+		if (smode.find("CW") == string::npos) {
+			if (wf->USB()) rf -= af;
+			else           rf += af;
+		}
 	}
 	else if (md == MODE_RTTY) {
 		int shift;
@@ -784,23 +832,51 @@ void DXcluster_select()
 //          1     ^   2     ^   3        ^4         5         6         ^
 //7080.4 CO3VR Optional Comment
 
+void freqstrings( string &khz, string &hz )
+{
+	string sfreq = inpFreq->value();
+
+	int phz = sfreq.length() - 2;
+	hz = sfreq.substr(phz, 2);
+	sfreq.erase(phz);
+
+	size_t p = sfreq.find(".");
+	if (p != string::npos) sfreq.erase(p,1);
+
+	long freq = atol(sfreq.c_str());
+
+	if (!progdefaults.dxc_hertz) {
+		if (hz > "49") freq++;
+	}
+	char szfreq[20];
+	snprintf(szfreq, sizeof(szfreq), "%ld", freq);
+	khz = szfreq;
+	khz.insert(khz.length() - 1, ".");
+
+	return;
+}
+
 void send_DXcluster_spot()
 {
 	if (inpCall->value()[0] == 0) return;  // no call
 
-	string spot = "dx ";
-	spot.append(inpFreq->value());
-	string hz = spot.substr(spot.length() - 2, 2);
-	spot.erase(spot.length()-2); // truncate to nearest 100 Hz
+	string hz, khz;
+	freqstrings( khz, hz );
 
-	spot.append(" ").append(inpCall->value()).append(" ");
+	string spot = "dx ";
+	spot.append(khz)
+		.append(" ")
+		.append(inpCall->value())
+		.append(" ");
 
 	string comments = trim(inp_dxcluster_cmd->value());
 	string currmode = mode_info[active_modem->get_mode()].adif_name;
+
 	if (comments.find(currmode) == string::npos) {
 		if (progdefaults.dxc_hertz) {
-			currmode.append(" [");
-			currmode.append(hz).append("] ");
+			currmode.append(" [")
+					.append(hz).
+					append("] ");
 		}
 		comments.insert(0, currmode);
 	}
@@ -848,7 +924,7 @@ void DXcluster_doconnect()
 			temp.append(progdefaults.dxcc_host_url).append(":");
 			temp.append(progdefaults.dxcc_host_port);
 			REQ(show_error, temp);
-			DXcluster_connect_timeout = 
+			DXcluster_connect_timeout =
 				(DXCLUSTER_CONNECT_TIMEOUT) / (DXCLUSTER_SOCKET_TIMEOUT + DXCLUSTER_LOOP_TIME);
 		} catch (const SocketException& e) {
 			LOG_ERROR("%s", e.what() );
@@ -949,7 +1025,7 @@ void DXcluster_init(void)
 	brws_tcpip_stream->setFontColor(progdefaults.DXfontcolor, FTextBase::RECV);
 	brws_tcpip_stream->setFontColor(progdefaults.DXalt_color, FTextBase::XMIT);
 	brws_tcpip_stream->setFontColor(
-		fl_contrast(progdefaults.DXfontcolor, 
+		fl_contrast(progdefaults.DXfontcolor,
 			fl_rgb_color(	progdefaults.DX_Color.R,
 				progdefaults.DX_Color.G,
 				progdefaults.DX_Color.B) ),
@@ -989,7 +1065,7 @@ void DXcluster_init(void)
 #ifdef DXC_DEBUG
 	string pname = "TempDir";
 	pname.append("dxcdebug.txt", "a");
-	FILE *dxcdebug = fopen(pname.c_str(), "w");
+	FILE *dxcdebug = fl_fopen(pname.c_str(), "w");
 	fprintf(dxcdebug, "DXC session\n\n");
 	fclose(dxcdebug);
 #endif
@@ -1072,8 +1148,9 @@ void dxcluster_hosts_load()
 	size_t p2;
 	while (p != string::npos && p != 0) {
 		hostline.assign(hosts.substr(0,p+1));
-		p2 = hostline.find(":|");
-		if (p2 != string::npos) hostline.insert(p+1, progdefaults.myCall);
+		p2 = hostline.find("::|");
+		if (p2 != string::npos)
+			hostline.insert(p2 + 1, progdefaults.myCall);
 		p2 = hostline.find("|");
 		if (p2 != string::npos) hostline.erase(p2, 1);
 		brws_dxcluster_hosts->add(hostline.c_str());
@@ -1090,7 +1167,10 @@ void dxcluster_hosts_select(Fl_Button*, void*)
 	int line_nbr = brws_dxcluster_hosts->value();
 	if (line_nbr == 0) return;
 	host_line = brws_dxcluster_hosts->text(line_nbr);
-	string host_name, host_port, host_login;
+	string	host_name, 
+			host_port,
+			host_login,
+			host_password;
 	size_t p = host_line.find("@.");
 	if (p != string::npos) host_line.erase(0, p + 2);
 	p = host_line.find(":");
@@ -1101,7 +1181,14 @@ void dxcluster_hosts_select(Fl_Button*, void*)
 	if (p == string::npos) return;
 	host_port = host_line.substr(0, p);
 	host_line.erase(0, p+1);
-	host_login = host_line;
+	p = host_line.find(":");
+	if (p == string::npos) 
+		host_login = host_line;
+	else {
+		host_login = host_line.substr(0, p);
+		host_line.erase(0, p+1);
+		host_password = host_line;
+	}
 
 	progdefaults.dxcc_host_url = host_name;
 	inp_dxcc_host_url->value(host_name.c_str());
@@ -1114,6 +1201,13 @@ void dxcluster_hosts_select(Fl_Button*, void*)
 	progdefaults.dxcc_login = host_login;
 	inp_dccc_login->value(host_login.c_str());
 	inp_dccc_login->redraw();
+
+	progdefaults.dxcc_password = host_password;
+	inp_dxcc_password->value(host_password.c_str());
+	inp_dxcc_password->redraw();
+
+std::cout << "host " << host_name << "\nport " << host_port <<
+"\nlogin " << host_login << "\npassword " << host_password << std::endl;
 
 }
 
@@ -1146,6 +1240,7 @@ void dxcluster_hosts_add(Fl_Button*, void*)
 	string host_line = progdefaults.dxcc_host_url.c_str();
 	host_line.append(":").append(progdefaults.dxcc_host_port.c_str());
 	host_line.append(":").append(progdefaults.dxcc_login);
+	host_line.append(":").append(progdefaults.dxcc_password);
 	if (brws_dx_cluster->size() > 0) {
 		for (int i = 1; i <= brws_dxcluster_hosts->size(); i++) {
 			if (host_line == brws_dxcluster_hosts->text(i))

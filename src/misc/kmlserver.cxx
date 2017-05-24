@@ -77,7 +77,7 @@ static void KmlTimestamp( std::ostream &ostrm, time_t tim ) {
 	tm objTm = *gmtime(&tim);
 	char bufTm[24];
 	// See http://www.w3.org/TR/xmlschema-2/#isoformats
-	sprintf( bufTm, "%4d-%02d-%02dT%02d:%02dZ",
+	snprintf( bufTm, sizeof(bufTm), "%4d-%02d-%02dT%02d:%02dZ",
 			objTm.tm_year + 1900,
 			objTm.tm_mon + 1,
 			objTm.tm_mday,
@@ -1107,8 +1107,8 @@ class  KmlSrvImpl : public KmlServer {
 			~FilCloserT() { fclose(m_file); }
 		} Closer = { filKml };
 
-		std::auto_ptr< irr::io::IrrXMLReader > xml( irr::io::createIrrXMLReader( Closer.m_file ) );
-		if( xml.get() == NULL ) {
+		irr::io::IrrXMLReader * xml = irr::io::createIrrXMLReader( Closer.m_file );
+		if( xml == NULL ) {
 			LOG_ERROR("Could not parse %s", kmlFilNam.c_str() );
 			return ;
 		}
@@ -1376,6 +1376,10 @@ class  KmlSrvImpl : public KmlServer {
 				break;
 			}
 		}
+
+// And of course delete it
+
+		delete xml;
 
 		if (bMOREINFO)
 			LOG_INFO("kmlFilNam=%s loaded sz=%d",
@@ -1772,7 +1776,7 @@ std::string KmlServer::Tm2Time( time_t tim ) {
 	tm tmpTm;
 	gmtime_r( &tim, & tmpTm );
 
-	sprintf( bufTm, "%4d-%02d-%02d %02d:%02d",
+	snprintf( bufTm, sizeof(bufTm), "%4d-%02d-%02d %02d:%02d",
 			tmpTm.tm_year + 1900,
 			tmpTm.tm_mon + 1,
 			tmpTm.tm_mday,

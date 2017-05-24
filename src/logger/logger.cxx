@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include "icons.h"
 #include "logger.h"
@@ -88,7 +89,7 @@ void writeADIF () {
     fname.append("log.adif");
 	adiFile = fl_fopen (fname.c_str(), "a");
 	if (adiFile) {
-// write the current record to the file  
+// write the current record to the file
 		fprintf(adiFile,"%s<EOR>\n", adif.c_str());
 		fclose (adiFile);
 	}
@@ -106,17 +107,44 @@ void putadif(int num, const char *s, string &str = adif)
 	str.append(tempstr).append(s);
 }
 
+vector<int> lotw_recs_sent;
+
+void clear_lotw_recs_sent()
+{
+	lotw_recs_sent.clear();
+}
+
+void restore_lotwsdates()
+{
+extern int editNbr;
+	if (lotw_recs_sent.empty()) return;
+
+	int recnbr;
+	cQsoRec *rec;
+	for (size_t n = 0; n < lotw_recs_sent.size(); n++) {
+		recnbr = lotw_recs_sent[n];
+		rec = qsodb.getRec(recnbr);
+		rec->putField(LOTWSDATE, "");
+		if (recnbr == editNbr) {
+			inpLOTWsentdate_log->value("");
+			inpLOTWsentdate_log->redraw();
+		}
+	}
+	clear_lotw_recs_sent();
+}
+
 void check_lotw_log(void *)
 {
 	string logtxt;
-	FILE * logfile = fopen(lotw_log_fname.c_str(), "r");
+	FILE * logfile = fl_fopen(lotw_log_fname.c_str(), "r");
 	if (!logfile) {
 		logcheck_count++;
 		if (logcheck_count < 20) {
 			Fl::repeat_timeout(1.0, check_lotw_log);
 			return;
 		}
-		LOG_ERROR("%s", "NO tqsl log file in 20 seconds!");
+		LOG_ERROR("%s", "NO tqsl log file in 25 seconds!");
+		restore_lotwsdates();
 		return;
 	}
 	char c = fgetc(logfile);
@@ -130,6 +158,7 @@ void check_lotw_log(void *)
 	size_t p = logtxt.find("UploadFile returns 0");
 	if (p != string::npos) {
 		if (progdefaults.lotw_quiet_mode) fl_alert2("LoTW upload OK");
+		clear_lotw_recs_sent();
 	} else {
 		string errlog = LoTWDir;
 		errlog.append("lotw_error_log.txt");
@@ -141,6 +170,7 @@ void check_lotw_log(void *)
 			logtxt.append(errlog);
 		}
 		if (progdefaults.lotw_quiet_mode) fl_alert2("LoTW upload Failed\nView LoTW error log:\n%s", errlog.c_str());
+		restore_lotwsdates();
 	}
 	remove(lotw_log_fname.c_str());
 }
@@ -190,11 +220,15 @@ void send_to_lotw(void *)
 
 string lotw_rec(cQsoRec &rec)
 {
+  /* does not honor the selection of adif fields selected by the user
+     only sends the required  call, mode, freq, band and qso date.
+     Others are ignored.
+  */
 	static string valid_lotw_modes =
 	"\
 AM AMTORFEC ASCI ATV CHIP64 CHIP128 CLO CONTESTI CW DSTAR DOMINO DOMINOF FAX \
 FM FMHELL FSK31 FSK441 GTOR HELL HELL80 HFSK JT44 JT4A JT4B JT4C JT4D JT4E \
-JT4F JT4G JT65 JT65A JT65B JT65C JT6M MFSK8 MFSK16 \
+JT4F JT4G JT65 JT65A JT65B JT65C JT6M JT9 MFSK8 MFSK16 \
 MT63 OLIVIA PAC PAC2 PAC3 PAX PAX2 PCW PKT PSK10 PSK31 PSK63 PSK63F PSK125 \
 PSKAM10 PSKAM31 PSKAM50 PSKFEC31 PSKHELL Q15 QPSK31 QPSK63 QPSK125 \
 ROS RTTY RTTYM SSB SSTV THRB THOR THRBX TOR VOI WINMOR WSPR ";
@@ -221,11 +255,12 @@ MFSK4 MFSK11 MFSK22 MFSK31 MFSK32 MFSK64 MFSK128 MFSK64L MFSK128L";
 	putadif(MODE, temp.c_str(), strrec);
 
 	temp = rec.getField(FREQ);
-	size_t len = temp.length();
-	temp.erase(len - 3);
+	temp.resize(7);
 	putadif(FREQ, temp.c_str(), strrec);
 
 	putadif(QSO_DATE, rec.getField(QSO_DATE), strrec);
+//KB add BAND
+	putadif(BAND, rec.getField(BAND), strrec);
 
 	temp = rec.getField(TIME_ON);
 	if (temp.length() > 4) temp.erase(4);
@@ -242,17 +277,18 @@ void submit_lotw(cQsoRec &rec)
 
 	if (adifrec.empty()) return;
 
-	if (str_lotw.empty())
-		str_lotw = "Fldigi LoTW upload file\n<ADIF_VER:5>2.2.7\n<EOH>\n";
-	str_lotw.append(adifrec);
-
-	if (progdefaults.submit_lotw) Fl::add_timeout(2.0, send_to_lotw);
+	if (progdefaults.submit_lotw) {
+		if (str_lotw.empty())
+			str_lotw = "Fldigi LoTW upload file\n<ADIF_VER:5>2.2.7\n<EOH>\n";
+		str_lotw.append(adifrec);
+		Fl::awake(send_to_lotw);
+	}
 }
 
 void submit_ADIF(cQsoRec &rec)
 {
 	adif.erase();
-	
+
 	putadif(QSO_DATE, rec.getField(QSO_DATE));
 	putadif(TIME_ON, rec.getField(TIME_ON));
 	putadif(QSO_DATE_OFF, rec.getField(QSO_DATE_OFF));
@@ -341,7 +377,7 @@ static void send_IPC_log(cQsoRec &rec)
 	    if (notes[i] == '\n') notes[i] = ';';
 	addtomsg("notes:",		notes.c_str());
 	addtomsg("power:",		rec.getField(TX_PWR));
-	
+
 	strncpy(msgbuf.mtext, log_msg.c_str(), sizeof(msgbuf.mtext));
 	msgbuf.mtext[sizeof(msgbuf.mtext) - 1] = '\0';
 

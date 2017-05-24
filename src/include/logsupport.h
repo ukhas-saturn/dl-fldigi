@@ -18,8 +18,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#ifndef SUPPORT_H
-#define SUPPORT_H
+#ifndef LOG_SUPPORT_H
+#define LOG_SUPPORT_H
 
 #include <string>
 
@@ -68,6 +68,7 @@ extern void cb_mnuExportTEXT_log(Fl_Menu_* m, void* d);
 extern string lotw_rec(cQsoRec &rec);
 extern void cb_btnExportLoTW();
 
+extern Fl_Double_Window *lotw_review_dialog;
 extern void cb_review_lotw();
 extern void cb_send_lotw();
 extern void send_to_lotw(void *);
@@ -77,7 +78,7 @@ extern void cb_btn_verify_eqsl(Fl_Button *, void *);
 extern void cb_Export_Cabrillo(Fl_Menu_* m, void* d);
 extern void cb_export_date_select();
 
-extern void saveLogbook();
+extern void saveLogbook(bool force = false);
 extern void cb_mnuShowLogbook(Fl_Menu_ *m, void* d);
 
 extern void activateButtons();

@@ -118,14 +118,14 @@ void loadBrowser(Fl_Widget *widget) {
 
 	w->add(LINE_SEP);
 	w->add(_("<QSOTIME>\tQSO time (HHMM))"));
-	w->add(_("<ILDT>\tLDT in iso-8601 format"));
-	w->add(_("<LDT>\tLocal datetime"));
-	w->add(_("<IZDT>\tZDT in iso-8601 format"));
-	w->add(_("<ZDT>\tUTC datetime"));
-	w->add(_("<LT>\tlocal time HHMM"));
-	w->add(_("<ZT>\tzulu time HHMMZ"));
-	w->add(_("<LD>\tlocal date YYYY-MM-DD"));
-	w->add(_("<ZD>\tzulu date YYYY-MM-DD Z"));
+	w->add(_("<ILDT[:fmt]>\tLDT default '%Y-%m-%d %H:%M%z'"));
+	w->add(_("<LDT[[fmt]>\tLocal datetime, default '%x %H:%M %Z'"));
+	w->add(_("<IZDT[:fmt]>\tZDT default '%Y-%m-%d %H:%MZ'"));
+	w->add(_("<ZDT[:fmt]>\tUTC datetime, default '%x %H:%MZ'"));
+	w->add(_("<LT[:fmt]>\tlocal time, default %H%M"));
+	w->add(_("<ZT[:fmt]>\tzulu time default %H%MZ"));
+	w->add(_("<LD[:fmt]>\tlocal date, default '%Y-%M-%D'"));
+	w->add(_("<ZD[:fmt]>\tzulu date, default '%Y-%M-%D Z'"));
 	w->add(_("<WX>\tget weather data"));
 	w->add(_("<WX:xxxx>\tget weather data for station"));
 
@@ -138,6 +138,8 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<XBEG>\texchange begin"));
 	w->add(_("<XEND>\texchange end"));
 	w->add(_("<SAVEXCHG>\tsave contest out"));
+	w->add(_("<SERNO>\tcurrent contest serno"));
+	w->add(_("<LASTNO>\tlast serno sent"));
 
 	w->add(LINE_SEP);
 	w->add(_("<RX>\treceive"));
@@ -162,7 +164,7 @@ void loadBrowser(Fl_Widget *widget) {
 
 	w->add(LINE_SEP);
 	w->add(_("<FILE:>\tinsert text file"));
-	w->add(_("<IMAGE:>\tinsert MFSK image"));
+	w->add(_("<IMAGE:>\tinsert image file"));
 	w->add(LINE_SEP);
 
 	w->add(_("<PAUSE>\tpause transmit"));

@@ -607,8 +607,11 @@ void Socket::open(const Address& addr)
 	address = addr;
 	size_t n = address.size();
 
-//	for (anum = 0; anum < n; anum++) {
+#ifdef __FreeBSD__
+	for (anum = n-1; anum >= 1; anum--) {
+#else
 	for (anum = n-1; anum >= 0; anum--) {
+#endif
 		ainfo = address.get(anum);
 		LOG_INFO("Trying %s", address.get_str(ainfo).c_str());
 		if ((sockfd = socket(ainfo->ai_family, ainfo->ai_socktype, ainfo->ai_protocol)) != -1)
@@ -866,20 +869,21 @@ Socket * Socket::accept2(void)
 ///
 void Socket::connect(void)
 {
-    connected_flag = false;
-	LOG_INFO("Connecting to %s", address.get_str(ainfo).c_str());
+	connected_flag = false;
+
 	int res = ::connect(sockfd, ainfo->ai_addr, ainfo->ai_addrlen);
+
 	if (res == -1) {
 #ifdef __MINGW32__
 		if(!errno || (WSAEISCONN == errno)) {
 #else
 		if(!errno || (EISCONN == errno)) {
 #endif
+
 //		if (!errno || (errno == EWOULDBLOCK) || (errno == EINPROGRESS) || 
 //			(errno == EISCONN) || (errno == EALREADY) ) {
 //
 			connected_flag = true;
-			LOG_DEBUG("CONNECT OK: %d, %s", errno, strerror(errno));
 			return;
 		}
 		LOG_INFO("Response %d: %s", errno, strerror(errno));
@@ -889,8 +893,10 @@ void Socket::connect(void)
 		 */
 		throw SocketException(errno, "connect");
 	}
-    connected_flag = true;
+	LOG_INFO(" Connected to %s", address.get_str(ainfo).c_str());
+	connected_flag = true;
 }
+
 ///
 /// Connects the socket to the address that is associated with the object
 /// Return connect state (T/F)

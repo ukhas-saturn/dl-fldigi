@@ -1289,7 +1289,7 @@ int process_io_csma(ScriptParsing *sp, SCRIPT_COMMANDS *sc)
  ***********************************************************/
 int process_callsign_info(ScriptParsing *sp, SCRIPT_COMMANDS *sc)
 {
-	return assign_string(inpMyCallsign, sp, sc);
+	return assign_string(inpOperCallsign, sp, sc);
 }
 
 /** ********************************************************
@@ -2470,6 +2470,28 @@ int process_hamlib_stop_bits(ScriptParsing *sp, SCRIPT_COMMANDS *sc)
 
 	if(!error && valHamRigStopbits) {
 		progdefaults.HamRigStopbits = value;
+		progdefaults.changed = true;
+	}
+	return error;
+#else
+	return script_no_errors;
+#endif // USE_HAMLIB
+}
+
+/** ********************************************************
+ * \brief
+ * \param sp Access to ScritpParsing members.
+ * \param sc Access to SCRIPT_COMMANDS structure variables.
+ * \return 0 (no error) Other (error)
+ ***********************************************************/
+int process_hamlib_poll_rate(ScriptParsing *sp, SCRIPT_COMMANDS *sc)
+{
+#if USE_HAMLIB
+	int value = 0;
+	int error = assign_integer(valHamRigPollrate, sp, sc, value);
+
+	if(!error && valHamRigPollrate) {
+		progdefaults.HamRigPollrate = value;
 		progdefaults.changed = true;
 	}
 	return error;

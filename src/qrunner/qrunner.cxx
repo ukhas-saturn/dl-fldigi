@@ -52,6 +52,7 @@ const char *sztid[] = {
 	"NORIGCTL_TID",
 	"EQSL_TID",
 	"ADIF_RW_TID",
+	"ADIF_MERGE_TID",
 	"XMLRPC_TID",
 	"ARQ_TID",
 	"ARQSOCKET_TID",
@@ -62,6 +63,7 @@ const char *sztid[] = {
 	"FD_TID",
 	"N3FJP_TID",
 	"DXCC_TID",
+	"WKEY_TID",
 	"FLMAIN_TID"
 };
 

@@ -765,8 +765,7 @@ size_t SoundOSS::Read(float *buffer, size_t buffersize)
 		src_buffer[i] = ibuff[i] / MAXSC;
 
 	for (size_t i = 0; i < buffersize; i++)
-		buffer[i] = src_buffer[2*i +
-							   progdefaults.ReverseRxAudio ? 1 : 0];
+		buffer[i] = src_buffer[2*i + (progdefaults.ReverseRxAudio ? 1 : 0)];
 
 #if USE_SNDFILE
 	if (capture)
@@ -800,8 +799,7 @@ size_t SoundOSS::Read(float *buffer, size_t buffersize)
 	numread = rx_src_data->output_frames_gen;
 
 	for (int i = 0; i < numread; i++)
-		buffer[i] = snd_buffer[2*i +
-							   progdefaults.sig_on_right_channel ? 1 : 0];
+		buffer[i] = snd_buffer[2*i + (progdefaults.sig_on_right_channel ? 1 : 0)];
 
 	return numread;
 
@@ -2002,7 +2000,7 @@ SoundPulse::~SoundPulse()
 	delete [] rbuf;
 }
 
-int SoundPulse::Open(int mode, int freq)
+int SoundPulse::Open(int dir, int freq)
 {
 	const char* server = (progdefaults.PulseServer.length() ?
 				  progdefaults.PulseServer.c_str() : NULL);
@@ -2010,23 +2008,19 @@ int SoundPulse::Open(int mode, int freq)
 	int err;
 
 	sample_frequency = freq;
-	for (int i = 0; i < 2; i++) {
-		src_data_reset(1 << O_RDONLY | 1 << O_WRONLY);
 
-		if ((unsigned)freq != sd[i].stream_params.rate)
-			Close(i);
-		if (sd[i].stream)
-			continue;
+	src_data_reset(1 << O_RDONLY | 1 << O_WRONLY);
+	if ((unsigned)freq != sd[dir].stream_params.rate)
+		Close(dir);
 
-		sd[i].stream_params.rate = freq;
-		snprintf(sname, sizeof(sname), "%s (%u)", (i ? "playback" : "capture"), getpid());
-		setenv("PULSE_PROP_application.icon_name", PACKAGE_TARNAME, 1);
-		sd[i].stream = pa_simple_new(server, main_window_title.c_str(), sd[i].dir, NULL,
-						 sname, &sd[i].stream_params, NULL,
-						 &sd[i].buffer_attrs, &err);
-		if (!sd[i].stream)
-			throw SndPulseException(err);
-	}
+	sd[dir].stream_params.rate = freq;
+	snprintf(sname, sizeof(sname), "%s (%u)", (dir ? "playback" : "capture"), getpid());
+	setenv("PULSE_PROP_application.icon_name", PACKAGE_TARNAME, 1);
+	sd[dir].stream = pa_simple_new(server, main_window_title.c_str(), sd[dir].dir, NULL,
+				 sname, &sd[dir].stream_params, NULL,
+				 &sd[dir].buffer_attrs, &err);
+	if (!sd[dir].stream)
+		throw SndPulseException(err);
 
 	return 0;
 }

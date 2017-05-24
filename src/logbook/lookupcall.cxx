@@ -403,15 +403,21 @@ void QRZ_disp_result()
 	}
 
 	inpQth->value(lookup_qth.c_str());
+	inpQth->position (0);
 
 	inpState->value(lookup_state.c_str());
+	inpState->position (0);
 
 	inpVEprov->value(lookup_province.c_str());
+	inpVEprov->position (0);
 
 	inpLoc->value(lookup_grid.c_str());
+	inpLoc->position (0);
 
-	if (!lookup_country.empty())
+	if (!lookup_country.empty()) {
 		inpCountry->value(lookup_country.c_str());
+		inpCountry->position (0);
+	}
 
 	if (!progdefaults.myLocator.empty() && !lookup_grid.empty()) {
 		char buf[10];
@@ -422,8 +428,10 @@ void QRZ_disp_result()
 		    QRB::qrb(lon[0], lat[0], lon[1], lat[1], &distance, &azimuth) == QRB::QRB_OK)
 			snprintf(buf, sizeof(buf), "%03.0f", round(azimuth));
 		inpAZ->value(buf);
+		inpAZ->position (0);
 	}
 	inpNotes->value(lookup_notes.c_str());
+	inpNotes->position (0);
 
 }
 
@@ -711,12 +719,12 @@ void CALLOOKquery()
 // Hamcall specific functions
 // ---------------------------------------------------------------------
 
-#define HAMCALL_CALL 181
-#define HAMCALL_FIRST 184
-#define HAMCALL_CITY 191
-#define HAMCALL_STATE 192
-#define HAMCALL_GRID 202
-#define HAMCALL_DOB 194
+#define HAMCALL_CALL   "181"
+#define HAMCALL_FIRST  "184"
+#define HAMCALL_CITY   "191"
+#define HAMCALL_STATE  "192"
+#define HAMCALL_GRID   "202"
+#define HAMCALL_DOB    "194"
 
 void parse_html(const string& htmlpage)
 {

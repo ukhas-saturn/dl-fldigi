@@ -103,6 +103,7 @@
 #include "n3fjp_logger.h"
 #include "dx_cluster.h"
 #include "dx_dialog.h"
+#include "record_loader.h"
 
 #if USE_HAMLIB
 	#include "rigclass.h"
@@ -207,14 +208,6 @@ static void checkdirectories(void);
 
 static void arg_error(const char* name, const char* arg, bool missing);
 static void fatal_error(string);
-
-// TODO: find out why fldigi crashes on OS X if the wizard window is
-// shown before fldigi_main.
-#ifndef __APPLE__
-#  define SHOW_WIZARD_BEFORE_MAIN_WINDOW 1
-#else
-#  define SHOW_WIZARD_BEFORE_MAIN_WINDOW 0
-#endif
 
 /*
 from: https://msdn.microsoft.com/en-us/library/windows/desktop/ms682425(v=vs.85).aspx
@@ -693,6 +686,11 @@ void delayed_startup(void *)
 
 	auto_start();
 
+	if (progStatus.WK_online) {
+		btn_WK_connect->value(1);
+		WK_connect(1);
+	}
+
 	if (progdefaults.check_for_updates)
 		cb_mnuCheckUpdate((Fl_Widget *)0, NULL);
 
@@ -822,6 +820,10 @@ int main(int argc, char ** argv)
 				cbq[i]->attach(i, "ADIF_RW_TID");
 				break;
 
+			case ADIF_MERGE_TID:
+				cbq[i]->attach(i, "ADIF_MERGE_TID");
+				break;
+
 			case XMLRPC_TID:
 				cbq[i]->attach(i, "XMLRPC_TID");
 				break;
@@ -860,6 +862,10 @@ int main(int argc, char ** argv)
 
 			case DXCC_TID:
 				cbq[i]->attach(i, "DXCC_TID");
+				break;
+
+			case WKEY_TID:
+				cbq[i]->attach(i, "WKEY_TID");
 				break;
 
 			case FLMAIN_TID:
@@ -1071,14 +1077,12 @@ int main(int argc, char ** argv)
 	progdefaults.initInterface();
 	trx_start();
 
-#if SHOW_WIZARD_BEFORE_MAIN_WINDOW
 	if (!have_config) {
 		show_wizard(argc, argv);
 		Fl_Window* w;
 		while ((w = Fl::first_window()) && w->visible())
 			Fl::wait();
 	}
-#endif
 
 	dlgViewer = createViewer();
 	create_logbook_dialogs();
@@ -1111,11 +1115,6 @@ int main(int argc, char ** argv)
 	update_main_title();
 
 	mode_browser = new Mode_Browser;
-
-#if !SHOW_WIZARD_BEFORE_MAIN_WINDOW
-	if (!have_config)
-		show_wizard();
-#endif
 
 	Fl::add_timeout(.05, delayed_startup);
 

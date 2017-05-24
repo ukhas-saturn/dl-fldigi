@@ -92,9 +92,8 @@ const int		rtty::BITS[]  = {5, 7, 8};
 const int		rtty::numshifts = (int)(sizeof(SHIFT) / sizeof(*SHIFT)) - 1;
 const int		rtty::numbauds = (int)(sizeof(BAUD) / sizeof(*BAUD));
 
-void rtty::tx_init(SoundBase *sc)
+void rtty::tx_init()
 {
-	scard = sc;
 	phaseacc = 0;
 	preamble = true;
 	videoText();

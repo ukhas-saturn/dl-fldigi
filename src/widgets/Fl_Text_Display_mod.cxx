@@ -1934,8 +1934,8 @@ void Fl_Text_Display_mod::draw_string(int style,
 
   Fl_Font font = textfont();
   int fsize = textsize();
-  Fl_Color foreground;
-  Fl_Color background;
+  Fl_Color foreground = textcolor();
+  Fl_Color background = color();
 
   if ( style & STYLE_LOOKUP_MASK ) {
     int si = (style & STYLE_LOOKUP_MASK) - 'A';
@@ -1946,27 +1946,24 @@ void Fl_Text_Display_mod::draw_string(int style,
     font  = styleRec->font;
     fsize = styleRec->size;
     foreground = styleRec->color;
+    background = color();
 
     if (style & PRIMARY_MASK) {
-      if (Fl::focus() == (Fl_Widget*)this) background = selection_color();
-      else background = fl_color_average(color(), selection_color(), 0.4f);
+      if (Fl::focus() == (Fl_Widget*)this) {
+        background = foreground;
+        foreground = color();
+      }
     } else if (style & HIGHLIGHT_MASK) {
-      if (Fl::focus() == (Fl_Widget*)this) background = fl_color_average(color(), selection_color(), 0.5f);
-      else background = fl_color_average(color(), selection_color(), 0.6f);
-    } else background = color();
-      foreground = styleRec->color;
-//    foreground = fl_contrast(styleRec->color, background);
+      if (Fl::focus() == (Fl_Widget*)this) {
+        background = fl_color_average(color(), selection_color(), 0.5f);
+      }
+    }
   } else if (style & PRIMARY_MASK) {
-//    if (Fl::focus() == (Fl_Widget*)this) background = selection_color();
-//    else background = fl_color_average(color(), selection_color(), 0.4f);
-    background = fl_contrast(color(), textcolor());
-    foreground = fl_contrast(textcolor(), background);
+    if (Fl::focus() == (Fl_Widget*)this) background = selection_color();
+    else background = fl_color_average(color(), selection_color(), 0.4f);
   } else if (style & HIGHLIGHT_MASK) {
-//    if (Fl::focus() == (Fl_Widget*)this) background = fl_color_average(color(), selection_color(), 0.5f);
-//    else background = fl_color_average(color(), selection_color(), 0.6f);
-//    background = fl_color_average(color(), styleRec->color, 0.2f);
-    background = fl_contrast(color(), textcolor());
-    foreground = fl_contrast(textcolor(), background);
+    if (Fl::focus() == (Fl_Widget*)this) background = fl_color_average(color(), selection_color(), 0.5f);
+    else background = fl_color_average(color(), selection_color(), 0.6f);
   } else {
     foreground = textcolor();
     background = color();
@@ -2680,7 +2677,7 @@ void Fl_Text_Display_mod::draw_line_numbers(bool /*clearAll*/) {
     lineStart = textD->lineStarts[visLine];
     if (lineStart != -1 && (lineStart==0 ||
                             BufGetCharacter(textD->buffer, lineStart-1)=='\n')) {
-      sprintf(lineNumString, "%*d", nCols, line);
+      snprintf(lineNumString, sizeof(lineNumString), "%*d", nCols, line);
       XDrawImageString(XtDisplay(textD->w), XtWindow(textD->w),
                        textD->lineNumGC, textD->lineNumLeft, y + textD->ascent,
                        lineNumString, strlen(lineNumString));

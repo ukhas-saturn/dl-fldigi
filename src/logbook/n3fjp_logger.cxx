@@ -87,7 +87,7 @@ int n3fjp_has_xcvr_control = UNKNOWN;
 double tracked_freq = 0;
 int  tracked_mode = -1;
 
-enum {FJP_NONE, FJP_FD, FJP_CQWWRTTY};
+enum {FJP_NONE, FJP_FD, FJP_CQWWRTTY, FJP_NAQP, FJP_GENERIC};
 int  n3fjp_contest = FJP_NONE;
 
 int n3fjp_wait = 0;
@@ -133,6 +133,16 @@ void n3fjp_disconnect();
 void *n3fjp_loop(void *args);
 void n3fjp_init(void);
 void n3fjp_close(void);
+
+//======================================================================
+//
+//======================================================================
+static std::string strip(std::string s)
+{
+	while (s.length() && (s[0] <= ' ')) s.erase(0,1);
+	while (s.length() && (s[s.length()-1] <= ' ')) s.erase(s.length()-1, 1);
+	return s;
+}
 
 //======================================================================
 //
@@ -186,6 +196,18 @@ void adjust_freq(string sfreq)
 //======================================================================
 //
 //======================================================================
+void set_connect_box()
+{
+	box_n3fjp_connected->color(
+		n3fjp_connected ? FL_DARK_GREEN : FL_BACKGROUND2_COLOR);
+	box_n3fjp_connected->redraw();
+}
+
+void n3fjp_show(string s)
+{
+	txt_N3FJP_data->insert(s.c_str());
+	txt_N3FJP_data->redraw();
+}
 
 void n3fjp_disp_report(string s, string fm)
 {
@@ -204,7 +226,7 @@ void n3fjp_disp_report(string s, string fm)
 
 	std::string pathname = TempDir;
 	pathname.append("n3fjp_data_stream.txt");
-	FILE *n3fjplog = fopen(pathname.c_str(), "a");
+	FILE *n3fjplog = fl_fopen(pathname.c_str(), "a");
 	fprintf(n3fjplog, "%s", report.c_str());
 	fclose(n3fjplog);
 
@@ -267,7 +289,8 @@ void n3fjp_clear_record()
 	string cmd = "<CMD><ACTION><VALUE>CLEAR</VALUE></CMD>";
 	try {
 		n3fjp_send(cmd);
-		MilliSleep(5);
+		n3fjp_wait = 100;
+//		MilliSleep(5);
 	} catch (const SocketException& e) {
 		LOG_ERROR("Error: %d, %s", e.error(), e.what());
 	}
@@ -283,6 +306,7 @@ void n3fjp_getfields()
 	string cmd ="<CMD><ALLFIELDSWITHVALUES></CMD>";
 	try {
 		n3fjp_send(cmd);
+		n3fjp_wait = 100;
 	} catch (const SocketException& e) {
 		LOG_ERROR("Error: %d, %s", e.error(), e.what());
 		n3fjp_calltab = false;
@@ -311,6 +335,8 @@ void n3fjp_get_record(string call)
 
 		n3fjp_send(cmd2);
 		n3fjp_calltab = false;
+
+		n3fjp_wait = 100;
 
 	} catch (const SocketException& e) {
 		LOG_ERROR("Error: %d, %s", e.error(), e.what());
@@ -352,6 +378,23 @@ static string ParseTextField(string &record, string fieldtag)
 	size_t p3 = record.find("</VALUE>", p2);
 	if (p3 == string::npos) return "";
 	return record.substr(p2, p3 - p2);
+}
+
+//======================================================================
+// parse value contents
+// <VALUE>valuestring</VALUE>
+//======================================================================
+static string ParseValueField(string field, string &record)
+{
+	string start = "<";
+	start.append(field).append("><VALUE>");
+	string endvalue = "</VALUE>";
+	size_t p1 = record.find(start);
+	size_t p2 = record.find(endvalue, p1);
+	if ((p1 == string::npos) || (p2 == string::npos) ||
+		(p2 < p1) ) return "";
+	p1 += start.length();
+	return record.substr(p1, p2 - p1);
 }
 
 static string ucasestr(string s)
@@ -517,10 +560,10 @@ static void send_control(const string ctl, string val)
 	cmd.append("</VALUE></CMD>");
 	try {
 		n3fjp_send(cmd);
+		n3fjp_wait = 100;
 	} catch (...) {
 		throw;
 	}
-	MilliSleep(10);
 }
 
 static void send_action(const string action)
@@ -531,10 +574,10 @@ static void send_action(const string action)
 	cmd.append("</VALUE></CMD>");
 	try {
 		n3fjp_send(cmd);
+		n3fjp_wait = 100;
 	} catch (...) {
 		throw;
 	}
-	MilliSleep(10);
 }
 
 static void send_command(const string command, string val)
@@ -547,48 +590,56 @@ static void send_command(const string command, string val)
 	try {
 		n3fjp_send(cmd);
 		MilliSleep(5);
+		n3fjp_wait = 100;
 	} catch (...) {
 		throw;
 	}
-	MilliSleep(10);
 }
+
+string last_lookup = "";
+bool   last_dupcheck = false;
 
 bool n3fjp_dupcheck()
 {
+	guard_lock rx_lock(&n3fjp_mutex);
+
 	string chkcall = inpCall->value();
+	if (chkcall == last_lookup) return last_dupcheck;
+
 	if (chkcall.length() < 3) return false;
+	if ((chkcall.length() == 3) && isdigit(chkcall[2])) return false;
+
+	last_lookup = chkcall;
 
 	string cmd;
+	bool isdup = false;
 
 	cmd.assign("<CMD><DUPECHECK><CALL>");
-	cmd.append(inpCall->value());
+	cmd.append(strip(inpCall->value()));
 	cmd.append("</CALL><BAND>");
-	cmd.append(n3fjp_opband());
+	cmd.append(strip(n3fjp_opband()));
 	cmd.append("</BAND><MODE>");
-	cmd.append(n3fjp_tstmode());
+	cmd.append(strip(n3fjp_tstmode()));
 	cmd.append("</MODE></CMD>");
-
-	guard_lock rx_lock(&n3fjp_mutex);
 
 	try {
 		n3fjp_send(cmd);
-	} catch (...) {
-		;
-	}
-	MilliSleep(200);
 
-	try {
+		MilliSleep(200);
+
 		string resp;
 		n3fjp_rcv(resp);
-		n3fjp_parse_response(resp);
 
 		if (resp.find("Duplicate") != string::npos)
-			return true;
-		return false;
+			isdup = true;
+		n3fjp_parse_response(resp);
+
 	} catch (...) {
-		;
+		throw;
 	}
-	return false;
+	last_dupcheck = isdup;
+
+	return isdup;
 }
 
 static cQsoRec rec;
@@ -600,8 +651,7 @@ static void n3fjp_send_data()
 		send_control("FREQUENCY", n3fjp_freq());
 		send_control("BAND", n3fjp_opband());
 		send_control("MODE", n3fjp_opmode());
-		send_control("CALL", rec.getField(CALL));
-		send_action("CALLTAB");
+		send_control("CALL", strip(rec.getField(CALL)));
 
 		if (n3fjp_contest == FJP_NONE) {
 			send_control("DATE", fmt_date(rec.getField(QSO_DATE)));
@@ -618,23 +668,35 @@ static void n3fjp_send_data()
 		}
 		if (n3fjp_contest == FJP_FD) {
 			send_control("MODETST", n3fjp_tstmode());
-			send_control("CLASS", ucasestr(rec.getField(FDCLASS)));
-			send_control("SECTION", ucasestr(rec.getField(FDSECTION)));
-			send_control("SERIALR", rec.getField(SRX));
-			send_control("SERIALS", rec.getField(STX));
+			send_control("CLASS", strip(ucasestr(rec.getField(FDCLASS))));
+			send_control("SECTION", strip(ucasestr(rec.getField(FDSECTION))));
 		}
 		if (n3fjp_contest == FJP_CQWWRTTY) {
-			send_control("RSTS", rec.getField(RST_SENT));
-			send_control("RSTR", rec.getField(RST_RCVD));
-			send_control("CQZONE", rec.getField(CQZ));
-			send_control("STATE", rec.getField(STATE));
+			send_control("RSTS", strip(rec.getField(RST_SENT)));
+			send_control("RSTR", strip(rec.getField(RST_RCVD)));
+			send_control("CQZONE", strip(rec.getField(CQZ)));
+			send_control("STATE", strip(rec.getField(STATE)));
 		}
+		if (n3fjp_contest == FJP_GENERIC) {
+			send_control("RSTS", strip(rec.getField(RST_SENT)));
+			send_control("RSTR", strip(rec.getField(RST_RCVD)));
+			send_control("SERIALNOR", strip(rec.getField(SRX)));
+			send_control("SPCNUM", strip(ucasestr(rec.getField(XCHG1))));
+		}
+		if (n3fjp_contest == FJP_NAQP) {
+			send_control("NAMER", rec.getField(NAME));
+			if (strlen(rec.getField(STATE)) > 0)
+				send_control("SPCNUM", rec.getField(STATE));
+			else if (strlen(rec.getField(VE_PROV)) > 0)
+				send_control("SPCNUM", rec.getField(VE_PROV));
+		}
+
 		string other = "XCVR:";
 		char szfreq[6];
 		snprintf(szfreq, sizeof(szfreq), "%d", (int)active_modem->get_txfreq());
 		other.append(ModeIsLSB(rec.getField(MODE)) ? "LSB" : "USB");
 		other.append(" MODE:");
-		other.append(rec.getField(MODE));
+		other.append(strip(rec.getField(MODE)));
 		other.append(" WF:");
 		other.append(szfreq);
 
@@ -655,8 +717,7 @@ static void n3fjp_send_data_norig()
 		cmd.append("</CMD>");
 		n3fjp_send(cmd);
 
-		send_control("CALL", rec.getField(CALL));
-		send_action("CALLTAB");
+		send_control("CALL", strip(rec.getField(CALL)));
 
 		if (n3fjp_contest == FJP_NONE) {
 			send_control("FREQUENCY", n3fjp_freq());
@@ -664,28 +725,39 @@ static void n3fjp_send_data_norig()
 			send_control("DATE", fmt_date(rec.getField(QSO_DATE)));
 			send_control("TIMEON", fmt_time(rec.getField(TIME_ON)));
 			send_control("TIMEOFF", fmt_time(rec.getField(TIME_OFF)));
-			send_control("RSTS", rec.getField(RST_SENT));
-			send_control("RSTR", rec.getField(RST_RCVD));
-			send_control("NAMER", rec.getField(NAME));
-			send_control("COMMENTS", rec.getField(NOTES));
-			send_control("POWER", rec.getField(TX_PWR));
-			send_control("STATE", rec.getField(STATE));
-			send_control("GRIDR", rec.getField(GRIDSQUARE));
-			send_control("QTHGROUP", rec.getField(QTH));
+			send_control("RSTS", strip(rec.getField(RST_SENT)));
+			send_control("RSTR", strip(rec.getField(RST_RCVD)));
+			send_control("NAMER", strip(rec.getField(NAME)));
+			send_control("COMMENTS", strip(rec.getField(NOTES)));
+			send_control("POWER", strip(rec.getField(TX_PWR)));
+			send_control("STATE", strip(rec.getField(STATE)));
+			send_control("GRIDR", strip(rec.getField(GRIDSQUARE)));
+			send_control("QTHGROUP", strip(rec.getField(QTH)));
 		}
 		if (n3fjp_contest == FJP_FD) {
 			send_control("MODETST", n3fjp_tstmode());
-			send_control("CLASS", ucasestr(rec.getField(FDCLASS)));
-			send_control("SECTION", ucasestr(rec.getField(FDSECTION)));
-			send_control("SERIALR", rec.getField(SRX));
-			send_control("SERIALS", rec.getField(STX));
+			send_control("CLASS", strip(ucasestr(rec.getField(FDCLASS))));
+			send_control("SECTION", strip(ucasestr(rec.getField(FDSECTION))));
 		}
 		if (n3fjp_contest == FJP_CQWWRTTY) {
 			send_control("MODETST", n3fjp_tstmode());
-			send_control("RSTS", rec.getField(RST_SENT));
-			send_control("RSTR", rec.getField(RST_RCVD));
-			send_control("CQZONE", rec.getField(CQZ));
-			send_control("STATE", rec.getField(STATE));
+			send_control("RSTS", strip(rec.getField(RST_SENT)));
+			send_control("RSTR", strip(rec.getField(RST_RCVD)));
+			send_control("CQZONE", strip(rec.getField(CQZ)));
+			send_control("STATE", strip(rec.getField(STATE)));
+		}
+		if (n3fjp_contest == FJP_GENERIC) {
+			send_control("RSTS", strip(rec.getField(RST_SENT)));
+			send_control("RSTR", strip(rec.getField(RST_RCVD)));
+			send_control("SERIALNOR", strip(rec.getField(SRX)));
+			send_control("SPCNUM", strip(ucasestr(rec.getField(XCHG1))));
+		}
+		if (n3fjp_contest == FJP_NAQP) {
+			send_control("NAMER", rec.getField(NAME));
+			if (strlen(rec.getField(STATE)) > 0)
+				send_control("SPCNUM", rec.getField(STATE));
+			else if (strlen(rec.getField(VE_PROV)) > 0)
+				send_control("SPCNUM", rec.getField(VE_PROV));
 		}
 
 		string other = "XCVR:";
@@ -693,7 +765,7 @@ static void n3fjp_send_data_norig()
 		snprintf(szfreq, sizeof(szfreq), "%d", (int)active_modem->get_txfreq());
 		other.append(ModeIsLSB(rec.getField(MODE)) ? "LSB" : "USB");
 		other.append(" MODE:");
-		other.append(rec.getField(MODE));
+		other.append(strip(rec.getField(MODE)));
 		other.append(" WF:");
 		other.append(szfreq);
 
@@ -771,8 +843,22 @@ void n3fjp_set_ptt(int on)
 
 void n3fjp_add_record(cQsoRec &record)
 {
+	if (!n3fjp_connected) return;
 	rec = record;
 	n3fjp_bool_add_record = true;
+}
+
+void n3fjp_request_next_serial_number()
+{
+	send_command("<CMD><NEXTSERIALNUMBER></CMD>");
+}
+
+string n3fjp_serno = "";
+
+void n3fjp_parse_next_serial(string buff)
+{
+	n3fjp_serno = ParseValueField("NEXTSERIALNUMBERRESPONSE", buff);
+	clearQSO();
 }
 
 //======================================================================
@@ -821,6 +907,12 @@ void n3fjp_parse_response(string tempbuff)
 	if (tempbuff.find("ALLFIELDSWVRESPONSE") != string::npos) {
 		REQ(n3fjp_parse_data_stream, tempbuff);
 	}
+	if (tempbuff.find("<ENTEREVENT>") != string::npos) {
+		REQ(n3fjp_request_next_serial_number);
+	}
+	if (tempbuff.find("<NEXTSERIALNUMBERRESPONSE>") != string::npos) {
+		REQ(n3fjp_parse_next_serial, tempbuff);
+	}
 }
 
 //======================================================================
@@ -840,18 +932,35 @@ void n3fjp_rcv_data()
 static void connect_to_n3fjp_server()
 {
 	try {
+		n3fjp_serno.clear();
+
 		if (!n3fjp_connected)
 			n3fjp_socket->connect();
-MilliSleep(100);
+
+		if (!n3fjp_socket->is_connected()) {
+			MilliSleep(200);
+			n3fjp_socket->connect();
+			if (!n3fjp_socket->is_connected()) {
+				n3fjp_socket->shut_down();
+				n3fjp_socket->close();
+				delete n3fjp_socket;
+				n3fjp_socket = 0;
+				n3fjp_connected = false;
+				REQ(set_connect_box);
+				return;
+			}
+		}
+
 		std::string pathname = TempDir;
 		pathname.append("n3fjp_data_stream.txt");
-		FILE *n3fjplog = fopen(pathname.c_str(), "w");
+		FILE *n3fjplog = fl_fopen(pathname.c_str(), "w");
 		fprintf(n3fjplog, "N3FJP / fldigi tcpip log\n\n");
 		fclose(n3fjplog);
 
 		string buffer;
 		string cmd = "<CMD><PROGRAM></CMD>";
 		n3fjp_send(cmd);
+		MilliSleep(100);
 
 		n3fjp_rcv(buffer);
 		if (buffer.empty()) return;
@@ -863,8 +972,14 @@ MilliSleep(100);
 			n3fjp_contest = FJP_NONE;
 		else if (info.find("CQ WW DX RTTY Contest Log") != string::npos)
 			n3fjp_contest = FJP_CQWWRTTY;
-		else if (info.find("ARRL Field Day Contest Log") != string::npos)
+		else if (info.find("Field Day Contest") != string::npos)
 			n3fjp_contest = FJP_FD;
+		else if (info.find("NAQP Contest Log") != string::npos)
+			n3fjp_contest = FJP_NAQP;
+		else {
+			n3fjp_contest = FJP_GENERIC;
+			REQ(n3fjp_request_next_serial_number);
+		}
 
 		info.insert(0, "Connected to ");
 
@@ -872,6 +987,7 @@ MilliSleep(100);
 		info.append(", Ver ").append(ver);
 
 		n3fjp_connected = true;
+		REQ(set_connect_box);
 
 		cmd = "<CMD><CALLTABENTEREVENTS><VALUE>TRUE</VALUE></CMD>";
 		n3fjp_send(cmd);
@@ -892,6 +1008,10 @@ MilliSleep(100);
 		send_command(cmd);
 
 	} catch (const SocketException& e) {
+		string err;
+		err = e.what();
+		err.append("\n");
+		REQ(n3fjp_show, err);
 		LOG_INFO("%s(%d)", e.what(), e.error());
 	}
 
@@ -903,6 +1023,8 @@ MilliSleep(100);
 
 void n3fjp_start()
 {
+	static bool firstreport = true;
+
 	n3fjp_ip_address =  progdefaults.N3FJP_address;
 	n3fjp_ip_port = progdefaults.N3FJP_port;
 
@@ -915,18 +1037,25 @@ void n3fjp_start()
 		n3fjp_socket->set_timeout(0.01);
 		n3fjp_socket->set_nonblocking(true);
 		LOG_INFO("Client socket %d", n3fjp_socket->fd());
+		firstreport = true;
 	}
 	catch (const SocketException& e) {
-		LOG_INFO("%s", e.what() );
+		if (firstreport) {
+			LOG_INFO("%s", e.what() );
+			firstreport = false;
+		}
 		delete n3fjp_socket;
 		n3fjp_socket = 0;
 		n3fjp_connected = false;
+		REQ(set_connect_box);
 		n3fjp_has_xcvr_control = UNKNOWN;
 	}
 }
 
 void n3fjp_restart()
 {
+	static bool firstreport = true;
+
 	n3fjp_ip_address =  progdefaults.N3FJP_address;
 	n3fjp_ip_port = progdefaults.N3FJP_port;
 
@@ -935,6 +1064,7 @@ void n3fjp_restart()
 		n3fjp_socket->close();
 		delete n3fjp_socket;
 		n3fjp_connected = false;
+		REQ(set_connect_box);
 		n3fjp_socket = new Socket(
 				Address( n3fjp_ip_address.c_str(),
 						 n3fjp_ip_port.c_str(),
@@ -942,12 +1072,17 @@ void n3fjp_restart()
 		n3fjp_socket->set_timeout(0.01);
 		n3fjp_socket->set_nonblocking(true);
 		LOG_INFO("Client socket %d", n3fjp_socket->fd());
+		firstreport = true;
 	}
 	catch (const SocketException& e) {
-		LOG_INFO("%s", e.what() );
+		if (firstreport) {
+			LOG_INFO("%s", e.what() );
+			firstreport = false;
+		}
 		delete n3fjp_socket;
 		n3fjp_socket = 0;
 		n3fjp_connected = false;
+		REQ(set_connect_box);
 		n3fjp_has_xcvr_control = UNKNOWN;
 	}
 }
@@ -963,8 +1098,11 @@ void n3fjp_disconnect()
 	delete n3fjp_socket;
 	n3fjp_socket = 0;
 	n3fjp_connected = false;
+	REQ(set_connect_box);
 	n3fjp_has_xcvr_control = UNKNOWN;
 	LOG_INFO("Disconnected");
+	n3fjp_serno.clear();
+	REQ(clearQSO);
 }
 
 //======================================================================
@@ -975,57 +1113,60 @@ void *n3fjp_loop(void *args)
 {
 	SET_THREAD_ID(N3FJP_TID);
 
-	int loopcount = 10;
-	int n3fjp_looptime = 100;
+	int n3fjp_looptime = 5000;
 	while(1) {
 		if (n3fjp_exit) break;
 
-		for (int i = 0; i < n3fjp_looptime/10; i++) {
-			MilliSleep(10);
-			if (n3fjp_exit) break;
-		}
+		MilliSleep(10);
+		if (n3fjp_wait) n3fjp_wait -= 10;
+		if (n3fjp_looptime) n3fjp_looptime -= 10;
 
-		if (!n3fjp_socket || (n3fjp_socket->fd() == -1)) {
-			n3fjp_start();
-		}
+		if (n3fjp_wait > 0) continue;
 
-		else if (n3fjp_socket) {
-			if ((n3fjp_ip_address != progdefaults.N3FJP_address) ||
-				(n3fjp_ip_port != progdefaults.N3FJP_port) ) {
-				n3fjp_restart();
-			}
+		if (n3fjp_looptime > 0) continue;
 
-			else if (!n3fjp_connected && progdefaults.connect_to_n3fjp && (--loopcount == 0)) {
-				connect_to_n3fjp_server();
-				loopcount = 1;
-			} 
+		if (!n3fjp_connected) n3fjp_looptime = 5000; // test for N3FJP logger every 5 sec
+		else n3fjp_looptime = 250;  // r/w to N3FJP logger every 1/4 second
 
-			else if (n3fjp_connected && !progdefaults.connect_to_n3fjp)
-				n3fjp_disconnect();
+		if (progdefaults.connect_to_n3fjp) {
+			if (!n3fjp_socket || (n3fjp_socket->fd() == -1))
+				n3fjp_start();
 
-			else if (n3fjp_connected) {
-				try {
-					if (n3fjp_has_xcvr_control == FLDIGI)
-						n3fjp_send_freq_mode();
-					if (!send_this.empty()) {
-						guard_lock send_lock(&send_this_mutex);
-						n3fjp_send(send_this);
-						send_this.clear();
-					} else if (n3fjp_bool_add_record)
-						do_n3fjp_add_record_entries();
-					else {
-						guard_lock rx_lock(&n3fjp_mutex);
-						n3fjp_rcv_data();
+			if (n3fjp_socket) {
+				if ((n3fjp_ip_address != progdefaults.N3FJP_address) ||
+					(n3fjp_ip_port != progdefaults.N3FJP_port) ) {
+					n3fjp_restart();
+				}
+
+				if (!n3fjp_connected)
+					connect_to_n3fjp_server();
+
+				if (n3fjp_connected) {
+					try {
+						if (n3fjp_has_xcvr_control == FLDIGI)
+							n3fjp_send_freq_mode();
+						if (!send_this.empty()) {
+							guard_lock send_lock(&send_this_mutex);
+							n3fjp_send(send_this);
+							send_this.clear();
+						} else if (n3fjp_bool_add_record)
+							do_n3fjp_add_record_entries();
+						else {
+							guard_lock rx_lock(&n3fjp_mutex);
+							n3fjp_rcv_data();
+						}
+					} catch (const SocketException& e) {
+						LOG_ERROR("%s", e.what() );
+						delete n3fjp_socket;
+						n3fjp_socket = 0;
+						n3fjp_connected = false;
+						REQ(set_connect_box);
+						n3fjp_has_xcvr_control = UNKNOWN;
 					}
-				} catch (const SocketException& e) {
-					LOG_ERROR("%s", e.what() );
-					delete n3fjp_socket;
-					n3fjp_socket = 0;
-					n3fjp_connected = false;
-					n3fjp_has_xcvr_control = UNKNOWN;
 				}
 			}
-		}
+		} else if (n3fjp_connected)
+			n3fjp_disconnect();
 	}
 	// exit the n3fjp thread
 	SET_THREAD_CANCEL();

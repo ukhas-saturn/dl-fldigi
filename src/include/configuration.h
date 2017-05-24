@@ -410,9 +410,6 @@
         ELEM_(bool, CWmfilt, "CWMFILT",                                                 \
               "Matched Filter in use",                                                  \
               false)                                                                    \
-        ELEM_(bool, CWuse_fft_filter, "CWUSEFFTFILTER",                                 \
-              "Use FFT overlap and add convolution filter",                             \
-              false)                                                                    \
         ELEM_(bool, CWuseSOMdecoding, "CWUSESOMDECODING",                               \
               "Self Organizing Map decoding",                                           \
               false)                                                                    \
@@ -485,11 +482,17 @@
         ELEM_(double, HELL_BW_FSK, "HELL_BW5", "FSK Hell bandwidth",  180.0)            \
         ELEM_(double, HELL_BW_FSK105, "HELL_BW6", "FSK105 Hell bandwidth",  100.0)      \
         ELEM_(double, HELL_BW_HELL80, "HELL_BW7", "HELL80 bandwidth",  450.0)           \
-        ELEM_(bool, HellRcvWidth, "HELLRCVWIDTH",                                       \
-              "Halve receive width (compress RX in time)",                              \
-              false)                                                                    \
+        ELEM_(int, HellRcvWidth, "HELLRCVWIDTH",                                        \
+              "Horizontal size multiplier for each hell character, 1, 2, or 3",         \
+              2)                                                                        \
+        ELEM_(int, HellRcvHeight, "HELLRCVHEIGHT",                                      \
+              "Vertical char size in pixels",                                           \
+              20)                                                                       \
         ELEM_(bool, HellBlackboard, "HELLBLACKBOARD",                                   \
               "Display RX in reverse video",                                            \
+              false)                                                                    \
+        ELEM_(bool, HellMarquee, "HELLMARQUEE",                                         \
+              "Display RX as scrolling marquee",                                        \
               false)                                                                    \
         ELEM_(int, HellXmtWidth, "HELLXMTWIDTH",                                        \
               "Transmit width (number of multiple scans per character line)",           \
@@ -501,6 +504,9 @@
               "Raised cosine pulse shape factor. Values are as follows:\n"              \
               "  0: slow (4 ms); 1: fast (2 ms).",                                      \
               false)   /* slow */                                                       \
+        ELEM_(int, hellagc, "HELLAGC",                                                  \
+              "1 - slow, 2 - medium, 3 - fast",                                         \
+              2)                                                                        \
         /* OLIVIA */                                                                    \
         ELEM_(int, oliviatones, "OLIVIATONES",                                          \
               "Number of tones. Values are as follows:\n"                               \
@@ -1085,6 +1091,9 @@
         ELEM_(int, HamRigStopbits, "HAMRIGSTOPBITS",                                    \
               "Hamlib stopbits <1/2>.",                                                 \
               2)   /* 600 baud */                                                       \
+        ELEM_(int, HamRigPollrate, "HAMRIGPOLLRATE",                                    \
+              "250 - 2000 in 50 msec increments",                                        \
+              250)                                                                      \
         ELEM_(int, hamlib_ptt_on_data, "HAMLIBPTTONDATA",                               \
               "Hamlib PTT for xmt audio on data port",                                  \
               1)                                                                        \
@@ -1206,7 +1215,7 @@
               0)   /* SIDEBAND_RIG */                                                   \
         /* Operator */                                                                  \
         ELEM_(std::string, myCall, "MYCALL",                                            \
-              "Operator callsign",                                                      \
+              "Station callsign",                                                       \
               "")                                                                       \
         ELEM_(std::string, myQth, "MYQTH",                                              \
               "Operator QTH",                                                           \
@@ -1221,6 +1230,9 @@
               "Antenna description (keep short!)",                                      \
               "")                                                                       \
         /* Sound card */                                                                \
+        ELEM_(std::string, operCall, "OPERCALL",                                        \
+              "Operator call sign, if distinct from the station call MYCALL",           \
+              "")                                                                       \
         ELEM_(int, btnAudioIOis, "AUDIOIO",                                             \
               "Audio subsystem.  Values are as follows:\n"                              \
               "  0: TCP; 1: PortAudio; 2: PulseAudio; 3: File I/O",                     \
@@ -1255,7 +1267,7 @@
               "")                                                                       \
         ELEM_(bool, sig_on_right_channel, "SIGONRIGHTCHANNEL",                          \
               "Duplicate modem signal on left & right",                                 \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, ReverseAudio, "REVERSEAUDIO",                                       \
               "Reverse left-right rx audio channels",                                   \
               false)                                                                    \
@@ -1419,10 +1431,10 @@
               "Fields separated by : character\n"                                       \
               "Lines separated by | character",                                         \
               "\
-dxc.wb3ffv.us:7300:|\
-nk7z-cluster.ddns.net:7373:|\
-dx.n8noe.us:7373:|\
-w0mw.dynip.com:23:|")                                                                   \
+dxc.wb3ffv.us:7300::|\
+nk7z-cluster.ddns.net:7373::|\
+dx.n8noe.us:7373::|\
+w0mw.dynip.com:23::|")                                                                   \
         ELEM_(RGB, DX_Color, "DX_COLOR",                                                \
               "RX text font color (RGB)",                                               \
               { 0, 0, 130 })                                                            \
@@ -1435,6 +1447,9 @@ w0mw.dynip.com:23:|")                                                           
         ELEM_(Fl_Color, DXC_textcolor, "DXC_TEXTCOLOR",                                 \
               "Text color in dxcluster dialog",                                         \
               FL_YELLOW)                                                                \
+        ELEM_(std::string, DXC_textname, "DXC_TEXTNAME",                                \
+              "DX cluster browser font name",                                           \
+              "")                                                                       \
         ELEM_(Fl_Font, DXC_textfont, "DXC_TEXTFONT",                                    \
               "DX cluster browsers font number",                                        \
               FL_COURIER)                                                               \
@@ -1447,6 +1462,9 @@ w0mw.dynip.com:23:|")                                                           
         ELEM_(Fl_Color, DXalt_color, "DXALT_COLOR",                                     \
               "Alternate text color in dxcluster stream",                               \
               FL_DARK_RED)                                                              \
+        ELEM_(std::string, DXfontname, "DXFONTNAME",                                    \
+              "DX cluster stream font name",                                            \
+              "")                                                                       \
         ELEM_(Fl_Font, DXfontnbr, "DXFONTNBR",                                          \
               "DX cluster stream font number",                                          \
               FL_COURIER)                                                               \
@@ -1458,6 +1476,9 @@ w0mw.dynip.com:23:|")                                                           
               "")                                                                       \
         ELEM_(std::string, dxcc_login, "DXCC_LOGIN",                                    \
               "DXCC cluster login call sign",                                           \
+              "")                                                                       \
+        ELEM_(std::string, dxcc_password, "DXCC_PASSWORD",                              \
+              "DXCC cluster login password",                                            \
               "")                                                                       \
         ELEM_(std::string, dxcm_label_1, "DXC_ML1",                                     \
               "DXC Macro Label 1",                                                      \
@@ -1540,6 +1561,10 @@ w0mw.dynip.com:23:|")                                                           
               "# and position of macro bars\n"                                          \
               "0..12, 1 = default",                                                     \
               1)                                                                        \
+        ELEM_(bool, four_bar_position, "FOURBARPOSITION",                               \
+              "Position 4 bar macro sat below Tx panel\n"                               \
+              "Default is above Rx panel",                                              \
+              false)                                                                    \
         ELEM_(bool, macro_post, "MACROPOST",                                            \
               "expand ^! macro tags in Rx panel when executed",                         \
               false)                                                                    \
@@ -1600,12 +1625,12 @@ w0mw.dynip.com:23:|")                                                           
         ELEM_(std::string, charset_name, "CHARSET_NAME",                                \
               "Default character set",                                                  \
               "UTF-8")                                                                  \
-        ELEM_(std::string, RxFontName, "RXFONTNAME",                                    \
-              "RX text font name",                                                      \
-              "")                                                                       \
         ELEM_(bool, RxFontWarn, "RXFONTWARN",                                           \
               "Enable RX font warnings",                                                \
               true)                                                                     \
+        ELEM_(std::string, RxFontName, "RXFONTNAME",                                    \
+              "RX text font name",                                                      \
+              "")                                                                       \
         ELEM_(Fl_Font, RxFontnbr, "RXFONTNBR",                                          \
               "RX text font index",                                                     \
               FL_HELVETICA)                                                             \
@@ -1615,7 +1640,7 @@ w0mw.dynip.com:23:|")                                                           
         ELEM_(Fl_Color, RxFontcolor, "RXFNTCOLOR",                                      \
               "RX text font color",                                                     \
               FL_BLACK)                                                                 \
-        ELEM_(std::string, MacroBtnFontname, "MACROBTNFONTNAME",                        \
+        ELEM_(std::string, MacroBtnFontName, "MACROBTNFONTNAME",                        \
               "Macro Btn Font Name",                                                    \
               "")                                                                       \
         ELEM_(Fl_Font, MacroBtnFontnbr, "MACROBTNFONTNBR",                              \
@@ -1630,12 +1655,12 @@ w0mw.dynip.com:23:|")                                                           
         ELEM_(Fl_Color, RxTxSelectcolor, "RXTXSELCOLOR",                                \
               "RX/TX text select color",                                                \
               FL_MAGENTA)                                                               \
-        ELEM_(std::string, TxFontName, "TXFONTNAME",                                    \
-              "TX text font name",                                                      \
-              "")                                                                       \
         ELEM_(bool, TxFontWarn, "TXFONTWARN",                                           \
               "Enable TX font warnings",                                                \
               true)                                                                     \
+        ELEM_(std::string, TxFontName, "TXFONTNAME",                                    \
+              "TX text font name",                                                      \
+              "")                                                                       \
         ELEM_(Fl_Font, TxFontnbr, "TXFONTNBR",                                          \
               "TX text font index",                                                     \
               FL_HELVETICA)                                                             \
@@ -1690,6 +1715,9 @@ w0mw.dynip.com:23:|")                                                           
         ELEM_(Fl_Color, LOGGINGcolor, "LOGGINGCOLOR",                                   \
               "Background color in logging controls",                                   \
               FL_BACKGROUND2_COLOR)                                                     \
+        ELEM_(std::string, LOGGINGfontname, "LOGGINGTEXTNAME",                          \
+              "LOGGING text font name",                                                 \
+              "")                                                                       \
         ELEM_(Fl_Font, LOGGINGtextfont, "LOGGINGTEXTFONT",                              \
               "Logging Controls font number",                                           \
               FL_HELVETICA)                                                             \
@@ -1702,6 +1730,9 @@ w0mw.dynip.com:23:|")                                                           
         ELEM_(Fl_Color, LOGBOOKcolor, "LOGBOOKCOLOR",                                   \
               "Background color in logbook dialog",                                     \
               FL_BACKGROUND2_COLOR)                                                     \
+        ELEM_(std::string, LOGBOOKtextname, "LOGBOOKTEXTNAME",                          \
+              "Logbook text font name",                                                 \
+              "")                                                                       \
         ELEM_(Fl_Font, LOGBOOKtextfont, "LOGBOOKTEXTFONT",                              \
               "Logbook dialog controls font number",                                    \
               FL_HELVETICA)                                                             \
@@ -2195,6 +2226,9 @@ w0mw.dynip.com:23:|")                                                           
               "Enabled, View smeter & power meter\n"                                    \
               "Disable, (default)",                                                     \
               false)                                                                    \
+        ELEM_(std::string, MacroEditFontName, "MACROEDITORFONTNAME",                    \
+              "Macro editor font name",                                                 \
+              "")                                                                       \
         ELEM_(Fl_Font, MacroEditFontnbr, "MACROEDITFONTNBR",                            \
               "RX text font index",                                                     \
               FL_HELVETICA)                                                             \

@@ -164,6 +164,7 @@ modem *contestia_modem = 0;
 modem *rtty_modem = 0;
 modem *pkt_modem = 0;
 
+modem *thormicro_modem = 0;
 modem *thor4_modem = 0;
 modem *thor5_modem = 0;
 modem *thor8_modem = 0;
@@ -179,6 +180,7 @@ modem *fsq_modem = 0;
 
 modem *ifkp_modem = 0;
 
+modem *dominoexmicro_modem = 0;
 modem *dominoex4_modem = 0;
 modem *dominoex5_modem = 0;
 modem *dominoex8_modem = 0;
@@ -467,16 +469,10 @@ double modem::gauss(double sigma) {
 
 void modem::add_noise(double *buffer, int len)
 {
-	double sigma = sigmaN(noiseDB->value());
-	double sn = 0;
+	double mag;
 	for (int n = 0; n < len; n++) {
-//		mag = fabs(buffer[n]);
-//		if (btn_imd_on->value())
-//			buffer[n] *= (1.0 - mag *xmtimd->value())/(1.0 - xmtimd->value());
-		if (btnNoiseOn->value()) {
-			sn = (buffer[n] + gauss(sigma)) / (1.0 + 3.0 * sigma);
-			buffer[n] = clamp(sn, -1.0, 1.0);
-		}
+		mag = fabs(buffer[n]);
+		buffer[n] *= (1.0 - mag *xmtimd->value())/(1.0 - xmtimd->value());
 	}
 }
 
@@ -492,7 +488,7 @@ bool disable_modem = false;
 
 void modem::ModulateXmtr(double *buffer, int len)
 {
-	if (unlikely(!scard)) return;
+	if (unlikely(!TXscard)) return;
 	if (disable_modem) return;
 
 	tx_sample_count += len;
@@ -522,7 +518,7 @@ void modem::ModulateXmtr(double *buffer, int len)
 
 	try {
 		unsigned n = 4;
-		while (scard->Write(buffer, len) == 0 && --n);
+		while (TXscard->Write(buffer, len) == 0 && --n);
 		if (n == 0)
 			throw SndException(-99, "Sound write failed");
 	}
@@ -539,7 +535,7 @@ void modem::ModulateXmtr(double *buffer, int len)
 using namespace std;
 void modem::ModulateStereo(double *left, double *right, int len, bool sample_flag)
 {
-	if (unlikely(!scard)) return;
+	if (unlikely(!TXscard)) return;
 	if (disable_modem) return;
 
 	if(sample_flag)
@@ -563,7 +559,7 @@ void modem::ModulateStereo(double *left, double *right, int len, bool sample_fla
 	}
 	try {
 		unsigned n = 4;
-		while (scard->Write_stereo(left, right, len) == 0 && --n);
+		while (TXscard->Write_stereo(left, right, len) == 0 && --n);
 		if (n == 0)
 			throw SndException(-99, "Sound write failed");
 	}
@@ -582,7 +578,7 @@ void modem::ModulateStereo(double *left, double *right, int len, bool sample_fla
 //------------------------------------------------------------------------------
 void modem::ModulateVideoStereo(double *left, double *right, int len, bool sample_flag)
 {
-	if (unlikely(!scard)) return;
+	if (unlikely(!TXscard)) return;
 
 	if(sample_flag)
 		tx_sample_count += len;
@@ -604,7 +600,7 @@ void modem::ModulateVideoStereo(double *left, double *right, int len, bool sampl
 	}
 	try {
 		unsigned n = 4;
-		while (scard->Write_stereo(left, right, len) == 0 && --n);
+		while (TXscard->Write_stereo(left, right, len) == 0 && --n);
 		if (n == 0)
 			throw SndException(-99, "Sound write failed");
 	}
@@ -619,7 +615,7 @@ void modem::ModulateVideoStereo(double *left, double *right, int len, bool sampl
 
 void modem::ModulateVideo(double *buffer, int len)
 {
-	if (unlikely(!scard)) return;
+	if (unlikely(!TXscard)) return;
 
 	tx_sample_count += len;
 
@@ -645,7 +641,7 @@ void modem::ModulateVideo(double *buffer, int len)
 
 	try {
 		unsigned n = 4;
-		while (scard->Write(buffer, len) == 0 && --n);
+		while (TXscard->Write(buffer, len) == 0 && --n);
 		if (n == 0)
 			throw SndException(-99, "Sound write failed");
 	}
@@ -752,7 +748,7 @@ void modem::cwid_send_symbol(int bits)
 		sample = 0,
 		currsym = bits & 1;
 
-	freq = get_txfreq() - progdefaults.TxOffset;
+	freq = get_txfreq_woffset() - progdefaults.TxOffset;
 
 	if ((currsym == 1) && (cwid_lastsym == 0))
 		cwid_phaseacc = 0.0;
@@ -877,7 +873,7 @@ void modem::wfid_make_tones(int numchars)
 {
 	double f, flo, fhi;
 	int vwidth = (numchars*NUMCOLS + (numchars-1)*CHARSPACE - 1);
-	f = get_txfreq() + TONESPACING * vwidth/2.0;
+	f = get_txfreq_woffset() + TONESPACING * vwidth/2.0;
 	fhi = f + TONESPACING;
 	flo = fhi - (vwidth + 2) * TONESPACING;
 	for (int i = 1; i <= NUMCOLS * numchars; i++) {
@@ -948,7 +944,7 @@ void modem::pretone()
 {
 	int sr = get_samplerate();
 	int symlen = sr / 10;
-	double phaseincr = 2.0 * M_PI * get_txfreq() / sr;
+	double phaseincr = 2.0 * M_PI * get_txfreq_woffset() / sr;
 	double phase = 0.0;
 	double outbuf[symlen];
 

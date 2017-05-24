@@ -108,8 +108,11 @@ extern Fl_Input2		*inpRstOut;
 extern Fl_Input2		*inpQth;
 extern Fl_Input2		*inpState;
 extern Fl_Input2		*inpCountry;
+extern Fl_Input2		*inpCounty;
 extern Fl_Input2		*inpSerNo;
 extern Fl_Input2		*outSerNo;
+extern Fl_Input2		*outSerNo1;
+extern Fl_Input2		*outSerNo2;
 extern Fl_Input2		*inpXchgIn;
 extern Fl_Input2		*inpXchgIn1;
 extern Fl_Input2		*inpXchgIn2;
@@ -260,6 +263,9 @@ extern void			ifkp_update_avatar(unsigned char data, int pos);
 extern int			ifkp_get_avatar_pixel(int pos, int color);
 extern void			cb_ifkp_send_avatar( Fl_Widget *w, void *);
 
+extern void			ifkp_load_raw_video();
+extern void			activate_ifkp_image_item(bool);
+
 extern void			cb_ifkp_heard(Fl_Browser*, void*);
 
 extern void			enableSELCAL();
@@ -340,6 +346,7 @@ extern void activate_rig_menu_item(bool b);
 extern void activate_test_menu_item(bool b);
 extern void activate_mfsk_image_item(bool b);
 extern void activate_wefax_image_item(bool b);
+extern void activate_thor_image_item(bool b);
 extern void WF_UI();
 
 extern void set_macroLabels();
@@ -608,6 +615,8 @@ extern void			cb_thor_send_avatar( Fl_Widget *w, void *);
 extern picture		*thor_avatar;
 extern void			thor_load_scaled_image(std::string fname);
 
+extern void			thor_load_raw_video();
+
 // field day
 extern Fl_Input2	*inp_FD_class;
 extern Fl_Input2	*inp_FD_section;
@@ -625,5 +634,10 @@ extern Fl_Double_Window	*dxcluster_viewer;
 // TOD clock
 extern void  TOD_init();
 extern void  TOD_close();
+
+//======================================================================
+//FeldHell resizable Rx character height
+//======================================================================
+extern void FHdisp_char_height();
 
 #endif

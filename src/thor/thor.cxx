@@ -62,9 +62,8 @@ char confidence[80];
 
 #include "thor-pic.cxx"
 
-void thor::tx_init(SoundBase *sc)
+void thor::tx_init()
 {
-	scard = sc;
 	txstate = TX_STATE_PREAMBLE;
 	txprevtone = 0;
 	bitstate = 0;
@@ -194,6 +193,8 @@ thor::~thor()
 	delete picfilter;
 	delete pixfilter;
 	delete pixsyncfilter;
+
+	activate_thor_image_item(false);
 }
 
 thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
@@ -229,7 +230,14 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 		break;
 
 // 8kHz modes
-	case MODE_THOR4:
+	case MODE_THORMICRO:
+		symlen = 4000; 
+		doublespaced = 1;
+		samplerate = 8000;
+        idepth = 4;
+		break;
+    
+    case MODE_THOR4:
 		symlen = 2048;
 		doublespaced = 2;
 		samplerate = 8000;
@@ -327,11 +335,11 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 	if ( mode == MODE_THOR100 || mode == MODE_THOR50x1 || mode == MODE_THOR50x2 || mode == MODE_THOR25x4 ) {
 		Enc = new encoder (THOR_K15, K15_POLY1, K15_POLY2);
 		Dec = new viterbi (THOR_K15, K15_POLY1, K15_POLY2);
-		Dec->settraceback (PATHMEM-1); // Long constraint length codes require longer traceback
+		Dec->settraceback (15 * 12); // Long constraint length codes require longer traceback
 	} else {
 		Enc = new encoder (THOR_K, THOR_POLY1, THOR_POLY2);
 		Dec = new viterbi (THOR_K, THOR_POLY1, THOR_POLY2);
-		Dec->settraceback (45);
+		Dec->settraceback (45); 
 	}
 	Txinlv = new interleave (isize, idepth, INTERLEAVE_FWD);
 	Rxinlv = new interleave (isize, idepth, INTERLEAVE_REV);
@@ -349,6 +357,8 @@ thor::thor(trx_mode md) : hilbert(0), fft(0), filter_reset(false)
 	pixsyncfilter = new Cmovavg(3*IMAGEspp);
 
 	init();
+
+	activate_thor_image_item(true);
 }
 
 //=====================================================================
@@ -1211,8 +1221,10 @@ int thor::tx_process()
 		break;
 	case TX_STATE_START:
 		sendchar('\r', 0);
-		sendchar(2, 0);		// STX
-		sendchar('\r', 0);
+        if (mode != MODE_THORMICRO) {
+            sendchar(2, 0);		// STX
+            sendchar('\r', 0);
+        }
 			txstate = TX_STATE_DATA;
 		break;
 	case TX_STATE_DATA:
@@ -1238,8 +1250,10 @@ int thor::tx_process()
 		break;
 	case TX_STATE_END:
 		sendchar('\r', 0);
-		sendchar(4, 0);		// EOT
-		sendchar('\r', 0);
+        if (mode != MODE_THORMICRO) {
+            sendchar(4, 0);		// EOT
+            sendchar('\r', 0);
+        }
 		txstate = TX_STATE_FLUSH;
 		break;
 	case TX_STATE_FLUSH:
