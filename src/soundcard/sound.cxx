@@ -2330,6 +2330,10 @@ SoundIP::SoundIP(const char* inithost, const char* initport, bool udp_flag)
 		soundSock = new Socket( Address( "127.0.0.1", initport, "udp") );
 	else
 		soundSock = new Socket( Address( inithost, initport, "tcp") );
+	/*
+	 * Known bug: opening a TCP socket on "localhost" when hostname
+	 * is NOT "localhost" breaks in a bad way.
+	 */
 }
 
 SoundIP::~SoundIP()

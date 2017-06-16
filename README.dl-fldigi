@@ -15,10 +15,9 @@ dl-fldigi is hosted at http://github.com/jamescoxon/dl-fldigi
 The original fldigi is hosted at http://www.w1hkj.com/Fldigi.html
 See AUTHORS.dl-fldigi for a list of contributors.
 
-This vesrion of dl-fldigi is based off fl-digi 3.21.26 (git commit 
-a5be80f1c5a80b4d3f6ee9ec77c4d15d2d038628). You can see every modification
-made in full detail with the command below.
-git diff -M a5be80f1c5a80b4d3f6ee9ec77c4d15d2d038628
+This version of dl-fldigi is based off fl-digi 4.0.x
+
+You can see every modification made in full detail on github.
 
 - USAGE ---------------------------------------------------------------
 

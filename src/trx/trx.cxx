@@ -600,10 +600,12 @@ void trx_start_modem(modem* m, int f)
 void trx_reset_loop()
 {
 	if (RXscard)  {
+		RXscard->Close();
 		delete RXscard;
 		RXscard = 0;
 	}
 	if (TXscard)  {
+		TXscard->Close();
 		delete TXscard;
 		TXscard = 0;
 	}
@@ -612,10 +614,12 @@ void trx_reset_loop()
 
 	case SND_IDX_UDP:
 		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), true);
+		RXscard->Open(O_RDONLY, current_RXsamplerate = 8000);
 		TXscard = new SoundNull;
 		break;
 	case SND_IDX_TCP:
 		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), false);
+		RXscard->Open(O_RDONLY, current_RXsamplerate = 8000);
 		TXscard = new SoundNull;
 		break;
 #if USE_OSS
@@ -672,10 +676,12 @@ void trx_start(void)
 	}
 
 	if (RXscard) {
+		RXscard->Close();
 		delete RXscard;
 		RXscard = 0;
 	}
 	if (TXscard) {
+		TXscard->Close();
 		delete TXscard;
 		TXscard = 0;
 	}
@@ -787,6 +793,7 @@ void trx_close()
 #endif
 
 	if (RXscard) {
+		RXscard->Close();
 		delete RXscard;
 		RXscard = 0;
 	}
