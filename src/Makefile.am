@@ -714,9 +714,9 @@ dl_fldigi_SOURCES += \
 	dl_fldigi/hbtint.cxx \
 	dl_fldigi/update.cxx \
 	dl_fldigi/version.cxx \
-	libtiniconv/tiniconv.c \
-	libtiniconv/tiniconv_desc.c
+	libtiniconv/tiniconv.c
 
+#	libtiniconv/tiniconv_desc.c
 #	packet/pkt.cxx
 #	include/pkt.h
 

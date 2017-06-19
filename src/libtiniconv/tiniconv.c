@@ -22,6 +22,7 @@
 
 #include "tiniconv.h"
 #include "tiniconv_int.h"
+#include "tiniconv_desc.h"
 
 #include <string.h>
 #include <assert.h>
