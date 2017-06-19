@@ -292,8 +292,8 @@
               "Custom shift (Hz)",                                                      \
               450)                                                                      \
         ELEM_(double, RTTY_BW, "RTTYBW",                                                \
-              "Receive filter bandwidth (Hz)",                                          \
-              68.0)                                                                     \
+              "Receive filter bandwidth multiplier",                                          \
+              1.2)                                                                     \
         ELEM_(int, rtty_cwi, "RTTYCWI",                                                 \
               "Selective decoding of mark/space tones\n"                                \
               "0 - both\n"                                                              \
