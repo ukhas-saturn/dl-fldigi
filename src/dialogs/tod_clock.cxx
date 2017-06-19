@@ -170,11 +170,12 @@ void *TOD_loop(void *args)
 			first_call = false;
 		} else
 			MilliSleep(50);
-			if (--count == 0) {
-				Fl::awake(ztimer);
-				count = 20;
-			}
+
+		if (--count == 0) {
+			Fl::awake(ztimer);
+			count = 20;
 		}
+	}
 
 		
 // exit the TOD thread

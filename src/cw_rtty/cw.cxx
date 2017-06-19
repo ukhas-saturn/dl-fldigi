@@ -1034,10 +1034,12 @@ void cw::send_symbol(int bits, int len)
 				kpost = keydown - knum + (int)(progdefaults.CWpost * 8);
 		} else
 			kpost = keydown + (int)(progdefaults.CWpost * 8);
-			if (kpost < 0) kpost = 0;
-		} else {
-			kpre = 0;
+
+		if (kpost < 0)
 			kpost = 0;
+	} else {
+		kpre = 0;
+		kpost = 0;
 	}
 
 	if (firstelement) {
