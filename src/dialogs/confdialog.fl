@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0304
 i18n_type 1
 i18n_include "gettext.h"
 i18n_function _
@@ -30,16 +30,16 @@ decl {\#include "fl_digi.h"} {private local
 }
 
 decl {\#include "dl_fldigi/dl_fldigi.h"} {private local
-} 
+}
 
 decl {\#include "dl_fldigi/location.h"} {private local
-} 
+}
 
 decl {\#include "dl_fldigi/flights.h"} {private local
-} 
+}
 
 decl {\#include "dl_fldigi/hbtint.h"} {private local
-} 
+}
 
 decl {\#include "data_io.h"} {private local
 }
@@ -449,12 +449,23 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
       Fl_Group tabOperator {
         label Operator
         callback {progdefaults.changed = true;} open
-        xywh {0 25 600 365} when 1 hide
+        xywh {0 30 600 360} when 1
       } {
         Fl_Group {} {
-          label {Station / Operator} open
-          xywh {35 35 529 245} box ENGRAVED_FRAME align 21
+          label {Station / Operator} open selected
+          xywh {35 35 535 271} box ENGRAVED_FRAME align 53
         } {
+          Fl_Input inpOperCallsign {
+            label {Ham Callsign:}
+            callback {progdefaults.operCall = o->value();
+progdefaults.changed = true;
+dl_fldigi::changed(dl_fldigi::CH_INFO);
+          }
+            tooltip {Operator call (if different from station)} xywh {196 64 319 24}
+            code0 {o->labelsize(FL_NORMAL_SIZE);}
+            code1 {o->value(progdefaults.operCall.c_str());}
+            class Fl_Input2
+          }
           Fl_Input inpMyQth {
             label {Station QTH:}
             callback {progdefaults.myQth = o->value();
@@ -471,19 +482,19 @@ btnApplyConfig->activate();}
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
-            tooltip {Maidenhead locator as in EM64qv} xywh {195 133 85 24}
+            tooltip {Maidenhead locator as in EM64qv} xywh {195 132 320 24}
             code0 {inpMyLocator->labelsize(FL_NORMAL_SIZE);}
             class Fl_Input2
           }
-          Fl_Input inpOperCallsign {
-            label {Operator Callsign:}
-            callback {progdefaults.operCall = o->value();
+          Fl_Input inpMyCallsign {
+            label {Upload Callsign:}
+            callback {progdefaults.myCall = o->value();
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
-            tooltip {Operator callsign (if different than station callsign)} xywh {196 166 110 24}
+            tooltip {Station callsign (for uploading to UKHAS)} xywh {196 166 319 24}
             code0 {o->labelsize(FL_NORMAL_SIZE);}
-            code1 {o->value(progdefaults.operCall.c_str());}
+            code1 {o->value(progdefaults.myCall.c_str());}
             class Fl_Input2
           }
           Fl_Input inpMyName {
@@ -492,19 +503,48 @@ btnApplyConfig->activate();}
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
-            tooltip {Operators name} xywh {195 197 140 24}
+            tooltip {Operators name} xywh {195 200 320 24}
             code0 {inpMyName->labelsize(FL_NORMAL_SIZE);}
             class Fl_Input2
           }
-        Fl_Input inpMyAntenna {
-          label {Antenna:}
-          callback {progdefaults.myAntenna = o->value();
+          Fl_Input inpMyAntenna {
+            label {Antenna:}
+            callback {progdefaults.myAntenna = o->value();
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
-          tooltip {Short description of antenna} xywh {195 233 320 24}
-          code0 {inpMyAntenna->labelsize(FL_NORMAL_SIZE);}
-          xywh {35 281 529 99} box ENGRAVED_FRAME align 21 hide
+            tooltip {Short description of antenna} xywh {195 268 320 24}
+            code0 {inpMyAntenna->labelsize(FL_NORMAL_SIZE);}
+            class Fl_Input2
+          }
+          Fl_Input MyRadio {
+            label {Radio:}
+            callback {progdefaults.myRadio = o->value();
+progdefaults.changed = true;
+dl_fldigi::changed(dl_fldigi::CH_INFO);
+btnApplyConfig->activate();}
+            tooltip {Short description of radio} xywh {195 234 320 24}
+            code0 {o->value(progdefaults.myRadio.c_str());}
+            class Fl_Input2
+          }
+        }
+        Fl_Group grpNoise {
+          label {Test Signal - Do NOT use with transmitter} open
+          xywh {35 306 535 73} box ENGRAVED_FRAME align 21 hide
+        } {
+          Fl_Check_Button btnNoiseOn {
+            label {Noise on}
+            callback {progdefaults.noise = o->value();}
+            xywh {93 306 70 6} down_box DOWN_BOX
+            code0 {o->value(progdefaults.noise);}
+          }
+          Fl_Counter noiseDB {
+            label dB
+            callback {progdefaults.s2n = o->value();}
+            xywh {340 306 130 6} align 4 minimum -18 maximum 60 value 20
+            code0 {o->value(progdefaults.s2n);}
+            code1 {o->lstep(1);}
+            class Fl_Counter2
           }
           Fl_Counter ctrl_freq_offset {
             label {freq-offset}
@@ -3391,7 +3431,7 @@ behaves inside the waterfall} xywh {65 207 150 22} box DOWN_BOX color 7 align 8
       }
       Fl_Group tabModems {
         label Modems open
-        xywh {0 25 605 365}
+        xywh {0 25 605 365} hide
       } {
         Fl_Tabs tabsModems {open
           xywh {0 25 605 365} selection_color 50 align 9
@@ -3404,7 +3444,7 @@ behaves inside the waterfall} xywh {65 207 150 22} box DOWN_BOX color 7 align 8
               xywh {0 50 605 340} selection_color 50
             } {
               Fl_Group tabsCW_general {
-                label General open selected
+                label General open
                 xywh {0 75 600 315} align 5
               } {
                 Fl_Group {} {
@@ -4165,7 +4205,7 @@ progdefaults.changed = true;}
                 callback {progdefaults.DOMINOEX_ADJ = o->value();
 resetDOMEX();
 progdefaults.changed = true;}
-                tooltip {Tone-spacing adjust} xywh {206 166 63 20} type Simple align 8 minimum -100 maximum 100 value 0
+                tooltip {Tone-spacing adjust} xywh {206 166 63 20} type Simple align 8 minimum -100 maximum 100
                 code0 {o->value(progdefaults.DOMINOEX_ADJ);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Counter2
@@ -5015,7 +5055,7 @@ progdefaults.changed = true;}
             } {
               Fl_Group {} {
                 label Tx open
-                xywh {0 75 600 315} align 5 hide
+                xywh {0 75 600 315} align 5
               } {
                 Fl_Group selShift {
                   label {Carrier shift}
@@ -5090,7 +5130,7 @@ progdefaults.changed = true;} open
                   label {Filter Adjustment}
                   callback {progdefaults.RTTY_BW = o->value();
 resetRTTY();
-progdefaults.changed = true;} selected
+progdefaults.changed = true;}
                   tooltip {RTTY filter bandwidth} xywh {35 320 250 20} type Horizontal align 5 minimum 0.5 maximum 2 step 0.1 value 1 textsize 14
                   code0 {o->value(progdefaults.RTTY_BW);}
                   code1 {o->labelsize(FL_NORMAL_SIZE); o->textsize(FL_NORMAL_SIZE);}
@@ -6703,18 +6743,18 @@ progdefaults.changed = true;
 resetSoundCard();}
                 tooltip {Use TCP audio server} xywh {65 75 53 25} down_box DOWN_BOX selection_color 1
               }
-       Fl_Input inpIPServerHost {
+              Fl_Input inpIPServerHost {
                 label {Host:}
                 callback {scDevice[0] = progdefaults.IPServerHost = o->value();
 scDevice[1] = progdefaults.IPServerPort;
 progdefaults.changed = true;
 resetSoundCard();}
-               tooltip {TCP/UDP Server Host} xywh {180 75 90 25}
-               code0 {o->value(progdefaults.IPServerHost.c_str());}
+                tooltip {TCP/UDP Server Host} xywh {180 75 90 25}
+                code0 {o->value(progdefaults.IPServerHost.c_str());}
                 code1 {inpIPServerHost->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Input2
               }
-       Fl_Input inpIPServerPort {
+              Fl_Input inpIPServerPort {
                 label {Port:}
                 callback {scDevice[1] = progdefaults.IPServerPort = o->value();
 scDevice[0] = progdefaults.IPServerHost;
@@ -6729,7 +6769,7 @@ resetSoundCard();}
             Fl_Group AudioUDP {open
               xywh {435 65 110 45} box ENGRAVED_FRAME
             } {
-                Fl_Round_Button {btnAudioIO[4]} {
+              Fl_Round_Button {btnAudioIO[4]} {
                 label UDP
                 callback {sound_update(SND_IDX_UDP);
 progdefaults.changed = true;
@@ -9367,7 +9407,7 @@ progdefaults.changed = true;}
       label Close
       callback {closeDialog();
 	dl_fldigi::commit();}
-       xywh {462 394 130 22}
+      xywh {462 394 130 22}
     }
     Fl_Button btnResetConfig {
       label {Restore defaults}
