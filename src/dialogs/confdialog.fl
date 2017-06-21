@@ -9401,13 +9401,13 @@ progdefaults.changed = true;}
     Fl_Button btnSaveConfig {
       label Save
       callback {progdefaults.saveDefaults();}
-      xywh {330 394 130 22}
+      xywh {330 396 130 22}
     }
     Fl_Return_Button btnCloseConfig {
       label Close
       callback {closeDialog();
 	dl_fldigi::commit();}
-      xywh {462 394 130 22}
+      xywh {462 396 130 22}
     }
     Fl_Button btnResetConfig {
       label {Restore defaults}
@@ -9415,13 +9415,13 @@ progdefaults.changed = true;}
 	progdefaults.resetDefaults();
 	progdefaults.changed = false;
       }}
-      tooltip {WARNING - this will over write ALL settings} xywh {10 400 130 22}
+      tooltip {WARNING - this will over write ALL settings} xywh {10 396 130 22}
     }
     Fl_Button btnApplyConfig {
       label {Apply (dl)}
       callback {dl_fldigi::commit();
 btnApplyConfig->deactivate();}
-      xywh {160 400 130 22} deactivate
+      xywh {160 396 130 22} deactivate
     }
   }
 }

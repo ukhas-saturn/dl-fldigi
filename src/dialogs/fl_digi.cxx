@@ -4465,7 +4465,7 @@ void UI_position_macros(int x, int y1, int w, int HTh)
 bool UI_first = true;
 void UI_select()
 {
-	if (bWF_only) {
+	if (bWF_only || bHAB) {
 		int Y = cntTxLevel->y();
 		int psm_width = progdefaults.show_psm_btn ? bwSqlOnOff : 0;
 		StatusBar->resize(
@@ -9268,7 +9268,7 @@ void create_fl_digi_main_dl_fldigi() {
 
 		hpack = new Fl_Pack(0, Y, WMIN_hab, Hstatus);
 			hpack->type(1);
-			MODEstatus = new Fl_Button(0, Y, Wmode+30, Hstatus, "");
+			MODEstatus = new Fl_Button(0, Y, Wmode, Hstatus, "");
 			MODEstatus->box(FL_DOWN_BOX);
 			MODEstatus->color(FL_BACKGROUND2_COLOR);
 			MODEstatus->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
@@ -9288,34 +9288,43 @@ void create_fl_digi_main_dl_fldigi() {
 
 			StatusBar = new Fl_Box(
 				rightof(Status2), Y,
-				WMIN_hab - bwSqlOnOff - bwAfcOnOff  - bwPwrSqlOnOff
-						- Wwarn - rightof(Status2) - 2 * pad,
+				WMIN_hab - rightof(Status2)
+				- 2 * bwSqlOnOff
+				- bwAfcOnOff
+				- Wwarn
+				- bwTxLevel,
 				Hstatus, "");
 			StatusBar->box(FL_DOWN_BOX);
 			StatusBar->color(FL_BACKGROUND2_COLOR);
 			StatusBar->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
 
+			cntTxLevel = new Fl_Counter2(
+				rightof(StatusBar), Y,
+				bwTxLevel, Hstatus, "");
+			cntTxLevel->minimum(-30);
+			cntTxLevel->maximum(0);
+			cntTxLevel->value(-6);
+			cntTxLevel->callback((Fl_Callback*)cb_cntTxLevel);
+			cntTxLevel->value(progdefaults.txlevel);
+			cntTxLevel->lstep(1.0);
+			cntTxLevel->tooltip(_("Tx level attenuator (dB)"));
+
 			WARNstatus = new Fl_Box(
-				rightof(StatusBar) + pad, Y,
+				rightof(cntTxLevel), Y,
 				Wwarn, Hstatus, "");
 			WARNstatus->box(FL_DIAMOND_DOWN_BOX);
 			WARNstatus->color(FL_BACKGROUND_COLOR);
 			WARNstatus->labelcolor(FL_RED);
 			WARNstatus->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE);
 
-			int sql_width = bwSqlOnOff;
-#ifdef __APPLE__
-			sql_width -= 15; // leave room for resize handle
-#endif
 			btnAFC = new Fl_Light_Button(
-				WMIN_hab - bwSqlOnOff - bwPwrSqlOnOff - bwAfcOnOff,
-				Y,
+				rightof(WARNstatus), Y,
 				bwAfcOnOff, Hstatus, "AFC");
 			btnAFC->selection_color(progdefaults.AfcColor);
+
 			btnSQL = new Fl_Light_Button(
-				WMIN_hab - bwSqlOnOff  - bwPwrSqlOnOff,
-				Y,
-				sql_width, Hstatus, "SQL");
+				rightof(btnAFC), Y,
+				bwSqlOnOff, Hstatus, "SQL");
 			btnSQL->selection_color(progdefaults.Sql1Color);
 			
 			btnAFC->callback(cbAFC, 0);
@@ -9326,13 +9335,13 @@ void create_fl_digi_main_dl_fldigi() {
 			btnSQL->tooltip(_("Squelch"));
 
 			btnPSQL = new Fl_Light_Button(
-					WMIN_hab - bwPwrSqlOnOff,
-					Y,
-					bwPwrSqlOnOff, Hstatus, "KPSQL");
+				rightof(btnSQL), Y,
+				bwSqlOnOff, Hstatus, "PSM");
+
 			btnPSQL->selection_color(progdefaults.Sql1Color);
 			btnPSQL->callback(cbPwrSQL, 0);
-			btnPSQL->value(0);
-			btnPSQL->tooltip(_("Monitor KISS Pwr Squelch"));
+			btnPSQL->value(progdefaults.kpsql_enabled);
+			btnPSQL->tooltip(_("Power Signal Monitor"));
 
 			Fl_Group::current()->resizable(StatusBar);
 		hpack->end();
@@ -9364,6 +9373,7 @@ void create_fl_digi_main_dl_fldigi() {
 	make_scopeviewer();
 	noop_controls();
 
+	UI_select();
 	wf->UI_select(progStatus.WF_UI);
 
 	createConfig();

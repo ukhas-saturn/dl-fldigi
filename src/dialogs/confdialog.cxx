@@ -15388,17 +15388,17 @@ ed)"));
       } // Fl_Group* tabKPSM
       tabsConfigure->end();
     } // Fl_Tabs* tabsConfigure
-    { btnSaveConfig = new Fl_Button(330, 394, 130, 22, _("Save"));
+    { btnSaveConfig = new Fl_Button(330, 396, 130, 22, _("Save"));
       btnSaveConfig->callback((Fl_Callback*)cb_btnSaveConfig);
     } // Fl_Button* btnSaveConfig
-    { btnCloseConfig = new Fl_Return_Button(462, 394, 130, 22, _("Close"));
+    { btnCloseConfig = new Fl_Return_Button(462, 396, 130, 22, _("Close"));
       btnCloseConfig->callback((Fl_Callback*)cb_btnCloseConfig);
     } // Fl_Return_Button* btnCloseConfig
-    { btnResetConfig = new Fl_Button(10, 400, 130, 22, _("Restore defaults"));
+    { btnResetConfig = new Fl_Button(10, 396, 130, 22, _("Restore defaults"));
       btnResetConfig->tooltip(_("WARNING - this will over write ALL settings"));
       btnResetConfig->callback((Fl_Callback*)cb_btnResetConfig);
     } // Fl_Button* btnResetConfig
-    { btnApplyConfig = new Fl_Button(160, 400, 130, 22, _("Apply (dl)"));
+    { btnApplyConfig = new Fl_Button(160, 396, 130, 22, _("Apply (dl)"));
       btnApplyConfig->callback((Fl_Callback*)cb_btnApplyConfig);
       btnApplyConfig->deactivate();
     } // Fl_Button* btnApplyConfig
