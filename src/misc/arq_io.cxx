@@ -808,9 +808,9 @@ static void *arq_loop(void *args)
 	for (;;) {
 		/* see if we are being canceled */
 		if (arq_exit) {
-printf("exiting arq_loop\n");
+			printf("exiting arq_loop\n");
 			break;
-}
+		}
 
 		test_arq_clients();
 
@@ -848,6 +848,8 @@ bool arq_state(void)
 void arq_init()
 {
 	arq_enabled = false;
+	LOG_ERROR("arq init: denied");
+	return;
 
 	txstring.clear();
 	arqclient.clear();
@@ -876,7 +878,7 @@ void arq_close(void)
 	arq_exit = true;
 
 	// and then wait for it to die
-printf("pthread_join arq_thread\n");
+	printf("pthread_join arq_thread\n");
 	pthread_join(arq_thread, NULL);
 	arq_enabled = false;
 	LOG_INFO("ARQ closed");
