@@ -11412,6 +11412,7 @@ i on a\ntouch screen device such as a tablet."));
                 selCustomShift->when(FL_WHEN_CHANGED);
                 o->lstep(100.0);
                 o->labelsize(FL_NORMAL_SIZE);
+                o->value(progdefaults.rtty_custom_shift);
                 } // Fl_Counter2* selCustomShift
                 { Fl_ListBox* o = selBaud = new Fl_ListBox(65, 170, 100, 20, _("Baud rate"));
                 selBaud->tooltip(_("Select carrier baudrate"));

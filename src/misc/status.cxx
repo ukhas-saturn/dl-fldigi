@@ -914,10 +914,10 @@ void status::initLastState()
 		progdefaults.rtty_shift = rtty_shift;
 		selShift->index(progdefaults.rtty_shift);
 		if (rtty_shift == selShift->lsize() - 1) {
-			selCustomShift->deactivate();
+			selCustomShift->activate();
 		}
 		else { // Custom shift
-			selCustomShift->activate();
+			selCustomShift->deactivate();
 		}
 		selBaud->index(progdefaults.rtty_baud = rtty_baud);
 		selBits->index(progdefaults.rtty_bits = rtty_bits);

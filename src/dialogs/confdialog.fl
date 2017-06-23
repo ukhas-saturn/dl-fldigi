@@ -5080,6 +5080,7 @@ progdefaults.changed = true;}
                   tooltip {Input carrier shift} xywh {65 137 100 20} align 8 minimum 10 maximum 1200 step 10 value 450
                   code0 {o->lstep(100.0);}
                   code1 {o->labelsize(FL_NORMAL_SIZE);}
+                  code2 {o->value(progdefaults.rtty_custom_shift);}
                   class Fl_Counter2
                 }
                 Fl_Group selBaud {

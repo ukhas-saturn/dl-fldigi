@@ -1051,7 +1051,6 @@ void cb_contestiaCustom(Fl_Widget *w, void *arg)
 void set_rtty_tab_widgets()
 {
 	selShift->index(progdefaults.rtty_shift);
-	selCustomShift->deactivate();
 	selBits->index(progdefaults.rtty_bits);
 	selBaud->index(progdefaults.rtty_baud);
 	selParity->index(progdefaults.rtty_parity);
