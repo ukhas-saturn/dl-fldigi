@@ -223,7 +223,8 @@ void trx_trx_receive_loop()
 	try {
 		if (current_RXsamplerate != active_modem->get_samplerate() ) {
 			current_RXsamplerate = active_modem->get_samplerate();
-			RXscard->Close(O_RDONLY);
+			if(progdefaults.btnAudioIOis != SND_IDX_TCP && progdefaults.btnAudioIOis != SND_IDX_UDP)
+				RXscard->Close(O_RDONLY);
 			if (RXscard->Open(O_RDONLY, current_RXsamplerate))
 				REQ(sound_update, progdefaults.btnAudioIOis);
 		}
