@@ -145,8 +145,8 @@ public:
 	Socket * accept2(void);
 
 	// Client
-	int connect(const Address& addr);
-	int connect(void);
+	void connect(const Address& addr);
+	void connect(void);
 	bool connect1(void);
 
 	// Data Transimission
