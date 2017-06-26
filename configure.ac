@@ -241,9 +241,8 @@ AC_FLDIGI_PKG_CHECK([sndfile], [sndfile >= 1.0.10], [yes], [yes],
 # Set ac_cv_portaudio to yes/no
 # Define USE_PORTAUDIO in config.h
 # Substitute PORTAUDIO_CFLAGS and PORTAUDIO_LIBS in Makefile
-if test "x$ac_cv_want_fldigi" = "xyes"; then
-    AC_FLDIGI_PKG_CHECK([portaudio], [portaudio-2.0 >= 19], [no], [no])
-fi
+AC_FLDIGI_PKG_CHECK([portaudio], [portaudio-2.0 >= 19], [yes], [yes],
+                    [enable support for PortAudio @<:@autodetect@:>@] )
 
 ### pulseaudio
 # Set ac_cv_pulseaudio to yes/no

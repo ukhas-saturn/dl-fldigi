@@ -21,6 +21,7 @@ std::queue<PLAYLIST *> playlist;
  **********************************************************************************/
 void process_alert()
 {
+#if USE_PORTAUDIO
 	if (playlist.empty()) return;
 
 	struct PLAYLIST *plist = playlist.front();
@@ -78,7 +79,7 @@ void process_alert()
 
 	playlist.pop();
 //LOG_INFO("%d items remain in play list", (int)(playlist.size()));
-
+#endif
 }
 
 /**********************************************************************************
@@ -93,8 +94,11 @@ static void * alert_loop(void *args)
 	alert_terminate_flag   = false;
 
 	while(1) {
+#if USE_PORTAUDIO
 		MilliSleep(50);
-
+#else
+		MilliSleep(500);
+#endif
 		if (alert_terminate_flag) break;
 
 		if(trx_state == STATE_RX) {
@@ -161,6 +165,7 @@ static void stop_alert_thread(void)
 
 static void add_alert(c_portaudio * _cpa, float *buffer, int len, int sr)
 {
+#if USE_PORTAUDIO
 	if(alert_thread_running) {
 		struct PLAYLIST *plist = new PLAYLIST;
 		plist->fbuff = new float[2*len];
@@ -173,11 +178,13 @@ static void add_alert(c_portaudio * _cpa, float *buffer, int len, int sr)
 		playlist.push(plist);
 //LOG_INFO("play list contains %d items", (int)(playlist.size()));
 	}
+#endif
 }
 
 // Initialize the c_portaudio class
 c_portaudio::c_portaudio()
 {
+#if USE_PORTAUDIO
 	PaError paError = Pa_Initialize();
 	if (paError != paNoError)
 		throw cPA_exception(paError);
@@ -189,17 +196,21 @@ c_portaudio::c_portaudio()
 	paStreamParameters.suggestedLatency = Pa_GetDeviceInfo(paStreamParameters.device)->defaultLowOutputLatency;
 	paStreamParameters.hostApiSpecificStreamInfo = NULL;
 
+#endif
 	start_alert_thread();
 }
 
 c_portaudio::~c_portaudio()
 {
 	stop_alert_thread();
+#if USE_PORTAUDIO
 	Pa_Terminate();
+#endif
 }
 
 void c_portaudio::open(int samplerate)
 {
+#if USE_PORTAUDIO
 	sr = samplerate;
 	paError = Pa_OpenStream( &stream,
 		0,
@@ -214,15 +225,18 @@ void c_portaudio::open(int samplerate)
 	}
 // else
 //LOG_INFO("opened pa stream %p @ %d samples/sec", stream, samplerate);
+#endif
 }
 
 void c_portaudio::close()
 {
+#if USE_PORTAUDIO
 	paError = Pa_CloseStream(stream);
 	if (paError != paNoError)
 		throw cPA_exception(paError);
 //	else
 //LOG_INFO("closed stream %p", stream);
+#endif
 }
 
 // Play stereo buffer
@@ -272,6 +286,7 @@ void c_portaudio::silence(float secs, int _sr)
 
 void c_portaudio::play_file(std::string fname)
 {
+#if USE_PORTAUDIO
 	playinfo.frames = 0;
 	playinfo.samplerate = 0;
 	playinfo.channels = 0;
@@ -298,5 +313,5 @@ void c_portaudio::play_file(std::string fname)
 	}
 
 	sf_close(playback);
-
+#endif
 }

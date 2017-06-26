@@ -709,11 +709,11 @@ void delayed_startup(void *)
 
 #if USE_PORTAUDIO
 	LOG_INFO("%s", str_pa_devices.c_str());
+#endif
 	try {
 		audio_alert = new Caudio_alert;
 	} catch (...) {
 	}
-#endif
 }
 
 int main(int argc, char ** argv)

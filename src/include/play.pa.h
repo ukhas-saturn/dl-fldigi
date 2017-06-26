@@ -3,7 +3,14 @@
 #ifndef PLAY_PA_H
 #define PLAY_PA_H
 
+#if USE_PORTAUDIO
 #include <portaudio.h>
+#else
+#define PaStream int
+#define PaStreamParameters void*
+#define Pa_GetErrorText err_to_str
+#endif
+
 
 #include <stdio.h>
 #include <string.h>
