@@ -9,7 +9,7 @@ dnl major and minor must be integers; patch may
 dnl contain other characters or be empty
 m4_define(FLDIGI_MAJOR, [4])
 m4_define(FLDIGI_MINOR, [0])
-m4_define(FLDIGI_PATCH, [.4])
+m4_define(FLDIGI_PATCH, [.6])
 m4_define(FLARQ_MAJOR,  [4])
 m4_define(FLARQ_MINOR,  [3])
 m4_define(FLARQ_PATCH,  [.6])
@@ -241,8 +241,9 @@ AC_FLDIGI_PKG_CHECK([sndfile], [sndfile >= 1.0.10], [yes], [yes],
 # Set ac_cv_portaudio to yes/no
 # Define USE_PORTAUDIO in config.h
 # Substitute PORTAUDIO_CFLAGS and PORTAUDIO_LIBS in Makefile
-AC_FLDIGI_PKG_CHECK([portaudio], [portaudio-2.0 >= 19], [yes], [yes],
-                    [enable support for PortAudio @<:@autodetect@:>@] )
+if test "x$ac_cv_want_fldigi" = "xyes"; then
+    AC_FLDIGI_PKG_CHECK([portaudio], [portaudio-2.0 >= 19], [no], [no])
+fi
 
 ### pulseaudio
 # Set ac_cv_pulseaudio to yes/no
@@ -345,6 +346,12 @@ Configuration summary:
   i18n ........................ $USE_NLS
 ])
 
+ac_xmlrpc_report="internal lib";
+
+if test "x$ac_cv_flxmlrpc" = "xyes"; then
+  ac_xmlrpc_report="external lib";
+fi
+ 
 if test "x$ac_cv_want_fldigi" = "xyes"; then
   AC_MSG_RESULT([ fldigi build options:
 
@@ -352,7 +359,7 @@ if test "x$ac_cv_want_fldigi" = "xyes"; then
   portaudio ................... $ac_cv_portaudio
   pulseaudio .................. $ac_cv_pulseaudio
 
-  flxmlrpc .................... $ac_cv_flxmlrpc
+  flxmlrpc .................... $ac_xmlrpc_report
 
   hamlib ...................... $ac_cv_hamlib
 ])

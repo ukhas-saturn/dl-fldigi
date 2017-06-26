@@ -183,6 +183,8 @@ bool bHAB = false;
 
 #include "winkeyer.h"
 
+#include "audio_alert.h"
+
 #define CB_WHEN FL_WHEN_CHANGED | FL_WHEN_NOT_CHANGED | FL_WHEN_ENTER_KEY_ALWAYS | FL_WHEN_RELEASE_ALWAYS
 
 #define LOG_TO_FILE_MLABEL     _("Log all RX/TX text")
@@ -198,7 +200,7 @@ bool bHAB = false;
 #define THOR_IMAGE_MLABEL      _("THOR Raw Image")
 #define IFKP_IMAGE_MLABEL      _("IFKP Raw Image")
 #define WEFAX_RX_IMAGE_MLABEL  _("Weather Fax Image RX")
-#define WEFAX_fsq_tx_image_MLABEL  _("Weather Fax Image TX")
+#define WEFAX_TX_IMAGE_MLABEL  _("Weather Fax Image TX")
 #define CONTEST_MLABEL         _("Contest")
 #define COUNTRIES_MLABEL       _("C&ountries")
 #define UI_MLABEL              _("&UI")
@@ -2035,8 +2037,8 @@ void restoreFocus(int n)
 
 void macro_cb(Fl_Widget *w, void *v)
 {
-	if (active_modem->get_mode() == MODE_FSQ)
-		return;
+//	if (active_modem->get_mode() == MODE_FSQ)
+//		return;
 
 	int b = (int)(reinterpret_cast<long> (v));
 
@@ -3036,95 +3038,6 @@ void cb_sldrSquelch(Fl_Slider* o, void*) {
 	restoreFocus(13);
 }
 
-/*
-static char ztbuf[20] = "20120602 123000";
-
-const char* zdate(void) { return ztbuf; }
-const char* ztime(void) { return ztbuf + 9; }
-const char* zshowtime(void) {
-	static char s[5];
-	strncpy(s, &ztbuf[9], 4);
-	s[4] = 0;
-	return (const char *)s;
-}
-
-static char tx_time[6];
-static int tx_mins;
-static int tx_secs;
-bool   tx_timer_active = false;
-
-void show_tx_timer()
-{
-	if (!tx_timer) return;
-	if (progdefaults.show_tx_timer && tx_timer_active) {
-		snprintf(tx_time, sizeof(tx_time),"%02d:%02d", tx_mins, tx_secs);
-		tx_timer->color(FL_DARK_RED);
-		tx_timer->labelcolor(FL_YELLOW);
-		tx_timer->label(tx_time);
-		tx_timer->redraw_label();
-		tx_timer->redraw();
-	} else {
-		tx_timer->color(FL_BACKGROUND_COLOR);
-		tx_timer->labelcolor(FL_BACKGROUND_COLOR);
-		tx_timer->redraw_label();
-		tx_timer->redraw();
-	}
-}
-
-void start_tx_timer()
-{
-	tx_mins = 0; tx_secs = 0;
-	tx_timer_active = true;
-	show_tx_timer();
-}
-
-void stop_tx_timer()
-{
-	if (!tx_timer) return;
-	tx_timer_active = false;
-}
-
-void update_tx_timer()
-{
-	tx_secs++;
-	if (tx_secs == 60) {
-		tx_secs = 0;
-		tx_mins++;
-	}
-	show_tx_timer();
-}
-
-void ztimer(void* first_call)
-{
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-
-	if (first_call) {
-		double st = 1.0 - tv.tv_usec / 1e6;
-		Fl::repeat_timeout(st, ztimer);
-	} else
-		Fl::repeat_timeout(1.0, ztimer);
-
-	update_tx_timer();
-
-	struct tm tm;
-	time_t t_temp;
-
-	t_temp=(time_t)tv.tv_sec;
-	gmtime_r(&t_temp, &tm);
-	if (!strftime(ztbuf, sizeof(ztbuf), "%Y%m%d %H%M%S", &tm))
-		memset(ztbuf, 0, sizeof(ztbuf));
-	else
-		ztbuf[8] = '\0';
-
-	if (!inpTimeOff1) return;
-
-	inpTimeOff1->value(zshowtime());
-	inpTimeOff2->value(zshowtime());
-	inpTimeOff3->value(zshowtime());
-}
-*/
-
 bool oktoclear = true;
 extern string n3fjp_serno;
 
@@ -3953,8 +3866,12 @@ LOG_INFO("Closing WinKeyer interface");
 LOG_INFO("Stopping TOD clock");
 	TOD_close();
 
+LOG_INFO("Deleting audio_alert");
+	delete audio_alert;
+
 LOG_INFO("exit_process");
 	exit_process();
+
 
 	if (field_day_viewer)
 		if (field_day_viewer->visible())
@@ -5138,7 +5055,7 @@ static Fl_Menu_Item menu_[] = {
 { icons::make_icon_label(THOR_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuThorViewRaw,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(IFKP_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuIfkpViewRaw,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(WEFAX_RX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_rx,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(WEFAX_fsq_tx_image_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(WEFAX_TX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
 { icons::make_icon_label(_("Signal browser")), 's', (Fl_Callback*)cb_mnuViewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(COUNTRIES_MLABEL), 'o', (Fl_Callback*)cb_mnuShowCountries, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
@@ -5365,7 +5282,7 @@ void activate_wefax_image_item(bool b)
 	Fl_Menu_Item *wefax_rx_item = getMenuItem(WEFAX_RX_IMAGE_MLABEL);
 	if (wefax_rx_item)
 		icons::set_active(wefax_rx_item, b);
-	Fl_Menu_Item *wefax_tx_item = getMenuItem(WEFAX_fsq_tx_image_MLABEL);
+	Fl_Menu_Item *wefax_tx_item = getMenuItem(WEFAX_TX_IMAGE_MLABEL);
 	if (wefax_tx_item)
 		icons::set_active(wefax_tx_item, b);
 }
@@ -8421,7 +8338,7 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(THOR_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuThorViewRaw,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(IFKP_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuIfkpViewRaw,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(WEFAX_RX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_rx,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(WEFAX_fsq_tx_image_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(WEFAX_TX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
 { icons::make_icon_label(_("Signal Browser")), 's', (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
@@ -11402,9 +11319,15 @@ void cb_ifkp_heard(Fl_Browser*, void*)
 	restoreFocus();
 }
 
+static void do_fsq_rx_text(std::string text, int style) 
+{
+	for (size_t n = 0; n < text.length(); n++)
+		rx_parser( text[n], style );
+}
+
 void display_fsq_rx_text(std::string text, int style)
 {
-	REQ(&FTextRX::addstr, fsq_rx_text, text, style);
+	REQ(do_fsq_rx_text, text, style);
 }
 
 void display_fsq_mon_text(std::string text, int style)

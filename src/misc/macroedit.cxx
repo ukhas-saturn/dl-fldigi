@@ -140,6 +140,8 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<SAVEXCHG>\tsave contest out"));
 	w->add(_("<SERNO>\tcurrent contest serno"));
 	w->add(_("<LASTNO>\tlast serno sent"));
+	w->add(_("<FDCLASS>\trecvd FD class"));
+	w->add(_("<FDSECT>\trecvd FD section"));
 
 	w->add(LINE_SEP);
 	w->add(_("<RX>\treceive"));
@@ -187,6 +189,10 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<RXRSID:on|off|t>\tRx RSID on,off,toggle"));
 	w->add(_("<NRSID:NN>\tTransmit |NN| successive RsID bursts"));
 	w->add(_("<DTMF:[Wn:][Ln:]chrs>\t[Wait][Len](ms)"));
+
+	w->add(LINE_SEP);
+	w->add(_("<ALERT:[bark][checkout][doesnot][phone][beeboo][diesel][steam_train][dinner_bell]>"));
+	w->add(_("<ALERT:>\talert using external wav file"));
 
 	w->add(LINE_SEP);
 	w->add(_("<POST:+/-nn.n>\tCW QSK post-timing"));
@@ -384,6 +390,16 @@ void cbInsertMacro(Fl_Widget *, void *)
 			MacrosDir.c_str());
 		if (p && *p) {
 			text.insert(8, p);
+		} else
+			text = "";
+	} else if (text == "<ALERT:>") {
+		string filters = "Wav file\t*.wav";
+		const char* p = FSEL::select(
+			_("Select wav file"),
+			filters.c_str(),
+			HomeDir.c_str());
+		if (p && *p) {
+			text.insert(7, p);
 		} else
 			text = "";
 	}

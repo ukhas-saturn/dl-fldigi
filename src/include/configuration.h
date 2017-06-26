@@ -422,6 +422,14 @@
         ELEM_(int, CWupperlimit, "CWUPPERLIMIT",                                        \
               "Upper TX limit (WPM)",                                                   \
               50)                                                                       \
+        ELEM_(int, cwrx_attack, "CWRX_ATTACK",                                          \
+              "rx squelch attack timing\n"                                              \
+              "SLOW = 0 (100)\nMEDIUM = 1 (50)\nFAST = 2 (25)",                         \
+              1)                                                                        \
+        ELEM_(int, cwrx_decay, "CWRX_DECAY",                                            \
+              "rx squelch decay timing\n"                                               \
+              "SLOW = 0 (1000)\nMEDIUM = 1 (500)\nFAST = 2 (250)",                      \
+              1)                                                                        \
         ELEM_(double, CWdash2dot, "CWDASH2DOT",                                         \
               "Dash to dot ratio",                                                      \
               3.0)                                                                      \
@@ -473,6 +481,42 @@
         ELEM_(std::string, CW_prosigns, "CWPROSIGNS",                                   \
               "CW prosigns BT AA AS AR SK KN INT HM VE",                                \
               "=~<>%+&{}")                                                              \
+        ELEM_(bool, A_umlaut, "A_umlaut",                                               \
+              "Use Ä extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, A_aelig, "A_aelig",                                                 \
+              "Use Æ extended CW character",                                            \
+              false)                                                                    \
+        ELEM_(bool, A_ring, "A_ring",                                                   \
+              "Use Ä extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, C_cedilla, "C_cedilla",                                             \
+              "Use Ç extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, E_grave, "E_grave",                                                 \
+              "Use È extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, E_acute, "E_acute",                                                 \
+              "Use É extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, O_acute, "O_acute",                                                 \
+              "Use Ó extended CW character",                                            \
+              false)                                                                    \
+        ELEM_(bool, O_umlaut, "O_umlaut",                                               \
+              "Use Ö extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, O_slash, "O_slash",                                                 \
+              "Use Ø extended CW character",                                            \
+              false)                                                                    \
+        ELEM_(bool, N_tilde, "N_tilde",                                                 \
+              "Use Ñ extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, U_umlaut, "U_umlaut",                                               \
+              "Use Ü extended CW character",                                            \
+              true)                                                                     \
+        ELEM_(bool, U_circ, "U_circ",                                                   \
+              "Use Û extended CW character",                                            \
+              false)                                                                    \
         /* FELD HELL */                                                                 \
         ELEM_(double, HELL_BW, "HELL_BW0", "Feld Hell working bandwidth",  245.0)       \
         ELEM_(double, HELL_BW_FH, "HELL_BW1", "FH bandwidth",  245.0)                   \
@@ -894,12 +938,54 @@
         ELEM_(std::string, flmsg_pathname, "FLMSG_PATHNAME",                            \
               "Full pathname to the flmsg executable",                                  \
               "")                                                                       \
-        ELEM_(std::string, flnet_pathname, "FLNET_PATHNAME",                            \
-              "Full pathname to the flnet executable",                                  \
-              "")                                                                       \
+        ELEM_(std::string, BWSR_REGEX_MATCH, "BWSR_REGEX_MATCH",                        \
+              "audio alert audio clip name / file",                                     \
+              "dinner_bell")                                                            \
+        ELEM_(int, REGEX_ALERT_MENU, "REGEX_ALERT_MENU",                                \
+              "menu selector",                                                          \
+              8)                                                                        \
+        ELEM_(bool, ENABLE_BWSR_REGEX_MATCH, "ENABLE_BWSR_REGEX_MATCH",                 \
+              "enable audio alert when regex match is detected in browser",             \
+              false)                                                                    \
+        ELEM_(std::string, BWSR_MYCALL_MATCH, "BWSR_MYCALL_MATCH",                      \
+              "audio alert audio clip name / file",                                     \
+              "dinner_bell")                                                            \
+        ELEM_(int, MYCALL_ALERT_MENU, "MYCALL_ALERT_MENU",                              \
+              "menu selector",                                                          \
+              8)                                                                        \
+        ELEM_(bool, ENABLE_BWSR_MYCALL_MATCH, "ENABLE_BWSR_MYCALL_MATCH",               \
+              "enable audio alert when MYCALL is detected in browser",                  \
+              false)                                                                    \
         ELEM_(double, extract_timeout, "EXTRACT_TIMEOUT",                               \
               "Abort message extraction after nn.n seconds of inactivity",              \
               2.0)                                                                      \
+        ELEM_(std::string, RX_EXTRACT_MSG_RCVD, "RX_EXTRACT_MSG_RCVD",                  \
+              "audio alert audio clip name / file",                                     \
+              "phone")                                                                  \
+        ELEM_(int, RX_EXTRACT_ALERT_MENU, "RX_EXTRACT_ALERT_MENU",                      \
+              "menu selector",                                                          \
+              7)                                                                        \
+        ELEM_(bool, ENABLE_RX_EXTRACT_MSG_RCVD, "ENABLE_RX_EXTRACT_MSG_RCVD",           \
+              "enable audio alert when flmsg received",                                 \
+              false)                                                                    \
+        ELEM_(std::string, RX_EXTRACT_TIMED_OUT, "RX_EXTRACT_TIMED_OUT",                \
+              "audio alert audio clip name / file",                                     \
+              "beeboo")                                                                 \
+        ELEM_(int, TIMED_OUT_ALERT_MENU, "TIMED_OUT_ALERT_MENU",                        \
+              "menu selector",                                                          \
+              6)                                                                        \
+        ELEM_(bool, ENABLE_RX_EXTRACT_TIMED_OUT, "ENABLE_RX_EXTRACT_TIMED_OUT",         \
+              "enable audio alert when flmsg reception times out",                      \
+              false)                                                                    \
+        ELEM_(std::string, RSID_MATCH, "RSID_MATCH",                                    \
+              "audio alert audio clip name / file",                                     \
+              "phone")                                                                  \
+        ELEM_(int, RSID_ALERT_MENU, "RSID_ALERT_MENU",                                  \
+              "menu selector",                                                          \
+              7)                                                                        \
+        ELEM_(bool, ENABLE_RSID_MATCH, "ENABLE_RSID_MATCH",                             \
+              "enable audio alert when RsID is detected",                               \
+              false)                                                                    \
         ELEM_(std::string, cty_dat_pathname, "CTYDAT_PATHNAME",                         \
               "Full pathname to the cty.dat data file",                                 \
               "")                                                                       \
@@ -1032,6 +1118,9 @@
         ELEM_(bool, N3FJP_modem_carrier, "N3FJP_MODEM_CARRIER",                         \
               "Use actual modem carrier frequency for logging",                         \
               true)                                                                     \
+        ELEM_(bool, enable_N3FJP_RIGTX, "N3FJP_RIGTX",                                  \
+              "Use RIGTX/RX vice CWCOMPORTKEYDOWN/CWCOMPORTKEYUP",                      \
+              false)                                                                    \
         /* Rig control */                                                               \
         ELEM_(bool, flrig_keys_modem, "FLRIG_KEYS_MODEM",                               \
               "PTT change at flrig changes Rx/Tx state\n"                               \
@@ -1265,6 +1354,9 @@
         ELEM_(std::string, PulseServer, "PULSESERVER",                                  \
               "PulseAudio server string",                                               \
               "")                                                                       \
+        ELEM_(bool, is_full_duplex, "IS_FULL_DUPLEX",                                   \
+              "Audio codec supports full duplex operation",                             \
+              true)                                                                     \
         ELEM_(bool, sig_on_right_channel, "SIGONRIGHTCHANNEL",                          \
               "Duplicate modem signal on left & right",                                 \
               true)                                                                     \

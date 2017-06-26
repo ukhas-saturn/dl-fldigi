@@ -507,6 +507,8 @@ for lpApplicationName, use quotation marks around the executable path in lpComma
 
 void start_process(string executable)
 {
+	while(executable[executable.length()-1] == ' ')
+		executable.erase(executable.length()-1);
 	if (!executable.empty()) {
 #ifdef __MINGW32__
 		static string cmdstr;
@@ -516,7 +518,7 @@ void start_process(string executable)
 		memset(&si, 0, sizeof(si));
 		si.cb = sizeof(si);
 		memset(&pi, 0, sizeof(pi));
-LOG_INFO("Starting external process: %s", cmdstr.c_str());
+		LOG_INFO("Starting external process: %s", cmdstr.c_str());
 		if (!CreateProcess(	NULL, const_cast<char*>(cmdstr.c_str()),
 							NULL, NULL,
 							FALSE, CREATE_NO_WINDOW,
@@ -526,18 +528,29 @@ LOG_INFO("Starting external process: %s", cmdstr.c_str());
 		MilliSleep(100);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
-LOG_INFO("Process handles closed");
+		LOG_INFO("Process handles closed");
 #else
 #ifdef __APPLE__
-	if (executable.find(".app") == (executable.length() - 4)) {
-		std::string progname = executable;
-		size_t p = progname.find("/", 1);
-		if (p != std::string::npos) progname.erase(0,p+1);
-		p = progname.find("-");
-		if (p != std::string::npos) progname.erase(p);
-		executable.append("/Contents/MacOS/").append(progname);
-	}
+		string params = "";
+		size_t p = executable.find(".app ");
+		if (p != string::npos) {
+			params = executable.substr(p+4);
+			executable.erase(p+4);
+		}
+		if (executable.find(".app") != string::npos ) { //== (executable.length() - 4)) {
+			DIR *dp = NULL;
+			std::string testdir = executable;
+			dp = opendir(testdir.append("/Contents/MacOS/").c_str());
+			struct dirent *sd = NULL;
+			sd = readdir(dp);
+			string sds = sd->d_name;
+			while (sds == "." || sds == "..") { sd = readdir(dp); sds = sd->d_name; }
+			closedir(dp);
+			executable.append("/Contents/MacOS/").append(sds);
+			if (!params.empty()) executable.append(params);
+		}
 #endif
+		LOG_INFO("Start external process: %s", executable.c_str());
 		switch (fork()) {
 			case -1:
 				LOG_PERROR("fork");
@@ -696,6 +709,10 @@ void delayed_startup(void *)
 
 #if USE_PORTAUDIO
 	LOG_INFO("%s", str_pa_devices.c_str());
+	try {
+		audio_alert = new Caudio_alert;
+	} catch (...) {
+	}
 #endif
 }
 
@@ -850,6 +867,10 @@ int main(int argc, char ** argv)
 
 			case PSM_TID:
 				cbq[i]->attach(i, "PSM_TID");
+				break;
+
+			case AUDIO_ALERT_TID:
+				cbq[i]->attach(i, "AUDIO_ALERT_TID");
 				break;
 
 			case FD_TID:
