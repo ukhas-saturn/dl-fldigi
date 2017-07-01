@@ -2323,7 +2323,7 @@ SoundIP::SoundIP(const char* inithost, const char* initport, bool udp_flag)
 	snd_buffer = new float[SND_BUF_LEN]; // floats out
 	cbuff   =  new uint8_t[SND_BUF_LEN]; // s16le stream in
 
-	m_stream = -1;
+	m_stream = 0;
 	m_step = 0.0;
 	buffend = buffptr = 0;
 	usingTCP = !udp_flag;
@@ -2373,9 +2373,8 @@ size_t  SoundIP::Read(float *buff, size_t count)
                 rate = 48000; // unset / native default
         ratio = 1.0 * rate / resamplerate;
 
-	if (m_stream < 0) {
+	if (!m_stream) {
 		// keep trying to open stream
-		MilliSleep(2000);
 		try {
 			if (usingTCP)
 				soundSock->connect();
@@ -2383,7 +2382,7 @@ size_t  SoundIP::Read(float *buff, size_t count)
 				soundSock->bindUDP();
 			m_stream = 1;
 		} catch (...) {
-			m_stream =-1;
+			MilliSleep(2000);
 			for (i = 0; i < count; i++)
 				buff[i] = 0.0f;
 			return count;
@@ -2416,11 +2415,11 @@ size_t  SoundIP::Read(float *buff, size_t count)
 
 		if (n == 0) {
 			MilliSleep(100);
-			if (m_idlecount++ > 20) {
+			if (!m_stream || m_idlecount++ > 20) {
 				/* Pad data after 2s of silence
 				 * Try to reopen the port for TCP */
 				if (usingTCP)
-					m_stream = -1;
+					m_stream = 0;
 				for (i = out; i < count; i++)
 					buff[i] = 0.0f;
 				return count;
@@ -2445,7 +2444,7 @@ size_t  SoundIP::Read(float *buff, size_t count)
 int SoundIP::Open(int mode, int freq)
 {
         resamplerate = freq;
-	if (m_stream > 0)
+	if (m_stream)
 		return m_stream;
 
 	soundSock->set_timeout(0.1);
@@ -2457,9 +2456,9 @@ int SoundIP::Open(int mode, int freq)
 
 void SoundIP::Close(unsigned unused)
 {
-	if (m_stream < 0)
+	if (!m_stream)
 		return;
-	m_stream = -1;
+	m_stream = 0;
 	soundSock->close();
 }
 

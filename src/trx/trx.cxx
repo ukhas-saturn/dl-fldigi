@@ -228,7 +228,6 @@ void trx_trx_receive_loop()
 			current_RXsamplerate = active_modem->get_samplerate();
 			if(progdefaults.btnAudioIOis != SND_IDX_TCP && progdefaults.btnAudioIOis != SND_IDX_UDP)
 				RXscard->Close(O_RDONLY);
-			RXscard->Close(O_RDONLY);
 			if (RXscard->Open(O_RDONLY, current_RXsamplerate)) {
 				REQ(sound_update, progdefaults.btnAudioIOis);
 				RXsc_is_open = true;
@@ -546,6 +545,8 @@ void *trx_loop(void *args)
 
 		switch (trx_state) {
 		case STATE_ABORT:
+			RXscard->Close();
+			RXsc_is_open = false;
 			delete RXscard;
 			RXscard = 0;
 			delete TXscard;
