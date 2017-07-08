@@ -5121,43 +5121,10 @@ btnInitHWPTT->redraw();
 progdefaults.changed = true;
 }
 
-Fl_Round_Button *btnRTSptt=(Fl_Round_Button *)0;
+Fl_Round_Button *btnSCU_17=(Fl_Round_Button *)0;
 
-static void cb_btnRTSptt(Fl_Round_Button*, void*) {
-  btnInitHWPTT->labelcolor(FL_RED);
-btnInitHWPTT->redraw();
-progdefaults.changed = true;
-}
-
-Fl_Round_Button *btnRTSplusV=(Fl_Round_Button *)0;
-
-static void cb_btnRTSplusV(Fl_Round_Button*, void*) {
-  btnInitHWPTT->labelcolor(FL_RED);
-btnInitHWPTT->redraw();
-progdefaults.changed = true;
-}
-
-Fl_Round_Button *btnDTRptt=(Fl_Round_Button *)0;
-
-static void cb_btnDTRptt(Fl_Round_Button*, void*) {
-  btnInitHWPTT->labelcolor(FL_RED);
-btnInitHWPTT->redraw();
-progdefaults.changed = true;
-}
-
-Fl_Round_Button *btnDTRplusV=(Fl_Round_Button *)0;
-
-static void cb_btnDTRplusV(Fl_Round_Button*, void*) {
-  btnInitHWPTT->labelcolor(FL_RED);
-btnInitHWPTT->redraw();
-progdefaults.changed = true;
-}
-
-Fl_Button *btnInitHWPTT=(Fl_Button *)0;
-
-static void cb_btnInitHWPTT(Fl_Button* o, void*) {
-  progdefaults.initInterface();
-o->labelcolor(FL_FOREGROUND_COLOR);
+static void cb_btnSCU_17(Fl_Round_Button* o, void*) {
+  progdefaults.SCU_17=o->value();
 progdefaults.changed = true;
 }
 
@@ -5202,6 +5169,46 @@ progdefaults.UseUHrouterPTT = false;
 
 btnInitHWPTT->labelcolor(FL_RED);
 btnInitHWPTT->redraw();
+progdefaults.changed = true;
+}
+
+Fl_Round_Button *btnRTSptt=(Fl_Round_Button *)0;
+
+static void cb_btnRTSptt(Fl_Round_Button*, void*) {
+  btnInitHWPTT->labelcolor(FL_RED);
+btnInitHWPTT->redraw();
+progdefaults.changed = true;
+}
+
+Fl_Round_Button *btnRTSplusV=(Fl_Round_Button *)0;
+
+static void cb_btnRTSplusV(Fl_Round_Button*, void*) {
+  btnInitHWPTT->labelcolor(FL_RED);
+btnInitHWPTT->redraw();
+progdefaults.changed = true;
+}
+
+Fl_Round_Button *btnDTRptt=(Fl_Round_Button *)0;
+
+static void cb_btnDTRptt(Fl_Round_Button*, void*) {
+  btnInitHWPTT->labelcolor(FL_RED);
+btnInitHWPTT->redraw();
+progdefaults.changed = true;
+}
+
+Fl_Round_Button *btnDTRplusV=(Fl_Round_Button *)0;
+
+static void cb_btnDTRplusV(Fl_Round_Button*, void*) {
+  btnInitHWPTT->labelcolor(FL_RED);
+btnInitHWPTT->redraw();
+progdefaults.changed = true;
+}
+
+Fl_Button *btnInitHWPTT=(Fl_Button *)0;
+
+static void cb_btnInitHWPTT(Fl_Button* o, void*) {
+  progdefaults.initInterface();
+o->labelcolor(FL_FOREGROUND_COLOR);
 progdefaults.changed = true;
 }
 
@@ -8004,7 +8011,7 @@ Fl_Double_Window* ConfigureDialog() {
     { tabsConfigure = new Fl_Tabs(0, 0, 605, 390);
       tabsConfigure->color(FL_LIGHT1);
       tabsConfigure->selection_color(FL_LIGHT1);
-      { tabOperator = new Fl_Group(0, 30, 600, 360, _("Operator"));
+      { tabOperator = new Fl_Group(0, 25, 600, 365, _("Operator"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
         { Fl_Group* o = new Fl_Group(35, 35, 535, 271, _("Station / Operator"));
@@ -12486,7 +12493,6 @@ le Earth)"));
         { tabsRig = new Fl_Tabs(0, 25, 600, 365);
           tabsRig->selection_color(FL_LIGHT1);
           { tabFLRIG = new Fl_Group(0, 50, 600, 340, _("flrig"));
-            tabFLRIG->hide();
             { Fl_Group* o = new Fl_Group(10, 210, 580, 90, _("\"Disable PTT keys modem if multiple instances of fldigi (client)\nare connec\
 ted to a single flrig (server)."));
               o->box(FL_ENGRAVED_BOX);
@@ -12558,6 +12564,7 @@ i.e. localhost"));
             tabFLRIG->end();
           } // Fl_Group* tabFLRIG
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("RigCAT"));
+            o->hide();
             { chkUSERIGCAT = new Fl_Check_Button(245, 60, 110, 20, _("Use RigCAT"));
               chkUSERIGCAT->tooltip(_("RigCAT used for rig control"));
               chkUSERIGCAT->down_box(FL_DOWN_BOX);
@@ -13062,7 +13069,7 @@ definition"));
           } // Fl_Group* tabXMLRPC
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Hardware PTT"));
             o->hide();
-            { Fl_Group* o = new Fl_Group(55, 57, 490, 38);
+            { Fl_Group* o = new Fl_Group(10, 57, 580, 38);
               o->box(FL_ENGRAVED_FRAME);
               { Fl_Check_Button* o = btnPTTrightchannel = new Fl_Check_Button(74, 66, 250, 20, _("PTT tone on right audio channel "));
                 btnPTTrightchannel->tooltip(_("Can be used in lieu of or in addition to other PTT types"));
@@ -13072,15 +13079,15 @@ definition"));
               } // Fl_Check_Button* btnPTTrightchannel
               o->end();
             } // Fl_Group* o
-            { grpHWPTT = new Fl_Group(55, 97, 490, 184, _("h/w ptt device-pin"));
+            { grpHWPTT = new Fl_Group(10, 97, 580, 184, _("h/w ptt device-pin"));
               grpHWPTT->box(FL_ENGRAVED_FRAME);
               grpHWPTT->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { btnTTYptt = new Fl_Round_Button(74, 121, 220, 20, _("Use separate serial port PTT"));
+              { btnTTYptt = new Fl_Round_Button(25, 124, 220, 20, _("Use separate serial port PTT"));
                 btnTTYptt->down_box(FL_DOWN_BOX);
                 btnTTYptt->selection_color((Fl_Color)1);
                 btnTTYptt->callback((Fl_Callback*)cb_btnTTYptt);
               } // Fl_Round_Button* btnTTYptt
-              { Fl_ComboBox* o = inpTTYdev = new Fl_ComboBox(128, 151, 160, 22, _("Device:"));
+              { Fl_ComboBox* o = inpTTYdev = new Fl_ComboBox(18, 165, 350, 22, _("Device:"));
                 inpTTYdev->box(FL_DOWN_BOX);
                 inpTTYdev->color(FL_BACKGROUND2_COLOR);
                 inpTTYdev->selection_color(FL_BACKGROUND_COLOR);
@@ -13089,48 +13096,55 @@ definition"));
                 inpTTYdev->labelsize(14);
                 inpTTYdev->labelcolor(FL_FOREGROUND_COLOR);
                 inpTTYdev->callback((Fl_Callback*)cb_inpTTYdev);
-                inpTTYdev->align(Fl_Align(FL_ALIGN_LEFT));
+                inpTTYdev->align(Fl_Align(FL_ALIGN_TOP_LEFT));
                 inpTTYdev->when(FL_WHEN_RELEASE);
                 o->labelsize(FL_NORMAL_SIZE);
                 inpTTYdev->end();
               } // Fl_ComboBox* inpTTYdev
-              { btnRTSptt = new Fl_Round_Button(310, 120, 85, 20, _("Use RTS"));
-                btnRTSptt->tooltip(_("RTS is PTT signal line"));
-                btnRTSptt->down_box(FL_DOWN_BOX);
-                btnRTSptt->callback((Fl_Callback*)cb_btnRTSptt);
-              } // Fl_Round_Button* btnRTSptt
-              { btnRTSplusV = new Fl_Round_Button(407, 120, 100, 20, _("RTS = +V"));
-                btnRTSplusV->tooltip(_("Initial voltage on RTS"));
-                btnRTSplusV->down_box(FL_DOWN_BOX);
-                btnRTSplusV->callback((Fl_Callback*)cb_btnRTSplusV);
-              } // Fl_Round_Button* btnRTSplusV
-              { btnDTRptt = new Fl_Round_Button(310, 150, 85, 20, _("Use DTR"));
-                btnDTRptt->tooltip(_("DTR is PTT signal line"));
-                btnDTRptt->down_box(FL_DOWN_BOX);
-                btnDTRptt->callback((Fl_Callback*)cb_btnDTRptt);
-              } // Fl_Round_Button* btnDTRptt
-              { btnDTRplusV = new Fl_Round_Button(407, 150, 100, 20, _("DTR = +V"));
-                btnDTRplusV->tooltip(_("Initial voltage on DTR"));
-                btnDTRplusV->down_box(FL_DOWN_BOX);
-                btnDTRplusV->callback((Fl_Callback*)cb_btnDTRplusV);
-              } // Fl_Round_Button* btnDTRplusV
-              { btnInitHWPTT = new Fl_Button(411, 217, 113, 24, _("Initialize"));
-                btnInitHWPTT->tooltip(_("Initialize the H/W PTT interface"));
-                btnInitHWPTT->callback((Fl_Callback*)cb_btnInitHWPTT);
-              } // Fl_Button* btnInitHWPTT
-              { btnUsePPortPTT = new Fl_Round_Button(74, 191, 170, 20, _("Use parallel port PTT"));
+              { Fl_Round_Button* o = btnSCU_17 = new Fl_Round_Button(260, 124, 236, 20, _("Port is second SCU-17 device"));
+                btnSCU_17->tooltip(_("Driver requires stop bits to be ZERO!"));
+                btnSCU_17->down_box(FL_DOWN_BOX);
+                btnSCU_17->selection_color((Fl_Color)1);
+                btnSCU_17->callback((Fl_Callback*)cb_btnSCU_17);
+                o->value(progdefaults.SCU_17);
+              } // Fl_Round_Button* btnSCU_17
+              { btnUsePPortPTT = new Fl_Round_Button(25, 213, 170, 20, _("Use parallel port PTT"));
                 btnUsePPortPTT->down_box(FL_DOWN_BOX);
                 btnUsePPortPTT->selection_color((Fl_Color)1);
                 btnUsePPortPTT->callback((Fl_Callback*)cb_btnUsePPortPTT);
               } // Fl_Round_Button* btnUsePPortPTT
-              { btnUseUHrouterPTT = new Fl_Round_Button(74, 221, 170, 20, _("Use uHRouter PTT"));
+              { btnUseUHrouterPTT = new Fl_Round_Button(25, 245, 170, 20, _("Use uHRouter PTT"));
                 btnUseUHrouterPTT->down_box(FL_DOWN_BOX);
                 btnUseUHrouterPTT->selection_color((Fl_Color)1);
                 btnUseUHrouterPTT->callback((Fl_Callback*)cb_btnUseUHrouterPTT);
               } // Fl_Round_Button* btnUseUHrouterPTT
+              { btnRTSptt = new Fl_Round_Button(380, 153, 85, 20, _("Use RTS"));
+                btnRTSptt->tooltip(_("RTS is PTT signal line"));
+                btnRTSptt->down_box(FL_DOWN_BOX);
+                btnRTSptt->callback((Fl_Callback*)cb_btnRTSptt);
+              } // Fl_Round_Button* btnRTSptt
+              { btnRTSplusV = new Fl_Round_Button(471, 153, 100, 20, _("RTS = +V"));
+                btnRTSplusV->tooltip(_("Initial voltage on RTS"));
+                btnRTSplusV->down_box(FL_DOWN_BOX);
+                btnRTSplusV->callback((Fl_Callback*)cb_btnRTSplusV);
+              } // Fl_Round_Button* btnRTSplusV
+              { btnDTRptt = new Fl_Round_Button(380, 185, 85, 20, _("Use DTR"));
+                btnDTRptt->tooltip(_("DTR is PTT signal line"));
+                btnDTRptt->down_box(FL_DOWN_BOX);
+                btnDTRptt->callback((Fl_Callback*)cb_btnDTRptt);
+              } // Fl_Round_Button* btnDTRptt
+              { btnDTRplusV = new Fl_Round_Button(471, 185, 100, 20, _("DTR = +V"));
+                btnDTRplusV->tooltip(_("Initial voltage on DTR"));
+                btnDTRplusV->down_box(FL_DOWN_BOX);
+                btnDTRplusV->callback((Fl_Callback*)cb_btnDTRplusV);
+              } // Fl_Round_Button* btnDTRplusV
+              { btnInitHWPTT = new Fl_Button(450, 242, 113, 24, _("Initialize"));
+                btnInitHWPTT->tooltip(_("Initialize the H/W PTT interface"));
+                btnInitHWPTT->callback((Fl_Callback*)cb_btnInitHWPTT);
+              } // Fl_Button* btnInitHWPTT
               grpHWPTT->end();
             } // Fl_Group* grpHWPTT
-            { grpPTTdelays = new Fl_Group(55, 284, 490, 91, _("PTT delays valid for all CAT/PTT types"));
+            { grpPTTdelays = new Fl_Group(10, 284, 580, 91, _("PTT delays valid for all CAT/PTT types"));
               grpPTTdelays->box(FL_ENGRAVED_FRAME);
               grpPTTdelays->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
               { Fl_Counter* o = cntPTT_on_delay = new Fl_Counter(74, 311, 100, 21, _("Start of transmit PTT delay"));
