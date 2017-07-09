@@ -3,6 +3,7 @@
 #ifndef PLAY_PA_H
 #define PLAY_PA_H
 
+#include "config.h"
 #if USE_PORTAUDIO
 #include <portaudio.h>
 #else
