@@ -2328,11 +2328,11 @@ SoundIP::SoundIP(const char* inithost, const char* initport, bool udp_flag)
 	buffend = buffptr = 0;
 	usingTCP = !udp_flag;
 	if (udp_flag)
-		soundSock = new Socket( Address( "127.0.0.1", initport, "udp") );
+		soundSock = new Socket( Address( "localhost", initport, "udp") );
 	else
 		soundSock = new Socket( Address( inithost, initport, "tcp") );
 	/*
-	 * Known bug: opening a TCP socket on "localhost" when hostname
+	 * Known bug: opening a socket on "localhost" when hostname
 	 * is NOT "localhost" breaks in a bad way.
 	 */
 }
@@ -2379,7 +2379,7 @@ size_t  SoundIP::Read(float *buff, size_t count)
 			if (usingTCP)
 				soundSock->connect();
 			else
-				soundSock->bindUDP();
+				soundSock->bind();
 			m_stream = 1;
 		} catch (...) {
 			MilliSleep(2000);
