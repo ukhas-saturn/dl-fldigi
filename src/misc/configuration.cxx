@@ -541,6 +541,7 @@ int configuration::setDefaults()
 	btnDTRplusV->value(DTRplus);
 
 	inpTTYdev->value(PTTdev.c_str());
+	inpGPSdev->value(progdefaults.gps_device.c_str());
 
 	chkUSEHAMLIB->value(0);
 	chkUSERIGCAT->value(0);
@@ -867,6 +868,7 @@ static bool open_serial(const char* dev)
 void configuration::testCommPorts()
 {
 	inpTTYdev->clear();
+	inpGPSdev->clear();
 	inpRIGdev->clear();
 	inpXmlRigDevice->clear();
 #ifndef PATH_MAX
@@ -886,6 +888,7 @@ void configuration::testCommPorts()
 		"/dev/ttyUSB%u",
 		"/dev/usb/ttyUSB%u",
 		"/dev/ttyACM%u",
+		"/dev/ttyAMA%u",
 		"/dev/usb/ttyACM%u",
 		"/opt/vttyS%u"
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
@@ -947,6 +950,8 @@ void configuration::testCommPorts()
 
 			LOG_VERBOSE("Found serial port %s", ttyname);
 			inpTTYdev->add(ttyname);
+			inpGPSdev->add(ttyname);
+
 #  if USE_HAMLIB
 			inpRIGdev->add(ttyname);
 #  endif

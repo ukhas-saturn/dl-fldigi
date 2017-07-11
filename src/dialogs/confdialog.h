@@ -798,8 +798,7 @@ extern Fl_Counter2 *cntTrackFreqMax;
 #include <FL/Fl_Float_Input.H>
 extern Fl_Float_Input *stationary_lat;
 extern Fl_Float_Input *stationary_lon;
-#include <FL/Fl_Input_Choice.H>
-extern Fl_Input_Choice *inpGPSdev;
+extern Fl_ComboBox *inpGPSdev;
 #include <FL/Fl_Spinner.H>
 extern Fl_Output *gps_pos_lat;
 extern Fl_Output *gps_pos_altitude;

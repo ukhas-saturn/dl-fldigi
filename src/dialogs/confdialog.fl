@@ -441,26 +441,25 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
   code {static const int payload_browser_columns[] = { 180, 350 };} {}
   Fl_Window {} {
     label {Fldigi configuration} open
-    xywh {992 46 600 425} type Double color 45 selection_color 51 labelsize 18 align 80 non_modal visible
+    xywh {765 46 600 425} type Double color 45 selection_color 51 labelsize 18 align 80 non_modal visible
   } {
     Fl_Tabs tabsConfigure {open
       xywh {0 0 605 390} color 50 selection_color 50
     } {
       Fl_Group tabOperator {
         label Operator
-        callback {progdefaults.changed = true;} open selected
-        xywh {0 25 600 365} when 1
+        callback {progdefaults.changed = true;} open
+        xywh {0 25 600 365} when 1 hide
       } {
         Fl_Group {} {
-          label {Station / Operator} open selected
+          label {Station / Operator} open
           xywh {35 35 535 271} box ENGRAVED_FRAME align 53
         } {
           Fl_Input inpOperCallsign {
             label {Ham Callsign:}
             callback {progdefaults.operCall = o->value();
 progdefaults.changed = true;
-dl_fldigi::changed(dl_fldigi::CH_INFO);
-          }
+dl_fldigi::changed(dl_fldigi::CH_INFO);}
             tooltip {Operator call (if different from station)} xywh {196 64 319 24}
             code0 {o->labelsize(FL_NORMAL_SIZE);}
             code1 {o->value(progdefaults.operCall.c_str());}
@@ -8415,14 +8414,14 @@ if (progdefaults.kml_enabled) {
       }
       Fl_Group tabDL {
         label {DL Client} open
-        xywh {0 25 540 350} selection_color 48 hide
+        xywh {0 25 540 350} selection_color 48
       } {
         Fl_Tabs tabsDL {open
           xywh {0 25 540 348}
         } {
           Fl_Group tabDLEnable {
             label Enable open
-            xywh {0 50 540 320}
+            xywh {0 50 540 320} hide
           } {
             Fl_Group {} {
               label habitat open
@@ -8550,7 +8549,7 @@ progdefaults.changed = true;}
           }
           Fl_Group {} {
             label Location open
-            xywh {0 50 540 317} hide
+            xywh {0 50 540 317}
           } {
             Fl_Group {} {
               label {Listener Location} open
@@ -8611,18 +8610,19 @@ btnApplyConfig->activate();}
                 xywh {45 165 190 25} type Radio down_box ROUND_DOWN_BOX
                 code0 {o->value(progdefaults.gps_start_enabled);}
               }
-              Fl_Input_Choice inpGPSdev {
+              Fl_Group inpGPSdev {
                 label Device
                 callback {progdefaults.gps_device = o->value();
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_GPS_SETTINGS);
-btnApplyConfig->activate();} open
-                xywh {115 195 185 25}
+btnApplyConfig->activate();} open selected
+                xywh {115 195 185 25} box DOWN_BOX color 7 align 4
+                code0 {o->labelsize(FL_NORMAL_SIZE);}
+                class Fl_ComboBox
               } {}
               Fl_Check_Button {} {
                 label {Always enable GPS on startup}
-                callback {progdefaults.gps_start_enabled = o->value();
-progdefaults.changed = true;}
+                callback {progdefaults.changed = true;}
                 xywh {235 165 240 25} down_box DOWN_BOX
                 code0 {o->value(progdefaults.gps_start_enabled);}
               }

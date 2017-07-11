@@ -292,8 +292,8 @@
               "Custom shift (Hz)",                                                      \
               450)                                                                      \
         ELEM_(double, RTTY_BW, "RTTYBW",                                                \
-              "Receive filter bandwidth multiplier",                                          \
-              1.2)                                                                     \
+              "Receive filter bandwidth multiplier",                                    \
+              1.2)                                                                      \
         ELEM_(int, rtty_cwi, "RTTYCWI",                                                 \
               "Selective decoding of mark/space tones\n"                                \
               "0 - both\n"                                                              \
@@ -1986,7 +1986,7 @@ w0mw.dynip.com:23::|")                                                          
          /* dl-fldigi GPS Device Info */                                                 \
          ELEM_(bool, gps_start_enabled, "GPSENABLED", "GPS Enabled on startup?", false)  \
          ELEM_(std::string, gps_device, "GPSDEVICE", "GPS Serial port", "")              \
-         ELEM_(int, gps_speed, "GPSSPEED", "GPS Serial baud", 0)                         \
+         ELEM_(int, gps_speed, "GPSSPEED", "GPS Serial baud", 4800)                      \
          ELEM_(int, gps_period, "GPSPERIOD", "GPS Upload period", 30)                    \
                                                                                          \
          /* dl-fldigi Misc config stuff */                                               \

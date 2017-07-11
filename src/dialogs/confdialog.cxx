@@ -6905,18 +6905,17 @@ static void cb_Upload(Fl_Round_Button* o, void*) {
 };
 }
 
-Fl_Input_Choice *inpGPSdev=(Fl_Input_Choice *)0;
+Fl_ComboBox *inpGPSdev=(Fl_ComboBox *)0;
 
-static void cb_inpGPSdev(Fl_Input_Choice* o, void*) {
+static void cb_inpGPSdev(Fl_ComboBox* o, void*) {
   progdefaults.gps_device = o->value();
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_GPS_SETTINGS);
 btnApplyConfig->activate();
 }
 
-static void cb_Always(Fl_Check_Button* o, void*) {
-  progdefaults.gps_start_enabled = o->value();
-progdefaults.changed = true;
+static void cb_Always(Fl_Check_Button*, void*) {
+  progdefaults.changed = true;
 }
 
 static void cb_Period(Fl_Spinner* o, void*) {
@@ -8014,6 +8013,7 @@ Fl_Double_Window* ConfigureDialog() {
       { tabOperator = new Fl_Group(0, 25, 600, 365, _("Operator"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
+        tabOperator->hide();
         { Fl_Group* o = new Fl_Group(35, 35, 535, 271, _("Station / Operator"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(37|FL_ALIGN_INSIDE));
@@ -14759,9 +14759,9 @@ and restarted if needed."));
       } // Fl_Group* tabMisc
       { tabDL = new Fl_Group(0, 25, 540, 350, _("DL Client"));
         tabDL->selection_color((Fl_Color)48);
-        tabDL->hide();
         { tabsDL = new Fl_Tabs(0, 25, 540, 348);
           { tabDLEnable = new Fl_Group(0, 50, 540, 320, _("Enable"));
+            tabDLEnable->hide();
             { Fl_Group* o = new Fl_Group(5, 59, 530, 76, _("habitat"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -14868,7 +14868,6 @@ and restarted if needed."));
             tabDLEnable->end();
           } // Fl_Group* tabDLEnable
           { Fl_Group* o = new Fl_Group(0, 50, 540, 317, _("Location"));
-            o->hide();
             { Fl_Group* o = new Fl_Group(5, 60, 530, 300, _("Listener Location"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -14911,9 +14910,20 @@ and restarted if needed."));
                 o->callback((Fl_Callback*)cb_Upload);
                 o->value(progdefaults.gps_start_enabled);
               } // Fl_Round_Button* o
-              { inpGPSdev = new Fl_Input_Choice(115, 195, 185, 25, _("Device"));
+              { Fl_ComboBox* o = inpGPSdev = new Fl_ComboBox(115, 195, 185, 25, _("Device"));
+                inpGPSdev->box(FL_DOWN_BOX);
+                inpGPSdev->color(FL_BACKGROUND2_COLOR);
+                inpGPSdev->selection_color(FL_BACKGROUND_COLOR);
+                inpGPSdev->labeltype(FL_NORMAL_LABEL);
+                inpGPSdev->labelfont(0);
+                inpGPSdev->labelsize(14);
+                inpGPSdev->labelcolor(FL_FOREGROUND_COLOR);
                 inpGPSdev->callback((Fl_Callback*)cb_inpGPSdev);
-              } // Fl_Input_Choice* inpGPSdev
+                inpGPSdev->align(Fl_Align(FL_ALIGN_LEFT));
+                inpGPSdev->when(FL_WHEN_RELEASE);
+                o->labelsize(FL_NORMAL_SIZE);
+                inpGPSdev->end();
+              } // Fl_ComboBox* inpGPSdev
               { Fl_Check_Button* o = new Fl_Check_Button(235, 165, 240, 25, _("Always enable GPS on startup"));
                 o->down_box(FL_DOWN_BOX);
                 o->callback((Fl_Callback*)cb_Always);
