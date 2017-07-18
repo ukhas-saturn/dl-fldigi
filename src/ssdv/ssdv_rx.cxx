@@ -575,7 +575,7 @@ void ssdv_rx::save_image(uint8_t *jpeg, size_t length)
 	const char *savedir;
 	struct tm tm;
 	FILE *f;
-	uint16_t l;
+	size_t l;
 	
 	/* Does the user want the image saved? */
 	if(!progdefaults.ssdv_save_image) return;
