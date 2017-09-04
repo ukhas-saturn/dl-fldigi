@@ -491,7 +491,8 @@ int configuration::setDefaults()
 	}
 #endif
 
-	inpOperCallsign->value(myCall.c_str());
+	inpMyCallsign->value(myCall.c_str());
+	inpOperCallsign->value(operCall.c_str());
 	inpMyName->value(myName.c_str());
 	inpMyQth->value(myQth.c_str());
 	inpMyLocator->value(myLocator.c_str());

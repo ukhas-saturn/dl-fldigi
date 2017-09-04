@@ -169,8 +169,8 @@ private:
 	int				txsymbols[MAX_CARRIERS];
 
 	double			*tx_shape;
+	double			*imd_shape;
 	int 			preamble;
-	C_FIR_filter	*xmtfilt;
 
 	void			transmit(double *buf, int len);
 	void			tx_carriers();
@@ -207,6 +207,8 @@ public:
 	int tx_process();
 	void searchDown();
 	void searchUp();
+
+	bool viewer_mode();
 
 	void clear_viewer() { 
 		if (pskviewer) pskviewer->clear();

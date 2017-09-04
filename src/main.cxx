@@ -126,6 +126,8 @@
 #include "dl_fldigi/dl_fldigi.h"
 #include "nullmodem.h"
 
+#include "spectrum_viewer.h"
+
 using namespace std;
 
 string appname;
@@ -541,12 +543,21 @@ void start_process(string executable)
 			DIR *dp = NULL;
 			std::string testdir = executable;
 			dp = opendir(testdir.append("/Contents/MacOS/").c_str());
+			if (!dp) {
+				fl_alert2("FOLDER NOT FOUND\n\n%s", testdir.append("/Contents/MacOS/").c_str());
+				return;
+			}
 			struct dirent *sd = NULL;
 			sd = readdir(dp);
 			string sds = sd->d_name;
 			while (sds == "." || sds == "..") { sd = readdir(dp); sds = sd->d_name; }
 			closedir(dp);
 			executable.append("/Contents/MacOS/").append(sds);
+			if (executable.find(" ") != string::npos) {
+				string exec;
+				exec.assign("\"").append(executable).append("\"");
+				executable.assign(exec);
+			}
 			if (!params.empty()) executable.append(params);
 		}
 #endif
@@ -1148,6 +1159,8 @@ int main(int argc, char ** argv)
 
 void exit_process() {
 
+	close_spectrum_viewer();
+
 	if (progdefaults.kml_enabled)
 		KmlServer::Exit();
 
@@ -1310,9 +1323,6 @@ void generate_option_help(void) {
 		 << "    Perform the CPU speed test, show results in the event log\n"
 		 << "    and possibly change options.\n\n"
 
-		 << "  --noise\n"
-		 << "    Unhide controls for noise tests\n\n"
-
 		 << "  --wfall-only\n"
 		 << "    Hide all controls but the waterfall\n\n"
 
@@ -1438,7 +1448,7 @@ int parse_args(int argc, char **argv, int& idx)
 			   OPT_FRAMES_PER_BUFFER,
 #endif
 		   OPT_MORE_INFO,
-		   OPT_NOISE, OPT_DEBUG_LEVEL, OPT_DEBUG_PSKMAIL, OPT_DEBUG_AUDIO,
+		   OPT_DEBUG_LEVEL, OPT_DEBUG_PSKMAIL, OPT_DEBUG_AUDIO,
 			   OPT_EXIT_AFTER,
 			   OPT_DEPRECATED, OPT_HELP, OPT_VERSION, OPT_BUILD_INFO };
 
@@ -1500,7 +1510,6 @@ int parse_args(int argc, char **argv, int& idx)
 		{ "more-info",     1, 0, OPT_MORE_INFO },
 		{ "exit-after",    1, 0, OPT_EXIT_AFTER },
 
-		{ "noise", 0, 0, OPT_NOISE },
 		{ "debug-level",   1, 0, OPT_DEBUG_LEVEL },
 		{ "debug-pskmail", 0, 0, OPT_DEBUG_PSKMAIL },
 		{ "debug-audio", 0, 0, OPT_DEBUG_AUDIO },
@@ -1731,10 +1740,6 @@ int parse_args(int argc, char **argv, int& idx)
 			bHAB = true;
 		case OPT_RX_ONLY:
 			rx_only = true;
-			break;
-
-		case OPT_NOISE:
-			withnoise = true;
 			break;
 
 		case OPT_SHOW_CPU_CHECK:

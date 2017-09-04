@@ -272,6 +272,7 @@ FLDIGI_FL_SRC = \
 		dialogs/confdialog.fl \
 		dialogs/notifydialog.fl \
 		dialogs/record_browse.fl \
+		dialogs/testsigs.fl \
 		logbook/lgbook.fl \
 		logbook/fd_view.fl \
 		dxcluster/dx_dialog.fl
@@ -373,6 +374,7 @@ dl_fldigi_SOURCES += \
 	dialogs/notifydialog.cxx \
 	dialogs/record_browse.cxx \
 	dialogs/tod_clock.cxx \
+	dialogs/testsigs.cxx \
 	dtmf/dtmf.cxx \
 	thor/thor.cxx \
 	thor/thorvaricode.cxx \
@@ -380,6 +382,9 @@ dl_fldigi_SOURCES += \
 	dominoex/dominovar.cxx \
 	feld/feld.cxx \
 	feld/feldfonts.cxx \
+	fft-monitor/fft-monitor.cxx \
+	fft-monitor/spectrum.cxx \
+	fft-monitor/spectrum_viewer.cxx \
 	fileselector/fileselect.cxx \
 	filters/fftfilt.cxx \
 	filters/filters.cxx \
@@ -400,7 +405,6 @@ dl_fldigi_SOURCES += \
 	include/Panel.h \
 	include/FreqControl.h \
 	include/analysis.h \
-	include/fftscan.h \
 	include/ascii.h \
 	include/charsetdistiller.h \
 	include/charsetlist.h \
@@ -422,6 +426,7 @@ dl_fldigi_SOURCES += \
 	include/fd_logger.h \
 	include/feld.h \
 	include/fftfilt.h \
+	include/fft-monitor.h \
 	include/filters.h \
 	include/fl_digi.h \
 	include/fl_lock.h \
@@ -513,6 +518,8 @@ dl_fldigi_SOURCES += \
 	include/socket.h \
 	include/sound.h \
 	include/soundconf.h \
+	include/spectrum.h \
+	include/spectrum_viewer.h \
 	include/spot.h \
 	include/ssdv.h \
 	include/ssdv_rx.h \
@@ -569,6 +576,8 @@ dl_fldigi_SOURCES += \
 	include/winkeyer.h \
 	include/audio_alert.h \
 	include/play.pa.h \
+	include/testsigs.h \
+	include/test_signal.h \
 	irrxml/CXMLReaderImpl.h \
 	irrxml/fast_atof.h \
 	irrxml/heapsort.h \
@@ -683,6 +692,7 @@ dl_fldigi_SOURCES += \
 	trx/modem.cxx \
 	trx/nullmodem.cxx \
 	trx/trx.cxx \
+	trx/test_signal.cxx \
 	waterfall/colorbox.cxx \
 	waterfall/digiscope.cxx \
 	waterfall/raster.cxx \
@@ -706,7 +716,6 @@ dl_fldigi_SOURCES += \
 	ifkp/tux.cxx \
 	fsq/fsq_monitor.cxx \
 	wwv/analysis.cxx \
-	wwv/fftscan.cxx \
 	wwv/wwv.cxx \
 	logbook/xmlrpc_log.cxx \
 	misc/jsoncpp.cpp \

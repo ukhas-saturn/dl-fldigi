@@ -96,7 +96,6 @@
 #include "ifkp.h"
 #include "wwv.h"
 #include "analysis.h"
-#include "fftscan.h"
 #include "ssb.h"
 
 #include "fileselect.h"
@@ -147,6 +146,8 @@
 #include "locator.h"
 #include "notify.h"
 
+#include "test_signal.h"
+
 #include "logbook.h"
 
 #include "rx_extract.h"
@@ -184,6 +185,8 @@ bool bHAB = false;
 #include "winkeyer.h"
 
 #include "audio_alert.h"
+
+#include "spectrum_viewer.h"
 
 #define CB_WHEN FL_WHEN_CHANGED | FL_WHEN_NOT_CHANGED | FL_WHEN_ENTER_KEY_ALWAYS | FL_WHEN_RELEASE_ALWAYS
 
@@ -240,7 +243,6 @@ void set599();
 fre_t seek_re("CQ", REG_EXTENDED | REG_ICASE | REG_NOSUB);
 
 bool bWF_only = false;
-bool withnoise = false;
 
 Fl_Double_Window	*fl_digi_main      = (Fl_Double_Window *)0;
 
@@ -1420,120 +1422,125 @@ void cb_mnuSaveMacro(Fl_Menu_*, void*) {
 void remove_windows()
 {
 	if (scopeview) {
-LOG_ERROR("Deleting %s", "scopeview");
+LOG_INFO("Deleting %s", "scopeview");
 		scopeview->hide();
 		delete scopeview;
 	}
 	if (dlgViewer) {
-LOG_ERROR("Deleting %s", "dlgViewer");
+LOG_INFO("Deleting %s", "dlgViewer");
 		dlgViewer->hide();
 		delete dlgViewer;
 	}
 	if (dlgLogbook) {
-LOG_ERROR("Deleting %s", "dlgLogbook");
+LOG_INFO("Deleting %s", "dlgLogbook");
 		dlgLogbook->hide();
 		delete dlgLogbook;
 	}
 	if (lotw_review_dialog) {
-LOG_ERROR("Deleting %s", "lotw_review_dialog");
+LOG_INFO("Deleting %s", "lotw_review_dialog");
 		lotw_review_dialog->hide();
 		delete lotw_review_dialog;
 	}
 	if (dlgConfig) {
-LOG_ERROR("Deleting %s", "dlgConfig");
+LOG_INFO("Deleting %s", "dlgConfig");
 		dlgConfig->hide();
 		delete cboHamlibRig;
 		delete dlgConfig;
 	}
 	if (font_browser) {
-LOG_ERROR("Deleting %s", "font-browser");
+LOG_INFO("Deleting %s", "font-browser");
 		font_browser->hide();
 		delete font_browser;
 	}
 	if (notify_window) {
-LOG_ERROR("Deleting %s", "notify_window");
+LOG_INFO("Deleting %s", "notify_window");
 		notify_window->hide();
 		delete notify_window;
 	}
 	if (dxcc_window) {
-LOG_ERROR("Deleting %s", "dxcc_window");
+LOG_INFO("Deleting %s", "dxcc_window");
 		dxcc_window->hide();
 		delete dxcc_window;
 	}
 	if (picRxWin) {
-LOG_ERROR("Deleting %s", "picRxWin");
+LOG_INFO("Deleting %s", "picRxWin");
 		picRxWin->hide();
 		delete picRxWin;
 	}
 	if (picTxWin) {
-LOG_ERROR("Deleting %s", "picTxWin");
+LOG_INFO("Deleting %s", "picTxWin");
 		picTxWin->hide();
 		delete picTxWin;
 	}
 	if (fsqpicRxWin){
-LOG_ERROR("Deleting %s", "fsqpicRxWin");
+LOG_INFO("Deleting %s", "fsqpicRxWin");
 		fsqpicRxWin->hide();
 		delete fsqpicRxWin;
 	}
 	if (fsqpicTxWin){
-LOG_ERROR("Deleting %s", "fsqpicTxWin");
+LOG_INFO("Deleting %s", "fsqpicTxWin");
 		fsqpicTxWin->hide();
 		delete fsqpicTxWin;
 	}
 	if (ifkppicRxWin){
-LOG_ERROR("Deleting %s", "ifppicRxWin");
+LOG_INFO("Deleting %s", "ifppicRxWin");
 		ifkppicRxWin->hide();
 		delete ifkppicRxWin;
 	}
 	if (ifkppicTxWin){
-LOG_ERROR("Deleting %s", "ifppicTxWin");
+LOG_INFO("Deleting %s", "ifppicTxWin");
 		ifkppicTxWin->hide();
 		delete ifkppicTxWin;
 	}
 	if (thorpicRxWin){
-LOG_ERROR("Deleting %s", "thorpicRxWin");
+LOG_INFO("Deleting %s", "thorpicRxWin");
 		thorpicRxWin->hide();
 		delete thorpicRxWin;
 	}
 	if (thorpicTxWin){
-LOG_ERROR("Deleting %s", "thorpicTxWin");
+LOG_INFO("Deleting %s", "thorpicTxWin");
 		thorpicTxWin->hide();
 		delete thorpicTxWin;
 	}
 	if (wefax_pic_rx_win) {
-LOG_ERROR("Deleting %s", "wefax_pic_rxin");
+LOG_INFO("Deleting %s", "wefax_pic_rxin");
 		wefax_pic_rx_win->hide();
 		delete wefax_pic_rx_win;
 	}
 	if (wefax_pic_tx_win) {
-LOG_ERROR("Deleting %s", "wefax_pic_txin");
+LOG_INFO("Deleting %s", "wefax_pic_txin");
 		wefax_pic_tx_win->hide();
 		delete wefax_pic_tx_win;
 	}
 	if (wExport) {
-LOG_ERROR("Deleting %s", "wExport");
+LOG_INFO("Deleting %s", "wExport");
 		wExport->hide();
 		delete wExport;
 	}
 	if (wCabrillo) {
-LOG_ERROR("Deleting %s", "wCabrillo");
+LOG_INFO("Deleting %s", "wCabrillo");
 		wCabrillo->hide();
 		delete wCabrillo;
 	}
 	if (MacroEditDialog) {
-LOG_ERROR("Deleting %s", "MacroEditDialog");
+LOG_INFO("Deleting %s", "MacroEditDialog");
 		MacroEditDialog->hide();
 		delete MacroEditDialog;
 	}
-LOG_ERROR("Deleting %s", "fsqMonitor");
+LOG_INFO("Deleting %s", "fsqMonitor");
 	if (fsqMonitor) {
 		fsqMonitor->hide();
 		delete fsqMonitor;
 	}
 	if (dxcluster_viewer) {
-LOG_ERROR("Deleting %s", "dxcluster_viewer");
+LOG_INFO("Deleting %s", "dxcluster_viewer");
 		dxcluster_viewer->hide();
 		delete dxcluster_viewer;
+	}
+	if (test_signal_window) {
+LOG_INFO("Deleting %s", "test signal window");
+		test_signal_window->hide();
+		delete test_signal_window;
 	}
 //	if (fsqDebug) {
 //		fsqDebug->hide();
@@ -1589,12 +1596,6 @@ void init_modem_squelch(trx_mode mode, int freq)
 	btnSQL->value(0);
 	Fl::add_timeout(progdefaults.rsid_squelch, rsid_squelch_timer);
 	init_modem(mode, freq);
-}
-
-void update_scope()
-{
-	if (active_modem->get_mode() == MODE_FFTSCAN)
-		active_modem->refresh_scope();
 }
 
 extern bool valid_kiss_modem(std::string modem_name);
@@ -1891,12 +1892,6 @@ void init_modem(trx_mode mode, int freq)
 	case MODE_ANALYSIS:
 		startup_modem(*mode_info[mode].modem ? *mode_info[mode].modem :
 				  *mode_info[mode].modem = new anal, freq);
-		break;
-
-	case MODE_FFTSCAN:
-		startup_modem(*mode_info[mode].modem ? *mode_info[mode].modem :
-				  *mode_info[mode].modem = new fftscan, freq);
-		modem_config_tab = tabDFTscan;
 		break;
 
 	case MODE_SSB:
@@ -2231,6 +2226,11 @@ void cb_mnuConfigPSM(Fl_Menu_*, void*) {
 void cb_mnuConfigNotify(Fl_Menu_*, void*)
 {
 	notify_show();
+}
+
+void cb_mnuTestSignals(Fl_Menu_*, void*)
+{
+	show_testdialog();
 }
 
 void cb_mnuUI(Fl_Menu_*, void *) {
@@ -2970,10 +2970,13 @@ void cb_mnuViewer(Fl_Menu_ *, void *) {
 }
 
 void cb_mnuShowSSDVRX(Fl_Menu_ *, void *) {
-	if (ssdv)
-	{
+	if (ssdv) {
 		ssdv->show();
 	}
+}
+
+void cb_mnuSpectrum (Fl_Menu_ *, void *) {
+	open_spectrum_viewer();
 }
 
 void cb_mnuShowCountries(Fl_Menu_ *, void *)
@@ -4994,7 +4997,6 @@ static Fl_Menu_Item menu_[] = {
 {0,0,0,0,0,0,0,0,0},
 
 { mode_info[MODE_WWV].name, 0, cb_init_mode, (void *)MODE_WWV, 0, FL_NORMAL_LABEL, 0, 14, 0},
-{ mode_info[MODE_FFTSCAN].name, 0, cb_init_mode, (void *)MODE_FFTSCAN, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { mode_info[MODE_ANALYSIS].name, 0, cb_init_mode, (void *)MODE_ANALYSIS, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 
 { mode_info[MODE_NULL].name, 0, cb_init_mode, (void *)MODE_NULL, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -5028,7 +5030,8 @@ static Fl_Menu_Item menu_[] = {
 { icons::make_icon_label(_("IO")), 0,  (Fl_Callback*)cb_mnuConfigIO, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Misc")), 0,  (Fl_Callback*)cb_mnuConfigMisc, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Notifications")), 0,  (Fl_Callback*)cb_mnuConfigNotify, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("PSM")), 0,  (Fl_Callback*)cb_mnuConfigPSM, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("PSM")), 0,  (Fl_Callback*)cb_mnuConfigPSM, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Test Signals")), 0, (Fl_Callback*)cb_mnuTestSignals, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 { _("Contest/Logging"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
@@ -5044,21 +5047,23 @@ static Fl_Menu_Item menu_[] = {
 { VIEW_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 
 { icons::make_icon_label(_("SSDV RX")), 's', (Fl_Callback*)cb_mnuShowSSDVRX, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("View/Hide Channels")), 'v', (Fl_Callback*)cb_view_hide_channels, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("View/Hide 48 macros")), 0, (Fl_Callback*)cb_48macros, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("View/Hide Channels")), 'c', (Fl_Callback*)cb_view_hide_channels, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Signal browser")), 'b', (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
-{ icons::make_icon_label(_("DX Cluster")), 0, (Fl_Callback*)cb_dxc_viewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("View/Hide 48 macros")), 'm', (Fl_Callback*)cb_48macros, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
-{ icons::make_icon_label(_("Floating scope"), utilities_system_monitor_icon), 'd', (Fl_Callback*)cb_mnuDigiscope, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("DX Cluster")), 'd', (Fl_Callback*)cb_dxc_viewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
-{ icons::make_icon_label(MFSK_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuPicViewer, 0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(THOR_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuThorViewRaw,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(IFKP_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuIfkpViewRaw,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(WEFAX_RX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_rx,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(WEFAX_TX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Floating scope"), utilities_system_monitor_icon), 'f', (Fl_Callback*)cb_mnuDigiscope, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Spectrum dialog"), utilities_system_monitor_icon), 's', (Fl_Callback*)cb_mnuSpectrum, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
-{ icons::make_icon_label(_("Signal browser")), 's', (Fl_Callback*)cb_mnuViewer, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(COUNTRIES_MLABEL), 'o', (Fl_Callback*)cb_mnuShowCountries, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(MFSK_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)cb_mnuPicViewer, 0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(THOR_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)cb_mnuThorViewRaw,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(IFKP_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)cb_mnuIfkpViewRaw,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(WEFAX_RX_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_rx,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(WEFAX_TX_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(COUNTRIES_MLABEL), 0, (Fl_Callback*)cb_mnuShowCountries, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
 { icons::make_icon_label(_("Rig/Log Controls")), 0, 0, 0, FL_SUBMENU, _FL_MULTI_LABEL, 0, 14, 0},
 { RIGLOG_FULL_MLABEL, 0, (Fl_Callback*)cb_mnu_riglog_all, 0, FL_MENU_RADIO, FL_NORMAL_LABEL, 0, 14, 0},
@@ -8304,7 +8309,6 @@ static Fl_Menu_Item alt_menu_[] = {
 {0,0,0,0,0,0,0,0,0},
 
 { mode_info[MODE_WWV].name, 0, cb_init_mode, (void *)MODE_WWV, 0, FL_NORMAL_LABEL, 0, 14, 0},
-{ mode_info[MODE_FFTSCAN].name, 0, cb_init_mode, (void *)MODE_FFTSCAN, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { mode_info[MODE_ANALYSIS].name, 0, cb_init_mode, (void *)MODE_ANALYSIS, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 
 { mode_info[MODE_NULL].name, 0, cb_init_mode, (void *)MODE_NULL, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -8329,18 +8333,20 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("IO")), 0,  (Fl_Callback*)cb_mnuConfigIO, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("PSM")), 0,  (Fl_Callback*)cb_mnuConfigPSM, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Notifications")), 0,  (Fl_Callback*)cb_mnuConfigNotify, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Test Signals")), 0, (Fl_Callback*)cb_mnuTestSignals, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Save Config"), save_icon), 0, (Fl_Callback*)cb_mnuSaveConfig, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 { VIEW_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("SSDV RX")), 's', (Fl_Callback*)cb_mnuShowSSDVRX, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(MFSK_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuPicViewer, 0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(THOR_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuThorViewRaw,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(IFKP_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)cb_mnuIfkpViewRaw,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(WEFAX_RX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_rx,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(WEFAX_TX_IMAGE_MLABEL, image_icon), 'm', (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(MFSK_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)cb_mnuPicViewer, 0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(THOR_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)cb_mnuThorViewRaw,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(IFKP_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)cb_mnuIfkpViewRaw,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(WEFAX_RX_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_rx,0, FL_MENU_INACTIVE, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(WEFAX_TX_IMAGE_MLABEL, image_icon), 0, (Fl_Callback*)wefax_pic::cb_mnu_pic_viewer_tx,0, FL_MENU_INACTIVE | FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
-{ icons::make_icon_label(_("Signal Browser")), 's', (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Signal Browser")), 0, (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Spectrum dialog")), 0, (Fl_Callback*)cb_mnuSpectrum, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
 { icons::make_icon_label(_("Floating scope"), utilities_system_monitor_icon), 'd', (Fl_Callback*)cb_mnuDigiscope, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { DOCKEDSCOPE_MLABEL, 0, (Fl_Callback*)cb_mnuAltDockedscope, 0, FL_MENU_TOGGLE, FL_NORMAL_LABEL, 0, 14, 0},
@@ -10913,8 +10919,7 @@ void psm_set_defaults(void)
 //-----------------------------------------------------------------------------
 void set_CSV(int start)
 {
-	if (! (active_modem->get_mode() == MODE_ANALYSIS ||
-			active_modem->get_mode() == MODE_FFTSCAN) ) return;
+	if (active_modem->get_mode() != MODE_ANALYSIS) return;
 	if (start == 1)
 		active_modem->start_csv();
 	else if (start == 0)
