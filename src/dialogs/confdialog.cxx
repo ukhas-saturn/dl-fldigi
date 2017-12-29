@@ -674,6 +674,13 @@ static void cb_btn_tx_show_timer(Fl_Check_Button* o, void*) {
 progdefaults.changed = true;
 }
 
+Fl_Spinner *val_tx_timeout=(Fl_Spinner *)0;
+
+static void cb_val_tx_timeout(Fl_Spinner* o, void*) {
+  progdefaults.tx_timeout=o->value();
+progdefaults.changed = true;
+}
+
 Fl_Group *tabLogServer=(Fl_Group *)0;
 
 Fl_Tabs *tabsLog=(Fl_Tabs *)0;
@@ -776,6 +783,7 @@ Fl_Check_Button *btnRXClicks=(Fl_Check_Button *)0;
 
 static void cb_btnRXClicks(Fl_Check_Button* o, void*) {
   progdefaults.rxtext_clicks_qso_data = o->value();
+btnRXClicks2->value(progdefaults.rxtext_clicks_qso_data);
 progdefaults.changed = true;
 }
 
@@ -1076,6 +1084,7 @@ else progdefaults.logging = LOG_QSO;
 btn_fd_contest->value(0);
 btn_cqww_contest->value(0);
 btn_bart_contest->value(0);
+btn_cwss_contest->value(0);
 UI_select();
 progdefaults.changed = true;
 }
@@ -1088,6 +1097,7 @@ else progdefaults.logging = LOG_QSO;
 btn_cqww_contest->value(0);
 btn_bart_contest->value(0);
 btn_generic_contest->value(0);
+btn_cwss_contest->value(0);
 UI_select();
 progdefaults.changed = true;
 }
@@ -1100,6 +1110,7 @@ else progdefaults.logging = LOG_QSO;
 btn_fd_contest->value(0);
 btn_bart_contest->value(0);
 btn_generic_contest->value(0);
+btn_cwss_contest->value(0);
 UI_select();
 progdefaults.changed = true;
 }
@@ -1112,7 +1123,36 @@ else progdefaults.logging = LOG_QSO;
 btn_fd_contest->value(0);
 btn_cqww_contest->value(0);
 btn_generic_contest->value(0);
+btn_cwss_contest->value(0);
 UI_select();
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_cwss_contest=(Fl_Check_Button *)0;
+
+static void cb_btn_cwss_contest(Fl_Check_Button* o, void*) {
+  if (o->value()) progdefaults.logging = LOG_CWSS;
+else progdefaults.logging = LOG_QSO;
+btn_generic_contest->value(0);
+btn_fd_contest->value(0);
+btn_cqww_contest->value(0);
+btn_bart_contest->value(0);
+UI_select();
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btnRXClicks2=(Fl_Check_Button *)0;
+
+static void cb_btnRXClicks2(Fl_Check_Button* o, void*) {
+  progdefaults.rxtext_clicks_qso_data = o->value();
+btnRXClicks->value(progdefaults.rxtext_clicks_qso_data);
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_clear_fields=(Fl_Check_Button *)0;
+
+static void cb_btn_clear_fields(Fl_Check_Button* o, void*) {
+  progdefaults.clear_fields=o->value();
 progdefaults.changed = true;
 }
 
@@ -2860,6 +2900,26 @@ Fl_ListBox *listboxWaterfallWheelAction=(Fl_ListBox *)0;
 
 static void cb_listboxWaterfallWheelAction(Fl_ListBox* o, void*) {
   progdefaults.WaterfallWheelAction = o->index();
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btnWFspectrum_center=(Fl_Check_Button *)0;
+
+static void cb_btnWFspectrum_center(Fl_Check_Button* o, void*) {
+  progdefaults.wf_spectrum_center = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Spinner *wfl_spectrum_range=(Fl_Spinner *)0;
+
+static void cb_wfl_spectrum_range(Fl_Spinner* o, void*) {
+  progdefaults.wf_spectrum_range = o->value();
+}
+
+Fl_Check_Button *btnWFspectrum_dbvals=(Fl_Check_Button *)0;
+
+static void cb_btnWFspectrum_dbvals(Fl_Check_Button* o, void*) {
+  progdefaults.wf_spectrum_dbvals = o->value();
 progdefaults.changed = true;
 }
 
@@ -8252,22 +8312,22 @@ Fl_Double_Window* ConfigureDialog() {
           } // Fl_Group* tabBrowser
           { tabUserInterface = new Fl_Group(0, 50, 600, 340, _("General"));
             tabUserInterface->hide();
-            { Fl_Group* o = new Fl_Group(40, 77, 520, 76);
+            { Fl_Group* o = new Fl_Group(5, 59, 590, 76);
               o->box(FL_ENGRAVED_FRAME);
-              { Fl_Check_Button* o = btnShowTooltips = new Fl_Check_Button(75, 90, 120, 20, _("Show tooltips"));
+              { Fl_Check_Button* o = btnShowTooltips = new Fl_Check_Button(75, 72, 120, 20, _("Show tooltips"));
                 btnShowTooltips->tooltip(_("Enable / disable tooltips"));
                 btnShowTooltips->down_box(FL_DOWN_BOX);
                 btnShowTooltips->value(1);
                 btnShowTooltips->callback((Fl_Callback*)cb_btnShowTooltips);
                 o->value(progdefaults.tooltips);
               } // Fl_Check_Button* btnShowTooltips
-              { Fl_Check_Button* o = chkMenuIcons = new Fl_Check_Button(219, 90, 150, 20, _("Show menu icons"));
+              { Fl_Check_Button* o = chkMenuIcons = new Fl_Check_Button(219, 72, 150, 20, _("Show menu icons"));
                 chkMenuIcons->tooltip(_("Enable / disable icons on menus"));
                 chkMenuIcons->down_box(FL_DOWN_BOX);
                 chkMenuIcons->callback((Fl_Callback*)cb_chkMenuIcons);
                 o->value(progdefaults.menuicons);
               } // Fl_Check_Button* chkMenuIcons
-              { Fl_ListBox* o = listboxScheme = new Fl_ListBox(193, 119, 80, 20, _("UI scheme"));
+              { Fl_ListBox* o = listboxScheme = new Fl_ListBox(193, 101, 80, 20, _("UI scheme"));
                 listboxScheme->tooltip(_("Change application look and feel"));
                 listboxScheme->box(FL_DOWN_BOX);
                 listboxScheme->color(FL_BACKGROUND2_COLOR);
@@ -8286,11 +8346,11 @@ Fl_Double_Window* ConfigureDialog() {
                        o->labelsize(FL_NORMAL_SIZE);
                 listboxScheme->end();
               } // Fl_ListBox* listboxScheme
-              { bVisibleModes = new Fl_Button(58, 119, 110, 20, _("Visible modes"));
+              { bVisibleModes = new Fl_Button(58, 101, 110, 20, _("Visible modes"));
                 bVisibleModes->tooltip(_("Select modes for menu access"));
                 bVisibleModes->callback((Fl_Callback*)cb_bVisibleModes);
               } // Fl_Button* bVisibleModes
-              { Fl_ListBox* o = listbox_language = new Fl_ListBox(375, 119, 170, 20, _("UI language"));
+              { Fl_ListBox* o = listbox_language = new Fl_ListBox(375, 101, 170, 20, _("UI language"));
                 listbox_language->tooltip(_("Changes take effect on next program startup"));
                 listbox_language->box(FL_DOWN_BOX);
                 listbox_language->color(FL_BACKGROUND2_COLOR);
@@ -8307,71 +8367,79 @@ Fl_Double_Window* ConfigureDialog() {
               } // Fl_ListBox* listbox_language
               o->end();
             } // Fl_Group* o
-            { Fl_Group* o = new Fl_Group(40, 154, 520, 34);
+            { Fl_Group* o = new Fl_Group(5, 141, 590, 34);
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_rx_lowercase = new Fl_Check_Button(75, 161, 389, 20, _("Print CW / RTTY / THROB / CONTESTIA in lowercase"));
+              { Fl_Check_Button* o = btn_rx_lowercase = new Fl_Check_Button(45, 148, 441, 20, _("Print CW / RTTY / THROB / CONTESTIA in lowercase"));
                 btn_rx_lowercase->down_box(FL_DOWN_BOX);
                 btn_rx_lowercase->callback((Fl_Callback*)cb_btn_rx_lowercase);
                 o->value(progdefaults.rx_lowercase);
               } // Fl_Check_Button* btn_rx_lowercase
               o->end();
             } // Fl_Group* o
-            { Fl_Group* o = new Fl_Group(40, 189, 260, 34);
+            { Fl_Group* o = new Fl_Group(5, 177, 294, 65);
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_tx_lowercase = new Fl_Check_Button(75, 197, 199, 20, _("Transmit lower case text"));
+              { Fl_Check_Button* o = btn_tx_lowercase = new Fl_Check_Button(40, 186, 199, 20, _("Transmit lower case text"));
                 btn_tx_lowercase->down_box(FL_DOWN_BOX);
                 btn_tx_lowercase->callback((Fl_Callback*)cb_btn_tx_lowercase);
                 o->value(progdefaults.tx_lowercase);
               } // Fl_Check_Button* btn_tx_lowercase
               o->end();
             } // Fl_Group* o
-            { Fl_Group* o = new Fl_Group(40, 224, 520, 76, _("Exit prompts"));
+            { Fl_Group* o = new Fl_Group(5, 244, 590, 76, _("Exit prompts"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_save_config_on_exit = new Fl_Check_Button(75, 248, 233, 20, _("Prompt to save Configuration"));
+              { Fl_Check_Button* o = btn_save_config_on_exit = new Fl_Check_Button(45, 268, 264, 20, _("Prompt to save Configuration"));
                 btn_save_config_on_exit->down_box(FL_DOWN_BOX);
                 btn_save_config_on_exit->callback((Fl_Callback*)cb_btn_save_config_on_exit);
                 o->value(progdefaults.SaveConfig);
               } // Fl_Check_Button* btn_save_config_on_exit
-              { Fl_Check_Button* o = btn2_save_macros_on_exit = new Fl_Check_Button(75, 270, 233, 20, _("Prompt to save macro file"));
+              { Fl_Check_Button* o = btn2_save_macros_on_exit = new Fl_Check_Button(45, 290, 264, 20, _("Prompt to save macro file"));
                 btn2_save_macros_on_exit->tooltip(_("Write current macro set on program exit"));
                 btn2_save_macros_on_exit->down_box(FL_DOWN_BOX);
                 btn2_save_macros_on_exit->callback((Fl_Callback*)cb_btn2_save_macros_on_exit);
                 o->value(progdefaults.SaveMacros);
               } // Fl_Check_Button* btn2_save_macros_on_exit
-              { Fl_Check_Button* o = btn2NagMe = new Fl_Check_Button(319, 248, 166, 20, _("Prompt to save log"));
+              { Fl_Check_Button* o = btn2NagMe = new Fl_Check_Button(322, 268, 188, 20, _("Prompt to save log"));
                 btn2NagMe->tooltip(_("Bug me about saving log entries"));
                 btn2NagMe->down_box(FL_DOWN_BOX);
                 btn2NagMe->callback((Fl_Callback*)cb_btn2NagMe);
                 o->value(progdefaults.NagMe);
               } // Fl_Check_Button* btn2NagMe
-              { Fl_Check_Button* o = btn2_confirm_exit = new Fl_Check_Button(319, 270, 200, 20, _("Confirm exit"));
+              { Fl_Check_Button* o = btn2_confirm_exit = new Fl_Check_Button(322, 290, 226, 20, _("Confirm exit"));
                 btn2_confirm_exit->down_box(FL_DOWN_BOX);
                 btn2_confirm_exit->callback((Fl_Callback*)cb_btn2_confirm_exit);
                 o->value(progdefaults.confirmExit);
               } // Fl_Check_Button* btn2_confirm_exit
               o->end();
             } // Fl_Group* o
-            { Fl_Group* o = new Fl_Group(40, 301, 520, 52, _("Check for updates"));
+            { Fl_Group* o = new Fl_Group(5, 323, 590, 60, _("Check for updates"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_check_for_updates = new Fl_Check_Button(75, 324, 324, 20, _("Check for updates when starting program"));
+              { Fl_Check_Button* o = btn_check_for_updates = new Fl_Check_Button(45, 346, 367, 20, _("Check for updates when starting program"));
                 btn_check_for_updates->down_box(FL_DOWN_BOX);
                 btn_check_for_updates->callback((Fl_Callback*)cb_btn_check_for_updates);
                 o->value(progdefaults.check_for_updates);
               } // Fl_Check_Button* btn_check_for_updates
               o->end();
             } // Fl_Group* o
-            { Fl_Group* o = new Fl_Group(300, 189, 260, 34);
+            { Fl_Group* o = new Fl_Group(300, 177, 295, 65);
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_tx_show_timer = new Fl_Check_Button(319, 195, 223, 20, _("Show TX timer"));
+              { Fl_Check_Button* o = btn_tx_show_timer = new Fl_Check_Button(319, 186, 219, 20, _("Show TX timer"));
                 btn_tx_show_timer->down_box(FL_DOWN_BOX);
                 btn_tx_show_timer->callback((Fl_Callback*)cb_btn_tx_show_timer);
                 o->value(progdefaults.show_tx_timer);
               } // Fl_Check_Button* btn_tx_show_timer
+              { Fl_Spinner* o = val_tx_timeout = new Fl_Spinner(320, 211, 45, 24, _("TX deadmen timeout (mins)"));
+                val_tx_timeout->minimum(0);
+                val_tx_timeout->maximum(60);
+                val_tx_timeout->value(10);
+                val_tx_timeout->callback((Fl_Callback*)cb_val_tx_timeout);
+                val_tx_timeout->align(Fl_Align(FL_ALIGN_RIGHT));
+                o->value(progdefaults.tx_timeout);
+              } // Fl_Spinner* val_tx_timeout
               o->end();
             } // Fl_Group* o
             tabUserInterface->end();
@@ -8856,30 +8924,47 @@ ab and newline are automatically included."));
             { Fl_Group* o = new Fl_Group(5, 307, 590, 78, _("Contest Logging"));
               o->box(FL_ENGRAVED_BOX);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_generic_contest = new Fl_Check_Button(30, 335, 70, 20, _("Generic"));
+              { Fl_Check_Button* o = btn_generic_contest = new Fl_Check_Button(30, 329, 70, 20, _("Generic"));
                 btn_generic_contest->tooltip(_("Use generic contest fields"));
                 btn_generic_contest->down_box(FL_DOWN_BOX);
                 btn_generic_contest->callback((Fl_Callback*)cb_btn_generic_contest);
                 o->value(progdefaults.logging == LOG_CONT);
               } // Fl_Check_Button* btn_generic_contest
-              { Fl_Check_Button* o = btn_fd_contest = new Fl_Check_Button(175, 335, 70, 20, _("Field Day"));
+              { Fl_Check_Button* o = btn_fd_contest = new Fl_Check_Button(126, 329, 70, 20, _("Field Day"));
                 btn_fd_contest->tooltip(_("Use Field Day Contest Fields"));
                 btn_fd_contest->down_box(FL_DOWN_BOX);
                 btn_fd_contest->callback((Fl_Callback*)cb_btn_fd_contest);
                 o->value(progdefaults.logging == LOG_FD);
               } // Fl_Check_Button* btn_fd_contest
-              { Fl_Check_Button* o = btn_cqww_contest = new Fl_Check_Button(320, 335, 70, 20, _("CQWW RTTY"));
+              { Fl_Check_Button* o = btn_cqww_contest = new Fl_Check_Button(237, 329, 70, 20, _("CQWW RTTY"));
                 btn_cqww_contest->tooltip(_("Use CQWW Fields"));
                 btn_cqww_contest->down_box(FL_DOWN_BOX);
                 btn_cqww_contest->callback((Fl_Callback*)cb_btn_cqww_contest);
                 o->value(progdefaults.logging == LOG_CQWW);
               } // Fl_Check_Button* btn_cqww_contest
-              { Fl_Check_Button* o = btn_bart_contest = new Fl_Check_Button(465, 335, 70, 20, _("BARTG RTTY"));
+              { Fl_Check_Button* o = btn_bart_contest = new Fl_Check_Button(364, 329, 70, 20, _("BARTG RTTY"));
                 btn_bart_contest->tooltip(_("Use generic contest fields"));
                 btn_bart_contest->down_box(FL_DOWN_BOX);
                 btn_bart_contest->callback((Fl_Callback*)cb_btn_bart_contest);
                 o->value(progdefaults.logging == LOG_BART);
               } // Fl_Check_Button* btn_bart_contest
+              { Fl_Check_Button* o = btn_cwss_contest = new Fl_Check_Button(495, 329, 70, 20, _("CW SS"));
+                btn_cwss_contest->tooltip(_("CW Sweepstakes"));
+                btn_cwss_contest->down_box(FL_DOWN_BOX);
+                btn_cwss_contest->callback((Fl_Callback*)cb_btn_cwss_contest);
+                o->value(progdefaults.logging == LOG_CWSS);
+              } // Fl_Check_Button* btn_cwss_contest
+              { Fl_Check_Button* o = btnRXClicks2 = new Fl_Check_Button(30, 356, 243, 20, _("Single-click to capture Rx word"));
+                btnRXClicks2->tooltip(_("Enable for single click capure of text in Rx panel"));
+                btnRXClicks2->down_box(FL_DOWN_BOX);
+                btnRXClicks2->callback((Fl_Callback*)cb_btnRXClicks2);
+                o->value(progdefaults.rxtext_clicks_qso_data);
+              } // Fl_Check_Button* btnRXClicks2
+              { Fl_Check_Button* o = btn_clear_fields = new Fl_Check_Button(320, 358, 238, 15, _("Clear fields with CALL capture"));
+                btn_clear_fields->down_box(FL_DOWN_BOX);
+                btn_clear_fields->callback((Fl_Callback*)cb_btn_clear_fields);
+                o->value(progdefaults.clear_fields);
+              } // Fl_Check_Button* btn_clear_fields
               o->end();
             } // Fl_Group* o
             tabContest->end();
@@ -9920,27 +10005,27 @@ i on a\ntouch screen device such as a tablet."));
           } // Fl_Group* o
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Mouse"));
             o->hide();
-            { Fl_Group* o = new Fl_Group(55, 73, 490, 170);
+            { Fl_Group* o = new Fl_Group(10, 60, 580, 170);
               o->box(FL_ENGRAVED_FRAME);
-              { Fl_Check_Button* o = btnWaterfallHistoryDefault = new Fl_Check_Button(65, 87, 340, 20, _("Left or right click always replays audio history"));
+              { Fl_Check_Button* o = btnWaterfallHistoryDefault = new Fl_Check_Button(65, 75, 340, 20, _("Left or right click always replays audio history"));
                 btnWaterfallHistoryDefault->tooltip(_("Replay trackline audio"));
                 btnWaterfallHistoryDefault->down_box(FL_DOWN_BOX);
                 btnWaterfallHistoryDefault->callback((Fl_Callback*)cb_btnWaterfallHistoryDefault);
                 o->value(progdefaults.WaterfallHistoryDefault);
               } // Fl_Check_Button* btnWaterfallHistoryDefault
-              { Fl_Check_Button* o = btnWaterfallQSY = new Fl_Check_Button(65, 117, 380, 20, _("Dragging on the waterfall scale changes frequency"));
+              { Fl_Check_Button* o = btnWaterfallQSY = new Fl_Check_Button(65, 105, 380, 20, _("Dragging on the waterfall scale changes frequency"));
                 btnWaterfallQSY->tooltip(_("Enable drag cursor on waterfall scale"));
                 btnWaterfallQSY->down_box(FL_DOWN_BOX);
                 btnWaterfallQSY->callback((Fl_Callback*)cb_btnWaterfallQSY);
                 o->value(progdefaults.WaterfallQSY);
               } // Fl_Check_Button* btnWaterfallQSY
-              { Fl_Check_Button* o = btnWaterfallClickInsert = new Fl_Check_Button(65, 159, 225, 20, _("Insert text on single left click"));
+              { Fl_Check_Button* o = btnWaterfallClickInsert = new Fl_Check_Button(65, 147, 225, 20, _("Insert text on single left click"));
                 btnWaterfallClickInsert->tooltip(_("Insert special text in Rx panel\nwhen waterfall clicked"));
                 btnWaterfallClickInsert->down_box(FL_DOWN_BOX);
                 btnWaterfallClickInsert->callback((Fl_Callback*)cb_btnWaterfallClickInsert);
                 o->value(progdefaults.WaterfallClickInsert);
               } // Fl_Check_Button* btnWaterfallClickInsert
-              { inpWaterfallClickText = new Fl_Input2(351, 147, 180, 50);
+              { inpWaterfallClickText = new Fl_Input2(351, 135, 180, 50);
                 inpWaterfallClickText->tooltip(_("The string <FREQ> is replaced with\nthe current modem and frequency"));
                 inpWaterfallClickText->box(FL_DOWN_BOX);
                 inpWaterfallClickText->color(FL_BACKGROUND2_COLOR);
@@ -9955,7 +10040,7 @@ i on a\ntouch screen device such as a tablet."));
               } // Fl_Input2* inpWaterfallClickText
               o->end();
             } // Fl_Group* o
-            { Fl_ListBox* o = listboxWaterfallWheelAction = new Fl_ListBox(65, 207, 150, 22, _("Wheel action"));
+            { Fl_ListBox* o = listboxWaterfallWheelAction = new Fl_ListBox(65, 195, 150, 22, _("Wheel action"));
               listboxWaterfallWheelAction->tooltip(_("Select how the mouse wheel\nbehaves inside the waterfall"));
               listboxWaterfallWheelAction->box(FL_DOWN_BOX);
               listboxWaterfallWheelAction->color(FL_BACKGROUND2_COLOR);
@@ -9970,6 +10055,32 @@ i on a\ntouch screen device such as a tablet."));
               o->labelsize(FL_NORMAL_SIZE);
               listboxWaterfallWheelAction->end();
             } // Fl_ListBox* listboxWaterfallWheelAction
+            { Fl_Group* o = new Fl_Group(10, 233, 580, 150, _("Spectrum Scope / Waterfall interaction"));
+              o->box(FL_ENGRAVED_BOX);
+              o->align(Fl_Align(FL_ALIGN_TOP|FL_ALIGN_INSIDE));
+              { Fl_Check_Button* o = btnWFspectrum_center = new Fl_Check_Button(65, 265, 340, 20, _("left click transfers frequency to scope center frequency"));
+                btnWFspectrum_center->tooltip(_("left click on WF recenters spectrum scope"));
+                btnWFspectrum_center->down_box(FL_DOWN_BOX);
+                btnWFspectrum_center->callback((Fl_Callback*)cb_btnWFspectrum_center);
+                o->value(progdefaults.wf_spectrum_center);
+              } // Fl_Check_Button* btnWFspectrum_center
+              { Fl_Spinner* o = wfl_spectrum_range = new Fl_Spinner(65, 300, 50, 24, _("left click spectrum range *= mode bandwidth"));
+                wfl_spectrum_range->tooltip(_("Initial spectrum range is NN times the modem bw"));
+                wfl_spectrum_range->minimum(2);
+                wfl_spectrum_range->maximum(20);
+                wfl_spectrum_range->value(10);
+                wfl_spectrum_range->callback((Fl_Callback*)cb_wfl_spectrum_range);
+                wfl_spectrum_range->align(Fl_Align(FL_ALIGN_RIGHT));
+                o->value(progdefaults.wf_spectrum_range);
+              } // Fl_Spinner* wfl_spectrum_range
+              { Fl_Check_Button* o = btnWFspectrum_dbvals = new Fl_Check_Button(65, 340, 340, 20, _("use waterfall range/limit values"));
+                btnWFspectrum_dbvals->tooltip(_("values left/below waterfall"));
+                btnWFspectrum_dbvals->down_box(FL_DOWN_BOX);
+                btnWFspectrum_dbvals->callback((Fl_Callback*)cb_btnWFspectrum_dbvals);
+                o->value(progdefaults.wf_spectrum_dbvals);
+              } // Fl_Check_Button* btnWFspectrum_dbvals
+              o->end();
+            } // Fl_Group* o
             o->end();
           } // Fl_Group* o
           tabsWaterfall->end();
@@ -12394,6 +12505,7 @@ le Earth)"));
         { tabsRig = new Fl_Tabs(0, 25, 600, 365);
           tabsRig->selection_color(FL_LIGHT1);
           { tabFLRIG = new Fl_Group(0, 50, 600, 340, _("flrig"));
+            tabFLRIG->hide();
             { Fl_Group* o = new Fl_Group(10, 210, 580, 90, _("\"Disable PTT keys modem if multiple instances of fldigi (client)\nare connec\
 ted to a single flrig (server)."));
               o->box(FL_ENGRAVED_BOX);
@@ -12465,7 +12577,6 @@ i.e. localhost"));
             tabFLRIG->end();
           } // Fl_Group* tabFLRIG
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("RigCAT"));
-            o->hide();
             { chkUSERIGCAT = new Fl_Check_Button(245, 60, 110, 20, _("Use RigCAT"));
               chkUSERIGCAT->tooltip(_("RigCAT used for rig control"));
               chkUSERIGCAT->down_box(FL_DOWN_BOX);
@@ -14059,6 +14170,7 @@ gured on the\n\"Notifications\" configure dialog."));
         { tabsMisc = new Fl_Tabs(0, 25, 600, 365);
           tabsMisc->selection_color(FL_LIGHT1);
           { tabCPUspeed = new Fl_Group(0, 50, 600, 340, _("CPU"));
+            tabCPUspeed->hide();
             { Fl_Group* o = new Fl_Group(55, 75, 490, 51);
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -14262,7 +14374,6 @@ gured on the\n\"Notifications\" configure dialog."));
             tabPskmail->end();
           } // Fl_Group* tabPskmail
           { tabSpot = new Fl_Group(0, 50, 600, 340, _("Spotting"));
-            tabSpot->hide();
             { Fl_Group* o = new Fl_Group(55, 72, 490, 254, _("PSK Reporter"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));

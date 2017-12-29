@@ -1311,6 +1311,8 @@ void thor::send_image() {
 
 	REQ(thor_clear_tximage);
 
+	stop_deadman();
+
 	double black[symlen];
 
 	memset(black, 0, sizeof(*black) * symlen);
@@ -1372,7 +1374,7 @@ void thor::send_image() {
 			}
 		}
 	}
-
+	start_deadman();
 }
 
 void thor::thor_send_image(std::string image_str) {
@@ -1435,3 +1437,42 @@ void thor::thor_send_avatar() {
 		start_tx();
 	}
 }
+
+void thor::m_thor_send_avatar()
+{
+	std::string mycall = progdefaults.myCall;
+	for (size_t n = 0; n < mycall.length(); n++)
+		mycall[n] = tolower(mycall[n]);
+	std::string fname = AvatarDir;
+	fname.append(mycall).append(".png");
+
+	my_avatar_img = Fl_Shared_Image::get(fname.c_str(), 59, 74);
+	if (!my_avatar_img) return;
+	unsigned char *img_data = (unsigned char *)my_avatar_img->data()[0];
+	memset(avatar, 0, sizeof(avatar));
+	int D = my_avatar_img->d();
+
+	if (D == 3)
+		memcpy(avatar, img_data, 59*74*3);
+	else if (D == 4) {
+		int i, j, k;
+		for (i = 0; i < 59*74; i++) {
+			j = i*3; k = i*4;
+			avatar[j] = img_data[k];
+			avatar[j+1] = img_data[k+1];
+			avatar[j+2] = img_data[k+2];
+		}
+	} else if (D == 1) {
+		int i, j;
+		for (i = 0; i < 59*74; i++) {
+			j = i * 3;
+			avatar[j] = avatar[j+1] = avatar[j+2] = img_data[i];
+		}
+	} else {
+		return;
+	}
+
+	avatarheader = "\npic%A";
+	thor_send_avatar();
+}
+

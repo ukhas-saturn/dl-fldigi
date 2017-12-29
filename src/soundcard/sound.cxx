@@ -1053,7 +1053,8 @@ SoundPort::SoundPort(const char *in_dev, const char *out_dev) : req_sample_rate(
 #endif
 	for (size_t i = 0; i < sizeof(sems)/sizeof(*sems); i++) {
 #if USE_NAMED_SEMAPHORES
-		snprintf(sname, sizeof(sname), "%" PRIuSZ "-%u-%s", i, getpid(), PACKAGE_TARNAME);
+		unsigned int un = i;
+		snprintf(sname, sizeof(sname), "%u-%u-%s", un, getpid(), PACKAGE_TARNAME);
 		if ((*sems[i] = sem_open(sname, O_CREAT | O_EXCL, 0600, 0)) == (sem_t*)SEM_FAILED) {
 			pa_perror(errno, sname);
 			throw SndException(errno);
@@ -1136,52 +1137,52 @@ SoundPort::~SoundPort()
 
 int SoundPort::Open(int mode, int freq)
 {
-    int old_sample_rate = (int)req_sample_rate;
-    req_sample_rate = sample_frequency = freq;
+	int old_sample_rate = (int)req_sample_rate;
+	req_sample_rate = sample_frequency = freq;
 
-    // do we need to (re)initialise the streams?
-    int ret = 0;
-    int sr[2] = { progdefaults.in_sample_rate, progdefaults.out_sample_rate };
+	// do we need to (re)initialise the streams?
+	int ret = 1;
+	int sr[2] = { progdefaults.in_sample_rate, progdefaults.out_sample_rate };
 
-    // initialize stream if it is a JACK device, regardless of mode
-    device_iterator idev;
-    int device_type = 0;
-    if (mode == O_WRONLY && (idev = name_to_device(sd[0].device, 0)) != devs.end() &&
-        (device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
-        mode = O_RDWR;
-    if (mode == O_RDONLY && (idev = name_to_device(sd[1].device, 1)) != devs.end() &&
-        (device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
-        mode = O_RDWR;
+	// initialize stream if it is a JACK device, regardless of mode
+	device_iterator idev;
+	int device_type = 0;
+	if (mode == O_WRONLY && (idev = name_to_device(sd[0].device, 0)) != devs.end() &&
+		(device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
+		mode = O_RDWR;
+	if (mode == O_RDONLY && (idev = name_to_device(sd[1].device, 1)) != devs.end() &&
+		(device_type = Pa_GetHostApiInfo((*idev)->hostApi)->type) == paJACK)
+		mode = O_RDWR;
 
-    size_t start = (mode == O_RDONLY || mode == O_RDWR) ? 0 : 1,
-    end = (mode == O_WRONLY || mode == O_RDWR) ? 1 : 0;
-    for (size_t i = start; i <= end; i++) {
-        if ( !(stream_active(i) && (Pa_GetHostApiInfo((*sd[i].idev)->hostApi)->type == paJACK ||
-                                    old_sample_rate == freq ||
-                                    sr[i] != SAMPLE_RATE_AUTO)) ) {
-            Close(i);
-            init_stream(i);
-            src_data_reset(i);
+	size_t start = (mode == O_RDONLY || mode == O_RDWR) ? 0 : 1,
+		end = (mode == O_WRONLY || mode == O_RDWR) ? 1 : 0;
+	for (size_t i = start; i <= end; i++) {
+		if ( !(stream_active(i) && (Pa_GetHostApiInfo((*sd[i].idev)->hostApi)->type == paJACK ||
+						old_sample_rate == freq ||
+						sr[i] != SAMPLE_RATE_AUTO)) ) {
+			Close(i);
+			init_stream(i);
+			src_data_reset(i);
 
-            // reset the semaphore
-            while (sem_trywait(sd[i].rwsem) == 0);
-            if (errno && errno != EAGAIN) {
-                pa_perror(errno, "open");
-                throw SndException(errno);
-            }
-            start_stream(i);
+			// reset the semaphore
+			while (sem_trywait(sd[i].rwsem) == 0);
+			if (errno && errno != EAGAIN) {
+				pa_perror(errno, "open failed");
+				throw SndException(errno);
+			}
+			start_stream(i);
 
-            ret = 1;
-        }
-        else {
-            pause_stream(i);
-            src_data_reset(i);
-            sd[i].state = spa_continue;
-        }
-    }
+			ret = 0;
+		}
+		else {
+			pause_stream(i);
+			src_data_reset(i);
+			sd[i].state = spa_continue;
+		}
+	}
 
-    static char pa_open_str[500];
-    snprintf(pa_open_str, sizeof(pa_open_str),
+	static char pa_open_str[500];
+	snprintf(pa_open_str, sizeof(pa_open_str),
 "\
 Port Audio open mode = %s\n\
 device type = %s\n\
@@ -1586,7 +1587,9 @@ void SoundPort::src_data_reset(unsigned dir)
 					MAX(req_sample_rate, sd[dir].dev_sample_rate) /
 					MIN(req_sample_rate, sd[dir].dev_sample_rate))),
 					8192);
-	LOG_VERBOSE("rbsize = %" PRIuSZ "", rbsize);
+	stringstream info;
+	info << "rbsize = " << rbsize;
+	LOG_VERBOSE("%s", info.str().c_str());
 	if (sd[dir].rb) delete sd[dir].rb;
 	sd[dir].rb = new ringbuffer<float>(rbsize);
 }

@@ -122,15 +122,6 @@ void xmlrpc_rig_set_qsy(long long rfc)
 //======================================================================
 
 //----------------------------------------------------------------------
-// To prevent a FLTK library thread deadlock on MacOSX
-//----------------------------------------------------------------------
-static void ptt_on_off_failure(void * ptt_flag)
-{
-    int flag = *((int *) ptt_flag);
-    fl_alert2("fldigi/flrig PTT %s failure", flag ? "ON" : "OFF");
-}
-
-//----------------------------------------------------------------------
 // push to talk
 //----------------------------------------------------------------------
 static bool wait_ptt = false; // wait for transceiver to respond
@@ -146,42 +137,47 @@ void exec_flrig_ptt() {
 		return;
 	}
 
-	XmlRpcValue val, result;
+	XmlRpcValue val, result, result2;
 	int resp, res;
 
 	try {
-// PTT on/off is critical 5 attempts with 10 verify reads per attempt
-		for (int i = 0; i < 5; i++) {
-			res = flrig_client->execute("rig.set_ptt", new_ptt, result, timeout);
-			if (res) {
-				for (int j = 0; j < 10; j++) {
-					MilliSleep(20);
-					res = flrig_client->execute("rig.get_ptt", XmlRpcValue(), result, 10);
-					if (res) {
-						resp = (int)result;
-						if (resp == new_ptt) {
-							wait_ptt = true;
-							wait_ptt_timeout = 10;
-							ptt_state = new_ptt;
-							LOG_VERBOSE("ptt %s in %d msec",
-								ptt_state ? "ON" : "OFF",
-								i*50 + (j + 1)*20);
-							new_ptt = -1;
-							return;
-						}
+//std::cout << "flrig_ptt " << new_ptt << std::endl;
+		res = flrig_client->execute("rig.set_ptt", new_ptt, result, timeout);
+		if (res) {
+			for (int j = 0; j < 5; j++) {
+				MilliSleep(100);
+				res = flrig_client->execute("rig.get_ptt", XmlRpcValue(), result2, 10);
+				if (res) {
+					resp = int(result2);
+//std::cout << "response (" << j+1 << ") " << resp << std::endl;
+					if (resp == new_ptt) {
+						wait_ptt = true;
+						wait_ptt_timeout = 10;
+						ptt_state = new_ptt;
+						LOG_VERBOSE("ptt %s in %d msec",
+							ptt_state ? "ON" : "OFF",
+							(j + 1)*50);//20);
+						new_ptt = -1;
+						return;
 					}
 				}
 			}
 		}
-	} catch (...) {}
+	} catch (...) {
+//std:cout << "catch error in rig.set_ptt" << std::endl;
+last_new_ptt = new_ptt;
+new_ptt = -1;
+wait_ptt = false;
+wait_ptt_timeout = 0;
+return;
+	}
 
 	wait_ptt = false;
 	wait_ptt_timeout = 0;
-	LOG_ERROR("%s", "rig.set_ptt failed (3)");
-    // FLTK thread dead lock on MacOSX. Call in main thread.
-    // fl_alert2("fldigi/flrig PTT %s failure", new_ptt ? "ON" : "OFF");
+//std::cout << "rig.set_ptt timeout" << std::endl;
+
+	LOG_ERROR("fldigi/flrig PTT %s failure", new_ptt ? "ON" : "OFF");
     last_new_ptt = new_ptt;
-    REQ(ptt_on_off_failure, (void *) &last_new_ptt);
 	new_ptt = -1;
 	return;
 }
@@ -197,7 +193,7 @@ void xmlrpc_rig_show_ptt(void *data)
 {
 	guard_lock flrig_lock(&mutex_flrig_ptt);
 	int on = reinterpret_cast<long>(data);
-	if (wf) {
+	if (wf && (trx_state != STATE_TUNE)) {
 		wf->xmtrcv->value(on);
 		wf->xmtrcv->do_callback();
 	}

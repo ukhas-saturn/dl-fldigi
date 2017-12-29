@@ -628,11 +628,20 @@ extern Fl_Input2	*inp_FD_section2;
 extern Fl_Input2	*inp_CQzone;
 extern Fl_Input2	*inp_CQstate;
 
+// CW Sweepstakes
+extern Fl_Input2	*inp_SS_SerialNoR;
+extern Fl_Input2	*inp_SS_Precedence;
+extern Fl_Input2	*inp_SS_Check;
+extern Fl_Input2	*inp_SS_Section;
+
 extern Fl_Double_Window	*dxcluster_viewer;
 
 // TOD clock
 extern void  TOD_init();
 extern void  TOD_close();
+extern void  start_deadman();
+extern void  stop_deadman();
+extern void  disable_deadman();
 
 //======================================================================
 //FeldHell resizable Rx character height

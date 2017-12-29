@@ -65,6 +65,8 @@ extern Fl_Check_Button *btn2NagMe;
 extern Fl_Check_Button *btn2_confirm_exit;
 extern Fl_Check_Button *btn_check_for_updates;
 extern Fl_Check_Button *btn_tx_show_timer;
+#include <FL/Fl_Spinner.H>
+extern Fl_Spinner *val_tx_timeout;
 extern Fl_Group *tabLogServer;
 extern Fl_Tabs *tabsLog;
 extern Fl_Group *grp_Log_QSO;
@@ -137,6 +139,9 @@ extern Fl_Check_Button *btn_generic_contest;
 extern Fl_Check_Button *btn_fd_contest;
 extern Fl_Check_Button *btn_cqww_contest;
 extern Fl_Check_Button *btn_bart_contest;
+extern Fl_Check_Button *btn_cwss_contest;
+extern Fl_Check_Button *btnRXClicks2;
+extern Fl_Check_Button *btn_clear_fields;
 extern Fl_Group *tabMBars;
 extern Fl_Check_Button *btnMacroMouseWheel;
 #include <FL/Fl_Counter.H>
@@ -300,6 +305,9 @@ extern Fl_Check_Button *btnWaterfallQSY;
 extern Fl_Check_Button *btnWaterfallClickInsert;
 extern Fl_Input2 *inpWaterfallClickText;
 extern Fl_ListBox *listboxWaterfallWheelAction;
+extern Fl_Check_Button *btnWFspectrum_center;
+extern Fl_Spinner *wfl_spectrum_range;
+extern Fl_Check_Button *btnWFspectrum_dbvals;
 extern Fl_Group *tabModems;
 extern Fl_Tabs *tabsModems;
 extern Fl_Group *tabCW;

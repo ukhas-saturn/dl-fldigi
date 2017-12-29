@@ -618,11 +618,7 @@ void Socket::open(const Address& addr)
 	address = addr;
 	size_t n = address.size();
 
-#ifdef __FreeBSD__
-	for (anum = n-1; anum >= 1; anum--) {
-#else
 	for (anum = n-1; anum >= 0; anum--) {
-#endif
 		ainfo = address.get(anum);
 		LOG_INFO("Trying %s", address.get_str(ainfo).c_str());
 		if ((sockfd = socket(ainfo->ai_family, ainfo->ai_socktype, ainfo->ai_protocol)) != -1)
@@ -638,6 +634,7 @@ void Socket::open(const Address& addr)
 ///
 void Socket::close(void)
 {
+LOG_INFO("sockfd %d", sockfd);
 #ifdef __MINGW32__
 	::closesocket(sockfd);
 #else
@@ -924,6 +921,8 @@ int Socket::connect(void)
 //		if (!errno || (errno == EWOULDBLOCK) || (errno == EINPROGRESS) || 
 //			(errno == EISCONN) || (errno == EALREADY) ) {
 //
+			LOG_INFO("Connected to sockfd %d: %s : %s", sockfd, address.get_str(ainfo).c_str(),
+				strerror(errno) );
 			connected_flag = true;
 			return errno;
 		}
@@ -934,7 +933,7 @@ int Socket::connect(void)
 		 */
 		throw SocketException(errno, "connect");
 	}
-	LOG_INFO(" Connected to %s", address.get_str(ainfo).c_str());
+	LOG_INFO(" Connected to sockfd %d: %s", sockfd, address.get_str(ainfo).c_str());
 	connected_flag = true;
 	return EISCONN;
 }
@@ -1008,6 +1007,12 @@ size_t Socket::send(const void* buf, size_t len)
 	size_t nToWrite = len;
 	int r = 0;
 	const char *sp = (const char *)buf;
+
+LOG_INFO("\n\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\
+%s\n\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+sp);
 
 	while ( nToWrite > 0) {
 #if defined(__WIN32__)

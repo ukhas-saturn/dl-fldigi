@@ -527,40 +527,53 @@ void start_process(string executable)
 							NULL, NULL,
 							&si, &pi))
 			LOG_ERROR("CreateProcess failed with error code %ld", GetLastError());
-		MilliSleep(100);
+		for (int i = 0; i < 5; i++) {
+			MilliSleep(50);
+			Fl::awake();
+		}
+//		MilliSleep(100);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 		LOG_INFO("Process handles closed");
 #else
 #ifdef __APPLE__
 		string params = "";
-		size_t p = executable.find(".app ");
-		if (p != string::npos) {
-			params = executable.substr(p+4);
-			executable.erase(p+4);
-		}
-		if (executable.find(".app") != string::npos ) { //== (executable.length() - 4)) {
-			DIR *dp = NULL;
-			std::string testdir = executable;
-			dp = opendir(testdir.append("/Contents/MacOS/").c_str());
-			if (!dp) {
-				fl_alert2("FOLDER NOT FOUND\n\n%s", testdir.append("/Contents/MacOS/").c_str());
-				return;
+		size_t p = executable.find(".app/Contents/MacOS");
+
+		if (p == string::npos) {
+			p = executable.find(".app");
+			if (p != string::npos) {
+				params = executable.substr(p+4);
+				executable.erase(p+4);
+
+				if (executable[0] == '"') executable.erase(0,1);
+				while ( (executable[executable.length()-1] == '"') ||
+					(executable[executable.length()-1] == ' ') )
+					executable.erase(executable.length()-1, 1);
+				if (params[0] == '"') params.erase(0,1);
+				while (params[0] == ' ') params.erase(0,1);
+
+				DIR *dp = NULL;
+				executable.append("/Contents/MacOS/");
+					dp = opendir(executable.c_str());
+				if (!dp) {
+					fl_alert2("FOLDER NOT FOUND\n\n%s", executable.c_str());
+					return;
+				}
+				struct dirent *sd = NULL;
+				sd = readdir(dp);
+				string sds = sd->d_name;
+				while (sds == "." || sds == "..") { sd = readdir(dp); sds = sd->d_name; }
+				closedir(dp);
+			
+				executable.insert(0,"\"");
+				executable.append(sds).append("\"");
+
+				if (!params.empty()) executable.append(" ").append(params);
 			}
-			struct dirent *sd = NULL;
-			sd = readdir(dp);
-			string sds = sd->d_name;
-			while (sds == "." || sds == "..") { sd = readdir(dp); sds = sd->d_name; }
-			closedir(dp);
-			executable.append("/Contents/MacOS/").append(sds);
-			if (executable.find(" ") != string::npos) {
-				string exec;
-				exec.assign("\"").append(executable).append("\"");
-				executable.assign(exec);
-			}
-			if (!params.empty()) executable.append(params);
 		}
-#endif
+#endif // __APPLE__
+
 		LOG_INFO("Start external process: %s", executable.c_str());
 		switch (fork()) {
 			case -1:
@@ -623,8 +636,10 @@ static void auto_start()
 	// A general wait to ensure FLDIGI initialization of
 	// io ports. 1/4 to 3/4 second delay.
 	int nloops = 0;
-	while(nloops++ < 3) {
-		MilliSleep(250);
+	while(nloops++ < 15) {// 3) {
+		MilliSleep(50);
+		Fl::awake();
+//		MilliSleep(250);
 		if(arq_state() && data_io_enabled == ARQ_IO)
 			break; // Exit early if verified.
 	}

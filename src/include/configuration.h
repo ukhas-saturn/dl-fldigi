@@ -77,6 +77,9 @@
         ELEM_(bool, show_tx_timer, "SHOW_TX_TIMER",                                     \
           "Show tx timer on menu bar",                                                  \
           true)                                                                         \
+        ELEM_(int, tx_timeout, "TX_TIMEOUT",                                            \
+          "TX deadman timeout in minutes",                                              \
+          5)                                                                            \
         ELEM_(bool, SaveConfig, "SAVECONFIG",                                           \
               "Save current configuration on exit",                                     \
               true)                                                                     \
@@ -227,9 +230,11 @@
         ELEM_(bool, tx_lowercase, "TX_LOWERCASE",                                       \
               "Transmit all text in lowercase",                                         \
               false)                                                                    \
-        /* PSK, filter can be 0, 1, 2, 3 or 4 */                                        \
+        /* PSK, filter can be 0, 1, 2 */                                                \
         ELEM_(int, PSK_filter, "PSKFILTER",                                             \
-              "Not configurable; must always be 0",                                     \
+              "0 - PskCore filter\n"                                                    \
+              "1 - Raised cosine / sinc filter\n"                                       \
+              "2 - G3PLX (gmfsk) filter",                                               \
               0)                                                                        \
         ELEM_(bool, pskbrowser_on, "PSKBROWSER_ON",                                     \
               "Enable psk multi-channel detector - disable for very slow cpus",         \
@@ -1421,6 +1426,9 @@
         ELEM_(bool, cutnbrs, "CUTNBRS",                                                 \
               "Send CW cut numbers",                                                    \
               false)                                                                    \
+        ELEM_(bool, clear_fields, "CLEARFIELDS",                                        \
+              "clear logging fields upon transfer of CALL from Rx panel",               \
+              true)                                                                     \
         ELEM_(RGB, bwsrSliderColor, "BWSRSLIDERCOLOR",                                  \
               "Background color of signal browser detect level",                        \
               {185, 211, 238})                                                          \
@@ -1468,7 +1476,7 @@
               120)                                                                      \
         ELEM_(int, ContestStart, "CONTESTSTART",                                        \
               "Contest starting number",                                                \
-              0)                                                                        \
+              1)                                                                        \
         ELEM_(int, ContestDigits, "CONTESTDIGITS",                                      \
               "Number of digits in serial number",                                      \
               4)                                                                        \
@@ -2345,7 +2353,16 @@
              2000.0)                                                                    \
         ELEM_(double, fftviewer_frng, "fftviewer_frng",                                 \
              "Frequency scan range in Hertz",                                           \
-             4000.0)
+             4000.0)                                                                    \
+        ELEM_(int, wf_spectrum_range, "wf_spectrum_range",                              \
+             "Initial spectrum range = N x modem bandwidth",                            \
+             10)                                                                        \
+        ELEM_(bool, wf_spectrum_center, "wf_spectrum_center",                           \
+             "left click on waterfall transfers to spectrum center",                    \
+             true)                                                                      \
+        ELEM_(bool, wf_spectrum_dbvals, "wf_spectrum_dbvals",                           \
+             "use waterfall db range and offset values for spectrum scope",             \
+             true)
 
 // declare the struct
 #define ELEM_DECLARE_CONFIGURATION(type_, var_, tag_, ...) type_ var_;

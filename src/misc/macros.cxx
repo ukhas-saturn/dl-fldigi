@@ -55,6 +55,7 @@
 #include "utf8file_io.h"
 #include "xmlrpc.h"
 #include "rigio.h"
+#include "strutil.h"
 
 #include <FL/Fl.H>
 #include <FL/filename.H>
@@ -2357,6 +2358,26 @@ void TxQueINSERTIMAGE(std::string s)
 		TransmitText->add_text(itext);
 }
 
+static void doAVATAR(std::string s)
+{
+	if (active_modem->get_mode() == MODE_IFKP)
+		active_modem->m_ifkp_send_avatar();
+
+	que_ok = true;
+}
+
+static void pTxQueAVATAR(std::string &s, size_t &i, size_t endbracket)
+{
+	if (within_exec) {
+		s.replace(i, endbracket - i + 1, "");
+		return;
+	}
+
+	struct CMDS cmd = { s.substr(i, endbracket - i + 1), doAVATAR };
+	push_txcmd(cmd);
+	s.replace(i, endbracket - i + 1, "^!");
+}
+
 static void doMODEM(std::string s)
 {
 	static fre_t re("<!MODEM:([[:alnum:]-]+)((:[[:digit:].+-]*)*)>", REG_EXTENDED);
@@ -2926,14 +2947,23 @@ static void pQSYFM(std::string &s, size_t &i, size_t endbracket)
 	do_qsy(false);
 }
 
+struct rfafmd { int rf; int af; std::string mdname;
+	rfafmd(int a, int b, std::string nm) { rf = a; af = b; mdname = nm;}
+	rfafmd(int a, int b) {rf = a; af = b; mdname = active_modem->get_mode_name();}
+	rfafmd(){rf = af = 0; mdname = active_modem->get_mode_name();}
+};
+static queue<rfafmd> fpairs;
+
 static void pQSY(std::string &s, size_t &i, size_t endbracket)
 {
 	if (within_exec) {
 		s.replace(i, endbracket - i + 1, "");
 		return;
 	}
+
+	std::string mdname = active_modem->get_mode_name();
 	int rf = 0;
-	int audio = 0;
+	int af = 0;
 	float rfd = 0;
 	std::string sGoFreq = s.substr(i+5, endbracket - i - 5);
 	// no frequency(s) specified
@@ -2941,26 +2971,54 @@ static void pQSY(std::string &s, size_t &i, size_t endbracket)
 		s.replace(i, endbracket-i+1, "");
 		return;
 	}
-	// rf first value
-	sscanf(sGoFreq.c_str(), "%f", &rfd);
-	if (rfd > 0)
-		rf = (int)(1000*rfd);
-	size_t pos;
-	if ((pos = sGoFreq.find(":")) != std::string::npos) {
-		// af second value
-		sGoFreq.erase(0, pos+1);
-		if (sGoFreq.length())
-			sscanf(sGoFreq.c_str(), "%d", &audio);
-		if (audio < 0) audio = 0;
-		if (audio < progdefaults.LowFreqCutoff)
-			audio = progdefaults.LowFreqCutoff;
-		if (audio > progdefaults.HighFreqCutoff)
-			audio = progdefaults.HighFreqCutoff;
+
+	if (fpairs.empty()) {
+		std::string triad;
+		size_t pos;
+		while (!sGoFreq.empty()) {
+			pos = sGoFreq.find(";");
+			if (pos == std::string::npos) triad = sGoFreq;
+			else  triad = sGoFreq.substr(0, pos);
+			sGoFreq.erase(0, triad.length()+1);
+			sscanf(triad.c_str(), "%f", &rfd);
+			if (rfd > 0) rf = (int)(1000*rfd);
+			if ((pos = triad.find(":")) != std::string::npos) {
+				triad.erase(0,pos+1);
+				if (triad.length())
+					sscanf(triad.c_str(), "%d", &af);
+				if (af < 0) af = 0;
+				if (af < progdefaults.LowFreqCutoff) af = progdefaults.LowFreqCutoff;
+				if (af > progdefaults.HighFreqCutoff) af = progdefaults.HighFreqCutoff;
+			} else af = active_modem->get_freq();
+
+			if ((pos = triad.find(":")) != std::string::npos) {
+				triad.erase(0, pos+1);
+				strtrim(triad);
+				fpairs.push(rfafmd(rf, af, triad));
+			} else
+				fpairs.push(rfafmd(rf,af, mdname));
+		}
 	}
+
+	struct rfafmd fpair;
+
+	fpair = fpairs.front();
+	rf = fpair.rf;
+	af = fpair.af;
+	if (fpair.mdname != mdname) {
+		for (int m = 0; m < NUM_MODES; m++) {
+			if (fpair.mdname == mode_info[m].sname) {
+				init_modem_sync(mode_info[m].mode);
+				break;
+			}
+		}
+	}
+	fpairs.pop();
+
 	if (rf && rf != wf->rfcarrier())
-		qsy(rf, audio);
+		qsy(rf, af);
 	else
-		active_modem->set_freq(audio);
+		active_modem->set_freq(af);
 
 	s.replace(i, endbracket - i + 1, "");
 }
@@ -3323,6 +3381,10 @@ void set_macro_env(void)
 		FLDIGI_LOGBOOK_CONTINENT,
 		FLDIGI_LOGBOOK_CQZ,
 		FLDIGI_LOGBOOK_ITUZ,
+		FLDIGI_LOGBOOK_SS_SERNO,
+		FLDIGI_LOGBOOK_SS_PREC,
+		FLDIGI_LOGBOOK_SS_CHK,
+		FLDIGI_LOGBOOK_SS_SEC,
 
 		ENV_SIZE
 	};
@@ -3410,7 +3472,6 @@ void set_macro_env(void)
 		{ "FLDIGI_LOGBOOK_LOCATOR", inpLoc_log->value() },
 		{ "FLDIGI_LOGBOOK_QSL_R", inpQSLrcvddate_log->value() },
 		{ "FLDIGI_LOGBOOK_QSL_S", inpQSLsentdate_log->value() },
-		{ "FLDIGI_LOGBOOK_NOTES", inpNotes_log->value() },
 		{ "FLDIGI_LOGBOOK_TX_PWR", inpTX_pwr_log->value() },
 		{ "FLDIGI_LOGBOOK_COUNTY", inpCNTY_log->value() },
 		{ "FLDIGI_LOGBOOK_IOTA", inpIOTA_log->value() },
@@ -3418,7 +3479,12 @@ void set_macro_env(void)
 		{ "FLDIGI_LOGBOOK_QSL_VIA", inpQSL_VIA_log->value() },
 		{ "FLDIGI_LOGBOOK_CONTINENT", inpCONT_log->value() },
 		{ "FLDIGI_LOGBOOK_CQZ", inpCQZ_log->value() },
-		{ "FLDIGI_LOGBOOK_ITUZ", inpITUZ_log->value() }
+		{ "FLDIGI_LOGBOOK_ITUZ", inpITUZ_log->value() },
+		{ "FLDIGI_LOGBOOK_SS_SERNO", inp_log_cwss_serno->value() },
+		{ "FLDIGI_LOGBOOK_SS_PREC", inp_log_cwss_prec->value() },
+		{ "FLDIGI_LOGBOOK_SS_CHK", inp_log_cwss_chk->value() },
+		{ "FLDIGI_LOGBOOK_SS_SEC", inp_log_cwss_sec->value() },
+		{ "FLDIGI_LOGBOOK_NOTES", inpNotes_log->value() }
 
 	};
 
@@ -3466,7 +3532,12 @@ void set_macro_env(void)
 
 	string temp;
 	size_t pch;
-	for (size_t j = 0; j < ENV_SIZE; j++) {
+//	for (size_t j = 0; j < ENV_SIZE; j++) {
+//		temp = env[j].val;
+//		while ((pch = temp.find("\n")) != string::npos) temp[pch] = ';';
+//		setenv(env[j].var, temp.c_str(), 1);
+//	}
+	for (size_t j = 0; j < sizeof(env) / sizeof (*env); j++) {
 		temp = env[j].val;
 		while ((pch = temp.find("\n")) != string::npos) temp[pch] = ';';
 		setenv(env[j].var, temp.c_str(), 1);
@@ -3479,6 +3550,7 @@ void set_macro_env(void)
 	mypath.append(":");
 	path.insert(0,mypath);
 	setenv("PATH", path.c_str(), 1);
+
 }
 
 // this is only for the case where the user tries to nest <EXEC>...
@@ -3957,6 +4029,7 @@ static const MTAGS mtags[] = {
 	{"<WX>",		pWX},
 	{"<WX:",		pWX2},
 	{"<IMAGE:",		pTxQueIMAGE},
+	{"<AVATAR>",	pTxQueAVATAR},
 // Tx Delayed action
 	{"<!WPM:",		pTxQueWPM},
 	{"<!RISE:",		pTxQueRISETIME},

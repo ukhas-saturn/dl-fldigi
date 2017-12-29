@@ -1385,6 +1385,10 @@ void xmtrcv_cb(Fl_Widget *w, void *vi)
 		}
 		else {
 			TransmitText->clear();
+			if (active_modem->get_mode() == MODE_FSQ && fsq_tx_text)
+				fsq_tx_text->clear();
+			else if (active_modem->get_mode() == MODE_IFKP && ifkp_tx_text)
+				ifkp_tx_text->clear();
 
 			if (arq_text_available)
 				AbortARQ();
@@ -2142,6 +2146,8 @@ int WFdisp::handle(int event)
 			oldcarrier = newcarrier;
 			if (eb != FL_LEFT_MOUSE || !ReceiveText->visible())
 				break;
+			if (eb == FL_LEFT_MOUSE)
+				recenter_spectrum_viewer();
 			if (!(Fl::event_state() & (FL_CTRL | FL_META | FL_ALT | FL_SHIFT))) {
 				if (Fl::event_clicks() == 1)
 					note_qrg(true, "\n", "\n");

@@ -1046,7 +1046,6 @@ void cw::send_symbol(int bits, int len)
 				kpost = keydown - knum + (int)(progdefaults.CWpost * 8);
 		} else
 			kpost = keydown + (int)(progdefaults.CWpost * 8);
-
 		if (kpost < 0)
 			kpost = 0;
 	} else {
@@ -1181,12 +1180,21 @@ void cw::send_ch(int ch)
 	int flen;
 
 	sync_parameters();
+
 // handle word space separately (7 dots spacing)
 // last char already had 3 elements of inter-character spacing
 
+	double T = (50.0 - 31 * fsymlen / symbollen) / 19.0;
+
+	if (!progdefaults.CWusefarnsworth || (progdefaults.CWspeed >= progdefaults.CWfarnsworth))
+		T = 1.0;
+
+	int tc = 3.0 * T * symbollen;
+	int tw = 7.0 * T * symbollen;
+
 	if ((chout == ' ') || (chout == '\n')) {
 		firstelement = false;
-		flen = 4 * symbollen;
+		flen = tw - tc - ( T > 1.0 ? fsymlen : 0);
 		while (flen - symbollen > 0) {
 			send_symbol(0, symbollen);
 			flen -= symbollen;
@@ -1196,21 +1204,10 @@ void cw::send_ch(int ch)
 		return;
 	}
 
-// loop sending out binary bits of cw character at WPM or Farnsworth rate
-
 	if (progdefaults.CWusefarnsworth && (progdefaults.CWspeed <= progdefaults.CWfarnsworth))
 		flen = fsymlen;
 	else
 		flen = symbollen;
-
-	int charlen = 0; // used for Farsnworth timing adjustment
-
-	if (chout <= 0) {
-		send_symbol(0, flen);
-		send_symbol(0, flen);
-		firstelement = false;
-		return;
-	}
 
 	code = morse.tx_lookup(chout);
 	if (!code.length()) {
@@ -1223,27 +1220,25 @@ void cw::send_ch(int ch)
 	for (size_t n = 0; n < code.length(); n++) {
 		send_symbol(0, flen);
 		send_symbol(1, flen);
-		charlen += 2;
 		if (code[n] == '-') {
 			send_symbol( 1, flen );
 			send_symbol( 1, flen );
-			charlen += 2;
 		}
 	}
 	send_symbol(0, flen);
 	send_symbol(0, flen);
-	charlen += 2;
+	send_symbol(0, flen);
 
 // inter character space at WPM/FWPM rate
-	flen = symbollen;
-	if (progdefaults.CWusefarnsworth && (progdefaults.CWspeed <= progdefaults.CWfarnsworth))
-		flen += (symbollen - fsymlen)*charlen;
-
-	while(flen - symbollen > 0) {
-		send_symbol(0, symbollen);
-		flen -= symbollen;
+//	if (progdefaults.CWusefarnsworth && (progdefaults.CWspeed <= progdefaults.CWfarnsworth)) {
+	if (T > 1.0) {
+		flen = tc - 3 * flen;
+		while(flen - symbollen > 0) {
+			send_symbol(0, symbollen);
+			flen -= symbollen;
+		}
+		if (flen) send_symbol(0, flen);
 	}
-	if (flen) send_symbol(0, flen);
 
 	if (ch != -1) {
 		string prtstr = morse.tx_print();
@@ -1273,15 +1268,27 @@ int cw::tx_process()
 
 	c = get_tx_char();
 
+	if (c == GET_TX_CHAR_NODATA) {
+		if (stopflag) {
+			stopflag = false;
+			if (progdefaults.CW_bpf_on) { // flush the transmit bandpass filter
+				int n = cw_xmt_filter->flush_size();
+				for (int i = 0; i < n; i++) outbuf[i] = 0;
+				nb_filter(outbuf, outbuf, n);
+			}
+			put_echo_char('\n');
+			return -1;
+		}
+		Fl::awake();
+		MilliSleep(50);
+		return 0;
+	}
+
 	if (progStatus.WK_online) {
 		if (c == GET_TX_CHAR_ETX || stopflag) {
 			stopflag = false;
 			put_echo_char('\n');
 			return -1;
-		}
-		if (c == GET_TX_CHAR_NODATA) {
-			MilliSleep(50);
-			return 0;
 		}
 		if (WK_send_char(c)){
 			put_echo_char('\n');
@@ -1300,17 +1307,11 @@ int cw::tx_process()
 		put_echo_char('\n');
 		return -1;
 	}
+
 	acc_symbols = 0;
 	send_ch(c);
-	FL_AWAKE();
 
-	xmt_samples = char_samples = acc_symbols;
-
-//	printf("%5s %d samples, overhead %d, %f sec's\n",
-//		ascii3[c & 0xff],
-//		char_samples,
-//		ovhd_samples,
-//		1.0 * char_samples / samplerate);
+	char_samples = acc_symbols;
 
 	return 0;
 }
