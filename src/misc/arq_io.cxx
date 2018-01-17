@@ -43,7 +43,7 @@
 #include <errno.h>
 
 #include <sys/types.h>
-#if !defined(__WOE32__) && !defined(__APPLE__)
+#if !defined(__WIN32__) && !defined(__APPLE__)
 #  include <sys/ipc.h>
 #  include <sys/msg.h>
 #endif
@@ -350,7 +350,7 @@ void checkTLF() {
 static bool TLF_arqRx()
 {
 	/// The mutex is automatically unlocked when returning.
-#if defined(__WOE32__) || defined(__APPLE__)
+#if defined(__WIN32__) || defined(__APPLE__)
 	return false;
 #else
 	time_t start_time, prog_time;
@@ -410,16 +410,21 @@ bool WRAP_auto_arqRx()
 	time_t start_time, prog_time;
 	static char mailline[1000];
 	static string sAutoFile("");
-	sAutoFile.assign(FLMSG_WRAP_auto_dir);
-	sAutoFile.append("wrap_auto_file");
 
 	ifstream autofile;
-	autofile.open(sAutoFile.c_str());
-	if (!autofile) {
-		sAutoFile.assign(WRAP_auto_dir);
+
+	if (sAutoFile.empty()) {
+		sAutoFile.assign(FLMSG_WRAP_auto_dir);
 		sAutoFile.append("wrap_auto_file");
 		autofile.open(sAutoFile.c_str());
-	}
+		if (!autofile) {
+			sAutoFile.assign(WRAP_auto_dir);
+			sAutoFile.append("wrap_auto_file");
+			autofile.open(sAutoFile.c_str());
+		}
+	} else
+		autofile.open(sAutoFile.c_str());
+
 	if(autofile) {
 		/// Mutex is unlocked when leaving the block.
 		guard_lock arq_rx_lock(&arq_rx_mutex);
@@ -500,7 +505,7 @@ bool ARQ_SOCKET_Server::start(const char* node, const char* service)
 	try {
 		inst->server_socket->open(Address(node, service));
 		inst->server_socket->bind();
-#ifdef __WOE32__
+#ifdef __WIN32__
 		inst->server_socket->listen();
 		inst->server_socket->set_timeout(0.1);
 #endif
@@ -529,16 +534,21 @@ void ARQ_SOCKET_Server::stop(void)
 	if (!inst)
 		return;
 	inst->run = false;
-
-	int timeout = 20;
 	SET_THREAD_CANCEL();
+	MilliSleep(50);
+
+#if !defined(__WOE32__) && !defined(__APPLE__)
+	int timeout = 10;
 	while(!server_stopped) {
-		MilliSleep(50);
+		MilliSleep(100);
+		Fl::awake();
 		if (--timeout == 0) break;
 	}
+#endif
 
 	delete inst;
 	inst = 0;
+
 }
 
 void* ARQ_SOCKET_Server::thread_func(void*)
@@ -548,16 +558,16 @@ void* ARQ_SOCKET_Server::thread_func(void*)
 	SET_THREAD_CANCEL();
 
 	// On POSIX we block indefinitely and are interrupted by a signal.
-	// On woe32 we block for a short time and test for cancellation.
+	// On WIN32 we block for a short time and test for cancellation.
 	while (inst->run) {
 		try {
-#ifdef __WOE32__ 
+//#ifdef __WIN32__
 			if (inst->server_socket->wait(0))
 				arq_run(inst->server_socket->accept());
-#else
-			arq_run(inst->server_socket->accept());
-			TEST_THREAD_CANCEL();
-#endif
+//#else
+//			arq_run(inst->server_socket->accept());
+//			TEST_THREAD_CANCEL();
+//#endif
 		}
 		catch (const SocketException& e) {
 			if (e.error() != EINTR) {
@@ -586,7 +596,7 @@ void* ARQ_SOCKET_Server::thread_func(void*)
 	}
 
 	inst->server_socket->close();
-server_stopped = true;
+	server_stopped = true;
 	return NULL;
 }
 
@@ -807,9 +817,8 @@ static void *arq_loop(void *args)
 
 	for (;;) {
 		/* see if we are being canceled */
-		if (arq_exit) {
+		if (arq_exit)
 			break;
-		}
 
 		test_arq_clients();
 
@@ -826,6 +835,7 @@ static void *arq_loop(void *args)
 				WriteARQsocket((unsigned char*)enroute.c_str(), enroute.length());
 			}
 		}
+		if (arq_exit) break;
 
 		// order of precedence; Socket, Wrap autofile, TLF autofile
 		if (!Socket_arqRx())
@@ -874,15 +884,19 @@ void arq_close(void)
 	ARQ_SOCKET_Server::stop();
 
 	// tell the arq thread to kill it self
-	arq_exit = true;
-
+	{
+		guard_lock arqclose(&tosend_mutex);
+		arq_exit = true;
+	}
 	// and then wait for it to die
 	pthread_join(arq_thread, NULL);
+
 	arq_enabled = false;
 	LOG_INFO("ARQ closed");
 	if(data_io_enabled == ARQ_IO)
 		data_io_enabled = DISABLED_IO ;
 	arq_exit = false;
+
 }
 
 int arq_get_char()

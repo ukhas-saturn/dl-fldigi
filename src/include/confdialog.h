@@ -306,8 +306,9 @@ extern Fl_Check_Button *btnWaterfallClickInsert;
 extern Fl_Input2 *inpWaterfallClickText;
 extern Fl_ListBox *listboxWaterfallWheelAction;
 extern Fl_Check_Button *btnWFspectrum_center;
-extern Fl_Spinner *wfl_spectrum_range;
 extern Fl_Check_Button *btnWFspectrum_dbvals;
+extern Fl_Counter *cntr_spectrum_freq_scale;
+extern Fl_Check_Button *btn_spectrum_modem_scale;
 extern Fl_Group *tabModems;
 extern Fl_Tabs *tabsModems;
 extern Fl_Group *tabCW;
@@ -796,7 +797,6 @@ extern Fl_Counter2 *cntTrackFreqMax;
 extern Fl_Float_Input *stationary_lat;
 extern Fl_Float_Input *stationary_lon;
 extern Fl_ComboBox *inpGPSdev;
-#include <FL/Fl_Spinner.H>
 extern Fl_Output *gps_pos_lat;
 extern Fl_Output *gps_pos_altitude;
 extern Fl_Output *gps_pos_time;

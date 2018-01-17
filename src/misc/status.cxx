@@ -954,10 +954,10 @@ void status::initLastState()
 		else { // Custom shift
 			selCustomShift->deactivate();
 		}
-		selBaud->index(progdefaults.rtty_baud = rtty_baud);
-		selBits->index(progdefaults.rtty_bits = rtty_bits);
-		selParity->index(progdefaults.rtty_parity = rtty_parity);
-		selStopBits->index(progdefaults.rtty_stop = rtty_stop);
+		selBaud->index((progdefaults.rtty_baud = rtty_baud));
+		selBits->index((progdefaults.rtty_bits = rtty_bits));
+		selParity->index((progdefaults.rtty_parity = rtty_parity));
+		selStopBits->index((progdefaults.rtty_stop = rtty_stop));
 		btnCRCRLF->value(progdefaults.rtty_crcrlf = rtty_crcrlf);
 		btnAUTOCRLF->value(progdefaults.rtty_autocrlf = rtty_autocrlf);
 		cntrAUTOCRLF->value(progdefaults.rtty_autocount = rtty_autocount);
