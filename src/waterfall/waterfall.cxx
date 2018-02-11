@@ -30,6 +30,7 @@
 
 #include <sstream>
 #include <vector>
+#include <queue>
 #include <algorithm>
 #include <map>
 
@@ -617,78 +618,115 @@ void WFdisp::redrawCursor()
 //	cursormoved = true;
 }
 
+//----------------------------------------------------------------------
+// queue audio_blocks used to separate audio stream process timing
+// from GUI processing and timing
+// mutex guards the audio_blocks data
+//----------------------------------------------------------------------
+
 extern state_t trx_state;
+static pthread_mutex_t data_mutex = PTHREAD_MUTEX_INITIALIZER;
+struct AUDIO_BLOCK {
+	double sig[WFBLOCKSIZE];
+	int sr;
+};
+queue<AUDIO_BLOCK> audio_blocks;
 
-void WFdisp::sig_data( double *sig, int len, int sr )
+void WFdisp::sig_data( double *sig, int sr)
 {
-	if (wfspeed == PAUSE)
-		goto update_freq;
+	AUDIO_BLOCK audio_block;
 
-	// if sound card sampling rate changed reset the waterfall buffer
-	if (srate != sr) {
-		srate = sr;
-		memset(circbuff, 0, FFT_LEN * sizeof(*circbuff));
-		ptrCB = 0;
-	}
+	memcpy((void *) &audio_block.sig[0], sig, WFBLOCKSIZE * sizeof(sig[0]));
+	audio_block.sr = sr;
 
-	memmove((void*)circbuff,
-			(void*)(circbuff + len),
-			(size_t)((FFT_LEN - len)*sizeof(wf_fft_type)));
+	guard_lock data_lock(&data_mutex);
+	audio_blocks.push(audio_block);
+}
 
-	{
-		double gain = pow(10, progdefaults.wfRefLevel / -20.0);
+// this method must be called from main thread
+
+void WFdisp::handle_sig_data()
+{
+	ENSURE_THREAD(FLMAIN_TID);
+
+	double gain = pow(10, progdefaults.wfRefLevel / -20.0);
+
+	while (1) {//!audio_blocks.empty()) {
+
+// this block guarded by data_mutex
+		{
+			guard_lock data_lock(&data_mutex);
+
+			if (audio_blocks.empty()) {
+				return;
+			}
+
+			memmove(
+				(void*)circbuff,
+				(void*)(circbuff + WFBLOCKSIZE),
+				(FFT_LEN - WFBLOCKSIZE)*sizeof(circbuff[0]) );
+
+			if (srate != audio_blocks.front().sr) {
+				srate = audio_blocks.front().sr;
+				memset( circbuff, 0, FFT_LEN * sizeof(circbuff[0]));
+				ptrCB = 0;
+			}
+			memcpy(
+				(void*)&circbuff[FFT_LEN - WFBLOCKSIZE - 1],
+				(void*)&audio_blocks.front().sig[0],
+				WFBLOCKSIZE * sizeof(circbuff[0]));
+			audio_blocks.pop();
+		}
+
 		overload = false;
-		double overval, peak = 0.0;
-		for (int i = 0; i < len; i++) {
-			overval = fabs(sig[i]);
-			sig[i] *= gain;
+		double overval = 0, peak = 0.0;
+		for (int i = FFT_LEN - WFBLOCKSIZE; i < FFT_LEN; i++) {
+			overval = fabs(circbuff[i]);
 			if (overval > peak) peak = overval;
+			circbuff[i] *= gain;
 		}
 		peakaudio = 0.1 * peak + 0.9 * peakaudio;
-	}
 
-	memcpy((void*)&circbuff[FFT_LEN-len],
-			(void*)sig,
-			(size_t)(len)*sizeof(double));
+		if (mode == SCOPE)
+			process_analog(circbuff, FFT_LEN);
+		else
+			processFFT();
 
-	if (mode == SCOPE)
-		process_analog(circbuff, FFT_LEN);
-	else
-		processFFT();
+		put_WARNstatus(peakaudio);
 
-	put_WARNstatus(peakaudio);
-
-update_freq:
-	static char szFrequency[14];
-	if (active_modem && rfc != 0) { // use a boolean for the waterfall
-		int offset = 0;
-		double afreq = active_modem->get_txfreq();
-		trx_mode mode = active_modem->get_mode();
-		if (mode == MODE_RTTY && progdefaults.useMARKfreq) {
-			offset = (progdefaults.rtty_shift < rtty::numshifts ?
-				  rtty::SHIFT[progdefaults.rtty_shift] :
-				  progdefaults.rtty_custom_shift);
-			offset /= 2;
-			if (active_modem->get_reverse()) offset *= -1;
-		}
-		string testmode = qso_opMODE->value();
-		usb = !ModeIsLSB(testmode);
-		if (testmode.find("CW") != string::npos)
-			afreq = 0;//-progdefaults.CWsweetspot;
-		if (mode == MODE_ANALYSIS) {
-			dfreq = 0;
+		static char szFrequency[14];
+		if (active_modem && rfc != 0) {
+			int offset = 0;
+			double afreq = active_modem->get_txfreq();
+			trx_mode mode = active_modem->get_mode();
+			if (mode == MODE_RTTY && progdefaults.useMARKfreq) {
+				offset = (progdefaults.rtty_shift < rtty::numshifts ?
+					rtty::SHIFT[progdefaults.rtty_shift] :
+					progdefaults.rtty_custom_shift);
+				offset /= 2;
+				if (active_modem->get_reverse()) offset *= -1;
+			}
+			string testmode = qso_opMODE->value();
+			usb = !ModeIsLSB(testmode);
+			if (testmode.find("CW") != string::npos)
+				afreq = 0;
+			if (mode == MODE_ANALYSIS) {
+				dfreq = 0;
+			} else {
+				if (usb)
+					dfreq = rfc + afreq + offset;
+				else
+					dfreq = rfc - afreq - offset;
+			}
+			snprintf(szFrequency, sizeof(szFrequency), "%-.3f", dfreq / 1000.0);
 		} else {
-			if (usb)
-				dfreq = rfc + afreq + offset;
-			else
-				dfreq = rfc - afreq - offset;
+			dfreq = active_modem->get_txfreq();
+			snprintf(szFrequency, sizeof(szFrequency), "%-.0f", dfreq);
 		}
-		snprintf(szFrequency, sizeof(szFrequency), "%-.3f", dfreq / 1000.0);
-	} else {
-		dfreq = active_modem->get_txfreq();
-		snprintf(szFrequency, sizeof(szFrequency), "%-.0f", dfreq);
+		inpFreq->value(szFrequency);
+
 	}
-	inpFreq->value(szFrequency);
+
 }
 
 // Check the display offset & limit to 0 to max IMAGE_WIDTH displayed

@@ -3858,6 +3858,13 @@ static void cb_btn_fsq_msg_append(Fl_Check_Button* o, void*) {
 progdefaults.changed=true;
 }
 
+Fl_Counter *cntr_FSQ_notify_time_out=(Fl_Counter *)0;
+
+static void cb_cntr_FSQ_notify_time_out(Fl_Counter* o, void*) {
+  progdefaults.fsq_notify_time_out = o->value();
+progdefaults.changed = true;
+}
+
 Fl_Output *txtAuditLog=(Fl_Output *)0;
 
 Fl_Light_Button *btn_enable_auditlog=(Fl_Light_Button *)0;
@@ -6526,6 +6533,15 @@ static void cb_btn_report_when_visible(Fl_Check_Button* o, void*) {
 progdefaults.changed = true;
 }
 
+Fl_Check_Button *btn_pskrep_autostart=(Fl_Check_Button *)0;
+
+static void cb_btn_pskrep_autostart(Fl_Check_Button* o, void*) {
+  progdefaults.pskrep_autostart = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Box *box_connected_to_pskrep=(Fl_Box *)0;
+
 Fl_Input2 *inpPSKRepHost=(Fl_Input2 *)0;
 
 static void cb_inpPSKRepHost(Fl_Input2* o, void*) {
@@ -6551,12 +6567,15 @@ static void cb_btnPSKRepInit(Fl_Button* o, void*) {
 if (!pskrep_start()) {
     boxPSKRepMsg->copy_label(pskrep_error());
     progdefaults.usepskrep = false;
+    box_connected_to_pskrep->color(FL_WHITE);
+    box_connected_to_pskrep->redraw();
 } else {
     boxPSKRepMsg->label(0);
     o->labelcolor(FL_FOREGROUND_COLOR);
     progdefaults.usepskrep = true;
-}
-progdefaults.changed = true;
+    box_connected_to_pskrep->color(FL_GREEN);
+    box_connected_to_pskrep->redraw();
+};
 }
 
 Fl_Box *boxPSKRepMsg=(Fl_Box *)0;
@@ -7374,6 +7393,8 @@ o->label((inpLOTW_pwd->type() & FL_SECRET_INPUT) ? _("Show") : _("Hide"));
 
 Fl_Button *btn_verify_lotw=(Fl_Button *)0;
 
+Fl_Button *btn_view_unmatched=(Fl_Button *)0;
+
 Fl_Group *tabAutoStart=(Fl_Group *)0;
 
 static void cb_tabAutoStart(Fl_Group*, void*) {
@@ -8179,6 +8200,7 @@ Fl_Double_Window* ConfigureDialog() {
         { tabsUI = new Fl_Tabs(0, 25, 600, 365);
           tabsUI->selection_color(FL_LIGHT1);
           { tabBrowser = new Fl_Group(0, 50, 600, 340, _("Browser"));
+            tabBrowser->hide();
             { Fl_Group* o = new Fl_Group(30, 65, 540, 300);
               o->box(FL_ENGRAVED_FRAME);
               { Fl_Spinner2* o = cntChannels = new Fl_Spinner2(46, 75, 50, 24, _("Channels, first channel starts at waterfall lower limit"));
@@ -8453,7 +8475,6 @@ Fl_Double_Window* ConfigureDialog() {
             tabUserInterface->end();
           } // Fl_Group* tabUserInterface
           { tabLogServer = new Fl_Group(0, 50, 600, 340, _("Log"));
-            tabLogServer->hide();
             { tabsLog = new Fl_Tabs(0, 50, 600, 340);
               { grp_Log_QSO = new Fl_Group(0, 75, 600, 315, _("QSO"));
                 { Fl_Group* o = new Fl_Group(60, 112, 496, 198, _("QSO logging"));
@@ -10112,6 +10133,7 @@ i on a\ntouch screen device such as a tablet."));
           tabsModems->selection_color(FL_LIGHT1);
           tabsModems->align(Fl_Align(FL_ALIGN_TOP_RIGHT));
           { tabCW = new Fl_Group(0, 50, 605, 340, _("CW"));
+            tabCW->hide();
             { tabsCW = new Fl_Tabs(0, 50, 605, 340);
               tabsCW->selection_color(FL_LIGHT1);
               { tabsCW_general = new Fl_Group(0, 75, 600, 315, _("General"));
@@ -11343,7 +11365,6 @@ ded Morse characters."));
             tabFeld->end();
           } // Fl_Group* tabFeld
           { tabFSQ = new Fl_Group(0, 50, 600, 340, _("FSQ"));
-            tabFSQ->hide();
             { Fl_Group* o = new Fl_Group(5, 60, 585, 65, _("Rx Parameters"));
               o->box(FL_ENGRAVED_BOX);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -11452,20 +11473,31 @@ ded Morse characters."));
             { Fl_Group* o = new Fl_Group(5, 210, 585, 55, _("Message Logging"));
               o->box(FL_ENGRAVED_BOX);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_fsq_msg_dt_stamp = new Fl_Check_Button(35, 237, 297, 15, _("Add date/time stamp to each message"));
+              { Fl_Check_Button* o = btn_fsq_msg_dt_stamp = new Fl_Check_Button(35, 237, 135, 15, _("Add date/time"));
                 btn_fsq_msg_dt_stamp->tooltip(_("Add date/time stamp to each # received message"));
                 btn_fsq_msg_dt_stamp->down_box(FL_DOWN_BOX);
                 btn_fsq_msg_dt_stamp->value(1);
                 btn_fsq_msg_dt_stamp->callback((Fl_Callback*)cb_btn_fsq_msg_dt_stamp);
                 o->value(progdefaults.add_fsq_msg_dt);
               } // Fl_Check_Button* btn_fsq_msg_dt_stamp
-              { Fl_Check_Button* o = btn_fsq_msg_append = new Fl_Check_Button(359, 237, 210, 15, _("always append to file(s)"));
+              { Fl_Check_Button* o = btn_fsq_msg_append = new Fl_Check_Button(182, 237, 210, 15, _("always append to file(s)"));
                 btn_fsq_msg_append->tooltip(_("append # directive msgs to named file"));
                 btn_fsq_msg_append->down_box(FL_DOWN_BOX);
                 btn_fsq_msg_append->value(1);
                 btn_fsq_msg_append->callback((Fl_Callback*)cb_btn_fsq_msg_append);
                 o->value(progdefaults.always_append);
               } // Fl_Check_Button* btn_fsq_msg_append
+              { Fl_Counter* o = cntr_FSQ_notify_time_out = new Fl_Counter(495, 233, 80, 22, _("Notify time out"));
+                cntr_FSQ_notify_time_out->tooltip(_("Notification dialog closes after XX seconds;^j0 == dialog remains open"));
+                cntr_FSQ_notify_time_out->type(1);
+                cntr_FSQ_notify_time_out->minimum(0);
+                cntr_FSQ_notify_time_out->maximum(30);
+                cntr_FSQ_notify_time_out->step(1);
+                cntr_FSQ_notify_time_out->value(10);
+                cntr_FSQ_notify_time_out->callback((Fl_Callback*)cb_cntr_FSQ_notify_time_out);
+                cntr_FSQ_notify_time_out->align(Fl_Align(FL_ALIGN_LEFT));
+                o->value(progdefaults.fsq_notify_time_out);
+              } // Fl_Counter* cntr_FSQ_notify_time_out
               o->end();
             } // Fl_Group* o
             { Fl_Group* o = new Fl_Group(5, 265, 585, 80, _("Logging"));
@@ -13469,6 +13501,7 @@ definition"));
         tabRig->end();
       } // Fl_Group* tabRig
       { tabSoundCard = new Fl_Group(0, 25, 600, 365, _("Audio"));
+        tabSoundCard->hide();
         { tabsSoundCard = new Fl_Tabs(0, 25, 600, 365);
           tabsSoundCard->selection_color(FL_LIGHT1);
           { tabAudio = new Fl_Group(0, 50, 600, 340, _("Devices"));
@@ -14184,7 +14217,6 @@ gured on the\n\"Notifications\" configure dialog."));
         tabID->end();
       } // Fl_Group* tabID
       { tabMisc = new Fl_Group(0, 25, 600, 365, _("Misc"));
-        tabMisc->hide();
         { tabsMisc = new Fl_Tabs(0, 25, 600, 365);
           tabsMisc->selection_color(FL_LIGHT1);
           { tabCPUspeed = new Fl_Group(0, 50, 600, 340, _("CPU"));
@@ -14392,7 +14424,7 @@ gured on the\n\"Notifications\" configure dialog."));
             tabPskmail->end();
           } // Fl_Group* tabPskmail
           { tabSpot = new Fl_Group(0, 50, 600, 340, _("Spotting"));
-            { Fl_Group* o = new Fl_Group(55, 72, 490, 254, _("PSK Reporter"));
+            { Fl_Group* o = new Fl_Group(40, 62, 525, 300, _("PSK Reporter"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
               { btnPSKRepAuto = new Fl_Check_Button(65, 103, 324, 20, _("Automatically spot callsigns in decoded text"));
@@ -14401,26 +14433,37 @@ gured on the\n\"Notifications\" configure dialog."));
                 btnPSKRepAuto->callback((Fl_Callback*)cb_btnPSKRepAuto);
                 btnPSKRepAuto->value(progdefaults.pskrep_auto);
               } // Fl_Check_Button* btnPSKRepAuto
-              { btnPSKRepLog = new Fl_Check_Button(65, 133, 327, 20, _("Send reception report when logging a QSO"));
+              { btnPSKRepLog = new Fl_Check_Button(65, 134, 327, 20, _("Send reception report when logging a QSO"));
                 btnPSKRepLog->tooltip(_("Send report only when QSO is logged"));
                 btnPSKRepLog->down_box(FL_DOWN_BOX);
                 btnPSKRepLog->callback((Fl_Callback*)cb_btnPSKRepLog);
                 btnPSKRepLog->value(progdefaults.pskrep_log);
               } // Fl_Check_Button* btnPSKRepLog
-              { btnPSKRepQRG = new Fl_Check_Button(65, 164, 416, 20, _("Report rig frequency (enable only if you have rig control!)"));
+              { btnPSKRepQRG = new Fl_Check_Button(65, 166, 416, 20, _("Report rig frequency (enable only if you have rig control!)"));
                 btnPSKRepQRG->tooltip(_("Include the transmit frequency"));
                 btnPSKRepQRG->down_box(FL_DOWN_BOX);
                 btnPSKRepQRG->callback((Fl_Callback*)cb_btnPSKRepQRG);
                 btnPSKRepQRG->value(progdefaults.pskrep_qrg);
               } // Fl_Check_Button* btnPSKRepQRG
-              { Fl_Check_Button* o = btn_report_when_visible = new Fl_Check_Button(65, 195, 416, 20, _("Disable spotting when signal browser(s) are not visible."));
+              { Fl_Check_Button* o = btn_report_when_visible = new Fl_Check_Button(65, 198, 416, 20, _("Disable spotting when signal browser(s) are not visible."));
                 btn_report_when_visible->tooltip(_("Check to reduce CPU load in PSK and RTTY modes."));
                 btn_report_when_visible->down_box(FL_DOWN_BOX);
                 btn_report_when_visible->value(1);
                 btn_report_when_visible->callback((Fl_Callback*)cb_btn_report_when_visible);
                 o->value(progdefaults.report_when_visible);
               } // Fl_Check_Button* btn_report_when_visible
-              { inpPSKRepHost = new Fl_Input2(108, 228, 220, 24, _("Host:"));
+              { Fl_Check_Button* o = btn_pskrep_autostart = new Fl_Check_Button(65, 230, 291, 20, _("Log on to pskrep when starting fldigi"));
+                btn_pskrep_autostart->tooltip(_("Automatically start psk reporter socket connection"));
+                btn_pskrep_autostart->down_box(FL_DOWN_BOX);
+                btn_pskrep_autostart->callback((Fl_Callback*)cb_btn_pskrep_autostart);
+                o->value(progdefaults.pskrep_autostart);
+              } // Fl_Check_Button* btn_pskrep_autostart
+              { box_connected_to_pskrep = new Fl_Box(375, 231, 18, 18, _("Connected"));
+                box_connected_to_pskrep->box(FL_DIAMOND_DOWN_BOX);
+                box_connected_to_pskrep->color(FL_BACKGROUND2_COLOR);
+                box_connected_to_pskrep->align(Fl_Align(FL_ALIGN_RIGHT));
+              } // Fl_Box* box_connected_to_pskrep
+              { inpPSKRepHost = new Fl_Input2(108, 268, 220, 24, _("Host:"));
                 inpPSKRepHost->tooltip(_("To whom the connection is made"));
                 inpPSKRepHost->box(FL_DOWN_BOX);
                 inpPSKRepHost->color(FL_BACKGROUND2_COLOR);
@@ -14435,7 +14478,7 @@ gured on the\n\"Notifications\" configure dialog."));
                 inpPSKRepHost->value(progdefaults.pskrep_host.c_str());
                 inpPSKRepHost->labelsize(FL_NORMAL_SIZE);
               } // Fl_Input2* inpPSKRepHost
-              { inpPSKRepPort = new Fl_Input2(477, 228, 60, 24, _("Port:"));
+              { inpPSKRepPort = new Fl_Input2(477, 268, 60, 24, _("Port:"));
                 inpPSKRepPort->tooltip(_("Using UDP port #"));
                 inpPSKRepPort->box(FL_DOWN_BOX);
                 inpPSKRepPort->color(FL_BACKGROUND2_COLOR);
@@ -14450,11 +14493,11 @@ gured on the\n\"Notifications\" configure dialog."));
                 inpPSKRepPort->value(progdefaults.pskrep_port.c_str());
                 inpPSKRepPort->labelsize(FL_NORMAL_SIZE);
               } // Fl_Input2* inpPSKRepPort
-              { btnPSKRepInit = new Fl_Button(457, 273, 80, 24, _("Initialize"));
+              { btnPSKRepInit = new Fl_Button(457, 313, 80, 24, _("Initialize"));
                 btnPSKRepInit->tooltip(_("Initialize the socket client"));
                 btnPSKRepInit->callback((Fl_Callback*)cb_btnPSKRepInit);
               } // Fl_Button* btnPSKRepInit
-              { boxPSKRepMsg = new Fl_Box(67, 257, 300, 48, _("<PSK Reporter error message>"));
+              { boxPSKRepMsg = new Fl_Box(67, 297, 300, 48, _("<PSK Reporter error message>"));
                 boxPSKRepMsg->labelfont(2);
                 boxPSKRepMsg->label(0);
               } // Fl_Box* boxPSKRepMsg
@@ -15064,6 +15107,7 @@ and restarted if needed."));
         tabQRZ->hide();
         { tabsQRZ = new Fl_Tabs(0, 25, 600, 365);
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Call Lookup"));
+            o->hide();
             { Fl_Group* o = new Fl_Group(34, 56, 538, 122, _("Web Browser lookup"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -15348,8 +15392,7 @@ and restarted if needed."));
             tabEQSL->end();
           } // Fl_Group* tabEQSL
           { tabLOTW = new Fl_Group(0, 50, 600, 340, _("LoTW"));
-            tabLOTW->hide();
-            { Fl_Input2* o = txt_lotw_pathname = new Fl_Input2(90, 91, 379, 24, _("tqsl:"));
+            { Fl_Input2* o = txt_lotw_pathname = new Fl_Input2(82, 91, 422, 24, _("tqsl:"));
               txt_lotw_pathname->tooltip(_("Enter full path-filename for tqsl executable"));
               txt_lotw_pathname->box(FL_DOWN_BOX);
               txt_lotw_pathname->color(FL_BACKGROUND2_COLOR);
@@ -15363,7 +15406,7 @@ and restarted if needed."));
               txt_lotw_pathname->when(FL_WHEN_CHANGED);
               o->value(progdefaults.lotw_pathname.c_str());
             } // Fl_Input2* txt_lotw_pathname
-            { Fl_Input2* o = inpLOTW_pwd = new Fl_Input2(90, 126, 200, 24, _("Password"));
+            { Fl_Input2* o = inpLOTW_pwd = new Fl_Input2(82, 126, 250, 24, _("Password"));
               inpLOTW_pwd->tooltip(_("Your tqsl login password"));
               inpLOTW_pwd->box(FL_DOWN_BOX);
               inpLOTW_pwd->color(FL_BACKGROUND2_COLOR);
@@ -15379,13 +15422,13 @@ and restarted if needed."));
               o->type(FL_SECRET_INPUT);
               inpLOTW_pwd->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpLOTW_pwd
-            { Fl_Check_Button* o = btn_submit_lotw_password = new Fl_Check_Button(90, 161, 234, 16, _("Use password for tqsl access"));
+            { Fl_Check_Button* o = btn_submit_lotw_password = new Fl_Check_Button(42, 161, 234, 16, _("Use password for tqsl access"));
               btn_submit_lotw_password->tooltip(_("Submit password with each upload"));
               btn_submit_lotw_password->down_box(FL_DOWN_BOX);
               btn_submit_lotw_password->callback((Fl_Callback*)cb_btn_submit_lotw_password);
               o->value(progdefaults.submit_lotw_password);
             } // Fl_Check_Button* btn_submit_lotw_password
-            { Fl_Input2* o = inpLOTW_location = new Fl_Input2(90, 188, 200, 24, _("Location"));
+            { Fl_Input2* o = inpLOTW_location = new Fl_Input2(82, 188, 250, 24, _("Location"));
               inpLOTW_location->tooltip(_("tqsl station location"));
               inpLOTW_location->box(FL_DOWN_BOX);
               inpLOTW_location->color(FL_BACKGROUND2_COLOR);
@@ -15400,61 +15443,66 @@ and restarted if needed."));
               o->value(progdefaults.lotw_location.c_str());
               inpLOTW_pwd->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpLOTW_location
-            { btn_select_lotw = new Fl_Button(477, 91, 70, 24, _("Locate"));
+            { btn_select_lotw = new Fl_Button(525, 91, 70, 24, _("Locate"));
               btn_select_lotw->tooltip(_("Locate tqsl executable"));
               btn_select_lotw->callback((Fl_Callback*)cb_btn_select_lotw);
             } // Fl_Button* btn_select_lotw
-            { Fl_Check_Button* o = btn_lotw_quiet_mode = new Fl_Check_Button(90, 223, 309, 16, _("Quiet mode [-q], do not open tqsl dialog"));
+            { Fl_Check_Button* o = btn_lotw_quiet_mode = new Fl_Check_Button(42, 223, 309, 16, _("Quiet mode [-q], do not open tqsl dialog"));
               btn_lotw_quiet_mode->tooltip(_("Operate tqsl in batch mode (no dialog)"));
               btn_lotw_quiet_mode->down_box(FL_DOWN_BOX);
               btn_lotw_quiet_mode->callback((Fl_Callback*)cb_btn_lotw_quiet_mode);
               o->value(progdefaults.lotw_quiet_mode);
             } // Fl_Check_Button* btn_lotw_quiet_mode
-            { Fl_Check_Button* o = btn_submit_lotw = new Fl_Check_Button(90, 247, 289, 16, _("Send QSO data to LoTW when logged"));
+            { Fl_Check_Button* o = btn_submit_lotw = new Fl_Check_Button(42, 247, 289, 16, _("Send QSO data to LoTW when logged"));
               btn_submit_lotw->tooltip(_("Submit each QSO as logged"));
               btn_submit_lotw->down_box(FL_DOWN_BOX);
               btn_submit_lotw->callback((Fl_Callback*)cb_btn_submit_lotw);
               o->value(progdefaults.submit_lotw);
             } // Fl_Check_Button* btn_submit_lotw
-            { btn_export_lotw = new Fl_Button(90, 273, 70, 24, _("Export"));
+            { btn_export_lotw = new Fl_Button(15, 273, 70, 24, _("Export"));
               btn_export_lotw->tooltip(_("Export records for LoTW upload"));
               btn_export_lotw->callback((Fl_Callback*)cb_btn_export_lotw);
             } // Fl_Button* btn_export_lotw
-            { btn_review_lotw = new Fl_Button(90, 300, 70, 24, _("Check"));
+            { btn_review_lotw = new Fl_Button(15, 300, 70, 24, _("Check"));
               btn_review_lotw->tooltip(_("Review lotw.adif file before sending with tqsl"));
               btn_review_lotw->callback((Fl_Callback*)cb_btn_review_lotw);
             } // Fl_Button* btn_review_lotw
-            { btn_send_lotw = new Fl_Button(90, 328, 70, 24, _("Send"));
+            { btn_send_lotw = new Fl_Button(15, 328, 70, 24, _("Send"));
               btn_send_lotw->tooltip(_("Send lotw.adif via tqsl"));
               btn_send_lotw->callback((Fl_Callback*)cb_btn_send_lotw);
             } // Fl_Button* btn_send_lotw
-            { Fl_Box* o = new Fl_Box(175, 273, 395, 24, _("Export all or a set of logbook records for LoTW upload"));
+            { Fl_Box* o = new Fl_Box(90, 273, 346, 24, _("Export logbook records for LoTW upload"));
               o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
             } // Fl_Box* o
-            { Fl_Box* o = new Fl_Box(175, 300, 395, 24, _("Review / edit the exported LoTW upload adif file"));
+            { Fl_Box* o = new Fl_Box(90, 300, 346, 24, _("Review / edit the exported LoTW upload adif file"));
               o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
             } // Fl_Box* o
-            { Fl_Box* o = new Fl_Box(175, 328, 395, 24, _("Submit the upload adif file to LoTW"));
+            { Fl_Box* o = new Fl_Box(90, 328, 346, 24, _("Submit the upload adif file to LoTW"));
               o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
             } // Fl_Box* o
             { Fl_Box* o = new Fl_Box(11, 60, 574, 24, _("You must have tqsl installed and it\'s location recorded for LoTW updates to \
 work!"));
               o->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
             } // Fl_Box* o
-            { btnLOTW_pwd_show = new Fl_Button(297, 126, 70, 24, _("Show"));
+            { btnLOTW_pwd_show = new Fl_Button(340, 126, 70, 24, _("Show"));
               btnLOTW_pwd_show->tooltip(_("Show password in plain text"));
               btnLOTW_pwd_show->callback((Fl_Callback*)cb_btnLOTW_pwd_show);
             } // Fl_Button* btnLOTW_pwd_show
-            { Fl_Box* o = new Fl_Box(300, 188, 285, 24, _("Use this tqsl station location"));
+            { Fl_Box* o = new Fl_Box(339, 188, 211, 24, _("Use this tqsl station location"));
               o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
             } // Fl_Box* o
-            { btn_verify_lotw = new Fl_Button(90, 356, 70, 24, _("Match"));
+            { btn_verify_lotw = new Fl_Button(15, 356, 70, 24, _("Match"));
               btn_verify_lotw->tooltip(_("Verify database with LoTW download file"));
               btn_verify_lotw->callback((Fl_Callback*)cb_btn_verify_lotw);
             } // Fl_Button* btn_verify_lotw
-            { Fl_Box* o = new Fl_Box(175, 356, 395, 24, _("Match logbook records with LoTW download file"));
+            { Fl_Box* o = new Fl_Box(90, 356, 346, 24, _("Match logbook records with LoTW download file"));
               o->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
             } // Fl_Box* o
+            { btn_view_unmatched = new Fl_Button(456, 356, 139, 24, _("View Unmatched"));
+              btn_view_unmatched->tooltip(_("Verify database with LoTW download file"));
+              btn_view_unmatched->callback((Fl_Callback*)cb_btn_view_unmatched);
+              btn_view_unmatched->deactivate();
+            } // Fl_Button* btn_view_unmatched
             tabLOTW->end();
           } // Fl_Group* tabLOTW
           tabsQRZ->end();

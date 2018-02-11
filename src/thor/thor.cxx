@@ -1208,6 +1208,8 @@ static bool hide_after_sending = false;
 
 int thor::tx_process()
 {
+	modem::tx_process();
+
 	int i = 0;
 
 	switch (txstate) {

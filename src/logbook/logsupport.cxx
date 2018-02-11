@@ -912,7 +912,8 @@ void cb_mnuMergeADIF_log(Fl_Menu_* m, void* d) {
 	ENSURE_THREAD(FLMAIN_TID);
 
 	if (MERGE_thread) {
-		fl_alert2("Database merger in progress");
+		notify_dialog* alert_window = new notify_dialog;
+		alert_window->notify(_("Database merger in progress"), 5.0, true);
 		return;
 	}
 
@@ -944,22 +945,27 @@ void cb_mnuMergeADIF_log(Fl_Menu_* m, void* d) {
 static string lotw_download_name = "";
 static cQsoDb *lotw_db = 0;
 
+extern Fl_Button *btn_view_unmatched;
+
 void verify_lotw(void *)
 {
 	lotw_db = new cQsoDb;
 	adifFile.do_readfile (lotw_download_name.c_str(), lotw_db);
 
-	string notice;
-	char sznote[50];
+	stringstream ss_note;
 
 	if (lotw_db->nbrRecs() == 0) {
-		notice = "No records in lotw download file";
-		LOG_INFO("%s", notice.c_str());
+		LOG_INFO("%s", _("No records in lotw download file"));
 	} else {
+
+		string report_fname = LoTWDir;
+		report_fname.append("unverified.txt");
+		ofstream report_file(report_fname.c_str());
 
 		int matchrec;
 		cQsoRec *qrec, *lrec;
 		int nverified = 0;
+		int unverified = 0;
 		string date;
 		string qdate;
 
@@ -971,7 +977,6 @@ void verify_lotw(void *)
 				qrec = qsodb.getRec(matchrec);
 				qdate = qrec->getField(LOTWRDATE);
 				if (date != qdate) {
-					nverified++;
 					qrec->putField(STATE, lrec->getField(STATE));
 					qrec->putField(GRIDSQUARE, lrec->getField(GRIDSQUARE));
 					qrec->putField(CQZ, lrec->getField(CQZ));
@@ -981,21 +986,79 @@ void verify_lotw(void *)
 					qrec->putField(DXCC, lrec->getField(DXCC));
 					qrec->putField(LOTWRDATE, lrec->getField(QSLRDATE));
 				}
+				nverified++;
 			} else {
-				notice.append("Could not match ");
-				notice.append(lrec->getField(CALL)).append(" on ");
-				notice.append(lrec->getField(QSO_DATE)).append("\n");
-				LOG_INFO("Could not match %s on %s", lrec->getField(CALL), lrec->getField(QSO_DATE));
+				unverified++;
+				report_file << lrec->getField(CALL) << ", "
+							<< lrec->getField(QSO_DATE) << ", "
+							<< lrec->getField(TIME_ON) << ", "
+							<< lrec->getField(FREQ) << ", "
+							<< lrec->getField(BAND) << ", "
+							<< lrec->getField(MODE) << "\n";
 			}
 		}
-		snprintf(sznote, sizeof(sznote),"%d records matched", nverified);
-		notice.append(sznote).append("\n");
-		if (nverified) qsodb.isdirty(1);
-		LOG_INFO("%d records matched", nverified);
-	}
-	fl_alert2("%s", notice.c_str());
+		report_file.close();
+		if (!unverified) remove(report_fname.c_str());
 
+		ss_note	<< "LoTW download contains " << lotw_db->nbrRecs() << " records\n\n"
+				<< nverified << " verified\n";
+		if (unverified) {
+			ss_note	<< unverified << " unverified\n\n"
+					<< "Check file " << report_fname;
+
+			btn_view_unmatched->activate();
+
+			if (nverified) qsodb.isdirty(1);
+			LOG_INFO("%d records verified", nverified);
+			LOG_INFO("%d records unverified", unverified);
+		}
+		notify_dialog* alert_window = new notify_dialog;
+		alert_window->notify(ss_note.str().c_str(), 15.0, true);
+	}
 	delete lotw_db;
+}
+
+static Fl_Window       *unmatched_viewer = (Fl_Window *)0;
+static Fl_Text_Display *viewer = (Fl_Text_Display *)0;
+static Fl_Text_Buffer  *buffer = (Fl_Text_Buffer *)0;
+static Fl_Button       *close_viewer = (Fl_Button *)0;
+
+void cb_close_viewer(Fl_Button *, void *) {
+	if (unmatched_viewer) {
+		unmatched_viewer->hide();
+		delete unmatched_viewer;
+		unmatched_viewer = 0;
+	}
+}
+
+void cb_btn_view_unmatched(Fl_Button *, void *) {
+	btn_view_unmatched->deactivate();
+	if (!unmatched_viewer) {
+		unmatched_viewer = new Fl_Window(100,100, 400, 500, _("Unmatched LoTW Records"));
+		viewer = new Fl_Text_Display(5, 5, 390, 470, "");
+		buffer = new Fl_Text_Buffer(8192);
+		viewer->buffer(buffer);
+		viewer->textfont(progdefaults.LOGBOOKtextfont);
+		viewer->textsize(progdefaults.LOGBOOKtextsize);
+		close_viewer = new Fl_Button(320, 477, 75, 20, _("Close"));
+		close_viewer->callback((Fl_Callback *)cb_close_viewer);
+		unmatched_viewer->end();
+		unmatched_viewer->resizable(viewer);
+	}
+	string report_fname = LoTWDir;
+	report_fname.append("unverified.txt");
+	ifstream report_file(report_fname.c_str());
+	if (report_file) {
+		char linebuff[1025];
+		viewer->buffer()->text("");
+		while (!report_file.eof()) {
+			report_file.getline(linebuff, 1024);
+			strcat(linebuff, "\n");
+			viewer->insert(linebuff);
+		}
+		report_file.close();
+		unmatched_viewer->show();
+	}
 }
 
 void cb_btn_verify_lotw(Fl_Button *, void *) {
@@ -1009,12 +1072,14 @@ void cb_btn_verify_lotw(Fl_Button *, void *) {
 
 //	if (!p || !*p) {
 	if (!f) {
-		fl_alert2("\
+		std::string alert = _("\
 Could not find LoTW report file.\n\n\
 Download from ARRL's LoTW page after logging in at:\n\n\
 https://lotw.arrl.org/lotwuser/default\n\n\
 Store the report file to the fldigi LOTW folder,\n\n\
 naming the file 'lotwreport.adi'");
+		notify_dialog* alert_window = new notify_dialog;
+		alert_window->notify(alert.c_str(), 20, true);
 		return;
 	}
 //	lotw_download_name = p;
@@ -1331,8 +1396,10 @@ void SearchLastQSO(const char *callsign)
 		wBrowser->GotoRow(row);
 		inpName->value(inpName_log->value());
 		inpQth->value(inpQth_log->value());
-		inpLoc->value(inpLoc_log->value());
-		inpLoc->position (0);
+		inpLoc1->value(inpLoc_log->value());
+		inpLoc1->position (0);
+		inpLoc2->value(inpLoc_log->value());
+		inpLoc2->position (0);
 		inpState->value(inpState_log->value());
 		inpState->position (0);
 		inpVEprov->value(inpVE_Prov_log->value ());
@@ -1359,7 +1426,8 @@ void SearchLastQSO(const char *callsign)
 	} else {
 		inpName->value("");
 		inpQth->value("");
-		inpLoc->value("");
+		inpLoc1->value("");
+		inpLoc2->value("");
 		inpState->value("");
 		inpVEprov->value("");
 		inpCountry->value("");
@@ -1445,8 +1513,10 @@ void cb_btnRetrieve(Fl_Button* b, void* d)
 	inpCounty->position (0);
 	inpXchgIn->value(qsoPtr->getField(XCHG1));
 	inpQth->value (qsoPtr->getField(QTH));
-	inpLoc->value (qsoPtr->getField(GRIDSQUARE));
-	inpLoc->position (0);
+	inpLoc1->value (qsoPtr->getField(GRIDSQUARE));
+	inpLoc1->position (0);
+	inpLoc2->value (qsoPtr->getField(GRIDSQUARE));
+	inpLoc2->position (0);
 	inpNotes->value (qsoPtr->getField(NOTES));
 
 	wBrowser->take_focus();

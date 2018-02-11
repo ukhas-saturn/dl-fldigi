@@ -1121,6 +1121,8 @@ static int line_char_count = 0;
 
 int rtty::tx_process()
 {
+	modem::tx_process();
+
 	int c;
 
 	if (preamble) {
