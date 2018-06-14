@@ -17,7 +17,7 @@ dl_fldigi_CPPFLAGS = -DBUILD_FLDIGI -DLOCALEDIR=\"$(localedir)\" @FLDIGI_BUILD_C
 dl_fldigi_CXXFLAGS = @FLDIGI_BUILD_CXXFLAGS@
 dl_fldigi_CFLAGS = $(dl_fldigi_CXXFLAGS)
 dl_fldigi_LDFLAGS = @FLDIGI_BUILD_LDFLAGS@
-dl_fldigi_LDADD = -lcrypto @FLDIGI_BUILD_LDADD@
+dl_fldigi_LDADD = -lm -lcrypto -lstdc++ @FLDIGI_BUILD_LDADD@
 
 flarq_CPPFLAGS = -DBUILD_FLARQ -DLOCALEDIR=\"$(localedir)\" @FLARQ_BUILD_CPPFLAGS@
 flarq_CXXFLAGS = @FLARQ_BUILD_CXXFLAGS@

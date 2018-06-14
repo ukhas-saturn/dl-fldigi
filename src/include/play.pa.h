@@ -9,7 +9,7 @@
 #else
 #define PaStream int
 #define PaStreamParameters void*
-#define Pa_GetErrorText err_to_str
+#define Pa_GetErrorText strerror
 #endif
 
 
