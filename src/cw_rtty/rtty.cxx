@@ -655,6 +655,9 @@ int rtty::rx_process(const double *buf, int len)
 		progStatus.rtty_filter_changed = false;
 		reset_filters();
 	}
+{
+	reverse = wf->Reverse() ^ !wf->USB();
+}
 
 	Metric();
 #if FILTER_DEBUG == 1
@@ -1123,20 +1126,71 @@ int rtty::tx_process()
 {
 	modem::tx_process();
 
-	int c;
+	int c = get_tx_char();
+
+	if (use_nanoIO) {
+		set_nanoIO();
+		if (preamble) {
+			start_deadman();
+			for (int i = 0; i < progdefaults.TTY_LTRS; i++)
+				Nav_send_char(-1);
+			preamble = false;
+			nano_send_char(-1);
+			nano_send_char(-1);
+		}
+
+		if (c == GET_TX_CHAR_ETX || stopflag) {
+			stopflag = false;
+			stop_deadman();
+			return -1;
+		}
+// send idle character if c == -1
+// nanoIO does not return an idle character in it's buffer so fldigi
+// must insert a suitable time delay to account for the idle
+		if (c == GET_TX_CHAR_NODATA) {
+			double baudrate = 45.45;
+			if (progdefaults.nanoIO_baud == 50.0) baudrate = 50.0;
+			if (progdefaults.nanoIO_baud == 75.0) baudrate = 75.0;
+			MilliSleep(7500.0 / baudrate); // start + 5 data = 1.5 stop bits
+			return 0;
+		}
+		nano_send_char(c);
+		put_echo_char(c);
+		return 0;
+	}
+
+	if (use_Nav) {
+		if (preamble) {
+			start_deadman();
+			for (int i = 0; i < progdefaults.TTY_LTRS; i++)
+				Nav_send_char(-1);
+			preamble = false;
+		}
+
+		if (c == GET_TX_CHAR_ETX || stopflag) {
+			stopflag = false;
+			stop_deadman();
+			return -1;
+		}
+// send idle character if c == -1
+// must insert a suitable time delay to account for the idle
+		if (c == GET_TX_CHAR_NODATA) {
+			Nav_send_char(-1);
+			return 0;
+		}
+		Nav_send_char(c);
+		put_echo_char(c);
+		return 0;
+	}
 
 	if (preamble) {
 		m_SymShaper1->reset();
 		m_SymShaper2->reset();
-		for (int i = 0; i < nbits + 1; i++) send_symbol(0, symbollen);
 		send_stop();
-		for (int i = 0; i < nbits + 1; i++) send_symbol(1, symbollen);
-		send_stop();
-		send_idle();
+		for (int i = 0; i < progdefaults.TTY_LTRS; i++)
+			send_idle();
 		preamble = false;
-//		freq1 = get_txfreq_woffset() + shift / 2.0;
 	}
-	c = get_tx_char();
 
 // TX buffer empty
 	if (c == GET_TX_CHAR_ETX || stopflag) {
@@ -1151,15 +1205,10 @@ int rtty::tx_process()
 			send_char(0x08);
 			send_char(0x02);
 		}
-	if (progStatus.shaped_rtty) flush_stream();
-//	if (rtty_baud <= SHAPER_BAUD) flush_stream();
-//#if SHAPER_BAUD
-//	flush_stream();
-//#endif
+		flush_stream();
 		cwid();
 		return -1;
 	}
-
 // send idle character if c == -1
 	if (c == GET_TX_CHAR_NODATA) {
 		send_idle();
@@ -1168,11 +1217,9 @@ int rtty::tx_process()
 
 // if NOT Baudot
 	if (nbits != 5) {
-///
 		acc_symbols = 0;
 		send_char(c);
 		xmt_samples = char_samples = acc_symbols;
-
 		return 0;
 	}
 
@@ -1365,7 +1412,7 @@ void SymbolShaper::Preset(double baud, double sr)
         int const offset = m_table_size/2;
         double wfactor = 1.0 / 1.568; // optimal
 // symbol-length in samples if wmultiple = 1.0
-        double const T = wfactor * sample_rate / (baud_rate*2.0); 
+        double const T = wfactor * sample_rate / (baud_rate*2.0);
 // symbol-time relative to zero
         double const t = (x-offset);
 

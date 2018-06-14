@@ -24,6 +24,7 @@ extern void testDirectory(std::string);
 extern void cbSendTalk();
 extern void cbClearTalk();
 extern void help_cb();
+extern void open_nbems_file_folder();
 
 extern void sendEmailFile();
 extern void sendAsciiFile();
@@ -46,6 +47,9 @@ extern int		iretries;
 extern long		iwaittime;
 extern long		itimeout;
 extern int		bcnInterval;
+extern int		idtimer;
+
+extern void		cb_idtimer();
 
 // used by xmlrpc interface
 extern int			arqstate;

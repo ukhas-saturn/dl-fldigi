@@ -503,15 +503,27 @@ void trx_tune_loop()
 		active_modem->tx_init();
 
 		try {
-			while (trx_state == STATE_TUNE) {
-				if (_trx_tune == 0) {
-					REQ(&waterfall::set_XmtRcvBtn, wf, true);
-					xmttune::keydown(active_modem->get_txfreq_woffset(), TXscard);
-					_trx_tune = 1;
-				} else
-					xmttune::tune(active_modem->get_txfreq_woffset(), TXscard);
+			if ((active_modem->get_mode() == MODE_CW)  && (use_nanoIO || progStatus.WK_online)) {
+				if (use_nanoIO) nanoCW_tune(1);
+				else WK_tune(1);
+
+				REQ(&waterfall::set_XmtRcvBtn, wf, true);
+				while (trx_state == STATE_TUNE) MilliSleep(10);
+
+				if (use_nanoIO) nanoCW_tune(0);
+				else WK_tune(0);
 			}
-			xmttune::keyup(active_modem->get_txfreq_woffset(), TXscard);
+			else {
+				while (trx_state == STATE_TUNE) {
+					if (_trx_tune == 0) {
+						REQ(&waterfall::set_XmtRcvBtn, wf, true);
+						xmttune::keydown(active_modem->get_txfreq_woffset(), TXscard);
+						_trx_tune = 1;
+					} else
+						xmttune::tune(active_modem->get_txfreq_woffset(), TXscard);
+				}
+				xmttune::keyup(active_modem->get_txfreq_woffset(), TXscard);
+			}
 		}
 		catch (const SndException& e) {
 			if (TXscard) TXscard->Close();
@@ -616,7 +628,7 @@ static int new_freq;
 void trx_start_modem_loop()
 {
 	if (new_modem == active_modem) {
-		if (new_freq > 0)
+		if (new_freq > 0 && !progdefaults.retain_freq_lock)
 			active_modem->set_freq(new_freq);
 		active_modem->restart();
 		trx_state = STATE_RX;
@@ -631,7 +643,7 @@ void trx_start_modem_loop()
 
 	new_modem->init();
 	active_modem = new_modem;
-	if (new_freq > 0)
+	if (new_freq > 0 && !progdefaults.retain_freq_lock)
 		active_modem->set_freq(new_freq);
 	trx_state = STATE_RX;
 	REQ(&waterfall::opmode, wf);

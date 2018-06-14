@@ -134,7 +134,7 @@
               false)                                                                    \
         ELEM_(bool, retain_freq_lock, "RETAINFREQLOCK",                                 \
              "retain frequency lock on rsid modem change/reset",                        \
-             false)                                                                     \
+             true)                                                                      \
         ELEM_(bool, changed, "", "",  false)                                            \
                                                                                         \
         ELEM_(double, wfRefLevel, "WFREFLEVEL",                                         \
@@ -187,16 +187,16 @@
               3000)                                                                     \
         ELEM_(double, CWsweetspot, "CWSWEETSPOT",                                       \
               "Default CW tracking point (Hz)",                                         \
-              1000)                                                                     \
+              1500)                                                                     \
         ELEM_(double, RTTYsweetspot, "RTTYSWEETSPOT",                                   \
               "Default RTTY tracking point (Hz)",                                       \
-              1000)                                                                     \
+              1500)                                                                     \
         ELEM_(double, PSKsweetspot, "PSKSWEETSPOT",                                     \
               "Default tracking point for all other modems (Hz)",                       \
-              1000)                                                                     \
+              1500)                                                                     \
         ELEM_(bool, StartAtSweetSpot, "STARTATSWEETSPOT",                               \
               "Always start new modems at sweet spot frequencies",                      \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, CWOffset, "CWOFFSET",                                               \
               "Select if waterfall should compensate for BFO offset in CW",             \
               false)                                                                    \
@@ -913,7 +913,7 @@
               true)                                                                     \
         ELEM_(bool, rxtext_tooltips, "RXTEXTTOOLTIPS",                                  \
               "Show callsign tooltips in received text",                                \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, autofill_qso_fields, "AUTOFILLQSO",                                 \
               "Auto-fill Country and Azimuth QSO fields",                               \
               false)                                                                    \
@@ -922,10 +922,10 @@
               true)                                                                     \
         ELEM_(bool, RSTdefault, "RSTDEFAULT",                                           \
               "Default outgoing RST to 599/59",                                         \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, RSTin_default, "RSTINDEFAULT",                                      \
               "Default incoming RST to 599/59",                                         \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, autoextract, "AUTOEXTRACT",                                         \
               "Enable detection and extraction of \"wrapped\" text",                    \
               true)                                                                     \
@@ -1311,6 +1311,76 @@
               "Force the rig sideband (for the purpose of calculating frequencies).\n"  \
               "Values are as follows: 0: as reported by rig; 1: LSB; 2: USB.",          \
               0)   /* SIDEBAND_RIG */                                                   \
+        /* nanoIO interface parameters */                                               \
+        ELEM_(std::string, nanoIO_serial_port_name, "NANOSERIALPORTNAME",               \
+              "nanoIO serial device",                                                   \
+              "NONE")                                                                   \
+        ELEM_(int, nanoIO_baud, "NANOIOBAUD",                                           \
+              "0 - 45.45, 1 - 50, 2 - 75, 3 - 100 baud",                                \
+              0)                                                                        \
+        ELEM_(int, nanoIO_polarity, "NANOIOPOLARITY",                                   \
+              "MARK polarity 0 - high, 1 - low",                                        \
+              1)                                                                        \
+        ELEM_(int, nanoIO_CW_incr, "NANOIOCWINCR",                                      \
+              "^ ' increment/decrement value\n"                                         \
+              "range '1' to '5'",                                                       \
+              '2')                                                                      \
+        ELEM_(int, CW_keyspeed, "NANOCWKEYSPEED",                                       \
+              "Paddle keyer WPM (0...100)",                                             \
+              18)                                                                       \
+        ELEM_(int, nanoIO_CW_keyer, "NANOIOCWKEYER",                                    \
+              "0 - IambicA, 1 - IambicB, 2 - Straight",                                 \
+              0)                                                                        \
+        /* TTY h/w interface */                                                         \
+        ELEM_(int, xcvr_FSK_sideband, "XCVRFSKSIDEBAND",                                \
+              "0 = LSB | 1 = USB",                                                      \
+              0)                                                                        \
+        ELEM_(int, xcvr_FSK_MARK, "XCVRFSKMARK",                                        \
+              "typical values: 1275, 1615 or 2125 for 170 Hz shift, IC7200",            \
+              2125)                                                                     \
+        ELEM_(int, TTY_LTRS, "TTYLTRS",                                                 \
+              "0 to 10, number of LTRS bytes send at beginning of xmt",                 \
+              2)                                                                        \
+        /* Navigator interface */                                                       \
+        ELEM_(std::string, Nav_FSK_port, "NAVFSKPORT",                                  \
+              "Nav FSK serial device",                                                  \
+              "NONE")                                                                   \
+        ELEM_(std::string, Nav_config_port, "NAVCONFIGPORT",                            \
+              "Nav config serial device",                                               \
+              "NONE")                                                                   \
+        ELEM_(int, Nav_FSK_baud, "NAVFSKBAUD",                                          \
+              "0 - 45.45, 1 - 75, 2 - 100 baud",                                        \
+              0)                                                                        \
+        ELEM_(int, Nav_FSK_sidetone, "NAVFSKSIDETONE",                                  \
+              "0 = Off | 1 = On",                                                       \
+              0)                                                                        \
+        ELEM_(int, Nav_FSK_ptt, "NAVFSKPTT",                                            \
+              "0 = Off | 1 = On",                                                       \
+              0)                                                                        \
+        ELEM_(int, Nav_FSK_polarity, "NAVFSKPOLARITY",                                  \
+              "0 = Normal | 1 = Reversed",                                              \
+              0)                                                                        \
+        ELEM_(int, Nav_FSK_stopbits, "NAVFSKSTOPBITS",                                  \
+              "0 = 1 | 1 = 1.5 | 2 = 2",                                                \
+              1)                                                                        \
+        ELEM_(int, Nav_channel_2_att, "NAVCH2ATT",                                      \
+              "0 = 15 db, 1 = None",                                                    \
+              1)                                                                        \
+        ELEM_(int, Nav_channel_1_att, "NAVCH1ATT",                                      \
+              "0 = 15 db, 1 = None",                                                    \
+              1)                                                                        \
+        ELEM_(int, Nav_rf_att, "NAVRFATT",                                              \
+              "0 = 20 db, 1 = None",                                                    \
+              1)                                                                        \
+        ELEM_(int, Nav_led, "NAVLED",                                                   \
+              "0 = Off | 1 = On",                                                       \
+              0)                                                                        \
+        ELEM_(int, Nav_cat_led, "NAVCATLED",                                            \
+              "0 = Off | 1 = On",                                                       \
+              0)                                                                        \
+        ELEM_(int, Nav_wk_ptt, "NAVWKPTT",                                              \
+              "0 = Off | 1 = On",                                                       \
+              0)                                                                        \
         /* Operator */                                                                  \
         ELEM_(std::string, myCall, "MYCALL",                                            \
               "Station callsign",                                                       \
@@ -1425,9 +1495,12 @@
         ELEM_(std::string, logbookfilename, "LOGBOOKFILENAME",                          \
               "Logbook file name",                                                      \
               "")                                                                       \
+        ELEM_(bool, DisplayLogbookRead, "LOGBOOKREADDISPLAY",                           \
+              "Display read # recs and logbook name on program start",                  \
+              0)                                                                        \
         ELEM_(bool, fixed599, "FIXED599",                                               \
               "Force RST in/out to 599",                                                \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, UseLeadingZeros, "USELEADINGZEROS",                                 \
               "Insert leading zeros into transmitted serial number (contest)",          \
               true)                                                                     \
@@ -1463,7 +1536,7 @@
               {255, 110, 180})                                                          \
         ELEM_(bool, EnableDupCheck, "ENABLEDUPCHECK",                                   \
               "Check for duplicates (contest)",                                         \
-              false)                                                                    \
+              true)                                                                     \
         ELEM_(bool, dupmode, "DUPMODE",                                                 \
               "Predicate for ENABLEDUPCHECK (mode must match)",                         \
               true)                                                                     \
@@ -1964,6 +2037,9 @@
         ELEM_(Fl_Color, TuneColor, "TUNECOLOR",                                         \
               "UI Tune select color",                                                   \
               FL_RED)                                                                   \
+        ELEM_(Fl_Color, default_btn_color, "DEFAULTBTNCOLOR",                           \
+              "Default color of lighted buttons",                                       \
+              FL_YELLOW)                                                                \
         /* XMLRPC LOGBOOK server */                                                     \
         ELEM_(bool, xml_logbook, "XML_LOGBOOK",                                         \
               "Try to open remote xml logbook",                                         \

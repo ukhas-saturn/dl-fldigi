@@ -183,6 +183,7 @@
 bool bHAB = false;
 
 #include "winkeyer.h"
+#include "nanoIO.h"
 
 #include "audio_alert.h"
 
@@ -659,7 +660,6 @@ void cb_contestiaJ(Fl_Widget *w, void *arg);
 void cb_contestiaCustom(Fl_Widget *w, void *arg);
 
 void cb_rtty50(Fl_Widget *w, void *arg);
-void cb_rttyHAB50(Fl_Widget *w, void *arg);
 void cb_rtty100(Fl_Widget *w, void *arg);
 void cb_rtty300(Fl_Widget *w, void *arg);
 void cb_rttyCustom(Fl_Widget *w, void *arg);
@@ -1071,6 +1071,18 @@ void set_rtty_tab_widgets()
 	selStopBits->index(progdefaults.rtty_stop);
 }
 
+void enable_rtty_quickchange()
+{
+	if (active_modem->get_mode() == MODE_RTTY)
+		quick_change = quick_change_rtty;
+}
+
+void disable_rtty_quickchange()
+{
+	if (active_modem->get_mode() == MODE_RTTY)
+		quick_change = 0;
+}
+
 void cb_rtty45(Fl_Widget *w, void *arg)
 {
 	progdefaults.rtty_baud = 1;
@@ -1083,17 +1095,6 @@ void cb_rtty45(Fl_Widget *w, void *arg)
 }
 
 void cb_rtty50(Fl_Widget *w, void *arg)
-{
-	progdefaults.rtty_baud = 2;
-	progdefaults.rtty_bits = 1;
-	progdefaults.rtty_shift = 6;
-	progdefaults.rtty_parity = 0;
-	progdefaults.rtty_stop = 0;
-	set_rtty_tab_widgets();
-	cb_init_mode(w, arg);
-}
-
-void cb_rttyHAB50(Fl_Widget *w, void *arg)
 {
 	progdefaults.rtty_baud = 2;
 	progdefaults.rtty_bits = 1;
@@ -1877,7 +1878,11 @@ void init_modem(trx_mode mode, int freq)
 		startup_modem(*mode_info[mode].modem ? *mode_info[mode].modem :
 				  *mode_info[mode].modem = new rtty(mode), freq);
 		modem_config_tab = tabRTTY;
-		quick_change = quick_change_rtty;
+
+		if (progStatus.nanoFSK_online || progStatus.Nav_online)
+			quick_change = 0;
+		else
+			quick_change = quick_change_rtty;
 		break;
 
 	case MODE_THROB1: case MODE_THROB2: case MODE_THROB4:
@@ -4011,8 +4016,7 @@ void UI_check_swap()
 		progStatus.tile_y = TransmitText->h();
 		progStatus.tile_y_ratio = 1.0 * TransmitText->h() / text_panel->h();
 	}
-//	else if (!progdefaults.rxtx_swap && ReceiveText->y() > TransmitText->y()) {
-	else if (progdefaults.rxtx_swap && (ReceiveText->y() > TransmitText->y())) {
+	else if (!progdefaults.rxtx_swap && ReceiveText->y() > TransmitText->y()) {
 		rx_y = TransmitText->y();
 		rx_h = first_check ? progStatus.tile_y : ReceiveText->h();
 		rx_x = mv_x + mv_w;
@@ -5058,7 +5062,6 @@ static Fl_Menu_Item menu_[] = {
 { RTTY_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
-{ "RTTY-HAB-50", 0, cb_rttyHAB50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -5803,9 +5806,13 @@ void cb_cntCW_WPM(Fl_Widget * w, void *v)
 	}
 
 	if (progStatus.WK_online && cnt->value() > 55) cnt->value(55);
+	if (use_nanoIO && cnt->value() > 60) cnt->value(60);
+	if (use_nanoIO && cnt->value() < 5) cnt->value(5);
 
 	progdefaults.CWspeed = (int)cnt->value();
 	sldrCWxmtWPM->value(progdefaults.CWspeed);
+	cntr_nanoCW_WPM->value(progdefaults.CWspeed);
+
 	progdefaults.changed = true;
 	sync_cw_parameters();
 
@@ -8471,7 +8478,6 @@ static Fl_Menu_Item alt_menu_[] = {
 {"RTTY", 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
-{ "RTTY-HAB-50", 0, cb_rttyHAB50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0}, 
 { "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -10047,6 +10053,7 @@ void set_CWwpm()
 	FL_LOCK_D();
 	sldrCWxmtWPM->value(progdefaults.CWspeed);
 	cntCW_WPM->value(progdefaults.CWspeed);
+	if (use_nanoIO) set_nanoWPM(progdefaults.CWspeed);
 	FL_UNLOCK_D();
 }
 
@@ -10516,8 +10523,9 @@ void set_rx_only()
 
 void qsy(long long rfc, int fmid)
 {
-	if (rfc <= 0LL)
+	if (rfc <= 0LL) {
 		rfc = wf->rfcarrier();
+	}
 
 	if (fmid > 0) {
 		if (active_modem->freqlocked())
@@ -10529,8 +10537,9 @@ void qsy(long long rfc, int fmid)
 		if (adj)
 			rfc += (wf->USB() ? adj : -adj);
 	}
-	if (rfc == wf->rfcarrier())
+	if (rfc == wf->rfcarrier()) {
 		return;
+	}
 
 	if (connected_to_flrig)
 		REQ(xmlrpc_rig_set_qsy, rfc);
@@ -10544,7 +10553,13 @@ void qsy(long long rfc, int fmid)
 		REQ(xmlrpc_set_qsy, rfc);
 	else
 		qso_selectFreq((long int) rfc, fmid);
-		//LOG_VERBOSE("Ignoring rfcarrier change request (no rig control)");
+
+	string testmode = qso_opMODE->value();
+	bool xcvr_useFSK = (testmode.find("RTTY") != string::npos);
+	if (xcvr_useFSK) {
+		int fmid = progdefaults.xcvr_FSK_MARK + rtty::SHIFT[progdefaults.rtty_shift]/2;
+		wf->carrier(fmid);
+	} 
 }
 
 map<string, qrg_mode_t> qrg_marks;
@@ -10683,6 +10698,27 @@ void spot_selection_color()
 	btnAutoSpot->redraw();
 }
 
+void set_default_btn_color()
+{
+	Fl_Light_Button *buttons[] = {
+		btn_FSQCALL, btn_SELCAL, btn_MONITOR, btnPSQL,
+		btnDupCheckOn, btn_WK_connect,
+		btn_nanoCW_connect, btn_nanoIO_connect, 
+		btn_enable_auditlog, btn_enable_fsq_heard_log,
+		btn_enable_ifkp_audit_log, btn_enable_ifkp_audit_log,
+		btn_Nav_connect, btn_Nav_config,
+		btnConnectTalker };
+
+	size_t nbtns = sizeof(buttons)/sizeof(*buttons);
+
+	for (size_t i = 0; i < nbtns; i++) {
+		if (buttons[i] != NULL) {
+			buttons[i]->selection_color(progdefaults.default_btn_color);
+			buttons[i]->redraw();
+		}
+	}
+}
+
 void set_colors()
 {
 	spot_selection_color();
@@ -10693,6 +10729,7 @@ void set_colors()
 	afc_selection_color();
 	xmtlock_selection_color();
 	tune_selection_color();
+	set_default_btn_color();
 }
 
 // Olivia

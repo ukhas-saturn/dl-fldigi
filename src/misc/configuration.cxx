@@ -46,6 +46,7 @@
 
 #include "rigio.h"
 #include "rigxml.h"
+#include "nanoIO.h"
 #include "debug.h"
 
 #include <FL/Fl_Tooltip.H>
@@ -560,6 +561,12 @@ int configuration::setDefaults()
 	inpXmlRigDevice->value(XmlRigDevice.c_str());
 	listbox_xml_rig_baudrate->index(XmlRigBaudrate);
 
+	select_nanoIO_CommPort->value(nanoIO_serial_port_name.c_str());
+	select_nanoCW_CommPort->value(nanoIO_serial_port_name.c_str());
+
+	select_USN_FSK_port->value(Nav_FSK_port.c_str());
+	select_Nav_config_port->value(Nav_config_port.c_str());
+
 	valCWsweetspot->value(CWsweetspot);
 	valRTTYsweetspot->value(RTTYsweetspot);
 	valPSKsweetspot->value(PSKsweetspot);
@@ -892,6 +899,7 @@ void configuration::testCommPorts()
 		"/dev/ttyACM%u",
 		"/dev/ttyAMA%u",
 		"/dev/usb/ttyACM%u",
+		"/dev/rfcomm%u",
 		"/opt/vttyS%u"
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 		"/dev/tty%2.2u"
@@ -927,6 +935,9 @@ void configuration::testCommPorts()
 #  endif
 		inpXmlRigDevice->add(gbuf.gl_pathv[j]);
 
+		select_nanoIO_CommPort->add(gbuf.gl_pathv[j]);
+		select_nanoCW_CommPort->add(gbuf.gl_pathv[j]);
+
 		select_WK_CommPort->add(gbuf.gl_pathv[j]);
 	}
 	globfree(&gbuf);
@@ -959,6 +970,9 @@ void configuration::testCommPorts()
 #  endif
 			inpXmlRigDevice->add(ttyname);
 
+			select_nanoIO_CommPort->add(ttyname);
+			select_nanoCW_CommPort->add(ttyname);
+
 			select_WK_CommPort->add(ttyname);
 		}
 #else // __APPLE__
@@ -982,6 +996,12 @@ void configuration::testCommPorts()
 			inpRIGdev->add(gbuf.gl_pathv[j]);
 #  endif
 			inpXmlRigDevice->add(gbuf.gl_pathv[j]);
+
+			select_nanoIO_CommPort->add(gbuf.gl_pathv[j]);
+			select_nanoCW_CommPort->add(gbuf.gl_pathv[j]);
+
+			select_USN_FSK_port->add(gbuf.gl_pathv[j]);
+			select_Nav_config_port->add(gbuf.gl_pathv[j]);
 
 			select_WK_CommPort->add(gbuf.gl_pathv[j]);
 		}

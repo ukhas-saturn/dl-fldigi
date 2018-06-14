@@ -425,6 +425,7 @@ extern void rxid_selection_color();
 extern void txid_selection_color();
 extern void tune_selection_color();
 extern void spot_selection_color();
+extern void set_default_btn_color();
 
 extern void put_WARNstatus(double);
 
@@ -555,6 +556,8 @@ extern void set_rtty_shift(int shift);
 extern void set_rtty_baud(float baud);
 extern void set_rtty_bits(int bits);
 extern void set_rtty_bw(float bw);
+extern void enable_rtty_quickchange();
+extern void disable_rtty_quickchange();
 
 extern void sync_cw_parameters();
 
