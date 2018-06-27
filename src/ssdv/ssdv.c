@@ -587,6 +587,7 @@ static char ssdv_process(ssdv_t *s)
 		{
 			s->mcupart = 0;
 			s->mcu_id++;
+			s->reset_mcu = s->next_reset_mcu;
 			
 			/* Test for the end of image */
 			if(s->mcu_id >= s->mcu_count)
@@ -602,13 +603,15 @@ static char ssdv_process(ssdv_t *s)
 				/* The first MCU of each packet should be byte aligned */
 				ssdv_outbits_sync(s);
 				
-				s->reset_mcu = s->mcu_id;
+				s->next_reset_mcu = s->reset_mcu = s->mcu_id;
 				s->packet_mcu_id = s->mcu_id;
 				s->packet_mcu_offset = s->pkt_size_payload - s->out_len;
 			}
 			
 			if(s->mode == S_DECODING && s->mcu_id == s->reset_mcu)
+			{
 				s->workbits = s->worklen = 0;
+			}
 			
 			/* Test for a reset marker */
 			if(s->dri > 0 && s->mcu_id > 0 && s->mcu_id % s->dri == 0)
@@ -1028,9 +1031,10 @@ char ssdv_enc_get_packet(ssdv_t *s)
 			
 			if(r == SSDV_BUFFER_FULL || r == SSDV_EOI)
 			{
-				uint16_t mcu_id     = s->packet_mcu_id;
-				uint8_t i, mcu_offset = s->packet_mcu_offset;
+				uint16_t mcu_id    = s->packet_mcu_id;
+				uint8_t mcu_offset = s->packet_mcu_offset;
 				uint32_t x;
+				uint8_t i;
 				
 				if(mcu_offset != 0xFF && mcu_offset >= s->pkt_size_payload)
 				{
@@ -1260,7 +1264,13 @@ char ssdv_dec_feed(ssdv_t *s, uint8_t *packet)
 	s->packet_mcu_offset = packet[12];
 	s->packet_mcu_id     = (packet[13] << 8) | packet[14];
 	
-	if(s->packet_mcu_id != 0xFFFF) s->reset_mcu = s->packet_mcu_id;
+	if(s->packet_mcu_id != 0xFFFF)
+	{
+		/* Set the next reset MCU ID. We can't set it
+		 * directly here as the previous MCU may still
+		 * be being processed. */
+		s->next_reset_mcu = s->packet_mcu_id;
+	}
 	
 	/* If this is the first packet, write the JPEG headers */
 	if( (packet_id == 0) || (s->dqt_valid == 0) )
