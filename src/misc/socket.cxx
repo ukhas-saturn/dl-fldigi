@@ -620,6 +620,7 @@ void Socket::open(const Address& addr)
 	const addr_info_t* info = (addr_info_t *)0;
 	ainfo = info;
 
+#if 0
 	for (anum = 0; anum < n; anum++) {
 		info = address.get(anum);
 LOG_DEBUG("\n\
@@ -644,6 +645,16 @@ info->ai_protocol);
 	if ((sockfd = socket(ainfo->ai_family, ainfo->ai_socktype, ainfo->ai_protocol)) == -1) { //!= -1) {
 		throw SocketException(errno, "Open socket");
 	}
+#else
+	for (anum = n-1; anum >= 0; anum--) {
+		ainfo = address.get(anum);
+		LOG_INFO("Trying %s", address.get_str(ainfo).c_str());
+		if ((sockfd = socket(ainfo->ai_family, ainfo->ai_socktype, ainfo->ai_protocol)) != -1)
+			break;
+	}
+	if (sockfd == -1)
+		throw SocketException(errno, "Open socket");
+#endif
 	set_close_on_exec(true);
 }
 

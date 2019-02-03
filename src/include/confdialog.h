@@ -26,10 +26,10 @@ extern Fl_Group *tabOperator;
 extern Fl_Input2 *inpMyCallsign;
 extern Fl_Input2 *inpOperCallsign;
 extern Fl_Input2 *inpMyName;
+extern Fl_Input2 *MyRadio;
 extern Fl_Input2 *inpMyAntenna;
 extern Fl_Input2 *inpMyQth;
 extern Fl_Input2 *inpMyLocator;
-extern Fl_Input2 *MyRadio;
 #include "counties.h"
 extern Fl_ListBox *listbox_states;
 extern Fl_Input2 *inp_QP_state_short;

@@ -3450,6 +3450,8 @@ void init_country_fields()
 
 void set_log_colors()
 {
+	if(bHAB || bWF_only) return;
+
 Fl_Input2* qso_fields[] = {
 	inpCall1, inpCall2, inpCall3, inpCall4,
 	inpName1, inpName2,
@@ -3731,6 +3733,7 @@ Fl_Input2* log_fields[] = {
 void clearQSO()
 {
 if (bWF_only) return;
+if (bHAB) return;
 
 	Fl_Input2* call_fields[] = { inpCall1, inpCall2, inpCall3, inpCall4 };
 	size_t num_fields = sizeof(call_fields)/sizeof(*call_fields);
@@ -8264,6 +8267,10 @@ void noop_controls() // create and then hide all controls not being used
 	cboCountryWAE2 = new Fl_ComboBox(defwidget); cboCountryWAE2->end();
 	cboCountryWAE2->hide();
 
+	cboCountryAICW2 = new Fl_ComboBox(defwidget); cboCountryAICW2->end();
+	cboCountryAICW2->hide();
+	init_country_fields();
+
 	qso_opPICK3 = new Fl_Button(defwidget); qso_opPICK3->hide();
 	qsoClear3 = new Fl_Button(defwidget); qsoClear3->hide();
 	qsoSave3 = new Fl_Button(defwidget); qsoSave3->hide();
@@ -8622,6 +8629,116 @@ void create_fl_digi_main_dl_fldigi() {
 
 		Y = Hmenu + pad;
 		
+		status_group = new Fl_Group(0, Y, progStatus.mainW, Hstatus);
+
+			MODEstatus = new Fl_Button(
+				0, Y,
+				Wmode, Hstatus, "");
+			MODEstatus->box(FL_DOWN_BOX);
+			MODEstatus->color(FL_BACKGROUND2_COLOR);
+			MODEstatus->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+			MODEstatus->callback(status_cb, (void *)0);
+			MODEstatus->when(FL_WHEN_CHANGED);
+			MODEstatus->tooltip(_("Left click: change mode\nRight click: configure"));
+
+			cntCW_WPM = new Fl_Counter2(
+				rightof(MODEstatus), Y,
+				Ws2n - Hstatus, Hstatus, "");
+			cntCW_WPM->callback(cb_cntCW_WPM);
+			cntCW_WPM->minimum(progdefaults.CWlowerlimit);
+			cntCW_WPM->maximum(progdefaults.CWupperlimit);
+			cntCW_WPM->value(progdefaults.CWspeed);
+			cntCW_WPM->tooltip(_("CW transmit WPM"));
+			cntCW_WPM->type(1);
+			cntCW_WPM->step(1);
+			cntCW_WPM->hide();
+
+			btnCW_Default = new Fl_Button(
+				rightof(cntCW_WPM), Y,
+				Hstatus, Hstatus, "*");
+			btnCW_Default->callback(cb_btnCW_Default);
+			btnCW_Default->tooltip(_("Default WPM"));
+			btnCW_Default->hide();
+
+			Status1 = new Fl_Box(
+				rightof(MODEstatus), Y,
+				Ws2n, Hstatus, "");
+			Status1->box(FL_DOWN_BOX);
+			Status1->color(FL_BACKGROUND2_COLOR);
+			Status1->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+
+			Status2 = new Fl_Box(
+				rightof(Status1), Y,
+				Wimd, Hstatus, "");
+			Status2->box(FL_DOWN_BOX);
+			Status2->color(FL_BACKGROUND2_COLOR);
+			Status2->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+
+			StatusBar = new Fl_Box(
+				rightof(Status2), Y,
+				progStatus.mainW - rightof(Status2)
+				- 2 * bwSqlOnOff
+				- bwAfcOnOff
+				- Wwarn
+				- bwTxLevel,
+				Hstatus, "");
+			StatusBar->box(FL_DOWN_BOX);
+			StatusBar->color(FL_BACKGROUND2_COLOR);
+			StatusBar->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+
+			cntTxLevel = new Fl_Counter2(
+				rightof(StatusBar), Y,
+				bwTxLevel, Hstatus, "");
+			cntTxLevel->minimum(-30);
+			cntTxLevel->maximum(0);
+			cntTxLevel->value(-6);
+			cntTxLevel->callback((Fl_Callback*)cb_cntTxLevel);
+			cntTxLevel->value(progdefaults.txlevel);
+			cntTxLevel->lstep(1.0);
+			cntTxLevel->tooltip(_("Tx level attenuator (dB)"));
+
+			WARNstatus = new Fl_Box(
+				rightof(cntTxLevel), Y,
+				Wwarn, Hstatus, "");
+			WARNstatus->box(FL_DIAMOND_DOWN_BOX);
+			WARNstatus->color(FL_BACKGROUND_COLOR);
+			WARNstatus->labelcolor(FL_RED);
+			WARNstatus->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE);
+
+			btnAFC = new Fl_Light_Button(
+				rightof(WARNstatus), Y,
+				bwAfcOnOff, Hstatus, "AFC");
+			btnAFC->selection_color(progdefaults.AfcColor);
+
+			btnSQL = new Fl_Light_Button(
+				rightof(btnAFC), Y,
+				bwSqlOnOff, Hstatus, "SQL");
+
+// btnPSQL will be resized later depending on the state of the
+// configuration parameter to show that widget
+
+			btnPSQL = new Fl_Light_Button(
+				rightof(btnSQL), Y,
+				bwSqlOnOff, Hstatus, "PSM");
+
+			btnAFC->callback(cbAFC, 0);
+			btnAFC->value(1);
+			btnAFC->tooltip(_("Automatic Frequency Control"));
+
+			btnSQL->callback(cbSQL, 0);
+			btnSQL->selection_color(progdefaults.Sql1Color);
+			btnSQL->value(1);
+			btnSQL->tooltip(_("Squelch"));
+
+			btnPSQL->selection_color(progdefaults.Sql1Color);
+			btnPSQL->callback(cbPwrSQL, 0);
+			btnPSQL->value(progdefaults.kpsql_enabled);
+			btnPSQL->tooltip(_("Power Signal Monitor"));
+
+			Fl_Group::current()->resizable(StatusBar);
+		status_group->end();
+
+
 		TopFrameHAB = new Fl_Group(0, Y, WMIN_hab, TopFrameHABheight - 1);
 		TopFrameHAB->box(FL_UP_BOX);
 

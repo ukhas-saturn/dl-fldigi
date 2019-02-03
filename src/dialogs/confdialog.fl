@@ -458,7 +458,7 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
       } {
         Fl_Group {} {
           label {Station / Operator} open
-          xywh {5 35 590 285} box ENGRAVED_FRAME align 21
+          xywh {5 35 590 320} box ENGRAVED_FRAME align 21
         } {
           Fl_Input inpMyCallsign {
             label {Upload Callsign:}
@@ -504,7 +504,7 @@ btnApplyConfig->activate();}
             label {Operator Callsign:}
             callback {progdefaults.operCall = o->value();
 progdefaults.changed = true;}
-            tooltip {Operator callsign (if different than station callsign)} xywh {195 94 110 24}
+            tooltip {Operator callsign (if different than station callsign)} xywh {195 308 110 24}
             code0 {o->labelsize(FL_NORMAL_SIZE);}
             code1 {o->value(progdefaults.operCall.c_str());}
             class Fl_Input2
@@ -517,6 +517,16 @@ dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
             tooltip {Operators name} xywh {195 125 140 24}
             code0 {inpMyName->labelsize(FL_NORMAL_SIZE);}
+            class Fl_Input2
+          }
+          Fl_Input MyRadio {
+            label {Radio:}
+            callback {progdefaults.myRadio = o->value();
+progdefaults.changed = true;
+dl_fldigi::changed(dl_fldigi::CH_INFO);
+btnApplyConfig->activate();}
+            tooltip {Short description of radio} xywh {195 95 320 24}
+            code0 {o->value(progdefaults.myRadio.c_str());}
             class Fl_Input2
           }
           Fl_Input inpMyAntenna {
@@ -545,16 +555,6 @@ btnApplyConfig->activate();}
 progdefaults.changed = true;}
             tooltip {Maidenhead locator as in EM64qv} xywh {195 216 85 24}
             code0 {inpMyLocator->labelsize(FL_NORMAL_SIZE);}
-            class Fl_Input2
-          }
-          Fl_Input MyRadio {
-            label {Radio:}
-            callback {progdefaults.myRadio = o->value();
-progdefaults.changed = true;
-dl_fldigi::changed(dl_fldigi::CH_INFO);
-btnApplyConfig->activate();}
-            tooltip {Short description of radio} xywh {195 268 320 24}
-            code0 {o->value(progdefaults.myRadio.c_str());}
             class Fl_Input2
           }
           Fl_Group listbox_states {

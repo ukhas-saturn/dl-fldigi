@@ -376,6 +376,15 @@ dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();
 }
 
+Fl_Input2 *MyRadio=(Fl_Input2 *)0;
+
+static void cb_MyRadio(Fl_Input2* o, void*) {
+  progdefaults.myRadio = o->value();
+progdefaults.changed = true;
+dl_fldigi::changed(dl_fldigi::CH_INFO);
+btnApplyConfig->activate();
+}
+
 Fl_Input2 *inpMyAntenna=(Fl_Input2 *)0;
 
 static void cb_inpMyAntenna(Fl_Input2* o, void*) {
@@ -399,15 +408,6 @@ Fl_Input2 *inpMyLocator=(Fl_Input2 *)0;
 static void cb_inpMyLocator(Fl_Input2* o, void*) {
   progdefaults.myLocator = o->value();
 progdefaults.changed = true;
-}
-
-Fl_Input2 *MyRadio=(Fl_Input2 *)0;
-
-static void cb_MyRadio(Fl_Input2* o, void*) {
-  progdefaults.myRadio = o->value();
-progdefaults.changed = true;
-dl_fldigi::changed(dl_fldigi::CH_INFO);
-btnApplyConfig->activate();
 }
 
 Fl_ListBox *listbox_states=(Fl_ListBox *)0;
@@ -8519,7 +8519,7 @@ Fl_Double_Window* ConfigureDialog() {
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
         tabOperator->hide();
-        { Fl_Group* o = new Fl_Group(5, 35, 590, 285, _("Station / Operator"));
+        { Fl_Group* o = new Fl_Group(5, 35, 590, 320, _("Station / Operator"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
           { Fl_Input2* o = inpMyCallsign = new Fl_Input2(195, 64, 110, 24, _("Upload Callsign:"));
@@ -8537,7 +8537,7 @@ Fl_Double_Window* ConfigureDialog() {
             inpMyCallsign->labelsize(FL_NORMAL_SIZE);
             o->value(progdefaults.myCall.c_str());
           } // Fl_Input2* inpMyCallsign
-          { Fl_Input2* o = inpOperCallsign = new Fl_Input2(195, 94, 110, 24, _("Operator Callsign:"));
+          { Fl_Input2* o = inpOperCallsign = new Fl_Input2(195, 308, 110, 24, _("Operator Callsign:"));
             inpOperCallsign->tooltip(_("Operator callsign (if different than station callsign)"));
             inpOperCallsign->box(FL_DOWN_BOX);
             inpOperCallsign->color(FL_BACKGROUND2_COLOR);
@@ -8566,6 +8566,20 @@ Fl_Double_Window* ConfigureDialog() {
             inpMyName->when(FL_WHEN_RELEASE);
             inpMyName->labelsize(FL_NORMAL_SIZE);
           } // Fl_Input2* inpMyName
+          { Fl_Input2* o = MyRadio = new Fl_Input2(195, 95, 320, 24, _("Radio:"));
+            MyRadio->tooltip(_("Short description of radio"));
+            MyRadio->box(FL_DOWN_BOX);
+            MyRadio->color(FL_BACKGROUND2_COLOR);
+            MyRadio->selection_color(FL_SELECTION_COLOR);
+            MyRadio->labeltype(FL_NORMAL_LABEL);
+            MyRadio->labelfont(0);
+            MyRadio->labelsize(14);
+            MyRadio->labelcolor(FL_FOREGROUND_COLOR);
+            MyRadio->callback((Fl_Callback*)cb_MyRadio);
+            MyRadio->align(Fl_Align(FL_ALIGN_LEFT));
+            MyRadio->when(FL_WHEN_RELEASE);
+            o->value(progdefaults.myRadio.c_str());
+          } // Fl_Input2* MyRadio
           { inpMyAntenna = new Fl_Input2(195, 155, 320, 24, _("Antenna:"));
             inpMyAntenna->tooltip(_("Short description of antenna"));
             inpMyAntenna->box(FL_DOWN_BOX);
@@ -8608,20 +8622,6 @@ Fl_Double_Window* ConfigureDialog() {
             inpMyLocator->when(FL_WHEN_RELEASE);
             inpMyLocator->labelsize(FL_NORMAL_SIZE);
           } // Fl_Input2* inpMyLocator
-          { Fl_Input2* o = MyRadio = new Fl_Input2(195, 268, 320, 24, _("Radio:"));
-            MyRadio->tooltip(_("Short description of radio"));
-            MyRadio->box(FL_DOWN_BOX);
-            MyRadio->color(FL_BACKGROUND2_COLOR);
-            MyRadio->selection_color(FL_SELECTION_COLOR);
-            MyRadio->labeltype(FL_NORMAL_LABEL);
-            MyRadio->labelfont(0);
-            MyRadio->labelsize(14);
-            MyRadio->labelcolor(FL_FOREGROUND_COLOR);
-            MyRadio->callback((Fl_Callback*)cb_MyRadio);
-            MyRadio->align(Fl_Align(FL_ALIGN_LEFT));
-            MyRadio->when(FL_WHEN_RELEASE);
-            o->value(progdefaults.myRadio.c_str());
-          } // Fl_Input2* MyRadio
           { Fl_ListBox* o = listbox_states = new Fl_ListBox(195, 247, 160, 24, _("State"));
             listbox_states->box(FL_DOWN_BOX);
             listbox_states->color(FL_BACKGROUND2_COLOR);
