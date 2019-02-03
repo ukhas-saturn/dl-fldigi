@@ -128,7 +128,7 @@ void FTextBase::add(const char *s, int attr)
 /// @param s 
 /// @param attr 
 ///
-#if FLDIGI_FLTK_API_MAJOR == 1 && FLDIGI_FLTK_API_MINOR == 3
+#if FLDIGI_FLTK_API_MAJOR == 1 && FLDIGI_FLTK_API_MINOR >= 3
 void FTextBase::add(unsigned int c, int attr)
 #else
 void FTextBase::add(unsigned char c, int attr)
@@ -370,7 +370,7 @@ void FTextBase::saveFile(void)
 	}
 }
 
-/// Returns a character string containing the selected word, if any,
+/// Returns a character string containing the selected (n) word(s), if any,
 /// or the word at (\a x, \a y) relative to the widget's \c x() and \c y().
 /// If \a ontext is true, this function will return text only if the
 /// mouse cursor position is inside the text range.
@@ -380,7 +380,7 @@ void FTextBase::saveFile(void)
 ///
 /// @return The selection, or the word text at (x,y). <b>Must be freed by the caller</b>.
 ///
-char* FTextBase::get_word(int x, int y, const char* nwchars, bool ontext)
+char* FTextBase::get_word(int x, int y, const char* nwchars, int n, bool ontext)
 {
 	int p = xy_to_position(x + this->x(), y + this->y(), Fl_Text_Display_mod::CURSOR_POS);
 	int start, end;
@@ -398,8 +398,10 @@ char* FTextBase::get_word(int x, int y, const char* nwchars, bool ontext)
 		start = 0;
 	else
 		start++;
-	if (!tbuf->findchars_forward(p, nonword.c_str(), &end))
+	if (!tbuf->findchars_forward(p, nonword.c_str(), &end, n))
 		end = tbuf->length();
+
+	if (start >= end) return 0;
 
 	if (ontext && (p < start || p >= end))
 		return 0;

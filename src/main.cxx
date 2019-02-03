@@ -111,22 +111,20 @@
 #include "rigsupport.h"
 
 #include "log.h"
-
 #include "qrunner.h"
 #include "stacktrace.h"
-
 #include "xmlrpc.h"
+#include "icons.h"
+#include "nullmodem.h"
+#include "spectrum_viewer.h"
+#include "contest.h"
+#include "counties.h"
 
 #if BENCHMARK_MODE
 	#include "benchmark.h"
 #endif
 
-#include "icons.h"
-
 #include "dl_fldigi/dl_fldigi.h"
-#include "nullmodem.h"
-
-#include "spectrum_viewer.h"
 
 using namespace std;
 
@@ -147,11 +145,13 @@ string MacrosDir = "";
 string WrapDir = "";
 string TalkDir = "";
 string TempDir = "";
+string DebugDir = "";
 string LoTWDir = "";
 string KmlDir = "";
 string PskMailDir = "";
 
 string NBEMS_dir = "";
+string NBEMS_dir_default = "";
 string DATA_dir = "";
 string ARQ_dir = "";
 string ARQ_files_dir = "";
@@ -730,8 +730,13 @@ void delayed_startup(void *)
 	auto_start();
 
 	if (progStatus.WK_online) {
-		btn_WK_connect->value(1);
-		WK_connect(1);
+		if (progStatus.WKFSK_mode) {
+			btn_WKFSK_connect->value(1);
+			WKFSK_connect(1);
+		} else {
+			btn_WKCW_connect->value(1);
+			WKCW_connect(1);
+		}
 	}
 
 	if (progStatus.Nav_online) {
@@ -972,6 +977,8 @@ int main(int argc, char ** argv)
 
 	generate_option_help();
 
+//	FL_NORMAL_SIZE = 14;
+
 	int arg_idx;
 	if (Fl::args(argc, argv, arg_idx, parse_args) != argc)
 		arg_error(argv[0], NULL, false);
@@ -984,13 +991,13 @@ int main(int argc, char ** argv)
 	if (PskMailDir.empty()) PskMailDir = BaseDir;
 	if (DATA_dir.empty()) DATA_dir.assign(BaseDir).append("DATA.files/");
 	if (NBEMS_dir.empty()) NBEMS_dir.assign(BaseDir).append("NBEMS.files/");
-	if (FLMSG_dir.empty()) FLMSG_dir = FLMSG_dir_default = NBEMS_dir;
+	if (FLMSG_dir.empty()) FLMSG_dir = NBEMS_dir;
 #else
 	if (HomeDir.empty()) HomeDir.assign(BaseDir).append(".dl_fldigi/");
 	if (PskMailDir.empty()) PskMailDir = BaseDir;
 	if (DATA_dir.empty()) DATA_dir.assign(BaseDir).append("DATA.files/");
 	if (NBEMS_dir.empty()) NBEMS_dir.assign(BaseDir).append(".nbems/");
-	if (FLMSG_dir.empty()) FLMSG_dir = FLMSG_dir_default = NBEMS_dir;
+	if (FLMSG_dir.empty()) FLMSG_dir = NBEMS_dir;
 #endif
 
 	dl_fldigi::init();
@@ -1002,12 +1009,21 @@ int main(int argc, char ** argv)
 		fl_filename_expand(dirbuf, sizeof(dirbuf) - 1, FLMSG_dir_default.c_str());
 		FLMSG_dir = dirbuf;
 	}
+
+	if (!NBEMS_dir_default.empty()) {
+		char dirbuf[FL_PATH_MAX + 1];
+		if (NBEMS_dir_default[NBEMS_dir_default.length()-1] != '/')
+			NBEMS_dir_default += '/';
+		fl_filename_expand(dirbuf, sizeof(dirbuf) - 1, NBEMS_dir_default.c_str());
+		NBEMS_dir = dirbuf;
+	}
+
 	checkdirectories();
 	check_nbems_dirs();
 	check_data_dir();
 
 	try {
-		debug::start(string(HomeDir).append("status_log.txt").c_str());
+		debug::start(string(DebugDir).append("status_log.txt").c_str());
 		time_t t = time(NULL);
 		LOG(debug::QUIET_LEVEL, debug::LOG_OTHER, _("%s log started on %s"), PACKAGE_STRING, ctime(&t));
 		LOG_THREAD_ID();
@@ -1018,22 +1034,26 @@ int main(int argc, char ** argv)
 	}
 
 	LOG_INFO("appname: %s", appname.c_str());
+
+	LOG_INFO("%s", "Directories");
 	LOG_INFO("HomeDir: %s", HomeDir.c_str());
+	LOG_INFO("DATA_dir: %s", DATA_dir.c_str());
+	LOG_INFO("DebugDir: %s", DebugDir.c_str());
+	LOG_INFO("HelpDir: %s", HelpDir.c_str());
+	LOG_INFO("KmlDir: %s", KmlDir.c_str());
+	LOG_INFO("LogsDir: %s", LogsDir.c_str());
+	LOG_INFO("LoTWDir: %s", LoTWDir.c_str());
+	LOG_INFO("MacrosDir: %s", MacrosDir.c_str());
+	LOG_INFO("PalettesDir: %s", PalettesDir.c_str());
+	LOG_INFO("PicsDir: %s", PicsDir.c_str());
+	LOG_INFO("PskMailDir: %s", PskMailDir.c_str());
 	LOG_INFO("RigsDir: %s", RigsDir.c_str());
 	LOG_INFO("ScriptsDir: %s", ScriptsDir.c_str());
-	LOG_INFO("PalettesDir: %s", PalettesDir.c_str());
-	LOG_INFO("LogsDir: %s", LogsDir.c_str());
-	LOG_INFO("PicsDir: %s", PicsDir.c_str());
-	LOG_INFO("HelpDir: %s", HelpDir.c_str());
-	LOG_INFO("MacrosDir: %s", MacrosDir.c_str());
-	LOG_INFO("WrapDir: %s", WrapDir.c_str());
 	LOG_INFO("TalkDir: %s", TalkDir.c_str());
 	LOG_INFO("TempDir: %s", TempDir.c_str());
-	LOG_INFO("LoTWDir: %s", LoTWDir.c_str());
-	LOG_INFO("KmlDir: %s", KmlDir.c_str());
-	LOG_INFO("PskMailDir: %s", PskMailDir.c_str());
+	LOG_INFO("WrapDir: %s", WrapDir.c_str());
 
-	LOG_INFO("DATA_dir: %s", DATA_dir.c_str());
+	LOG_INFO("%s", "NBEMS directories");
 	LOG_INFO("NBEMS_dir: %s", NBEMS_dir.c_str());
 	LOG_INFO("ARQ_dir: %s", ARQ_dir.c_str());
 	LOG_INFO("ARQ_files_dir: %s", ARQ_files_dir.c_str());
@@ -1047,6 +1067,7 @@ int main(int argc, char ** argv)
 	LOG_INFO("ICS_msg_dir: %s", ICS_msg_dir.c_str());
 	LOG_INFO("ICS_tmp_dir: %s", ICS_tmp_dir.c_str());
 
+	LOG_INFO("%s", "FLMSG directories");
 	LOG_INFO("FLMSG_dir: %s", FLMSG_dir.c_str());
 	LOG_INFO("FLMSG_dir_default: %s", FLMSG_dir_default.c_str());
 	LOG_INFO("FLMSG_WRAP_dir: %s", FLMSG_WRAP_dir.c_str());
@@ -1184,9 +1205,13 @@ int main(int argc, char ** argv)
 
 	mode_browser = new Mode_Browser;
 
+	clearQSO();
+
 	Fl::add_timeout(.25, delayed_startup);
 
 	dl_fldigi::ready(bHAB);
+
+	Fl::set_color(FL_SELECTION_COLOR, 0, 0, 128);
 
 	int ret = Fl::run();
 
@@ -1463,6 +1488,7 @@ int parse_args(int argc, char **argv, int& idx)
 		   OPT_ARQ_ADDRESS, OPT_ARQ_PORT,
 		   OPT_SHOW_CPU_CHECK,
 		   OPT_FLMSG_DIR,
+		   OPT_NBEMS_DIR,
 		   OPT_AUTOSEND_DIR,
 
 		   OPT_CONFIG_XMLRPC_ADDRESS, OPT_CONFIG_XMLRPC_PORT,
@@ -1500,6 +1526,7 @@ int parse_args(int argc, char **argv, int& idx)
 		{ "arq-server-address", 1, 0, OPT_ARQ_ADDRESS },
 		{ "arq-server-port",    1, 0, OPT_ARQ_PORT },
 		{ "flmsg-dir", 1, 0, OPT_FLMSG_DIR },
+		{ "nbems-dir", 1, 0, OPT_NBEMS_DIR },
 		{ "auto-dir", 1, 0, OPT_AUTOSEND_DIR },
 
 		{ "cpu-speed-test", 0, 0, OPT_SHOW_CPU_CHECK },
@@ -1607,11 +1634,15 @@ int parse_args(int argc, char **argv, int& idx)
 			break;
 		case OPT_ARQ_PORT:
 			override_arq_port = optarg;
-			arq_address_override_flag = true;
+			arq_port_override_flag = true;
 			break;
 
 		case OPT_FLMSG_DIR:
 			FLMSG_dir_default = optarg;
+			break;
+
+		case OPT_NBEMS_DIR:
+			NBEMS_dir_default = optarg;
 			break;
 
 		case OPT_AUTOSEND_DIR:
@@ -2055,6 +2086,7 @@ static void checkdirectories(void)
 		{ LoTWDir, "LOTW", 0 },
 		{ KmlDir, "kml", 0 },
 		{ DATA_dir, "data", 0 },
+		{ DebugDir, "debug", 0 }
 	};
 
 	int r;

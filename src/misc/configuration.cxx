@@ -38,6 +38,7 @@
 #include "nls.h"
 #include "icons.h"
 #include "rigsupport.h"
+#include "contest.h"
 
 #if USE_HAMLIB
 	#include "hamlib.h"
@@ -429,6 +430,14 @@ void configuration::loadDefaults()
 	chkDominoEX_FEC->value(DOMINOEX_FEC);
 
 	Fl_Tooltip::enable(tooltips);
+
+// contest settings for state qso parties
+	adjust_for_contest(0);
+
+	UI_select();
+	set_log_colors();
+	clear_log_fields();
+	clearQSO();
 }
 
 void configuration::saveDefaults()
@@ -939,6 +948,7 @@ void configuration::testCommPorts()
 		select_nanoCW_CommPort->add(gbuf.gl_pathv[j]);
 
 		select_WK_CommPort->add(gbuf.gl_pathv[j]);
+		select_WKFSK_CommPort->add(gbuf.gl_pathv[j]);
 	}
 	globfree(&gbuf);
 #endif
@@ -974,6 +984,7 @@ void configuration::testCommPorts()
 			select_nanoCW_CommPort->add(ttyname);
 
 			select_WK_CommPort->add(ttyname);
+			select_WKFSK_CommPort->add(ttyname);
 		}
 #else // __APPLE__
 		glob_t gbuf;
@@ -1004,6 +1015,7 @@ void configuration::testCommPorts()
 			select_Nav_config_port->add(gbuf.gl_pathv[j]);
 
 			select_WK_CommPort->add(gbuf.gl_pathv[j]);
+			select_WKFSK_CommPort->add(gbuf.gl_pathv[j]);
 		}
 		globfree(&gbuf);
 #endif // __APPLE__

@@ -1734,7 +1734,7 @@ int xmltest_char()
 {
 	guard_lock xmlchr_lock(&tx_queue_mutex);
 	if (xmlchars.empty() || !xmltest_char_available)
-		return 0;
+		return -3;
 	if (pxmlchar >= xmlchars.length() ) {
 		xmlchars.clear();
 		pxmlchar = 0;
@@ -2718,7 +2718,7 @@ public:
 	}
 	void execute(const xmlrpc_c::paramList& params, xmlrpc_c::value* retval)
 	{
-		*retval = xmlrpc_c::value_string(inpCountry->value());
+		*retval = xmlrpc_c::value_string(cboCountry->value());
 	}
 };
 

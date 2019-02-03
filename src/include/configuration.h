@@ -548,10 +548,13 @@
         ELEM_(bool, HellXmtIdle, "HELLXMTIDLE",                                         \
               "Transmit periods (.) when idle",                                         \
               false)                                                                    \
-        ELEM_(bool, HellPulseFast, "HELLPULSEFAST",                                     \
+        ELEM_(int, HellPulseFast, "HELLPULSEFAST",                                      \
               "Raised cosine pulse shape factor. Values are as follows:\n"              \
-              "  0: slow (4 ms); 1: fast (2 ms).",                                      \
-              false)   /* slow */                                                       \
+              "  0: slow (4 ms)\n"                                                      \
+              "  1: med (2 ms)\n"                                                       \
+              "  2: fast (1 ms)\n"                                                      \
+              "  3: Hard (off)",                                                        \
+              1)       /* slow */                                                       \
         ELEM_(int, hellagc, "HELLAGC",                                                  \
               "1 - slow, 2 - medium, 3 - fast",                                         \
               2)                                                                        \
@@ -686,6 +689,9 @@
               4)                                                                        \
         ELEM_(bool, mt63_at500, "MT63AT500",                                            \
               "Always transmit lowest tone at 500 Hz",                                  \
+              false)                                                                    \
+        ELEM_(bool, mt63_centered, "MT63CENTERED",                                      \
+              "Always transmit centered at 1500 Hz (SHARES requirement)",               \
               false)                                                                    \
         /* FSQ */                                                                       \
         ELEM_(int, fsq_frequency, "FSQFREQUENCY",                                       \
@@ -1236,11 +1242,11 @@
         /* GPIO parameters */                                                           \
         ELEM_(long, enable_gpio, "ENABLE_GPIO",                                         \
               "GPIO enable\n"                                                           \
-              "bits 0 - 16; bit 0 --> gpio pin N",                                      \
+              "bits 0 - 16; bit 0 : gpio pin N",                                        \
               0)                                                                        \
         ELEM_(long, gpio_on, "GPIO_STATE",                                              \
               "GPIO State\n"                                                            \
-              "bits 0 - 16; bit 0 --> PTT ON state on pin N",                           \
+              "bits 0 - 16; bit 0 : PTT ON state on pin N",                             \
               0)                                                                        \
         ELEM_(int, gpio_pulse_width, "GPIO_PULSE_WIDTH",                                \
               "GPIO pulse width setting for PiHpSDR PTT",                               \
@@ -1585,14 +1591,81 @@
         ELEM_(std::string, my_FD_mult, "FDMULT",                                        \
               "Field Day multiplier",                                                   \
               "5")                                                                      \
+        ELEM_(std::string, my_SCR_class, "MY_SCR_CLASS",                                \
+              "School Round Up Class",                                                  \
+              "")                                                                       \
+        ELEM_(std::string, my_JOTA_troop, "MY_JOTA_TROOP",                              \
+              "Jamboree On The Air Troop",                                              \
+              "")                                                                       \
+        ELEM_(std::string, my_JOTA_scout, "MY_JOTA_SCOUT",                              \
+              "JOTA scout operator",                                                    \
+              "")                                                                       \
         ELEM_(int, logging, "LOGGING",                                                  \
               "Logging for:\n"                                                          \
               "  0 - generic QSO\n"                                                     \
               "  1 - generic contest\n"                                                 \
-              "  2 - Field Day\n"                                                       \
-              "  3 - CQWW RTTY\n"                                                       \
-              "  4 - BART",                                                             \
+              "  2 - BART\n"                                                            \
+              "  3 - Field Day\n"                                                       \
+              "  4 - Winter Field Day\n"                                                \
+              "  5 - Kids Day\n"                                                        \
+              "  6 - Rookie Roundup\n"                                                  \
+              "  7 - ARRY RTTY\n"                                                       \
+              "  8 - School Round UP\n"                                                 \
+              "  9 - Jamboree On The Air\n"                                             \
+              "  10 - CQ WPX\n"                                                         \
+              "  11 - CQWW RTTY\n"                                                      \
+              "  12 - Italian ARI International DX\n"                                   \
+              "  13 - North American QSO Party\n"                                       \
+              "  14 - North American Sprint\n"                                          \
+              "  15 - Sweepstakes\n"                                                    \
+              "  16 - State QSO Parties\n"                                              \
+              "  17 - Ten Ten\n"                                                        \
+              "  18 - Africa All Mode\n"                                                \
+              "  19 - VHF\n"                                                            \
+              "  20 - Worked All Europe",                                               \
               0)                                                                        \
+        ELEM_(int, SQSOcontest, "SQSOcontest",                                          \
+             "SQSO contest",                                                            \
+             0)                                                                         \
+        ELEM_(std::string, CONTESTnotes, "CONTESTnotes",                                \
+              "Notes for specfied contest",                                             \
+              "CALL if (RSTr), if (LOCATOR), NAME, QTH")                                \
+        ELEM_(int, SQSOinstate, "SQSOinstate",                                          \
+             "SQSO in-state",                                                           \
+             0)                                                                         \
+        ELEM_(int, SQSOstate, "SQSOstate",                                              \
+             "SQSO state",                                                              \
+             0)                                                                         \
+        ELEM_(int, SQSOcounty, "SQSOcounty",                                            \
+             "SQSO county",                                                             \
+             0)                                                                         \
+        ELEM_(int, SQSOlogstate, "SQSOlogstate",                                        \
+             "SQSO log state",                                                          \
+             0)                                                                         \
+        ELEM_(int, SQSOlogcounty, "SQSOlogcounty",                                      \
+             "SQSO log county",                                                         \
+             0)                                                                         \
+        ELEM_(int, SQSOlogserno, "SQSOlogserno",                                        \
+             "SQSO log serno",                                                          \
+             0)                                                                         \
+        ELEM_(int, SQSOlogxchg, "SQSOlogxchg",                                          \
+             "SQSO log exchange",                                                       \
+             0)                                                                         \
+        ELEM_(int, SQSOlogname, "SQSOlogname",                                          \
+             "SQSO log name",                                                           \
+             0)                                                                         \
+        ELEM_(int, SQSOlogstcty, "SQSOlogstcty",                                        \
+             "SQSO parse STCTY",                                                        \
+             0)                                                                         \
+        ELEM_(int, SQSOlogctyst, "SQSOlogctyst",                                        \
+             "SQSO parse CTYST",                                                        \
+             0)                                                                         \
+        ELEM_(int, SQSOlogrst, "SQSOlogrst",                                            \
+             "SQSO log rst",                                                            \
+             0)                                                                         \
+        ELEM_(int, SQSOlogcat, "SQSlogcat",                                             \
+             "State of Maryland ... peculiar folks living there",                       \
+             0)                                                                         \
         ELEM_(bool, connect_to_fdserver, "CONNECT_TO_FDSERVER",                         \
               "Connect to field day server",                                            \
               false)                                                                    \

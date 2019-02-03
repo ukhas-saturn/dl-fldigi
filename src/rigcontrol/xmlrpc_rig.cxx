@@ -141,7 +141,6 @@ void exec_flrig_ptt() {
 	int resp, res;
 
 	try {
-//std::cout << "flrig_ptt " << new_ptt << std::endl;
 		res = flrig_client->execute("rig.set_ptt", new_ptt, result, timeout);
 		if (res) {
 			for (int j = 0; j < 5; j++) {
@@ -149,7 +148,6 @@ void exec_flrig_ptt() {
 				res = flrig_client->execute("rig.get_ptt", XmlRpcValue(), result2, 10);
 				if (res) {
 					resp = int(result2);
-//std::cout << "response (" << j+1 << ") " << resp << std::endl;
 					if (resp == new_ptt) {
 						wait_ptt = true;
 						wait_ptt_timeout = 10;
@@ -164,17 +162,15 @@ void exec_flrig_ptt() {
 			}
 		}
 	} catch (...) {
-//std:cout << "catch error in rig.set_ptt" << std::endl;
-last_new_ptt = new_ptt;
-new_ptt = -1;
-wait_ptt = false;
-wait_ptt_timeout = 0;
-return;
+		last_new_ptt = new_ptt;
+		new_ptt = -1;
+		wait_ptt = false;
+		wait_ptt_timeout = 0;
+		return;
 	}
 
 	wait_ptt = false;
 	wait_ptt_timeout = 0;
-//std::cout << "rig.set_ptt timeout" << std::endl;
 
 	LOG_ERROR("fldigi/flrig PTT %s failure", new_ptt ? "ON" : "OFF");
     last_new_ptt = new_ptt;
@@ -338,8 +334,8 @@ void set_flrig_mode(const char *md)
 			wait_mode = true;
 			wait_mode_timeout = 10;
 			wait_bws_timeout = 5;
-qso_opBW->hide();
-qso_opGROUP->hide();
+			qso_opBW->hide();
+			qso_opGROUP->hide();
 			LOG_VERBOSE("set mode: %s", md);
 		}
 	} catch (...) {}
@@ -421,8 +417,10 @@ void xmlrpc_rig_post_modes(void *)
 		return;
 	}
 
+	std::string smodes;
 	for (int i = 0; i < nargs; i++)
-		qso_opMODE->add(string(modes_result[i]).c_str());
+		smodes.append(string(modes_result[i])).append("|");
+	qso_opMODE->add(smodes.c_str());
 
 	qso_opMODE->index(0);
 	qso_opMODE->activate();
@@ -489,11 +487,12 @@ void xmlrpc_rig_post_bw(void *)
 	if (!qso_opBW) return;
 
 	if (posted_bw != (std::string)(qso_opBW->value())) {
-		qso_opBW->value(posted_bw.c_str());
+		qso_opBW->value(posted_bw);//.c_str());
 		qso_opBW->redraw();
 		LOG_VERBOSE("Update BW %s", posted_bw.c_str());
+std::cout << "Update BW " << posted_bw << std::endl;
 	}
-qso_opBW->show();
+	qso_opBW->show();
 }
 
 void xmlrpc_rig_post_bw1(void *)
@@ -502,23 +501,24 @@ void xmlrpc_rig_post_bw1(void *)
 	if (!qso_opBW1) return;
 
 	if (posted_bw1 != (std::string)(qso_opBW1->value())) {
-		qso_opBW1->value(posted_bw1.c_str());
+		qso_opBW1->value(posted_bw1);//.c_str());
 		qso_opBW1->redraw();
 		LOG_VERBOSE("Update combo BW1 %s", posted_bw1.c_str());
 	}
-qso_opGROUP->show();
+	qso_opGROUP->show();
 }
 
 void xmlrpc_rig_post_bw2(void *)
 {
 	guard_lock flrig_lock(&mutex_flrig_bw);
 	if (!qso_opBW2) return;
+
 	if (posted_bw2 != (std::string)(qso_opBW2->value())) {
-		qso_opBW2->value(posted_bw2.c_str());
+		qso_opBW2->value(posted_bw2);//.c_str());
 		qso_opBW2->redraw();
 		LOG_VERBOSE("Update combo BW2 %s", posted_bw2.c_str());
 	}
-qso_opGROUP->show();
+	qso_opGROUP->show();
 }
 
 void do_flrig_get_bw()
@@ -549,7 +549,8 @@ void do_flrig_get_bw()
 			wait_bw_timeout = 0;
 			LOG_ERROR("%s", "get bw failed!");
 		}
-	} catch (...) {}
+	} catch (...) {
+		}
 }
 
 void flrig_get_bw()
@@ -587,7 +588,7 @@ void xmlrpc_rig_post_bws(void *)
 		static char tooltip1[20];
 		snprintf(tooltip1,sizeof(tooltip1),"%s",labels1.substr(2).c_str());
 		qso_opBW1->tooltip(tooltip1);
-//		qso_opBW1->index(0);
+		qso_opBW1->index(0);
 		qso_opBW1->redraw();
 
 		{
@@ -619,7 +620,7 @@ void xmlrpc_rig_post_bws(void *)
 			static char tooltip2[20];
 			snprintf(tooltip2,sizeof(tooltip2),"%s",labels2.substr(2).c_str());
 			qso_opBW2->tooltip(tooltip2);
-//			qso_opBW2->index(0);
+			qso_opBW2->index(0);
 			qso_opBW2->redraw();
 
 			{
@@ -637,7 +638,6 @@ void xmlrpc_rig_post_bws(void *)
 			return;
 		}
 		qso_opBW->hide();
-//		qso_opGROUP->show();
 		bws_posted = true;
 		return;
 	} catch (XmlRpcException err) {
@@ -646,13 +646,12 @@ void xmlrpc_rig_post_bws(void *)
 			string bwstr;
 			qso_opBW->clear();
 			for (int i = 1; i < nargs; i++) {
-				bwstr = string(bws_result[0][i]);
-				qso_opBW->add(bwstr.c_str());
+				bwstr.append(string(bws_result[0][i])).append("|");
 			}
-//			qso_opBW->index(0);
+			qso_opBW->add(bwstr.c_str());
+			qso_opBW->index(0);
 			qso_opBW->activate();
 			qso_opBW->tooltip("xcvr bandwidth");
-//			qso_opBW->show();
 			qso_opGROUP->hide();
 
 			{
@@ -871,10 +870,15 @@ void flrig_get_pwrmeter()
 // transceiver get name
 //==============================================================================
 
-void xmlrpc_rig_show_xcvr_name(void *)
+static void xmlrpc_rig_show_xcvr_name(void *)
 {
 	xcvr_title = xcvr_name;
 	setTitle();
+}
+
+static void no_rig_init(void *)
+{
+	init_NoRig_RigDialog();
 }
 
 bool flrig_get_xcvr()
@@ -903,7 +907,7 @@ bool flrig_get_xcvr()
 			if (xcvr_name != "") {
 				xcvr_name = "";
 				Fl::awake(xmlrpc_rig_show_xcvr_name);
-				init_NoRig_RigDialog();
+				Fl::awake(no_rig_init);
 			}
 			connected_to_flrig = false;
 		}
@@ -911,7 +915,7 @@ bool flrig_get_xcvr()
 		if (xcvr_name != "") {
 			xcvr_name = "";
 			Fl::awake(xmlrpc_rig_show_xcvr_name);
-			init_NoRig_RigDialog();
+			Fl::awake(no_rig_init);
 		}
 		connected_to_flrig = false;
 	}

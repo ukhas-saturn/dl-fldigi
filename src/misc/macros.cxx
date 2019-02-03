@@ -285,8 +285,8 @@ static void pCPS_TEST(std::string &s, size_t &i, size_t endbracket)
 
 	stopMacroTimer();
 	active_modem->set_stopflag(false);
+
 	PERFORM_CPS_TEST = true;
-	trx_transmit();
 	int s0 = number_of_samples("");
 // sample count for characters ' ' through '~'
 	for(int j = 0; j < 256; j++) {
@@ -361,11 +361,9 @@ static void pCPS_FILE(std::string &s, size_t &i, size_t endbracket)
 
 			stopMacroTimer();
 			active_modem->set_stopflag(false);
+
 			PERFORM_CPS_TEST = true;
-			trx_transmit();
-
 			int s0 = number_of_samples("");
-
 			num_cps_chars = 0;
 			CPS_report(number_of_samples(buffer), s0);
 			PERFORM_CPS_TEST = false;
@@ -424,15 +422,14 @@ static void pCPS_STRING(std::string &s, size_t &i, size_t endbracket)
 
 		stopMacroTimer();
 		active_modem->set_stopflag(false);
+
 		PERFORM_CPS_TEST = true;
-		trx_transmit();
-
 		int s0 = number_of_samples("");
-
 		num_cps_chars = 0;
 		testfilename = txtbuf;
 		CPS_report(number_of_samples(buffer), s0);
 		PERFORM_CPS_TEST = false;
+
 	} else {
 		string resp = "Text not specified";
 		LOG_WARN("%s", resp.c_str());
@@ -494,15 +491,14 @@ static void pCPS_N(std::string &s, size_t &i, size_t endbracket)
 
 	stopMacroTimer();
 	active_modem->set_stopflag(false);
+
 	PERFORM_CPS_TEST = true;
-	trx_transmit();
-
 	int s0 = number_of_samples("");
-
 	num_cps_chars = 0;
 	testfilename = "Random group test";
 	CPS_report(number_of_samples(buffer), s0);
 	PERFORM_CPS_TEST = false;
+
 	return;
 }
 
@@ -1581,17 +1577,37 @@ static void pMYRST(std::string &s, size_t &i, size_t endbracket)
 
 static void pANTENNA(std::string &s, size_t &i, size_t endbracket)
 {
-        s.replace( i, 9, progdefaults.myAntenna.c_str() );
+	s.replace( i, 9, progdefaults.myAntenna.c_str() );
 }
 
 static void pMYCLASS(std::string &s, size_t &i, size_t endbracket)
 {
-        s.replace( i, 9, progdefaults.my_FD_class.c_str() );
+	s.replace( i, 9, progdefaults.my_FD_class.c_str() );
 }
 
 static void pMYSECTION(std::string &s, size_t &i, size_t endbracket)
 {
-        s.replace( i, 11, progdefaults.my_FD_section.c_str() );
+	s.replace( i, 11, progdefaults.my_FD_section.c_str() );
+}
+
+static void pMYSTATE(std::string &s, size_t &i, size_t endbracket)
+{
+	s.replace( i, 9, listbox_states->value() );
+}
+
+static void pMYST(std::string &s, size_t &i, size_t endbracket)
+{
+	s.replace( i, 6,  inp_QP_state_short->value() );
+}
+
+static void pMYCOUNTY(std::string &s, size_t &i, size_t endbracket)
+{
+	s.replace( i, 10, listbox_counties->value() );
+}
+
+static void pMYCNTY(std::string &s, size_t &i, size_t endbracket)
+{
+	s.replace( i, 8, inp_QP_short_county->value() );
 }
 
 static void pLDT(std::string &s, size_t &i, size_t endbracket)
@@ -2066,8 +2082,7 @@ static void pFLRIG(std::string &s, size_t &i, size_t endbracket)
 	LOG_INFO("flrig CAT cmd: %s", s.substr(i, endbracket - i + 1).c_str());
 
 	size_t start = s.find(':');
-	std::string cmd = s.substr(start + 1, s.length() - start + 1);
-
+	std::string cmd = s.substr(start + 1, s.length() - start - 2);
 	xmlrpc_send_command(cmd);
 
 	s.replace(i, endbracket - i + 1, "");
@@ -2223,12 +2238,22 @@ static void pSAVEXCHG(std::string &s, size_t &i, size_t endbracket)
 
 static void pFD_CLASS(std::string &s, size_t &i, size_t endbracket)
 {
-	s.replace( i, 9, inp_FD_class->value() );
+	s.replace( i, 9, inpClass->value() );
 }
 
 static void pFD_SECTION(std::string &s, size_t &i, size_t endbracket)
 {
-	s.replace( i, 8, inp_FD_section->value() );
+	s.replace( i, 8, inpSection->value() );
+}
+
+static void pCLASS(std::string &s, size_t &i, size_t endbracket)
+{
+	s.replace( i, 7, inpClass->value() );
+}
+
+static void pSECTION(std::string &s, size_t &i, size_t endbracket)
+{
+	s.replace( i, 9, inpSection->value() );
 }
 
 static void pLOG(std::string &s, size_t &i, size_t endbracket)
@@ -2328,9 +2353,9 @@ static void doIMAGE(std::string s)
 				active_modem->send_Grey_image(fname) :
 				active_modem->send_color_image(fname);
 		} else if (active_mode >= MODE_THOR_FIRST && active_mode <= MODE_THOR_LAST) {
-			thor_load_scaled_image(fname);
+			thor_load_scaled_image(fname, Greyscale);
         } else if (active_mode == MODE_IFKP) {
-			ifkp_load_scaled_image(fname);
+			ifkp_load_scaled_image(fname, Greyscale);
 		}
 	}
 	que_ok = true;
@@ -2375,9 +2400,9 @@ static void doINSERTIMAGE(std::string s)
 					active_modem->send_color_image(fname);
 		}
 		else if (md == MODE_IFKP)
-			ifkp_load_scaled_image(fname);
+			ifkp_load_scaled_image(fname, Greyscale);
 		else if (md >= MODE_THOR_FIRST && md <= MODE_THOR_LAST)
-			thor_load_scaled_image(fname);
+			thor_load_scaled_image(fname, Greyscale);
 	}
 	que_ok = true;
 }
@@ -3403,8 +3428,8 @@ void set_macro_env(void)
 		FLDIGI_LOG_SERNO_OUT,
 		FLDIGI_XCHG_IN,
 		FLDIGI_XCGH_OUT,
-		FLDIGI_FD_CLASS,
-		FLDIGI_FD_SECTION,
+		FLDIGI_CLASS_IN,
+		FLDIGI_ARRL_SECTION_IN,
 		FLDIGI_VE_PROV,
 		FLDIGI_AZ,
 
@@ -3425,8 +3450,8 @@ void set_macro_env(void)
 		FLDIGI_LOGBOOK_SERNO_OUT,
 		FLDIGI_LOGBOOK_XCHG_IN,
 		FLDIGI_LOGBOOK_XCHG_OUT,
-		FLDIGI_FD_CLASS_OUT,
-		FLDIGI_FD_SECTION_OUT,
+		FLDIGI_LOGBOOK_CLASS_IN,
+		FLDIGI_LOGBOOK_SECTION_IN,
 		FLDIGI_LOGBOOK_QTH,
 		FLDIGI_LOGBOOK_LOCATOR,
 		FLDIGI_LOGBOOK_QSL_R,
@@ -3496,14 +3521,14 @@ void set_macro_env(void)
 		{ "FLDIGI_LOG_LOCATOR", inpLoc->value() },
 		{ "FLDIGI_LOG_NOTES", inpNotes->value() },
 		{ "FLDIGI_LOG_STATE", inpState->value() },
-		{ "FLDIGI_LOG_COUNTRY", inpCountry->value() },
+		{ "FLDIGI_LOG_COUNTRY", cboCountry->value() },
 		{ "FLDIGI_LOG_COUNTY", inpCounty->value() },
 		{ "FLDIGI_LOG_SERNO_IN", inpSerNo->value() },
 		{ "FLDIGI_LOG_SERNO_OUT", outSerNo->value() },
 		{ "FLDIGI_XCHG_IN", inpXchgIn->value() },
 		{ "FLDIGI_XCHG_OUT", inpSend1->value() },
-		{ "FLDIGI_FD_CLASS", inp_FD_class->value() },
-		{ "FLDIGI_FD_SECTION", inp_FD_section->value() },
+		{ "FLDIGI_CLASS_IN", inpClass->value() },
+		{ "FLDIGI_ARRL_SECTION_IN", inpSection->value() },
 		{ "FLDIGI_VE_PROV", inpVEprov->value() },
 		{ "FLDIGI_AZ", inpAZ->value() },
 
@@ -3525,8 +3550,8 @@ void set_macro_env(void)
 		{ "FLDIGI_LOGBOOK_SERNO_OUT", inpSerNoOut_log->value() },
 		{ "FLDIGI_LOGBOOK_XCHG_IN", inpXchgIn_log->value() },
 		{ "FLDIGI_LOGBOOK_XCHG_OUT", inpMyXchg_log->value() },
-		{ "FLDIGI_FD_CLASS_OUT", inp_FD_class_log->value() },
-		{ "FLDIGI_FD_SECTION_OUT", inp_FD_section_log->value() },
+		{ "FLDIGI_LOGBOOK_CLASS_IN", inpClass_log->value() },
+		{ "FLDIGI_LOGBOOK_ARRL_SECT_IN", inpSection_log->value() },
 		{ "FLDIGI_LOGBOOK_QTH", inpQth_log->value() },
 		{ "FLDIGI_LOGBOOK_LOCATOR", inpLoc_log->value() },
 		{ "FLDIGI_LOGBOOK_QSL_R", inpQSLrcvddate_log->value() },
@@ -3989,6 +4014,10 @@ static const MTAGS mtags[] = {
 {"<MYRST>",		pMYRST},
 {"<MYCLASS>",	pMYCLASS},
 {"<MYSECTION>",	pMYSECTION},
+{"<MYSTATE>",	pMYSTATE},
+{"<MYST>",		pMYST},
+{"<MYCOUNTY>",	pMYCOUNTY},
+{"<MYCNTY>",	pMYCNTY},
 {"<ANTENNA>",	pANTENNA},
 {"<QSOTIME>",	pQSOTIME},
 {"<QSONBR>",	pQSONBR},
@@ -4025,6 +4054,8 @@ static const MTAGS mtags[] = {
 {"<XOUT>",		pXOUT},
 {"<FDCLASS>",	pFD_CLASS},
 {"<FDSECT>",	pFD_SECTION},
+{"<CLASS>",		pCLASS},
+{"<SECTION>",	pSECTION},
 {"<XBEG>",		pXBEG},
 {"<XEND>",		pXEND},
 {"<SAVEXCHG>",	pSAVEXCHG},

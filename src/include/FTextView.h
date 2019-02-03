@@ -50,7 +50,7 @@ public:
 	FTextBase(int x, int y, int w, int h, const char *l = 0);
 	virtual ~FTextBase() { delete tbuf; delete sbuf; }
 
-#if FLDIGI_FLTK_API_MAJOR == 1 && FLDIGI_FLTK_API_MINOR == 3
+#if FLDIGI_FLTK_API_MAJOR == 1 && FLDIGI_FLTK_API_MINOR >= 3
 	virtual void	add(unsigned int c, int attr = RECV);
 #else
 	virtual void	add(unsigned char c, int attr = RECV);
@@ -86,7 +86,7 @@ protected:
 				  int set = SET_FONT | SET_SIZE | SET_COLOR);
 	int		readFile(const char* fn = 0);
 	void		saveFile(void);
-	char*		get_word(int x, int y, const char* nwchars = "", bool ontext = true);
+	char*		get_word(int x, int y, const char* nwchars = "", int n = 1, bool ontext = true);
 	void		init_context_menu(void);
 	void		show_context_menu(void);
 	virtual void	menu_cb(size_t item) { }

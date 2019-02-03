@@ -1,10 +1,49 @@
 
 
+=Version 4.1.0=
+
+2019-01-29  David Freese  <w1hkj@bellsouth.net>
+
+	39a76e8: po update
+	79c67d3: WWV doc
+	04e53b5: Winkeyer FSK
+	b8ca88e: Contests
+	b197c75: arq-override
+	8572f35: flmsg-dir
+	02c66eb: contest-docs
+	9d85169: fldigi_def.xml
+	20e2c02: socket_mods
+	e1c2d80: Fltk 1.4 mod
+	5ffd6f5: wefax
+	fb1fd67: nanoIO
+	7d604b8: CW SOM table
+	4eec8f2: flrig: macro
+	99b0a01: Audio adjust docs
+	146bd7e: feldhell
+	6b5c93a: C-11 fixes
+	ccbd52f: nano FSK
+	ed6a7db: Mint-19/Mate
+	e9c0f2d: Signal Browser documentation
+	fbb0654: flrig seg fault
+
+
+=Version 4.0.18=
+
+	2fef9cb: CPS testing
+	aa757af: ipv6 addressing
+	c62662c: MT63 centering
+	9460c00: fsq mods
+	5a7377f: IFKP/THOR greyscale image
+	51e2829: Hamlib bug fix
+	58c6362: Tooltip
+	47d2c6c: nanoIO
+	a253603: THROB adif
+	f46cb9b: RigCAT dialog
+
+
 =Version 4.0.17=
 
-2018-06-10  David Freese  <w1hkj@bellsouth.net>
-
-	88fd54d: flarq idtimer
+	a2b9172: flarq idtimer
 	d58b0b7: Greek language update
 	4c3ca8f: tmpfile
 	87cb7e1: xmlrpc cat string
