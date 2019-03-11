@@ -436,6 +436,10 @@ void configuration::loadDefaults()
 
 	UI_select();
 	set_log_colors();
+
+	if (bWF_only || bHAB)
+		return;
+
 	clear_log_fields();
 	clearQSO();
 }
