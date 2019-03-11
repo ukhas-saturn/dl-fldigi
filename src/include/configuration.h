@@ -1337,6 +1337,9 @@
         ELEM_(int, nanoIO_CW_keyer, "NANOIOCWKEYER",                                    \
               "0 - IambicA, 1 - IambicB, 2 - Straight",                                 \
               0)                                                                        \
+        ELEM_(bool, disable_CW_PTT, "disable_CW_PTT",                                   \
+              "Disable CAT PTT signal during CW ops with expernal h/w",                 \
+              0)                                                                        \
         /* TTY h/w interface */                                                         \
         ELEM_(int, xcvr_FSK_sideband, "XCVRFSKSIDEBAND",                                \
               "0 = LSB | 1 = USB",                                                      \
@@ -1540,6 +1543,9 @@
         ELEM_(RGB, dup_color, "dupcolor",                                               \
               "Callsign background color when duplicate detected",                      \
               {255, 110, 180})                                                          \
+        ELEM_(RGB, possible_dup_color, "duppossiblecolor",                              \
+              "Callsign background color when possible duplicate detected",             \
+              {255, 255, 150})                                                          \
         ELEM_(bool, EnableDupCheck, "ENABLEDUPCHECK",                                   \
               "Check for duplicates (contest)",                                         \
               true)                                                                     \

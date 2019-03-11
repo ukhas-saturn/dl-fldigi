@@ -61,7 +61,7 @@
 using namespace std;
 
 
-string qrzhost = "xml.qrz.com"; //"online.qrz.com";
+string qrzhost = "xmldata.qrz.com";
 string qrzSessionKey;
 string qrzalert;
 string qrzerror;
@@ -124,11 +124,11 @@ QRZ *qCall = 0;
 
 void print_query(const string &name, const string &s)
 {
-	LOG_VERBOSE("%s query:\n%s\n", name.c_str(), s.c_str());
+	LOG_VERBOSE("%s query:\n%s", name.c_str(), s.c_str());
 }
 
 void print_data(const string &name, const string &s) {
-	LOG_VERBOSE("%s data:\n%s\n", name.c_str(), s.c_str());
+	LOG_VERBOSE("%s data:\n%s", name.c_str(), s.c_str());
 }
 
 void clear_Lookup()
@@ -155,6 +155,10 @@ void clear_Lookup()
 
 bool parseSessionKey(const string& sessionpage)
 {
+	if (sessionpage.find("Bad Request") != string::npos) {
+		return false;
+	}
+
 	IrrXMLReader* xml = createIrrXMLReader(new IIrrXMLStringReader(sessionpage));
 	TAG tag=QRZ_IGNORE;
 	while(xml && xml->read()) {
@@ -205,7 +209,7 @@ bool parseSessionKey(const string& sessionpage)
 
 bool parse_xml(const string& xmlpage)
 {
-	print_data("QTH.com", xmlpage);
+	print_data("xmldata.qrz.com", xmlpage);
 
 	IrrXMLReader* xml = createIrrXMLReader(new IIrrXMLStringReader(xmlpage));
 
@@ -321,24 +325,17 @@ bool getSessionKey(string& sessionpage)
 {
 
 	string detail;
-	detail =  "GET /bin/xml?username=";
+	detail = "GET /xml/current/?username=";
 	detail += progdefaults.QRZusername;
 	detail += ";password=";
 	detail += progdefaults.QRZuserpassword;
-	detail += ";version=";
+	detail += ";agent=";
 	detail += PACKAGE_NAME;
-	detail += "/";
+	detail += "-";
 	detail += PACKAGE_VERSION;
-	detail += " HTTP/1.0\n";
-	detail += "Host: ";
-	detail += qrzhost;
-	detail += "\n";
-	detail += "Connection: close\n";
-	detail += "\n";
+	detail += "\r\n";
 
-	print_query("QRZ session key", detail);
-
-	return request_reply(qrzhost, "http", detail, sessionpage, 5.0);
+	return network_query(qrzhost, "http", detail, sessionpage, 5.0);
 }
 
 bool QRZGetXML(string& xmlpage)
@@ -348,17 +345,11 @@ bool QRZGetXML(string& xmlpage)
 	detail += qrzSessionKey;
 	detail += ";callsign=";
 	detail += callsign;
-	detail += " HTTP/1.0\n";
-	detail += "Host: ";
-	detail += qrzhost;
-	detail += "\n";
-	detail += "Connection: close\n";
-	detail += "\n";
+	detail += "\r\n";
 
-//	return request_reply(qrzhost, "http", detail, xmlpage, 5.0);
 	print_query("QRZ data", detail);
 
-	bool res = request_reply(qrzhost, "http", detail, xmlpage, 5.0);
+	bool res = network_query(qrzhost, "http", detail, xmlpage, 5.0);
 	LOG_VERBOSE("result = %d", res);
 	return res;
 }
@@ -528,22 +519,25 @@ void QRZAlert()
 
 	string qrznote;
 	if (!qrzalert.empty()) {
-		qrznote.append("QRZ alert notice:\n");
+		qrznote.append("QRZ alert:\n");
 		qrznote.append(qrzalert);
 		qrznote.append("\n");
 		qrzalert.clear();
 	}
 	if (!qrzerror.empty()) {
-		qrznote.append("QRZ error notice:\n");
-		qrznote.append(qrzalert);
+		qrznote.append("QRZ error:\n");
+		qrznote.append(qrzerror);
 		qrzerror.clear();
 	}
 	string notes;
 	if (!progdefaults.clear_notes) notes.assign(inpNotes->value());
 	else notes.clear();
 
-	if (!qrznote.empty()) notes.append("\n").append(qrznote);
-	inpNotes->value(notes.c_str());
+	if (!qrznote.empty()) {
+		if (!notes.empty()) notes.append("\n");
+		notes.append(qrznote);
+		inpNotes->value(notes.c_str());
+	}
 }
 
 bool QRZLogin(string& sessionpage)
@@ -573,12 +567,12 @@ void QRZquery()
 		ok = QRZLogin(qrzpage);
 	if (ok)
 		ok = QRZGetXML(qrzpage);
-	if (!ok) { // change to negative for MS not getting on first try
-		if (qrzSessionKey.empty())
-			ok = QRZLogin(qrzpage);
-		if (ok)
-			ok = QRZGetXML(qrzpage);
-	}
+//	if (!ok) { // change to negative for MS not getting on first try
+//		if (qrzSessionKey.empty())
+//			ok = QRZLogin(qrzpage);
+//		if (ok)
+//			ok = QRZGetXML(qrzpage);
+//	}
 	if (ok) {
 		parse_xml(qrzpage);
 		if (!qrzalert.empty() || !qrzerror.empty())
@@ -783,8 +777,8 @@ bool HAMCALLget(string& htmlpage)
 	url.erase(0, p+2);
 	size_t len = url.length();
 	if (url[len-1]=='/') url.erase(len-1, 1);
-	return request_reply(url, service, url_detail, htmlpage, 5.0);
-//	return request_reply("www.hamcall.net", "http", url_detail, htmlpage, 5.0);
+	return network_query(url, service, url_detail, htmlpage, 5.0);
+//	return network_query("www.hamcall.net", "http", url_detail, htmlpage, 5.0);
 }
 
 void HAMCALLquery()
@@ -823,10 +817,11 @@ bool HAMQTH_get_session_id()
 
 	HAMQTH_session_id.clear();
 	if (!fetch_http(url, retstr, 5.0)) {
-printf("fetch_http( %s, retstr, 5.0) failed\n", url.c_str());
+		LOG_ERROR("fetch_http( %s, retstr, 5.0) failed\n", url.c_str());
 		return false;
 	}
-printf("%s\n", retstr.c_str());
+	LOG_VERBOSE("url: %s", url.c_str());
+	LOG_VERBOSE("reply: %s\n", retstr.c_str());
 	p1 = retstr.find("<error>");
 	if (p1 != string::npos) {
 		p2 = retstr.find("</error>");
@@ -1139,10 +1134,10 @@ void CALLSIGNquery()
 
 	switch (DB_XML_query = static_cast<qrz_xmlquery_t>(progdefaults.QRZXML)) {
 	case QRZNET:
-		LOG_INFO("%s","Request sent to\nqrz.com...");
+		LOG_INFO("%s","Request sent to qrz.com...");
 		break;
 	case HAMCALLNET:
-		LOG_INFO("%s","Request sent to\nwww.hamcall.net...");
+		LOG_INFO("%s","Request sent to www.hamcall.net...");
 		break;
 	case QRZCD:
 		if (!qCall)
@@ -1177,208 +1172,6 @@ void CALLSIGNquery()
 	pthread_mutex_unlock(&qrz_mutex);
 }
 
-//======================================================================
-// thread to support sending log entry to eQSL
-//======================================================================
-
-pthread_t* EQSLthread = 0;
-pthread_mutex_t EQSLmutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t EQSLcond = PTHREAD_COND_INITIALIZER;
-
-static void *EQSL_loop(void *args);
-static void EQSL_init(void);
-
-void EQSL_close(void);
-void EQSL_send();
-
-static std::string EQSL_url = "";
-static std::string EQSL_xmlpage = "";
-
-static bool EQSLEXIT = false;
-
-static void *EQSL_loop(void *args)
-{
-	SET_THREAD_ID(EQSL_TID);
-
-	SET_THREAD_CANCEL();
-
-	for (;;) {
-		TEST_THREAD_CANCEL();
-		pthread_mutex_lock(&EQSLmutex);
-		pthread_cond_wait(&EQSLcond, &EQSLmutex);
-		pthread_mutex_unlock(&EQSLmutex);
-
-		if (EQSLEXIT)
-			return NULL;
-
-		size_t p;
-		if (fetch_http(EQSL_url, EQSL_xmlpage, 5.0) == false)
-			LOG_ERROR("%s", "eQSL not available");
-
-		else if ((p = EQSL_xmlpage.find("Error:")) != std::string::npos) {
-			size_t p2 = EQSL_xmlpage.find('\n', p);
-			LOG_ERROR("%s\n%s", EQSL_xmlpage.substr(p, p2 - p - 1).c_str(), EQSL_url.c_str());
-		} else
-			LOG_INFO("eQSL logged %s", EQSL_url.c_str());
-
-	}
-	return NULL;
-}
-
-void EQSL_close(void)
-{
-	ENSURE_THREAD(FLMAIN_TID);
-
-	if (!EQSLthread)
-		return;
-
-	CANCEL_THREAD(*EQSLthread);
-
-	pthread_mutex_lock(&qrz_mutex);
-	EQSLEXIT = true;
-	pthread_cond_signal(&qrz_cond);
-	pthread_mutex_unlock(&qrz_mutex);
-
-	pthread_join(*QRZ_thread, NULL);
-	delete QRZ_thread;
-	QRZ_thread = 0;
-}
-
-static void EQSL_init(void)
-{
-	ENSURE_THREAD(FLMAIN_TID);
-
-	if (EQSLthread)
-		return;
-	EQSLthread = new pthread_t;
-	EQSLEXIT = false;
-	if (pthread_create(EQSLthread, NULL, EQSL_loop, NULL) != 0) {
-		LOG_PERROR("pthread_create");
-		return;
-	}
-	MilliSleep(10);
-}
-
-void sendEQSL(const char *url)
-{
-	ENSURE_THREAD(FLMAIN_TID);
-
-	if (!EQSLthread)
-		EQSL_init();
-
-	pthread_mutex_lock(&EQSLmutex);
-	EQSL_url = url;
-	pthread_cond_signal(&EQSLcond);
-	pthread_mutex_unlock(&EQSLmutex);
-}
-
-// this function may be called from several places including macro
-// expansion and execution
-
-void makeEQSL(const char *message)
-{
-	char sztemp[100];
-	std::string tempstr;
-	std::string eQSL_url;
-	std::string msg;
-	size_t p = 0;
-
-	msg = message;
-
-	if (msg.empty()) msg = progdefaults.eqsl_default_message;
-
-// replace message tags {CALL}, {NAME}, {MODE}
-	while ((p = msg.find("{CALL}")) != std::string::npos)
-		msg.replace(p, 6, inpCall->value());
-	while ((p = msg.find("{NAME}")) != std::string::npos)
-		msg.replace(p, 6, inpName->value());
-	while ((p = msg.find("{MODE}")) != std::string::npos)
-		msg.replace(p, 6, mode_info[active_modem->get_mode()].export_name);
-
-
-// eqsl url header
-	eQSL_url = "http://www.eqsl.cc/qslcard/importADIF.cfm?ADIFdata=upload <adIF_ver:5>2.1.9";
-	snprintf(sztemp, sizeof(sztemp),"<EQSL_USER:%d>%s<EQSL_PSWD:%d>%s",
-		static_cast<int>(progdefaults.eqsl_id.length()),
-		progdefaults.eqsl_id.c_str(),
-		static_cast<int>(progdefaults.eqsl_pwd.length()),
-		progdefaults.eqsl_pwd.c_str());
-	eQSL_url.append(sztemp);
-	eQSL_url.append("<PROGRAMID:6>FLDIGI<EOH>");
-// eqsl nickname
-	if (!progdefaults.eqsl_nick.empty()) {
-		snprintf(sztemp, sizeof(sztemp), "<APP_EQSL_QTH_NICKNAME:%d>%s",
-			static_cast<int>(progdefaults.eqsl_nick.length()),
-			progdefaults.eqsl_nick.c_str());
-		eQSL_url.append(sztemp);
-	}
-
-// eqsl record
-// band
-	tempstr = band_name(band(wf->rfcarrier()));
-	snprintf(sztemp, sizeof(sztemp), "<BAND:%d>%s",
-		static_cast<int>(tempstr.length()),
-		tempstr.c_str());
-	eQSL_url.append(sztemp);
-// call
-	tempstr = inpCall->value();
-	snprintf(sztemp, sizeof(sztemp), "<CALL:%d>%s",
-		static_cast<int>(tempstr.length()),
-		tempstr.c_str());
-	eQSL_url.append(sztemp);
-// mode
-	tempstr = mode_info[active_modem->get_mode()].export_name;
-
-	snprintf(sztemp, sizeof(sztemp), "<MODE:%d>%s",
-		static_cast<int>(tempstr.length()),
-		tempstr.c_str());
-	eQSL_url.append(sztemp);
-// qso date
-	if (progdefaults.eqsl_datetime_off)
-		snprintf(sztemp, sizeof(sztemp), "<QSO_DATE:%d>%s",
-			static_cast<int>(sDate_on.length()),
-			sDate_off.c_str());
-	else
-		snprintf(sztemp, sizeof(sztemp), "<QSO_DATE:%d>%s",
-			static_cast<int>(sDate_on.length()),
-			sDate_on.c_str());
-	eQSL_url.append(sztemp);
-// qso time
-	if (progdefaults.eqsl_datetime_off)
-		tempstr = inpTimeOff->value();
-	else
-		tempstr = inpTimeOn->value();
-	snprintf(sztemp, sizeof(sztemp), "<TIME_ON:%d>%s",
-		static_cast<int>(tempstr.length()),
-		tempstr.c_str());
-	eQSL_url.append(sztemp);
-// rst sent
-	tempstr = inpRstOut->value();
-	snprintf(sztemp, sizeof(sztemp), "<RST_SENT:%d>%s",
-		static_cast<int>(tempstr.length()),
-		tempstr.c_str());
-	eQSL_url.append(sztemp);
-// message
-	if (!msg.empty()) {
-		snprintf(sztemp, sizeof(sztemp), "<QSLMSG:%d>%s",
-			static_cast<int>(msg.length()),
-			msg.c_str());
-		eQSL_url.append(sztemp);
-	}
-	eQSL_url.append("<EOR>");
-
-	tempstr.clear();
-	for (size_t n = 0; n < eQSL_url.length(); n++) {
-		if (eQSL_url[n] == ' ' || eQSL_url[n] == '\n') tempstr.append("%20");
-		else if (eQSL_url[n] == '<') tempstr.append("%3c");
-		else if (eQSL_url[n] == '>') tempstr.append("%3e");
-		else if (eQSL_url[n] > ' ' && eQSL_url[n] <= '}')
-			tempstr += eQSL_url[n];
-	}
-
-	sendEQSL(tempstr.c_str());
-
-}
 
 /// With this constructor, no need to declare the array mode_info[] in the calling program.
 QsoHelper::QsoHelper(int the_mode)

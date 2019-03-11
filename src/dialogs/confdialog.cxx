@@ -1064,6 +1064,22 @@ o->redraw();
 progdefaults.changed = true;
 }
 
+Fl_Button *btnPossibleDupColor=(Fl_Button *)0;
+
+static void cb_btnPossibleDupColor(Fl_Button* o, void*) {
+  fl_color_chooser("Possible_Dup Check",
+  progdefaults.possible_dup_color.R,
+  progdefaults.possible_dup_color.G,
+  progdefaults.possible_dup_color.B);
+o->color(
+  fl_rgb_color(
+    progdefaults.possible_dup_color.R,
+    progdefaults.possible_dup_color.G,
+    progdefaults.possible_dup_color.B));
+o->redraw();
+progdefaults.changed = true;
+}
+
 Fl_Check_Button *btnDupXchg1=(Fl_Check_Button *)0;
 
 static void cb_btnDupXchg1(Fl_Check_Button* o, void*) {
@@ -3725,6 +3741,13 @@ static void cb_listbox_nano_keyer(Fl_ListBox* o, void*) {
   progdefaults.nanoIO_CW_keyer = o->index();
 set_nanoIO_keyer(o->index());
 progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_disable_CW_PTT=(Fl_Check_Button *)0;
+
+static void cb_btn_disable_CW_PTT(Fl_Check_Button* o, void*) {
+  progdefaults.disable_CW_PTT=o->value();
+progdefaults.changed=true;
 }
 
 Fl_Group *tabDomEX=(Fl_Group *)0;
@@ -8685,10 +8708,10 @@ Fl_Double_Window* ConfigureDialog() {
         tabOperator->end();
       } // Fl_Group* tabOperator
       { tabUI = new Fl_Group(0, 25, 604, 365, _("UI"));
+        tabUI->hide();
         { tabsUI = new Fl_Tabs(0, 25, 604, 365);
           tabsUI->selection_color(FL_LIGHT1);
           { tabBrowser = new Fl_Group(0, 50, 600, 340, _("Browser"));
-            tabBrowser->hide();
             { Fl_Group* o = new Fl_Group(30, 65, 540, 300);
               o->box(FL_ENGRAVED_FRAME);
               { Fl_Spinner2* o = cntChannels = new Fl_Spinner2(46, 75, 50, 24, _("Channels, first channel starts at waterfall lower limit"));
@@ -9252,6 +9275,7 @@ ab and newline are automatically included."));
             tabLogServer->end();
           } // Fl_Group* tabLogServer
           { tabLogContests = new Fl_Group(0, 50, 604, 340, _("Contests"));
+            tabLogContests->hide();
             { tabs_contests = new Fl_Tabs(0, 50, 604, 340);
               { grpGeneral_contest = new Fl_Group(0, 75, 600, 315, _("General"));
                 { Fl_ListBox* o = listbox_contest = new Fl_ListBox(86, 84, 500, 24, _("Contest"));
@@ -9299,34 +9323,34 @@ ab and newline are automatically included."));
                 inp_contest_notes->when(FL_WHEN_RELEASE);
                 o->value(progdefaults.CONTESTnotes.c_str());
                 } // Fl_Input2* inp_contest_notes
-                { Fl_Group* o = new Fl_Group(3, 192, 590, 83, _("Duplicate check, CALL plus"));
+                { Fl_Group* o = new Fl_Group(3, 192, 590, 86, _("Duplicate check, CALL plus"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-                { Fl_Light_Button* o = btnDupCheckOn = new Fl_Light_Button(68, 217, 74, 20, _("On/Off"));
+                { Fl_Light_Button* o = btnDupCheckOn = new Fl_Light_Button(20, 217, 74, 20, _("On/Off"));
                 btnDupCheckOn->tooltip(_("Check for duplicates"));
                 btnDupCheckOn->selection_color((Fl_Color)2);
                 btnDupCheckOn->callback((Fl_Callback*)cb_btnDupCheckOn);
                 o->value(progdefaults.EnableDupCheck);
                 } // Fl_Light_Button* btnDupCheckOn
-                { Fl_Check_Button* o = btnDupBand = new Fl_Check_Button(173, 217, 70, 20, _("Band"));
+                { Fl_Check_Button* o = btnDupBand = new Fl_Check_Button(132, 217, 70, 20, _("Band"));
                 btnDupBand->tooltip(_("Bands must match"));
                 btnDupBand->down_box(FL_DOWN_BOX);
                 btnDupBand->callback((Fl_Callback*)cb_btnDupBand);
                 o->value(progdefaults.dupband);
                 } // Fl_Check_Button* btnDupBand
-                { Fl_Check_Button* o = btnDupMode = new Fl_Check_Button(293, 217, 70, 20, _("Mode"));
+                { Fl_Check_Button* o = btnDupMode = new Fl_Check_Button(245, 217, 70, 20, _("Mode"));
                 btnDupMode->tooltip(_("Mode must match"));
                 btnDupMode->down_box(FL_DOWN_BOX);
                 btnDupMode->callback((Fl_Callback*)cb_btnDupMode);
                 o->value(progdefaults.dupmode);
                 } // Fl_Check_Button* btnDupMode
-                { Fl_Check_Button* o = btnDupTimeSpan = new Fl_Check_Button(408, 217, 129, 20, _("Time span over"));
+                { Fl_Check_Button* o = btnDupTimeSpan = new Fl_Check_Button(370, 217, 129, 20, _("Time span over"));
                 btnDupTimeSpan->tooltip(_("QSO must not occur within a time period of"));
                 btnDupTimeSpan->down_box(FL_DOWN_BOX);
                 btnDupTimeSpan->callback((Fl_Callback*)cb_btnDupTimeSpan);
                 o->value(progdefaults.duptimespan);
                 } // Fl_Check_Button* btnDupTimeSpan
-                { Fl_Button* o = btnDupColor = new Fl_Button(68, 244, 90, 24, _("Dup Color"));
+                { Fl_Button* o = btnDupColor = new Fl_Button(20, 244, 90, 24, _("Dup Color"));
                 btnDupColor->tooltip(_("Left click to select dup color"));
                 btnDupColor->box(FL_DOWN_BOX);
                 btnDupColor->down_box(FL_DOWN_BOX);
@@ -9335,19 +9359,28 @@ ab and newline are automatically included."));
                 btnDupColor->callback((Fl_Callback*)cb_btnDupColor);
                 o->color(fl_rgb_color(progdefaults.dup_color.R, progdefaults.dup_color.G, progdefaults.dup_color.B));
                 } // Fl_Button* btnDupColor
-                { Fl_Check_Button* o = btnDupXchg1 = new Fl_Check_Button(173, 246, 105, 20, _("Exchange In"));
+                { Fl_Button* o = btnPossibleDupColor = new Fl_Button(132, 244, 90, 24, _("? Dup Color"));
+                btnPossibleDupColor->tooltip(_("Left click to select possible dup color"));
+                btnPossibleDupColor->box(FL_DOWN_BOX);
+                btnPossibleDupColor->down_box(FL_DOWN_BOX);
+                btnPossibleDupColor->color(FL_BACKGROUND2_COLOR);
+                btnPossibleDupColor->selection_color(FL_BACKGROUND2_COLOR);
+                btnPossibleDupColor->callback((Fl_Callback*)cb_btnPossibleDupColor);
+                o->color(fl_rgb_color(progdefaults.possible_dup_color.R, progdefaults.possible_dup_color.G, progdefaults.possible_dup_color.B));
+                } // Fl_Button* btnPossibleDupColor
+                { Fl_Check_Button* o = btnDupXchg1 = new Fl_Check_Button(245, 246, 105, 20, _("Exchange In"));
                 btnDupXchg1->tooltip(_("free form 1 must match"));
                 btnDupXchg1->down_box(FL_DOWN_BOX);
                 btnDupXchg1->callback((Fl_Callback*)cb_btnDupXchg1);
                 o->value(progdefaults.dupxchg1);
                 } // Fl_Check_Button* btnDupXchg1
-                { Fl_Check_Button* o = btnDupState = new Fl_Check_Button(293, 246, 70, 20, _("State"));
+                { Fl_Check_Button* o = btnDupState = new Fl_Check_Button(370, 246, 70, 20, _("State"));
                 btnDupState->tooltip(_("State must match"));
                 btnDupState->down_box(FL_DOWN_BOX);
                 btnDupState->callback((Fl_Callback*)cb_btnDupState);
                 o->value(progdefaults.dupstate);
                 } // Fl_Check_Button* btnDupState
-                { Fl_Value_Input2* o = nbrTimeSpan = new Fl_Value_Input2(408, 244, 53, 24, _("minutes"));
+                { Fl_Value_Input2* o = nbrTimeSpan = new Fl_Value_Input2(463, 244, 53, 24, _("minutes"));
                 nbrTimeSpan->tooltip(_("Enter time span in minutes"));
                 nbrTimeSpan->box(FL_DOWN_BOX);
                 nbrTimeSpan->color(FL_BACKGROUND2_COLOR);
@@ -10705,11 +10738,11 @@ i on a\ntouch screen device such as a tablet."));
           tabsModems->selection_color(FL_LIGHT1);
           tabsModems->align(Fl_Align(FL_ALIGN_TOP_RIGHT));
           { tabCW = new Fl_Group(0, 50, 600, 340, _("CW"));
-            tabCW->hide();
             { tabsCW = new Fl_Tabs(0, 50, 600, 340);
               tabsCW->selection_color(FL_LIGHT1);
               { tabsCW_general = new Fl_Group(0, 75, 600, 315, _("General"));
                 tabsCW_general->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+                tabsCW_general->hide();
                 { Fl_Group* o = new Fl_Group(35, 85, 530, 130, _("Receive"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -11684,7 +11717,6 @@ ded Morse characters."));
               } // Fl_Group* tabsCW_ext_chars
               { tab_nanoCW = new Fl_Group(0, 75, 600, 315, _("nanoCW"));
                 tab_nanoCW->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-                tab_nanoCW->hide();
                 { Fl_ComboBox* o = select_nanoCW_CommPort = new Fl_ComboBox(86, 85, 420, 23, _("Ser. Port"));
                 select_nanoCW_CommPort->tooltip(_("nanoIO serial port"));
                 select_nanoCW_CommPort->box(FL_DOWN_BOX);
@@ -11796,6 +11828,12 @@ ded Morse characters."));
                 o->index(progdefaults.nanoIO_CW_keyer);
                 listbox_nano_keyer->end();
                 } // Fl_ListBox* listbox_nano_keyer
+                { Fl_Check_Button* o = btn_disable_CW_PTT = new Fl_Check_Button(387, 145, 70, 15, _("disable PTT"));
+                btn_disable_CW_PTT->tooltip(_("Do not send CAT PTT signal"));
+                btn_disable_CW_PTT->down_box(FL_DOWN_BOX);
+                btn_disable_CW_PTT->callback((Fl_Callback*)cb_btn_disable_CW_PTT);
+                o->value(progdefaults.disable_CW_PTT);
+                } // Fl_Check_Button* btn_disable_CW_PTT
                 tab_nanoCW->end();
               } // Fl_Group* tab_nanoCW
               tabsCW->end();
@@ -12746,6 +12784,7 @@ ded Morse characters."));
             tabPSK->end();
           } // Fl_Group* tabPSK
           { tabRTTY = new Fl_Group(0, 50, 609, 340, _("TTY"));
+            tabRTTY->hide();
             { tabsRTTY = new Fl_Tabs(0, 50, 609, 340);
               tabsRTTY->selection_color(FL_LIGHT1);
               { tab_Rx_TTY = new Fl_Group(0, 75, 600, 315, _("Rx"));
