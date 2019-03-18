@@ -7768,6 +7768,20 @@ static void cb_btn_send_when_logged(Fl_Check_Button* o, void*) {
 progdefaults.changed = true;
 }
 
+Fl_Check_Button *btn_send_datetime_off=(Fl_Check_Button *)0;
+
+static void cb_btn_send_datetime_off(Fl_Check_Button* o, void*) {
+  progdefaults.eqsl_datetime_off = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_show_eqsl_delivery=(Fl_Check_Button *)0;
+
+static void cb_btn_show_eqsl_delivery(Fl_Check_Button* o, void*) {
+  progdefaults.eqsl_show_delivery = o->value();
+progdefaults.changed = true;
+}
+
 Fl_Input2 *txt_eqsl_default_message=(Fl_Input2 *)0;
 
 static void cb_txt_eqsl_default_message(Fl_Input2* o, void*) {
@@ -7780,13 +7794,6 @@ Fl_Box *eqsl_txt1=(Fl_Box *)0;
 Fl_Box *eqsl_txt2=(Fl_Box *)0;
 
 Fl_Box *eqsl_txt3=(Fl_Box *)0;
-
-Fl_Check_Button *btn_send_datetime_off=(Fl_Check_Button *)0;
-
-static void cb_btn_send_datetime_off(Fl_Check_Button* o, void*) {
-  progdefaults.eqsl_datetime_off = o->value();
-progdefaults.changed = true;
-}
 
 Fl_Group *tabLOTW=(Fl_Group *)0;
 
@@ -7870,6 +7877,13 @@ o->label((inpLOTW_pwd->type() & FL_SECRET_INPUT) ? _("Show") : _("Hide"));
 Fl_Button *btn_verify_lotw=(Fl_Button *)0;
 
 Fl_Button *btn_view_unmatched=(Fl_Button *)0;
+
+Fl_Check_Button *btn_show_lotw_delivery=(Fl_Check_Button *)0;
+
+static void cb_btn_show_lotw_delivery(Fl_Check_Button* o, void*) {
+  progdefaults.lotw_show_delivery = o->value();
+progdefaults.changed = true;
+}
 
 Fl_Group *tabAutoStart=(Fl_Group *)0;
 
@@ -8563,7 +8577,6 @@ Fl_Double_Window* ConfigureDialog() {
       { tabOperator = new Fl_Group(0, 25, 600, 365, _("Operator"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
-        tabOperator->hide();
         { Fl_Group* o = new Fl_Group(5, 35, 590, 320, _("Station / Operator"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -16130,6 +16143,7 @@ and restarted if needed."));
       } // Fl_Group* tabMisc
       { tabDL = new Fl_Group(0, 25, 540, 350, _("DL Client"));
         tabDL->selection_color((Fl_Color)48);
+        tabDL->hide();
         { tabsDL = new Fl_Tabs(0, 25, 540, 348);
           { tabDLEnable = new Fl_Group(0, 50, 540, 320, _("Enable"));
             tabDLEnable->hide();
@@ -16402,9 +16416,9 @@ and restarted if needed."));
         tabDL->end();
       } // Fl_Group* tabDL
       { tabQRZ = new Fl_Group(0, 25, 675, 365, _("Web"));
+        tabQRZ->hide();
         { tabsQRZ = new Fl_Tabs(0, 25, 675, 365);
           { Fl_Group* o = new Fl_Group(0, 50, 675, 340, _("Call Lookup"));
-            o->hide();
             { Fl_Group* o = new Fl_Group(8, 56, 585, 131, _("Web Browser lookup"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -16603,6 +16617,7 @@ and restarted if needed."));
             o->end();
           } // Fl_Group* o
           { tabEQSL = new Fl_Group(0, 50, 600, 340, _("eQSL"));
+            tabEQSL->hide();
             { Fl_Input2* o = inpEQSL_www_url = new Fl_Input2(155, 59, 390, 22, _("www url"));
               inpEQSL_www_url->tooltip(_("Your login name"));
               inpEQSL_www_url->box(FL_DOWN_BOX);
@@ -16675,13 +16690,25 @@ and restarted if needed."));
             { Fl_Group* o = new Fl_Group(42, 157, 516, 223, _("Options"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_send_when_logged = new Fl_Check_Button(91, 182, 70, 15, _("send when logged (log button, <LOG>, <LNW>)"));
+              { Fl_Check_Button* o = btn_send_when_logged = new Fl_Check_Button(126, 166, 70, 15, _("send when logged (log button, <LOG>, <LNW>)"));
                 btn_send_when_logged->tooltip(_("automatic data upload"));
                 btn_send_when_logged->down_box(FL_DOWN_BOX);
                 btn_send_when_logged->callback((Fl_Callback*)cb_btn_send_when_logged);
                 o->value(progdefaults.eqsl_when_logged);
               } // Fl_Check_Button* btn_send_when_logged
-              { Fl_Input2* o = txt_eqsl_default_message = new Fl_Input2(95, 242, 451, 40, _("Default message"));
+              { Fl_Check_Button* o = btn_send_datetime_off = new Fl_Check_Button(126, 186, 70, 15, _("Use date/time off for log entry"));
+                btn_send_datetime_off->tooltip(_("default uses date/time on"));
+                btn_send_datetime_off->down_box(FL_DOWN_BOX);
+                btn_send_datetime_off->callback((Fl_Callback*)cb_btn_send_datetime_off);
+                o->value(progdefaults.eqsl_datetime_off);
+              } // Fl_Check_Button* btn_send_datetime_off
+              { Fl_Check_Button* o = btn_show_eqsl_delivery = new Fl_Check_Button(126, 206, 70, 15, _("Show delivery message"));
+                btn_show_eqsl_delivery->tooltip(_("Display timed delivery message if enabled"));
+                btn_show_eqsl_delivery->down_box(FL_DOWN_BOX);
+                btn_show_eqsl_delivery->callback((Fl_Callback*)cb_btn_show_eqsl_delivery);
+                o->value(progdefaults.eqsl_show_delivery);
+              } // Fl_Check_Button* btn_show_eqsl_delivery
+              { Fl_Input2* o = txt_eqsl_default_message = new Fl_Input2(95, 247, 451, 40, _("Default message"));
                 txt_eqsl_default_message->tooltip(_("default text to send with <LOG> etc"));
                 txt_eqsl_default_message->type(4);
                 txt_eqsl_default_message->box(FL_DOWN_BOX);
@@ -16696,7 +16723,7 @@ and restarted if needed."));
                 txt_eqsl_default_message->when(FL_WHEN_CHANGED);
                 o->value(progdefaults.eqsl_default_message.c_str());
               } // Fl_Input2* txt_eqsl_default_message
-              { Fl_Group* o = new Fl_Group(49, 286, 481, 90, _("Text Tags (tags use {} delimiters)"));
+              { Fl_Group* o = new Fl_Group(58, 293, 481, 81, _("Text Tags (tags use {} delimiters)"));
                 o->box(FL_FLAT_BOX);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
                 { eqsl_txt1 = new Fl_Box(64, 333, 220, 17, _("  {CALL} other ops call sign"));
@@ -16708,16 +16735,10 @@ and restarted if needed."));
                 { eqsl_txt3 = new Fl_Box(310, 333, 220, 17, _("{NAME} other ops name"));
                 eqsl_txt3->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
                 } // Fl_Box* eqsl_txt3
-                { new Fl_Box(80, 309, 440, 17, _("These tags can also be used in <EQSL:[message]>"));
+                { new Fl_Box(80, 312, 440, 17, _("These tags can also be used in <EQSL:[message]>"));
                 } // Fl_Box* o
                 o->end();
               } // Fl_Group* o
-              { Fl_Check_Button* o = btn_send_datetime_off = new Fl_Check_Button(92, 204, 70, 15, _("Use date/time off for log entry"));
-                btn_send_datetime_off->tooltip(_("default uses date/time on"));
-                btn_send_datetime_off->down_box(FL_DOWN_BOX);
-                btn_send_datetime_off->callback((Fl_Callback*)cb_btn_send_datetime_off);
-                o->value(progdefaults.eqsl_datetime_off);
-              } // Fl_Check_Button* btn_send_datetime_off
               o->end();
             } // Fl_Group* o
             tabEQSL->end();
@@ -16835,6 +16856,12 @@ work!"));
               btn_view_unmatched->callback((Fl_Callback*)cb_btn_view_unmatched);
               btn_view_unmatched->deactivate();
             } // Fl_Button* btn_view_unmatched
+            { Fl_Check_Button* o = btn_show_lotw_delivery = new Fl_Check_Button(341, 247, 70, 15, _("Show delivery message"));
+              btn_show_lotw_delivery->tooltip(_("Display timed delivery message if enabled"));
+              btn_show_lotw_delivery->down_box(FL_DOWN_BOX);
+              btn_show_lotw_delivery->callback((Fl_Callback*)cb_btn_show_lotw_delivery);
+              o->value(progdefaults.lotw_show_delivery);
+            } // Fl_Check_Button* btn_show_lotw_delivery
             tabLOTW->end();
           } // Fl_Group* tabLOTW
           tabsQRZ->end();

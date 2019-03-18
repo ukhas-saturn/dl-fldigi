@@ -3891,6 +3891,16 @@ if (bHAB) return;
 	inpCall3->value(new_call.c_str());
 	inpCall4->value(new_call.c_str());
 
+	sDate_on = sDate_off = zdate();
+	sTime_on = sTime_off = ztime();
+
+	inpTimeOn->value(inpTimeOff->value());
+	inpTimeOn1->value(inpTimeOff->value());
+	inpTimeOn2->value(inpTimeOff->value());
+	inpTimeOn3->value(inpTimeOff->value());
+	inpTimeOn4->value(inpTimeOff->value());
+	inpTimeOn5->value(inpTimeOff->value());
+
 	if (progStatus.timer && (Fl::event() != FL_HIDE))
 		stopMacroTimer();
 
@@ -3922,16 +3932,6 @@ if (bHAB) return;
 
 	old_call = new_call;
 	oktoclear = false;
-
-	sDate_on = sDate_off = zdate();
-	sTime_on = sTime_off = ztime();
-
-	inpTimeOn->value(inpTimeOff->value());
-	inpTimeOn1->value(inpTimeOff->value());
-	inpTimeOn2->value(inpTimeOff->value());
-	inpTimeOn3->value(inpTimeOff->value());
-	inpTimeOn4->value(inpTimeOff->value());
-	inpTimeOn5->value(inpTimeOff->value());
 
 	SearchLastQSO(inpCall->value());
 
@@ -4327,9 +4327,7 @@ void cb_log(Fl_Widget* w, void*)
 	}
 
 	if (progdefaults.EnableDupCheck || FD_logged_on) {
-std::cout << "cb_log dup check ";
 		DupCheck();
-std::cout << std::endl;
 	}
 
 	if (Fl::event() == FL_KEYBOARD) {
