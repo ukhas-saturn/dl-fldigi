@@ -10278,7 +10278,6 @@ void * set_xmtrcv_button_false(void)
 void * set_xmtrcv_selection_color_transmitting(void)
 {
 	wf->xmtrcv_selection_color(progdefaults.XmtColor);
-	wf->redraw();
 	return (void *)0;
 }
 
@@ -10292,25 +10291,21 @@ void * set_xmtrcv_selection_color_pending(void)
 void xmtrcv_selection_color(Fl_Color clr)
 {
 	wf->xmtrcv_selection_color(clr);
-	wf->redraw();
 }
 
 void xmtrcv_selection_color()
 {
 	wf->xmtrcv_selection_color(progdefaults.XmtColor);
-	wf->redraw();
 }
 
 void rev_selection_color()
 {
 	wf->reverse_selection_color(progdefaults.RevColor);
-	wf->redraw();
 }
 
 void xmtlock_selection_color()
 {
 	wf->xmtlock_selection_color(progdefaults.LkColor);
-	wf->redraw();
 }
 
 void sql_selection_color()
