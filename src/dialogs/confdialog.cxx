@@ -308,7 +308,7 @@ void set_qrzxml_buttons(Fl_Button* b) {
 void set_qrzweb_buttons(Fl_Button* b) {
   Fl_Button* qrzbweb[] = { btnQRZWEBnotavailable, btnQRZonline,
                                 btnHAMCALLonline,
-                                btnHamQTHonline };
+                                btnHamQTHonline, btnCallookOnline };
   
   for (size_t i = 0; i < sizeof(qrzbweb)/sizeof(*qrzbweb); i++)
   	qrzbweb[i]->value(b == qrzbweb[i]);
@@ -5162,9 +5162,7 @@ static void cb_btn_fldigi_client_to_fldigi(Fl_Check_Button* o, void*) {
 if (o->value()) {
   progdefaults.chkUSEHAMLIBis = false;
   progdefaults.chkUSERIGCATis = false;
-  progdefaults.chkUSEXMLRPCis = false;
   chkUSEHAMLIB->value(0);
-  chkUSEXMLRPC->value(0);
   chkUSERIGCAT->value(0);
 }
 progdefaults.changed=true;
@@ -5175,11 +5173,8 @@ Fl_Check_Button *chkUSERIGCAT=(Fl_Check_Button *)0;
 static void cb_chkUSERIGCAT(Fl_Check_Button* o, void*) {
   if (o->value() == 1) {
   chkUSEHAMLIB->value(0);
-  chkUSEXMLRPC->value(0);
   btn_fldigi_client_to_fldigi->value(0);
-  progdefaults.chkUSEHAMLIBis = false;
   progdefaults.chkUSERIGCATis = true;
-  progdefaults.chkUSEXMLRPCis = false;
   progdefaults.fldigi_client_to_flrig = false;
   btnInitRIGCAT->labelcolor(FL_RED);
   btnInitRIGCAT->redraw();
@@ -5366,10 +5361,8 @@ static void cb_chkUSEHAMLIB(Fl_Check_Button* o, void*) {
   progdefaults.chkUSEHAMLIBis = o->value();
 if (o->value() == 1) {
   chkUSERIGCAT->value(0);
-  chkUSEXMLRPC->value(0);
   btn_fldigi_client_to_fldigi->value(0);
   progdefaults.chkUSERIGCATis = false;
-  progdefaults.chkUSEXMLRPCis = false;
   progdefaults.fldigi_client_to_flrig = false;
   btnInitHAMLIB->labelcolor(FL_RED);
   btnInitHAMLIB->activate();
@@ -5545,44 +5538,6 @@ static void cb_btnInitHAMLIB(Fl_Button* o, void*) {
   progdefaults.initInterface();
 o->labelcolor(FL_FOREGROUND_COLOR);
 progdefaults.changed = true;
-}
-
-Fl_Group *tabXMLRPC=(Fl_Group *)0;
-
-Fl_Group *grpXMLRPC=(Fl_Group *)0;
-
-Fl_Check_Button *chkUSEXMLRPC=(Fl_Check_Button *)0;
-
-static void cb_chkUSEXMLRPC(Fl_Check_Button* o, void*) {
-  progdefaults.chkUSEXMLRPCis = o->value();
-if(o->value() == 1){
-  chkUSEHAMLIB->value(0);
-  chkUSERIGCAT->value(0);
-  btn_fldigi_client_to_fldigi->value(0);
-  progdefaults.chkUSEHAMLIBis = false;
-  progdefaults.chkUSERIGCATis = false;
-  progdefaults.fldigi_client_to_flrig = false;
-  btnInitXMLRPC->labelcolor(FL_RED);
-  btnInitXMLRPC->redraw_label();
-} else {
-  progdefaults.initInterface();
-}
-progdefaults.changed = true;
-}
-
-Fl_Button *btnInitXMLRPC=(Fl_Button *)0;
-
-static void cb_btnInitXMLRPC(Fl_Button* o, void*) {
-  progdefaults.initInterface();
-o->labelcolor(FL_FOREGROUND_COLOR);
-progdefaults.changed = true;
-}
-
-Fl_Counter *mbw_delay=(Fl_Counter *)0;
-
-static void cb_mbw_delay(Fl_Counter* o, void*) {
-  progdefaults.mbw=o->value();
-progdefaults.changed=true;
 }
 
 Fl_Check_Button *btnPTTrightchannel=(Fl_Check_Button *)0;
@@ -7192,7 +7147,7 @@ Fl_Button *btn_default_wx_url=(Fl_Button *)0;
 
 static void cb_btn_default_wx_url(Fl_Button*, void*) {
   txt_wx_url->value(
-"http://tgftp.nws.noaa.gov/data/observations/metar/decoded");
+"https://tgftp.nws.noaa.gov/data/observations/metar/decoded");
 progdefaults.wx_url=txt_wx_url->value();
 progdefaults.changed=true;
 }
@@ -7593,6 +7548,14 @@ progdefaults.QRZWEB = HAMQTHHTML;
 progdefaults.changed = true;
 }
 
+Fl_Round_Button *btnCallookOnline=(Fl_Round_Button *)0;
+
+static void cb_btnCallookOnline(Fl_Round_Button* o, void*) {
+  set_qrzweb_buttons(o);
+progdefaults.QRZWEB = CALLOOKHTML;
+progdefaults.changed = true;
+}
+
 Fl_Input2 *inp_qrzurl=(Fl_Input2 *)0;
 
 static void cb_inp_qrzurl(Fl_Input2* o, void*) {
@@ -7611,6 +7574,13 @@ Fl_Input2 *inp_hamqthurl=(Fl_Input2 *)0;
 
 static void cb_inp_hamqthurl(Fl_Input2* o, void*) {
   progdefaults.hamqthurl = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Input2 *inp_callook_url=(Fl_Input2 *)0;
+
+static void cb_inp_callook_url(Fl_Input2* o, void*) {
+  progdefaults.callookurl = o->value();
 progdefaults.changed = true;
 }
 
@@ -7708,6 +7678,13 @@ progdefaults.changed= true;
 
 Fl_Group *tabEQSL=(Fl_Group *)0;
 
+Fl_Input2 *inpEQSL_www_url=(Fl_Input2 *)0;
+
+static void cb_inpEQSL_www_url(Fl_Input2* o, void*) {
+  progdefaults.eqsl_www_url = o->value();
+progdefaults.changed = true;
+}
+
 Fl_Input2 *inpEQSL_id=(Fl_Input2 *)0;
 
 static void cb_inpEQSL_id(Fl_Input2* o, void*) {
@@ -7746,6 +7723,20 @@ static void cb_btn_send_when_logged(Fl_Check_Button* o, void*) {
 progdefaults.changed = true;
 }
 
+Fl_Check_Button *btn_send_datetime_off=(Fl_Check_Button *)0;
+
+static void cb_btn_send_datetime_off(Fl_Check_Button* o, void*) {
+  progdefaults.eqsl_datetime_off = o->value();
+progdefaults.changed = true;
+}
+
+Fl_Check_Button *btn_show_eqsl_delivery=(Fl_Check_Button *)0;
+
+static void cb_btn_show_eqsl_delivery(Fl_Check_Button* o, void*) {
+  progdefaults.eqsl_show_delivery = o->value();
+progdefaults.changed = true;
+}
+
 Fl_Input2 *txt_eqsl_default_message=(Fl_Input2 *)0;
 
 static void cb_txt_eqsl_default_message(Fl_Input2* o, void*) {
@@ -7758,13 +7749,6 @@ Fl_Box *eqsl_txt1=(Fl_Box *)0;
 Fl_Box *eqsl_txt2=(Fl_Box *)0;
 
 Fl_Box *eqsl_txt3=(Fl_Box *)0;
-
-Fl_Check_Button *btn_send_datetime_off=(Fl_Check_Button *)0;
-
-static void cb_btn_send_datetime_off(Fl_Check_Button* o, void*) {
-  progdefaults.eqsl_datetime_off = o->value();
-progdefaults.changed = true;
-}
 
 Fl_Group *tabLOTW=(Fl_Group *)0;
 
@@ -7848,6 +7832,13 @@ o->label((inpLOTW_pwd->type() & FL_SECRET_INPUT) ? _("Show") : _("Hide"));
 Fl_Button *btn_verify_lotw=(Fl_Button *)0;
 
 Fl_Button *btn_view_unmatched=(Fl_Button *)0;
+
+Fl_Check_Button *btn_show_lotw_delivery=(Fl_Check_Button *)0;
+
+static void cb_btn_show_lotw_delivery(Fl_Check_Button* o, void*) {
+  progdefaults.lotw_show_delivery = o->value();
+progdefaults.changed = true;
+}
 
 Fl_Group *tabAutoStart=(Fl_Group *)0;
 
@@ -8535,13 +8526,12 @@ Fl_Double_Window* ConfigureDialog() {
     o->selection_color((Fl_Color)51);
     o->labelsize(18);
     o->align(Fl_Align(FL_ALIGN_CLIP|FL_ALIGN_INSIDE));
-    { tabsConfigure = new Fl_Tabs(0, 0, 609, 390);
+    { tabsConfigure = new Fl_Tabs(0, 0, 675, 390);
       tabsConfigure->color(FL_LIGHT1);
       tabsConfigure->selection_color(FL_LIGHT1);
       { tabOperator = new Fl_Group(0, 25, 600, 365, _("Operator"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
-        tabOperator->hide();
         { Fl_Group* o = new Fl_Group(5, 35, 590, 320, _("Station / Operator"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -10308,7 +10298,6 @@ i on a\ntouch screen device such as a tablet."));
           tabsWaterfall->color(FL_LIGHT1);
           tabsWaterfall->selection_color(FL_LIGHT1);
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Display"));
-            o->hide();
             { Fl_Group* o = new Fl_Group(50, 63, 496, 190, _("Colors and cursors"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -10694,6 +10683,7 @@ i on a\ntouch screen device such as a tablet."));
             o->end();
           } // Fl_Group* o
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Spectrum"));
+            o->hide();
             { Fl_Group* o = new Fl_Group(10, 65, 580, 150, _("Spectrum Scope / Waterfall interaction"));
               o->box(FL_ENGRAVED_BOX);
               o->align(Fl_Align(FL_ALIGN_TOP|FL_ALIGN_INSIDE));
@@ -10734,6 +10724,7 @@ i on a\ntouch screen device such as a tablet."));
         tabWaterfall->end();
       } // Fl_Group* tabWaterfall
       { tabModems = new Fl_Group(0, 25, 609, 365, _("Modems"));
+        tabModems->hide();
         { tabsModems = new Fl_Tabs(0, 25, 609, 365);
           tabsModems->selection_color(FL_LIGHT1);
           tabsModems->align(Fl_Align(FL_ALIGN_TOP_RIGHT));
@@ -10742,7 +10733,6 @@ i on a\ntouch screen device such as a tablet."));
               tabsCW->selection_color(FL_LIGHT1);
               { tabsCW_general = new Fl_Group(0, 75, 600, 315, _("General"));
                 tabsCW_general->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-                tabsCW_general->hide();
                 { Fl_Group* o = new Fl_Group(35, 85, 530, 130, _("Receive"));
                 o->box(FL_ENGRAVED_FRAME);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
@@ -11717,6 +11707,7 @@ ded Morse characters."));
               } // Fl_Group* tabsCW_ext_chars
               { tab_nanoCW = new Fl_Group(0, 75, 600, 315, _("nanoCW"));
                 tab_nanoCW->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+                tab_nanoCW->hide();
                 { Fl_ComboBox* o = select_nanoCW_CommPort = new Fl_ComboBox(86, 85, 420, 23, _("Ser. Port"));
                 select_nanoCW_CommPort->tooltip(_("nanoIO serial port"));
                 select_nanoCW_CommPort->box(FL_DOWN_BOX);
@@ -14365,45 +14356,6 @@ i.e. localhost"));
             } // Fl_Group* grpHamlib
             tabHamlib->end();
           } // Fl_Group* tabHamlib
-          { tabXMLRPC = new Fl_Group(0, 50, 600, 340, _("XML-RPC"));
-            tabXMLRPC->hide();
-            { grpXMLRPC = new Fl_Group(55, 61, 490, 160);
-              grpXMLRPC->box(FL_ENGRAVED_FRAME);
-              { Fl_Output* o = new Fl_Output(210, 80, 190, 58);
-                o->type(12);
-                o->box(FL_BORDER_BOX);
-                o->color(FL_LIGHT1);
-                o->value(_("Rig control via external\nprogram using xmlrpc\nremote calls."));
-              } // Fl_Output* o
-              { chkUSEXMLRPC = new Fl_Check_Button(210, 148, 183, 20, _("Use XML-RPC program"));
-                chkUSEXMLRPC->tooltip(_("Experimental"));
-                chkUSEXMLRPC->down_box(FL_DOWN_BOX);
-                chkUSEXMLRPC->callback((Fl_Callback*)cb_chkUSEXMLRPC);
-              } // Fl_Check_Button* chkUSEXMLRPC
-              { btnInitXMLRPC = new Fl_Button(251, 184, 113, 24, _("Initialize"));
-                btnInitXMLRPC->tooltip(_("Initialize XML-RPC rig control"));
-                btnInitXMLRPC->callback((Fl_Callback*)cb_btnInitXMLRPC);
-              } // Fl_Button* btnInitXMLRPC
-              grpXMLRPC->end();
-            } // Fl_Group* grpXMLRPC
-            { Fl_Group* o = new Fl_Group(55, 225, 490, 50);
-              o->box(FL_ENGRAVED_BOX);
-              { Fl_Counter* o = mbw_delay = new Fl_Counter(210, 239, 90, 21, _("Mode/BW delay"));
-                mbw_delay->tooltip(_("Delay in seconds between <RIGMODE... and <FILWID...\nwhen both in same macro \
-definition"));
-                mbw_delay->type(1);
-                mbw_delay->minimum(0.1);
-                mbw_delay->maximum(2);
-                mbw_delay->step(0.05);
-                mbw_delay->value(0.1);
-                mbw_delay->callback((Fl_Callback*)cb_mbw_delay);
-                mbw_delay->align(Fl_Align(FL_ALIGN_RIGHT));
-                o->value(progdefaults.mbw);
-              } // Fl_Counter* mbw_delay
-              o->end();
-            } // Fl_Group* o
-            tabXMLRPC->end();
-          } // Fl_Group* tabXMLRPC
           { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Hardware PTT"));
             o->hide();
             { Fl_Group* o = new Fl_Group(10, 57, 580, 38);
@@ -16107,6 +16059,7 @@ and restarted if needed."));
       } // Fl_Group* tabMisc
       { tabDL = new Fl_Group(0, 25, 540, 350, _("DL Client"));
         tabDL->selection_color((Fl_Color)48);
+        tabDL->hide();
         { tabsDL = new Fl_Tabs(0, 25, 540, 348);
           { tabDLEnable = new Fl_Group(0, 50, 540, 320, _("Enable"));
             tabDLEnable->hide();
@@ -16378,39 +16331,45 @@ and restarted if needed."));
         } // Fl_Tabs* tabsDL
         tabDL->end();
       } // Fl_Group* tabDL
-      { tabQRZ = new Fl_Group(0, 25, 600, 365, _("Web"));
+      { tabQRZ = new Fl_Group(0, 25, 675, 365, _("Web"));
         tabQRZ->hide();
-        { tabsQRZ = new Fl_Tabs(0, 25, 600, 365);
-          { Fl_Group* o = new Fl_Group(0, 50, 600, 340, _("Call Lookup"));
-            { Fl_Group* o = new Fl_Group(34, 56, 538, 122, _("Web Browser lookup"));
+        { tabsQRZ = new Fl_Tabs(0, 25, 675, 365);
+          { Fl_Group* o = new Fl_Group(0, 50, 675, 340, _("Call Lookup"));
+            { Fl_Group* o = new Fl_Group(8, 56, 585, 131, _("Web Browser lookup"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Round_Button* o = btnQRZWEBnotavailable = new Fl_Round_Button(77, 79, 337, 20, _("None"));
+              { Fl_Round_Button* o = btnQRZWEBnotavailable = new Fl_Round_Button(48, 75, 61, 20, _("None"));
                 btnQRZWEBnotavailable->tooltip(_("Do not use callsign lookup via web browser"));
                 btnQRZWEBnotavailable->down_box(FL_DOWN_BOX);
                 btnQRZWEBnotavailable->value(1);
                 btnQRZWEBnotavailable->callback((Fl_Callback*)cb_btnQRZWEBnotavailable);
                 o->value(progdefaults.QRZWEB == QRZWEBNONE);
               } // Fl_Round_Button* btnQRZWEBnotavailable
-              { Fl_Round_Button* o = btnQRZonline = new Fl_Round_Button(77, 103, 337, 20, _("QRZ.............."));
+              { Fl_Round_Button* o = btnQRZonline = new Fl_Round_Button(48, 95, 83, 20, _("QRS on line"));
                 btnQRZonline->tooltip(_("Visit QRZ web site"));
                 btnQRZonline->down_box(FL_DOWN_BOX);
                 btnQRZonline->callback((Fl_Callback*)cb_btnQRZonline);
                 o->value(progdefaults.QRZWEB == QRZHTML);
               } // Fl_Round_Button* btnQRZonline
-              { Fl_Round_Button* o = btnHAMCALLonline = new Fl_Round_Button(77, 127, 337, 20, _("HamCall......"));
+              { Fl_Round_Button* o = btnHAMCALLonline = new Fl_Round_Button(48, 116, 83, 20, _("HamCall online"));
                 btnHAMCALLonline->tooltip(_("Visit Hamcall web site"));
                 btnHAMCALLonline->down_box(FL_DOWN_BOX);
                 btnHAMCALLonline->callback((Fl_Callback*)cb_btnHAMCALLonline);
                 o->value(progdefaults.QRZWEB == HAMCALLHTML);
               } // Fl_Round_Button* btnHAMCALLonline
-              { Fl_Round_Button* o = btnHamQTHonline = new Fl_Round_Button(77, 151, 337, 20, _("HamQTH....."));
+              { Fl_Round_Button* o = btnHamQTHonline = new Fl_Round_Button(48, 137, 20, 20, _("HamQTH online"));
                 btnHamQTHonline->tooltip(_("Visit hamQTH web site"));
                 btnHamQTHonline->down_box(FL_DOWN_BOX);
                 btnHamQTHonline->callback((Fl_Callback*)cb_btnHamQTHonline);
                 o->value(progdefaults.QRZWEB == HAMQTHHTML);
               } // Fl_Round_Button* btnHamQTHonline
-              { Fl_Input2* o = inp_qrzurl = new Fl_Input2(185, 102, 369, 22);
+              { Fl_Round_Button* o = btnCallookOnline = new Fl_Round_Button(48, 158, 20, 20, _("Callook online"));
+                btnCallookOnline->tooltip(_("Visit hamQTH web site"));
+                btnCallookOnline->down_box(FL_DOWN_BOX);
+                btnCallookOnline->callback((Fl_Callback*)cb_btnCallookOnline);
+                o->value(progdefaults.QRZWEB == CALLOOKHTML);
+              } // Fl_Round_Button* btnCallookOnline
+              { Fl_Input2* o = inp_qrzurl = new Fl_Input2(302, 69, 270, 22, _("QRZ"));
                 inp_qrzurl->box(FL_DOWN_BOX);
                 inp_qrzurl->color(FL_BACKGROUND2_COLOR);
                 inp_qrzurl->selection_color(FL_SELECTION_COLOR);
@@ -16423,7 +16382,7 @@ and restarted if needed."));
                 inp_qrzurl->when(FL_WHEN_RELEASE);
                 o->value(progdefaults.qrzurl.c_str());
               } // Fl_Input2* inp_qrzurl
-              { Fl_Input2* o = inp_hamcallurl = new Fl_Input2(185, 126, 369, 22);
+              { Fl_Input2* o = inp_hamcallurl = new Fl_Input2(302, 96, 270, 22, _("Hamcall"));
                 inp_hamcallurl->box(FL_DOWN_BOX);
                 inp_hamcallurl->color(FL_BACKGROUND2_COLOR);
                 inp_hamcallurl->selection_color(FL_SELECTION_COLOR);
@@ -16436,7 +16395,7 @@ and restarted if needed."));
                 inp_hamcallurl->when(FL_WHEN_RELEASE);
                 o->value(progdefaults.hamcallurl.c_str());
               } // Fl_Input2* inp_hamcallurl
-              { Fl_Input2* o = inp_hamqthurl = new Fl_Input2(185, 150, 369, 22);
+              { Fl_Input2* o = inp_hamqthurl = new Fl_Input2(302, 124, 270, 22, _("HamQTH"));
                 inp_hamqthurl->box(FL_DOWN_BOX);
                 inp_hamqthurl->color(FL_BACKGROUND2_COLOR);
                 inp_hamqthurl->selection_color(FL_SELECTION_COLOR);
@@ -16449,49 +16408,63 @@ and restarted if needed."));
                 inp_hamqthurl->when(FL_WHEN_RELEASE);
                 o->value(progdefaults.hamqthurl.c_str());
               } // Fl_Input2* inp_hamqthurl
+              { Fl_Input2* o = inp_callook_url = new Fl_Input2(302, 153, 270, 22, _("Callook"));
+                inp_callook_url->tooltip(_("Callook.info web site"));
+                inp_callook_url->box(FL_DOWN_BOX);
+                inp_callook_url->color(FL_BACKGROUND2_COLOR);
+                inp_callook_url->selection_color(FL_SELECTION_COLOR);
+                inp_callook_url->labeltype(FL_NORMAL_LABEL);
+                inp_callook_url->labelfont(0);
+                inp_callook_url->labelsize(14);
+                inp_callook_url->labelcolor(FL_FOREGROUND_COLOR);
+                inp_callook_url->callback((Fl_Callback*)cb_inp_callook_url);
+                inp_callook_url->align(Fl_Align(FL_ALIGN_LEFT));
+                inp_callook_url->when(FL_WHEN_RELEASE);
+                o->value(progdefaults.callookurl.c_str());
+              } // Fl_Input2* inp_callook_url
               o->end();
             } // Fl_Group* o
-            { Fl_Group* o = new Fl_Group(34, 180, 538, 195, _("Data base lookup"));
+            { Fl_Group* o = new Fl_Group(8, 188, 585, 195, _("Data base lookup"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Round_Button* o = btnQRZXMLnotavailable = new Fl_Round_Button(77, 203, 64, 20, _("None"));
+              { Fl_Round_Button* o = btnQRZXMLnotavailable = new Fl_Round_Button(55, 211, 69, 20, _("None"));
                 btnQRZXMLnotavailable->tooltip(_("Do not use callsign database"));
                 btnQRZXMLnotavailable->down_box(FL_DOWN_BOX);
                 btnQRZXMLnotavailable->value(1);
                 btnQRZXMLnotavailable->callback((Fl_Callback*)cb_btnQRZXMLnotavailable);
                 o->value(progdefaults.QRZXML == QRZXMLNONE);
               } // Fl_Round_Button* btnQRZXMLnotavailable
-              { Fl_Round_Button* o = btnQRZcdrom = new Fl_Round_Button(77, 238, 70, 20, _("QRZ cdrom"));
+              { Fl_Round_Button* o = btnQRZcdrom = new Fl_Round_Button(55, 239, 76, 20, _("QRZ cdrom"));
                 btnQRZcdrom->tooltip(_("Use CD or hard drive CD image"));
                 btnQRZcdrom->down_box(FL_DOWN_BOX);
                 btnQRZcdrom->callback((Fl_Callback*)cb_btnQRZcdrom);
                 o->value(progdefaults.QRZXML == QRZCD);
               } // Fl_Round_Button* btnQRZcdrom
-              { Fl_Round_Button* o = btnQRZsub = new Fl_Round_Button(77, 266, 126, 20, _("QRZ.com"));
+              { Fl_Round_Button* o = btnQRZsub = new Fl_Round_Button(55, 267, 137, 20, _("QRZ.com"));
                 btnQRZsub->tooltip(_("You need a paid QRZ online\nsubscription to access"));
                 btnQRZsub->down_box(FL_DOWN_BOX);
                 btnQRZsub->callback((Fl_Callback*)cb_btnQRZsub);
                 o->value(progdefaults.QRZXML == QRZNET);
               } // Fl_Round_Button* btnQRZsub
-              { Fl_Round_Button* o = btnHamcall = new Fl_Round_Button(77, 292, 126, 20, _("Hamcall.net"));
+              { Fl_Round_Button* o = btnHamcall = new Fl_Round_Button(55, 296, 137, 20, _("Hamcall.net"));
                 btnHamcall->tooltip(_("You need a paid Hamcall online\nsubscription to access"));
                 btnHamcall->down_box(FL_DOWN_BOX);
                 btnHamcall->callback((Fl_Callback*)cb_btnHamcall);
                 o->value(progdefaults.QRZXML == HAMCALLNET);
               } // Fl_Round_Button* btnHamcall
-              { Fl_Round_Button* o = btnHamQTH = new Fl_Round_Button(77, 318, 126, 20, _("HamQTH.com (free service http://www.hamqth.com)"));
+              { Fl_Round_Button* o = btnHamQTH = new Fl_Round_Button(55, 324, 137, 20, _("HamQTH.com"));
                 btnHamQTH->tooltip(_("Free service courtesy of OK"));
                 btnHamQTH->down_box(FL_DOWN_BOX);
                 btnHamQTH->callback((Fl_Callback*)cb_btnHamQTH);
                 o->value(progdefaults.QRZXML == HAMQTH);
               } // Fl_Round_Button* btnHamQTH
-              { Fl_Round_Button* o = btnCALLOOK = new Fl_Round_Button(77, 345, 126, 20, _("Callook.info lookup (free service US callsigns only)"));
-                btnCALLOOK->tooltip(_("Visit Hamcall web site"));
+              { Fl_Round_Button* o = btnCALLOOK = new Fl_Round_Button(55, 353, 113, 20, _("Callook.info"));
+                btnCALLOOK->tooltip(_("Callook.info lookup (free service US callsigns only)"));
                 btnCALLOOK->down_box(FL_DOWN_BOX);
                 btnCALLOOK->callback((Fl_Callback*)cb_btnCALLOOK);
                 o->value(progdefaults.QRZXML == CALLOOK);
               } // Fl_Round_Button* btnCALLOOK
-              { Fl_Input2* o = txtQRZpathname = new Fl_Input2(203, 237, 301, 22, _("at:"));
+              { Fl_Input2* o = txtQRZpathname = new Fl_Input2(172, 238, 401, 22);
                 txtQRZpathname->tooltip(_("ie: /home/dave/CALLBK/ or C:/CALLBK/\nLeave blank to search for database"));
                 txtQRZpathname->box(FL_DOWN_BOX);
                 txtQRZpathname->color(FL_BACKGROUND2_COLOR);
@@ -16506,8 +16479,8 @@ and restarted if needed."));
                 o->value(progdefaults.QRZpathname.c_str());
                 txtQRZpathname->labelsize(FL_NORMAL_SIZE);
               } // Fl_Input2* txtQRZpathname
-              { Fl_Input2* o = inpQRZusername = new Fl_Input2(286, 265, 150, 22, _("User name"));
-                inpQRZusername->tooltip(_("Your login name"));
+              { Fl_Input2* o = inpQRZusername = new Fl_Input2(282, 273, 163, 22, _("User name"));
+                inpQRZusername->tooltip(_("Login name for QRZ / Hamcall / HamQTH"));
                 inpQRZusername->box(FL_DOWN_BOX);
                 inpQRZusername->color(FL_BACKGROUND2_COLOR);
                 inpQRZusername->selection_color(FL_SELECTION_COLOR);
@@ -16521,8 +16494,8 @@ and restarted if needed."));
                 o->value(progdefaults.QRZusername.c_str());
                 inpQRZusername->labelsize(FL_NORMAL_SIZE);
               } // Fl_Input2* inpQRZusername
-              { Fl_Input2* o = inpQRZuserpassword = new Fl_Input2(286, 291, 150, 22, _("Password"));
-                inpQRZuserpassword->tooltip(_("Your login password"));
+              { Fl_Input2* o = inpQRZuserpassword = new Fl_Input2(282, 309, 163, 22, _("Password"));
+                inpQRZuserpassword->tooltip(_("Password for QRZ / Hamcall / HamQTH"));
                 inpQRZuserpassword->box(FL_DOWN_BOX);
                 inpQRZuserpassword->color(FL_BACKGROUND2_COLOR);
                 inpQRZuserpassword->selection_color(FL_SELECTION_COLOR);
@@ -16537,18 +16510,18 @@ and restarted if needed."));
                 o->type(FL_SECRET_INPUT);
                 inpQRZuserpassword->labelsize(FL_NORMAL_SIZE);
               } // Fl_Input2* inpQRZuserpassword
-              { btnQRZpasswordShow = new Fl_Button(447, 292, 70, 20, _("Show"));
+              { btnQRZpasswordShow = new Fl_Button(457, 309, 76, 22, _("Show"));
                 btnQRZpasswordShow->tooltip(_("Show password in plain text"));
                 btnQRZpasswordShow->callback((Fl_Callback*)cb_btnQRZpasswordShow);
               } // Fl_Button* btnQRZpasswordShow
-              { Fl_Group* o = new Fl_Group(195, 203, 371, 27);
+              { Fl_Group* o = new Fl_Group(177, 349, 403, 27);
                 o->box(FL_ENGRAVED_FRAME);
-                { Fl_Check_Button* o = btn_notes_address = new Fl_Check_Button(207, 210, 207, 15, _("Add address to notes field"));
+                { Fl_Check_Button* o = btn_notes_address = new Fl_Check_Button(201, 355, 207, 15, _("Add address to notes field"));
                 btn_notes_address->down_box(FL_DOWN_BOX);
                 btn_notes_address->callback((Fl_Callback*)cb_btn_notes_address);
                 o->value(progdefaults.notes_address);
                 } // Fl_Check_Button* btn_notes_address
-                { Fl_Check_Button* o = btn_clear_notes = new Fl_Check_Button(434, 210, 122, 15, _("clear old data"));
+                { Fl_Check_Button* o = btn_clear_notes = new Fl_Check_Button(428, 355, 122, 15, _("clear old data"));
                 btn_clear_notes->down_box(FL_DOWN_BOX);
                 btn_clear_notes->callback((Fl_Callback*)cb_btn_clear_notes);
                 o->value(progdefaults.clear_notes);
@@ -16561,7 +16534,22 @@ and restarted if needed."));
           } // Fl_Group* o
           { tabEQSL = new Fl_Group(0, 50, 600, 340, _("eQSL"));
             tabEQSL->hide();
-            { Fl_Input2* o = inpEQSL_id = new Fl_Input2(154, 60, 150, 22, _("User ID"));
+            { Fl_Input2* o = inpEQSL_www_url = new Fl_Input2(155, 59, 390, 22, _("www url"));
+              inpEQSL_www_url->tooltip(_("Your login name"));
+              inpEQSL_www_url->box(FL_DOWN_BOX);
+              inpEQSL_www_url->color(FL_BACKGROUND2_COLOR);
+              inpEQSL_www_url->selection_color(FL_SELECTION_COLOR);
+              inpEQSL_www_url->labeltype(FL_NORMAL_LABEL);
+              inpEQSL_www_url->labelfont(0);
+              inpEQSL_www_url->labelsize(14);
+              inpEQSL_www_url->labelcolor(FL_FOREGROUND_COLOR);
+              inpEQSL_www_url->callback((Fl_Callback*)cb_inpEQSL_www_url);
+              inpEQSL_www_url->align(Fl_Align(FL_ALIGN_LEFT));
+              inpEQSL_www_url->when(FL_WHEN_RELEASE);
+              o->value(progdefaults.eqsl_www_url.c_str());
+              o->labelsize(FL_NORMAL_SIZE);
+            } // Fl_Input2* inpEQSL_www_url
+            { Fl_Input2* o = inpEQSL_id = new Fl_Input2(154, 82, 150, 22, _("User ID"));
               inpEQSL_id->tooltip(_("Your login name"));
               inpEQSL_id->box(FL_DOWN_BOX);
               inpEQSL_id->color(FL_BACKGROUND2_COLOR);
@@ -16574,9 +16562,9 @@ and restarted if needed."));
               inpEQSL_id->align(Fl_Align(FL_ALIGN_LEFT));
               inpEQSL_id->when(FL_WHEN_RELEASE);
               o->value(progdefaults.eqsl_id.c_str());
-              inpEQSL_id->labelsize(FL_NORMAL_SIZE);
+              o->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpEQSL_id
-            { Fl_Input2* o = inpEQSL_pwd = new Fl_Input2(154, 87, 150, 22, _("Password"));
+            { Fl_Input2* o = inpEQSL_pwd = new Fl_Input2(154, 105, 150, 22, _("Password"));
               inpEQSL_pwd->tooltip(_("Your login password"));
               inpEQSL_pwd->box(FL_DOWN_BOX);
               inpEQSL_pwd->color(FL_BACKGROUND2_COLOR);
@@ -16590,13 +16578,13 @@ and restarted if needed."));
               inpEQSL_pwd->when(FL_WHEN_RELEASE);
               o->value(progdefaults.eqsl_pwd.c_str());
               o->type(FL_SECRET_INPUT);
-              inpEQSL_pwd->labelsize(FL_NORMAL_SIZE);
+              o->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpEQSL_pwd
-            { btnEQSL_pwd_show = new Fl_Button(310, 87, 70, 22, _("Show"));
+            { btnEQSL_pwd_show = new Fl_Button(310, 105, 70, 22, _("Show"));
               btnEQSL_pwd_show->tooltip(_("Show password in plain text"));
               btnEQSL_pwd_show->callback((Fl_Callback*)cb_btnEQSL_pwd_show);
             } // Fl_Button* btnEQSL_pwd_show
-            { Fl_Input2* o = inpEQSL_nick = new Fl_Input2(154, 115, 150, 22, _("QTH Nickname"));
+            { Fl_Input2* o = inpEQSL_nick = new Fl_Input2(154, 129, 150, 22, _("QTH Nickname"));
               inpEQSL_nick->tooltip(_("Your login name"));
               inpEQSL_nick->box(FL_DOWN_BOX);
               inpEQSL_nick->color(FL_BACKGROUND2_COLOR);
@@ -16609,22 +16597,34 @@ and restarted if needed."));
               inpEQSL_nick->align(Fl_Align(FL_ALIGN_LEFT));
               inpEQSL_nick->when(FL_WHEN_RELEASE);
               o->value(progdefaults.eqsl_nick.c_str());
-              inpEQSL_nick->labelsize(FL_NORMAL_SIZE);
+              o->labelsize(FL_NORMAL_SIZE);
             } // Fl_Input2* inpEQSL_nick
-            { btn_verify_eqsl = new Fl_Button(475, 111, 70, 24, _("Verify"));
+            { btn_verify_eqsl = new Fl_Button(475, 129, 70, 22, _("Verify"));
               btn_verify_eqsl->tooltip(_("Verify database with eQSL download file"));
               btn_verify_eqsl->callback((Fl_Callback*)cb_btn_verify_eqsl);
             } // Fl_Button* btn_verify_eqsl
-            { Fl_Group* o = new Fl_Group(42, 141, 516, 223, _("Options"));
+            { Fl_Group* o = new Fl_Group(42, 157, 516, 223, _("Options"));
               o->box(FL_ENGRAVED_FRAME);
               o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-              { Fl_Check_Button* o = btn_send_when_logged = new Fl_Check_Button(91, 166, 70, 15, _("send when logged (log button, <LOG>, <LNW>)"));
+              { Fl_Check_Button* o = btn_send_when_logged = new Fl_Check_Button(126, 166, 70, 15, _("send when logged (log button, <LOG>, <LNW>)"));
                 btn_send_when_logged->tooltip(_("automatic data upload"));
                 btn_send_when_logged->down_box(FL_DOWN_BOX);
                 btn_send_when_logged->callback((Fl_Callback*)cb_btn_send_when_logged);
                 o->value(progdefaults.eqsl_when_logged);
               } // Fl_Check_Button* btn_send_when_logged
-              { Fl_Input2* o = txt_eqsl_default_message = new Fl_Input2(95, 226, 451, 40, _("Default message"));
+              { Fl_Check_Button* o = btn_send_datetime_off = new Fl_Check_Button(126, 186, 70, 15, _("Use date/time off for log entry"));
+                btn_send_datetime_off->tooltip(_("default uses date/time on"));
+                btn_send_datetime_off->down_box(FL_DOWN_BOX);
+                btn_send_datetime_off->callback((Fl_Callback*)cb_btn_send_datetime_off);
+                o->value(progdefaults.eqsl_datetime_off);
+              } // Fl_Check_Button* btn_send_datetime_off
+              { Fl_Check_Button* o = btn_show_eqsl_delivery = new Fl_Check_Button(126, 206, 70, 15, _("Show delivery message"));
+                btn_show_eqsl_delivery->tooltip(_("Display timed delivery message if enabled"));
+                btn_show_eqsl_delivery->down_box(FL_DOWN_BOX);
+                btn_show_eqsl_delivery->callback((Fl_Callback*)cb_btn_show_eqsl_delivery);
+                o->value(progdefaults.eqsl_show_delivery);
+              } // Fl_Check_Button* btn_show_eqsl_delivery
+              { Fl_Input2* o = txt_eqsl_default_message = new Fl_Input2(95, 247, 451, 40, _("Default message"));
                 txt_eqsl_default_message->tooltip(_("default text to send with <LOG> etc"));
                 txt_eqsl_default_message->type(4);
                 txt_eqsl_default_message->box(FL_DOWN_BOX);
@@ -16639,28 +16639,22 @@ and restarted if needed."));
                 txt_eqsl_default_message->when(FL_WHEN_CHANGED);
                 o->value(progdefaults.eqsl_default_message.c_str());
               } // Fl_Input2* txt_eqsl_default_message
-              { Fl_Group* o = new Fl_Group(49, 270, 481, 90, _("Text Tags (tags use {} delimiters)"));
+              { Fl_Group* o = new Fl_Group(58, 293, 481, 81, _("Text Tags (tags use {} delimiters)"));
                 o->box(FL_FLAT_BOX);
                 o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-                { eqsl_txt1 = new Fl_Box(64, 317, 220, 17, _("  {CALL} other ops call sign"));
+                { eqsl_txt1 = new Fl_Box(64, 333, 220, 17, _("  {CALL} other ops call sign"));
                 eqsl_txt1->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
                 } // Fl_Box* eqsl_txt1
-                { eqsl_txt2 = new Fl_Box(62, 336, 220, 17, _("  {MODE} full mode / submode"));
+                { eqsl_txt2 = new Fl_Box(62, 352, 220, 17, _("  {MODE} full mode / submode"));
                 eqsl_txt2->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
                 } // Fl_Box* eqsl_txt2
-                { eqsl_txt3 = new Fl_Box(310, 317, 220, 17, _("{NAME} other ops name"));
+                { eqsl_txt3 = new Fl_Box(310, 333, 220, 17, _("{NAME} other ops name"));
                 eqsl_txt3->align(Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE));
                 } // Fl_Box* eqsl_txt3
-                { new Fl_Box(80, 293, 440, 17, _("These tags can also be used in <EQSL:[message]>"));
+                { new Fl_Box(80, 312, 440, 17, _("These tags can also be used in <EQSL:[message]>"));
                 } // Fl_Box* o
                 o->end();
               } // Fl_Group* o
-              { Fl_Check_Button* o = btn_send_datetime_off = new Fl_Check_Button(92, 188, 70, 15, _("Use date/time off for log entry"));
-                btn_send_datetime_off->tooltip(_("default uses date/time on"));
-                btn_send_datetime_off->down_box(FL_DOWN_BOX);
-                btn_send_datetime_off->callback((Fl_Callback*)cb_btn_send_datetime_off);
-                o->value(progdefaults.eqsl_datetime_off);
-              } // Fl_Check_Button* btn_send_datetime_off
               o->end();
             } // Fl_Group* o
             tabEQSL->end();
@@ -16778,6 +16772,12 @@ work!"));
               btn_view_unmatched->callback((Fl_Callback*)cb_btn_view_unmatched);
               btn_view_unmatched->deactivate();
             } // Fl_Button* btn_view_unmatched
+            { Fl_Check_Button* o = btn_show_lotw_delivery = new Fl_Check_Button(341, 247, 70, 15, _("Show delivery message"));
+              btn_show_lotw_delivery->tooltip(_("Display timed delivery message if enabled"));
+              btn_show_lotw_delivery->down_box(FL_DOWN_BOX);
+              btn_show_lotw_delivery->callback((Fl_Callback*)cb_btn_show_lotw_delivery);
+              o->value(progdefaults.lotw_show_delivery);
+            } // Fl_Check_Button* btn_show_lotw_delivery
             tabLOTW->end();
           } // Fl_Group* tabLOTW
           tabsQRZ->end();

@@ -48,6 +48,7 @@
 #include "main.h"
 #include "confdialog.h"
 #include "fl_digi.h"
+#include "flmisc.h"
 #include "qrzlib.h"
 #include "trx.h"
 
@@ -122,12 +123,16 @@ void QRZ_DETAILS_query();
 
 QRZ *qCall = 0;
 
+static notify_dialog *announce = 0;
+
 void print_query(const string &name, const string &s)
 {
+//	LOG_WARN("%s query:\n%s", name.c_str(), s.c_str());
 	LOG_VERBOSE("%s query:\n%s", name.c_str(), s.c_str());
 }
 
 void print_data(const string &name, const string &s) {
+//	LOG_WARN("%s data:\n%s", name.c_str(), s.c_str());
 	LOG_VERBOSE("%s data:\n%s", name.c_str(), s.c_str());
 }
 
@@ -210,6 +215,13 @@ bool parseSessionKey(const string& sessionpage)
 bool parse_xml(const string& xmlpage)
 {
 	print_data("xmldata.qrz.com", xmlpage);
+
+	if (xmlpage.find("<Error>Not found") != std::string::npos) {
+		if (!announce) announce = new notify_dialog;
+		announce->notify("Not found", 2.0);
+		REQ(show_notifier, announce);
+		return false;
+	}
 
 	IrrXMLReader* xml = createIrrXMLReader(new IIrrXMLStringReader(xmlpage));
 
@@ -323,35 +335,28 @@ bool parse_xml(const string& xmlpage)
 
 bool getSessionKey(string& sessionpage)
 {
-
-	string detail;
-	detail = "GET /xml/current/?username=";
-	detail += progdefaults.QRZusername;
-	detail += ";password=";
-	detail += progdefaults.QRZuserpassword;
-	detail += ";agent=";
-	detail += PACKAGE_NAME;
-	detail += "-";
-	detail += PACKAGE_VERSION;
-	detail += "\r\n";
-
-	return network_query(qrzhost, "http", detail, sessionpage, 5.0);
+	string html = "http://";
+	html.append(qrzhost);
+	html.append(" /xml/current/?username=");
+	html.append(progdefaults.QRZusername);
+	html.append(";password=");
+	html.append(progdefaults.QRZuserpassword);
+	html.append(";agent=");
+	html.append(PACKAGE_NAME);
+	html.append("-");
+	html.append(PACKAGE_VERSION);
+	return get_http(html, sessionpage, 5.0);
 }
 
 bool QRZGetXML(string& xmlpage)
 {
-	string detail;
-	detail = "GET /bin/xml?s=";
-	detail += qrzSessionKey;
-	detail += ";callsign=";
-	detail += callsign;
-	detail += "\r\n";
-
-	print_query("QRZ data", detail);
-
-	bool res = network_query(qrzhost, "http", detail, xmlpage, 5.0);
-	LOG_VERBOSE("result = %d", res);
-	return res;
+	string html;
+	html.assign("http://").append(qrzhost);
+	html.append(" /bin/xml?s=");
+	html.append(qrzSessionKey);
+	html.append(";callsign=");
+	html.append(callsign);
+	return get_http(html, xmlpage, 5.0);
 }
 
 void camel_case(string &s)
@@ -567,12 +572,6 @@ void QRZquery()
 		ok = QRZLogin(qrzpage);
 	if (ok)
 		ok = QRZGetXML(qrzpage);
-//	if (!ok) { // change to negative for MS not getting on first try
-//		if (qrzSessionKey.empty())
-//			ok = QRZLogin(qrzpage);
-//		if (ok)
-//			ok = QRZGetXML(qrzpage);
-//	}
 	if (ok) {
 		parse_xml(qrzpage);
 		if (!qrzalert.empty() || !qrzerror.empty())
@@ -631,12 +630,23 @@ string node_data(const string &xmlpage, const string nodename)
 void parse_callook(string& xmlpage)
 {
 	print_data("Callook info", xmlpage);
-	string nodestr;
-	nodestr = node_data(xmlpage, "current");
-	if (nodestr.empty()) {
-		lookup_notes = "no data from callook.info";
+
+	if (xmlpage.find("INVALID") != std::string::npos) {
+		if (!announce) announce = new notify_dialog;
+		announce->notify("Call not found", 2.0);
+		REQ(show_notifier, announce);
 		return;
 	}
+
+	string nodestr = node_data(xmlpage, "current");
+
+	if (nodestr.empty()) {
+		if (!announce) announce = new notify_dialog;
+		announce->notify("no data from callook.info", 2.0);
+		REQ(show_notifier, announce);
+		return;
+	}
+
 	size_t start_pos = xmlpage.find("</trustee>");
 	if (start_pos == string::npos) return;
 
@@ -685,8 +695,11 @@ void parse_callook(string& xmlpage)
 bool CALLOOKGetXML(string& xmlpage)
 {
 	string url = progdefaults.callookurl;
+	size_t p = 0;
+	if ((p = url.find("https")) != std::string::npos)
+		url.erase(p+4,1);
 	url.append(callsign).append("/xml");
-	bool res = fetch_http(url, xmlpage, 5.0);
+	bool res = get_http(url, xmlpage, 5.0);
 	LOG_VERBOSE("result = %d", res);
 	return res;
 }
@@ -695,16 +708,15 @@ void CALLOOKquery()
 {
 	ENSURE_THREAD(QRZ_TID);
 
-	bool ok = true;
+//	bool ok = true;
 
 	string CALLOOKpage;
 
 	clear_Lookup();
-	ok = CALLOOKGetXML(CALLOOKpage);
-	if (!ok) // change to negative for MS not getting on first try
-		ok = CALLOOKGetXML(CALLOOKpage);
-	if (ok)
-		parse_callook(CALLOOKpage);
+//	ok = 
+	CALLOOKGetXML(CALLOOKpage);
+//	if (ok)
+	parse_callook(CALLOOKpage);
 	REQ(QRZ_disp_result);
 }
 
@@ -758,27 +770,27 @@ void parse_html(const string& htmlpage)
 
 bool HAMCALLget(string& htmlpage)
 {
-	string url_detail;
-	url_detail =  "GET /call?username=";
-	url_detail += progdefaults.QRZusername;
-	url_detail += "&password=";
-	url_detail += progdefaults.QRZuserpassword;
-	url_detail += "&rawlookup=1&callsign=";
-	url_detail += callsign;
-	url_detail += "&program=fldigi-";
-	url_detail += VERSION;
-	url_detail += "\r\n";
+	string html = "http://";
+	html.append(progdefaults.hamcallurl);
+	html.append("  /call?username=");
+	html.append(progdefaults.QRZusername);
+	html.append("&password=");
+	html.append(progdefaults.QRZuserpassword);
+	html.append("&rawlookup=1&callsign=");
+	html.append(callsign);
+	html.append("&program=fldigi-");
+	html.append(VERSION);
+	return get_http(html, htmlpage, 5.0);
 
-	print_query("hamcall", url_detail);
+//	print_query("hamcall", url_html);
 
-	string url = progdefaults.hamcallurl;
-	size_t p = url.find("//");
-	string service = url.substr(0, p);
-	url.erase(0, p+2);
-	size_t len = url.length();
-	if (url[len-1]=='/') url.erase(len-1, 1);
-	return network_query(url, service, url_detail, htmlpage, 5.0);
-//	return network_query("www.hamcall.net", "http", url_detail, htmlpage, 5.0);
+//	string url = progdefaults.hamcallurl;
+//	size_t p = url.find("//");
+//	string service = url.substr(0, p);
+//	url.erase(0, p+2);
+//	size_t len = url.length();
+//	if (url[len-1]=='/') url.erase(len-1, 1);
+//	return network_query(url, service, url_html, htmlpage, 5.0);
 }
 
 void HAMCALLquery()
@@ -803,23 +815,80 @@ static string HAMQTH_reply = "";
 
 #define HAMQTH_DEBUG 1
 #undef HAMQTH_DEBUG
-
+/*
+ * send:
+     https://www.hamqth.com/xml.php?u=username&p=password
+ * response:
+     <?xml version="1.0"?>
+     <HamQTH version="2.7" xmlns="https://www.hamqth.com">
+     <session>
+     <session_id>09b0ae90050be03c452ad235a1f2915ad684393c</session_id>
+     </session>
+     </HamQTH>
+ *
+ * send:
+     https://www.hamqth.com/xml.php?id=09b0ae90050be03c452ad235a1f2915ad684393c\
+             &callsign=ok7an&prg=YOUR_PROGRAM_NAME
+ * response:
+	<?xml version="1.0"?>
+	<HamQTH version="2.7" xmlns="https://www.hamqth.com">
+	<search> 
+	<callsign>ok7an</callsign> 
+	<nick>Petr</nick> 
+	<qth>Neratovice</qth> 
+	<country>Czech Republic</country>
+	<adif>503</adif>
+	<itu>28</itu> 
+	<cq>15</cq> 
+	<grid>jo70gg</grid> 
+	<adr_name>Petr Hlozek</adr_name> 
+	<adr_street1>17. listopadu 1065</adr_street1> 
+	<adr_city>Neratovice</adr_city> 
+	<adr_zip>27711</adr_zip> 
+	<adr_country>Czech Republic</adr_country> 
+	<adr_adif>503</adr_adif>
+	<district>GZL</district>
+	<lotw>Y</lotw> 
+	<qsl>Y</qsl> 
+	<qsldirect>Y</qsldirect> 
+	<eqsl>Y</eqsl> 
+	<email>petr@ok7an.com</email>
+	<jabber>petr@ok7an.com</jabber>
+	<skype>PetrHH</skype> 
+	<birth_year>1982</birth_year> 
+	<lic_year>1998</lic_year> 
+	<web>https://www.ok7an.com</web>
+	<latitude>50.07</latitude>
+	<longitude>14.42</longitude>
+	<continent>EU</continent>
+	<utc_offset>-1</utc_offset>
+	<picture>https://www.hamqth.com/userfiles/o/ok/ok7an/_profile/ok7an_nove.jpg</picture>
+	</search> 
+	</HamQTH>
+*/
 bool HAMQTH_get_session_id()
 {
-	string url = progdefaults.hamqthurl;
+	string url;
 	string retstr = "";
 	size_t p1 = string::npos;
 	size_t p2 = string::npos;
 
-	if (url.find("https") == 0) url.erase(4,1); // change to http
+	url.assign(progdefaults.hamqthurl);
+	if ((p1 = url.find("https")) != std::string::npos)
+		url.erase(p1+4,1);
+	if (url[url.length()-1] != '/') url += '/';
 	url.append("xml.php?u=").append(progdefaults.QRZusername);
 	url.append("&p=").append(progdefaults.QRZuserpassword);
 
 	HAMQTH_session_id.clear();
-	if (!fetch_http(url, retstr, 5.0)) {
-		LOG_ERROR("fetch_http( %s, retstr, 5.0) failed\n", url.c_str());
+
+	int ret = get_http(url, retstr, 5.0);
+
+	if (ret == 0 ) {
+		LOG_ERROR("get_http( %s, retstr, 5.0) failed\n", url.c_str());
 		return false;
 	}
+
 	LOG_VERBOSE("url: %s", url.c_str());
 	LOG_VERBOSE("reply: %s\n", retstr.c_str());
 	p1 = retstr.find("<error>");
@@ -862,8 +931,12 @@ void parse_HAMQTH_html(const string& htmlpage)
 	if ((p = htmlpage.find("<error>")) != string::npos) {
 		p += 7;
 		p1 = htmlpage.find("</error>", p);
-		if (p1 != string::npos)
-			lookup_notes.append(htmlpage.substr(p, p1 - p));
+		if (p1 != string::npos) {
+			std::string errstr = htmlpage.substr(p, p1 - p);
+			if (!announce) announce = new notify_dialog;
+			announce->notify(errstr.c_str(), 2.0);
+			REQ(show_notifier, announce);
+		}
 		return;
 	}
 	if ((p = htmlpage.find("<nick>")) != string::npos) {
@@ -963,8 +1036,9 @@ void parse_HAMQTH_html(const string& htmlpage)
 
 bool HAMQTHget(string& htmlpage)
 {
-	string url = progdefaults.hamqthurl;
+	string url;
 	bool ret;
+
 	if (HAMQTH_session_id.empty()) {
 		if (!HAMQTH_get_session_id()) {
 			LOG_WARN("HAMQTH session id failed!");
@@ -972,39 +1046,32 @@ bool HAMQTHget(string& htmlpage)
 			return false;
 		}
 	}
-	if (url.find("https") == 0) url.erase(4,1); // change to http
+
+	size_t p1;
+	url.assign(progdefaults.hamqthurl);
+	if ((p1 = url.find("https")) != std::string::npos)
+		url.erase(p1+4,1);
+	if (url[url.length()-1] != '/') url += '/';
 	url.append("xml.php?id=").append(HAMQTH_session_id);
 	url.append("&callsign=").append(callsign);
 	url.append("&prg=FLDIGI");
 
 	print_query("HamQTH", url);
 
-	ret = fetch_http(url, htmlpage, 5.0);
-	size_t p = htmlpage.find("<error>");
-	string tempstr = "";
-	if (p != string::npos ) {
-		size_t p1 = htmlpage.find("</error>", p);
-		if (p1 != string::npos) {
-			tempstr.clear();
-			p += 7;
-			tempstr.assign(htmlpage.substr(p, p1 - p));
-			if (tempstr.find("Session does not exist or expired") != string::npos) {
-				htmlpage.clear();
-				LOG_WARN("HAMQTH session id expired!");
-				HAMQTH_session_id.clear();
-				if (!HAMQTH_get_session_id()) {
-					LOG_WARN("HAMQTH get session id failed!");
-					lookup_notes = "Get session id failed!\n";
-					htmlpage.clear();
-					return false;
-				}
-				ret = fetch_http(url, htmlpage, 5.0);
-			} else {
-				LOG_WARN("HAMQTH error: %s", tempstr.c_str());
-				htmlpage.clear();
-				return false;
-			}
+	ret = get_http(url, htmlpage, 5.0);
+
+	size_t p = htmlpage.find("Session does not exist or expired");
+	if (p != string::npos) {
+		htmlpage.clear();
+		LOG_WARN("HAMQTH session id expired!");
+		HAMQTH_session_id.clear();
+		if (!HAMQTH_get_session_id()) {
+			LOG_WARN("HAMQTH get session id failed!");
+			lookup_notes = "Get session id failed!\n";
+			htmlpage.clear();
+			return false;
 		}
+		ret = get_http(url, htmlpage, 5.0);
 	}
 #ifdef HAMQTH_DEBUG
 	FILE *fetchit = fopen("fetchit.txt", "a");
@@ -1050,6 +1117,12 @@ void HAMQTH_DETAILS_query()
 	cb_mnuVisitURL(0, (void*)hamqth.c_str());
 }
 
+void CALLOOK_DETAILS_query()
+{
+	string hamcall = progdefaults.callookurl;
+	hamcall.append(callsign);
+	cb_mnuVisitURL(0, (void *)hamcall.c_str());
+}
 
 // ----------------------------------------------------------------------------
 
@@ -1096,6 +1169,9 @@ static void *LOOKUP_loop(void *args)
 			break;
 		case HAMQTHHTML :
 			HAMQTH_DETAILS_query();
+			break;
+		case CALLOOKHTML :
+			CALLOOK_DETAILS_query();
 			break;
 		case QRZWEB_EXIT:
 			return NULL;
@@ -1153,7 +1229,7 @@ void CALLSIGNquery()
 		}
 		break;
 	case CALLOOK:
-		LOG_INFO("Request sent to %s", progdefaults.hamcallurl.c_str());
+		LOG_INFO("Request sent to %s", progdefaults.callookurl.c_str());
 		break;
 	case HAMQTH:
 		LOG_INFO("Request sent to %s", progdefaults.hamqthurl.c_str());
@@ -1177,7 +1253,7 @@ void CALLSIGNquery()
 QsoHelper::QsoHelper(int the_mode)
 	: qso_rec( new cQsoRec )
 {
-	qso_rec->putField(MODE, mode_info[the_mode].adif_name );
+	qso_rec->putField(ADIF_MODE, mode_info[the_mode].adif_name );
 }
 
 /// This saves the new record to a file and must be run in the main thread.

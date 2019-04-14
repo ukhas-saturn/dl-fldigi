@@ -97,6 +97,7 @@
 #include "gettext.h"
 #include "notifydialog.h"
 #include "notify.h"
+#include "qrunner.h"
 
 using namespace std;
 
@@ -703,15 +704,21 @@ static void notify_table_reload(void)
 // spotter and notification functions
 ////////////////////////////////////////////////////////////////////////////////
 
+static notify_dialog *alert_window = 0;
+
 static void notify_goto_freq_cb(Fl_Widget* w, void* arg)
 {
 	const notify_t* n = static_cast<notify_t*>(arg);
+	if (progdefaults.rsid_mark) // mark current modem & freq
+		REQ(note_qrg, false, "\nBefore RSID: ", "\n",
+			active_modem->get_mode(), 0LL, active_modem->get_freq());
 	if (active_modem->get_mode() != n->mode)
 		init_modem_sync(n->mode);
 	qsy(n->rfreq, n->afreq);
 	if (n->event == NOTIFY_EVENT_RSID && btnRSID->value() &&
 	    progdefaults.rsid_auto_disable && progdefaults.rsid_notify_only)
 		toggleRSID();
+	w->parent()->hide();
 }
 
 static void notify_alert_window_cb(Fl_Widget* w, void* arg)
@@ -722,7 +729,10 @@ static void notify_alert_window_cb(Fl_Widget* w, void* arg)
 
 static void notify_show_alert(const notify_t& n, const char* msg)
 {
-	notify_dialog* alert_window = new notify_dialog;
+	if (!alert_window) alert_window = new notify_dialog;
+	if (alert_window->visible())
+		return;
+
 	Fl_Button* goto_freq = alert_window->make_button(120);
 	if (goto_freq) {
 		char label[32];
@@ -732,7 +742,8 @@ static void notify_show_alert(const notify_t& n, const char* msg)
 		alert_window->callback(notify_alert_window_cb, goto_freq->user_data());
 	}
 
-	alert_window->notify(msg, n.action.alert_timeout, true);
+	alert_window->notify(msg, n.action.alert_timeout);
+	REQ(show_notifier, alert_window);
 }
 
 struct replace_refs

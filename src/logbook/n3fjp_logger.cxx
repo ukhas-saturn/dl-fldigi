@@ -104,7 +104,7 @@ int  tracked_mode = -1;
 
 enum {
   FJP_NONE,
-  FJP_GENERIC,
+  FJP_ACL,			// Amateur Contact Log
   FJP_FD,			// ARRL Field Day
   FJP_WFD,			// ARRL Winter Field Day
   FJP_KD,			// ARRL Kids Day
@@ -153,7 +153,7 @@ struct N3FJP_LOGGER {
 	bool       in_state;
 } n3fjp_logger[] = {
 	{"No Contest", FJP_NONE, false},
-	{"Amateur Contact Log", FJP_NONE, false},
+	{"Amateur Contact Log", FJP_ACL, false},
 	{"Africa All-Mode International", FJP_AIDX, false},
 	{"ARRL Field Day", FJP_FD, false},
 	{"Winter FD", FJP_WFD, false},
@@ -379,14 +379,16 @@ void adjust_freq(string sfreq)
 //======================================================================
 //
 //======================================================================
+static notify_dialog *alert_window = 0;
 void set_connect_box()
 {
+	if (!alert_window) alert_window = new notify_dialog;
 	box_n3fjp_connected->color(
 		n3fjp_connected ? FL_DARK_GREEN : FL_BACKGROUND2_COLOR);
 	box_n3fjp_connected->redraw();
 	if (n3fjp_connected) {
-		notify_dialog* alert_window = new notify_dialog;
-		alert_window->notify(_("Connected to N3FJP logger"), 1.0, true);
+		alert_window->notify(_("Connected to N3FJP logger"), 1.0);
+		REQ(show_notifier, alert_window);
 	}
 	else {
 		progdefaults.CONTESTnotes = "";
@@ -2013,7 +2015,7 @@ static void check_log_data()
 		case FJP_QP6:
 			n3fjp_check_QP6();
 			break;
-		case FJP_GENERIC:
+		case FJP_ACL:
 		case FJP_NONE:
 		default:
 			n3fjp_check_GENERIC();
@@ -2142,7 +2144,7 @@ static void send_log_data()
 			case FJP_QP6:
 				n3fjp_send_QP6();
 				break;
-			case FJP_GENERIC:
+			case FJP_ACL:
 			default:
 				n3fjp_send_GENERIC();
 				break;
@@ -2160,9 +2162,9 @@ static void enter_log_data()
 			string other = "XCVR:";
 			char szfreq[6];
 			snprintf(szfreq, sizeof(szfreq), "%d", (int)active_modem->get_txfreq());
-			other.append(ModeIsLSB(rec.getField(MODE)) ? "LSB" : "USB");
+			other.append(ModeIsLSB(rec.getField(ADIF_MODE)) ? "LSB" : "USB");
 			other.append(" MODE:");
-			other.append(strip(rec.getField(MODE)));
+			other.append(strip(rec.getField(ADIF_MODE)));
 			other.append(" WF:");
 			other.append(szfreq);
 			send_control("OTHER8", other);
@@ -2506,7 +2508,7 @@ static bool connect_to_n3fjp_server()
 
 		n3fjp_contest = FJP_NONE;
 
-		n = info.find("N3FJP's");
+		n = info.find("N3FJP's ");
 		if (n != std::string::npos) info.erase(n, 8);
 
 		if (info.find("Winter") != std::string::npos)
@@ -2515,7 +2517,7 @@ static bool connect_to_n3fjp_server()
 		n3fjp_print(std::string("Info: ").append(info));
 
 		for (n = 0; n < sizeof(n3fjp_logger) / sizeof(*n3fjp_logger); n++) {
-			if (info.find(n3fjp_logger[n].program) == 0) {//!= string::npos) {
+			if (info.find(n3fjp_logger[n].program) == 0) {
 				n3fjp_contest = n3fjp_logger[n].contest;
 				n3fjp_in_state = n3fjp_logger[n].in_state;
 				logger_nbr = n;
@@ -2593,7 +2595,7 @@ void n3fjp_start()
 						 "tcp") );
 		if (!n3fjp_socket) return;
 
-		n3fjp_socket->set_timeout(0.05);
+		n3fjp_socket->set_timeout(0.20);//0.05);
 		n3fjp_socket->set_nonblocking(true);
 
 		result.str("");

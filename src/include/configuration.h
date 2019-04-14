@@ -1025,7 +1025,7 @@
               "http://www.qrz.com/")                                                    \
         ELEM_(std::string, callookurl, "CALLOOKURL",                                    \
               "web address of callook",                                                 \
-              "http://callook.info/")                                                   \
+              "https://callook.info/")                                                  \
         ELEM_(int, QRZWEB, "QRZWEBTYPE",                                                \
               "Callsign browser query type.  Values are as follows:\n"                  \
               "  0: none; 1: QRZ web browser; 2: HamCall web browser\n"                 \
@@ -1048,6 +1048,9 @@
               true)                                                                     \
         ELEM_(bool, QRZchanged, "", "",  false)                                         \
         /* eQSL */                                                                      \
+        ELEM_(std::string, eqsl_www_url, "EQSL_url",                                    \
+              "eQSL web site",                                                          \
+             "http://www.eqsl.cc/qslcard/importADIF.cfm?ADIFdata=")                     \
         ELEM_(std::string, eqsl_id, "EQSL_ID",                                          \
               "eQSL login id",                                                          \
               "")                                                                       \
@@ -1066,6 +1069,9 @@
         ELEM_(bool, eqsl_datetime_off, "EQSL_DATETIME_OFF",                             \
               "Send logbook date/time off vice date on (default)",                      \
               false)                                                                    \
+        ELEM_(bool, eqsl_show_delivery, "EQSL_SHOW_DELIVERY",                           \
+              "Show timed delivery message for successful eQSL upload",                 \
+              true)                                                                     \
         /* tqsl automatic log submission */                                             \
         ELEM_(bool, submit_lotw, "SUBMIT_LOTW",                                         \
               "Send adif record to LoTW",                                               \
@@ -1081,6 +1087,9 @@
               "")                                                                       \
         ELEM_(bool, submit_lotw_password, "SUBMIT_LOTW_PASSWORD",                       \
               "Send -p <password> with each upload ",                                   \
+              true)                                                                     \
+        ELEM_(bool, lotw_show_delivery, "LOTW_SHOW_DELIVERY",                           \
+              "Show timed delivery message for successful LoTW upload",                 \
               true)                                                                     \
         ELEM_(std::string, lotw_location, "LOTW_LOCATION",                              \
               "Tqsl station location for uploading records",                            \
@@ -1137,7 +1146,7 @@
         ELEM_(bool, flrig_keys_modem, "FLRIG_KEYS_MODEM",                               \
               "PTT change at flrig changes Rx/Tx state\n"                               \
               "set to false if multple instance of fldigi used with single flrig",      \
-              true)                                                                     \
+              false)                                                                    \
         ELEM_(bool, fldigi_client_to_flrig, "CLIENT_TO_FLRIG",                          \
               "True if flrig xmlrpc server is used for xcvr control",                   \
               false)                                                                    \

@@ -760,11 +760,11 @@ void delayed_startup(void *)
 
 #if USE_PORTAUDIO
 	LOG_INFO("%s", str_pa_devices.c_str());
-#endif
 	try {
 		audio_alert = new Caudio_alert;
 	} catch (...) {
 	}
+#endif
 }
 
 int main(int argc, char ** argv)
@@ -773,7 +773,7 @@ int main(int argc, char ** argv)
 	program_start_time = time(0);
 
 	// ztimer must be run by FLTK's timeout handler
-	TOD_init(); // initialize time of day thread
+//	TOD_init(); // initialize time of day thread
 //	ztimer((void*)true);
 
 	active_modem = new NULLMODEM;
@@ -1032,6 +1032,7 @@ int main(int argc, char ** argv)
 		cerr << error << '\n';
 		debug::stop();
 	}
+	TOD_init(); // initialize time of day thread
 
 	LOG_INFO("appname: %s", appname.c_str());
 

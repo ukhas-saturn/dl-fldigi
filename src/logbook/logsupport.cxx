@@ -411,6 +411,9 @@ void cb_mnuNewLogbook(Fl_Menu_* m, void* d){
 	progdefaults.logbookfilename = logbook_filename = temp;
 
 	dlgLogbook->label(fl_filename_name(logbook_filename.c_str()));
+	txtLogFile->value(logbook_filename.c_str());
+	txtLogFile->redraw();
+
 	progdefaults.changed = true;
 	qsodb.deleteRecs();
 	dxcc_entity_cache_clear();
@@ -456,6 +459,10 @@ void cb_mnuOpenLogbook(Fl_Menu_* m, void* d)
 
 	adifFile.readFile (logbook_filename.c_str(), &qsodb);
 	dlgLogbook->label(fl_filename_name(logbook_filename.c_str()));
+
+	txtLogFile->value(logbook_filename.c_str());
+	txtLogFile->redraw();
+
 	qsodb.isdirty(0);
 
 }
@@ -485,6 +492,8 @@ void cb_mnuSaveLogbook(Fl_Menu_*m, void* d) {
 	progdefaults.changed = true;
 
 	dlgLogbook->label(fl_filename_name(logbook_filename.c_str()));
+	txtLogFile->value(logbook_filename.c_str());
+	txtLogFile->redraw();
 
 //	cQsoDb::reverse = false;
 //	qsodb.SortByDate(progdefaults.sort_date_time_off);
@@ -909,13 +918,15 @@ abort:
 	return NULL;
 }
 
+static notify_dialog *alert_window = 0;
 void cb_mnuMergeADIF_log(Fl_Menu_* m, void* d) {
 
 	ENSURE_THREAD(FLMAIN_TID);
 
 	if (MERGE_thread) {
-		notify_dialog* alert_window = new notify_dialog;
-		alert_window->notify(_("Database merger in progress"), 5.0, true);
+		if (!alert_window) alert_window = new notify_dialog;
+		alert_window->notify(_("Database merger in progress"), 5.0);
+		REQ(show_notifier, alert_window);
 		return;
 	}
 
@@ -996,7 +1007,7 @@ void verify_lotw(void *)
 							<< lrec->getField(TIME_ON) << ", "
 							<< lrec->getField(FREQ) << ", "
 							<< lrec->getField(BAND) << ", "
-							<< lrec->getField(MODE) << "\n";
+							<< lrec->getField(ADIF_MODE) << "\n";
 			}
 		}
 		report_file.close();
@@ -1014,8 +1025,9 @@ void verify_lotw(void *)
 			LOG_INFO("%d records verified", nverified);
 			LOG_INFO("%d records unverified", unverified);
 		}
-		notify_dialog* alert_window = new notify_dialog;
-		alert_window->notify(ss_note.str().c_str(), 15.0, true);
+		if (!alert_window) alert_window = new notify_dialog;
+		alert_window->notify(ss_note.str().c_str(), 15.0);
+		REQ(show_notifier, alert_window);
 	}
 	delete lotw_db;
 }
@@ -1080,8 +1092,9 @@ Download from ARRL's LoTW page after logging in at:\n\n\
 https://lotw.arrl.org/lotwuser/default\n\n\
 Store the report file to the fldigi LOTW folder,\n\n\
 naming the file 'lotwreport.adi'");
-		notify_dialog* alert_window = new notify_dialog;
-		alert_window->notify(alert.c_str(), 20, true);
+		if (!alert_window) alert_window = new notify_dialog;
+		alert_window->notify(alert.c_str(), 20);
+		REQ(show_notifier, alert_window);
 		return;
 	}
 //	lotw_download_name = p;
@@ -1140,8 +1153,8 @@ void cb_Export_log() {
 			rec->getField((export_to == LOTW ? TIME_ON : TIME_OFF) ),
 			rec->getField(CALL),
 			szfreq(rec->getField(FREQ)),
-			adif2export(rec->getField(MODE)).c_str(),
-			adif2submode(rec->getField(MODE)).c_str()
+			adif2export(rec->getField(ADIF_MODE)).c_str(),
+			adif2submode(rec->getField(ADIF_MODE)).c_str()
 		);
 		chkExportBrowser->add(line);
 	}
@@ -1374,6 +1387,9 @@ void DupCheck()
 
 cQsoRec* SearchLog(const char *callsign)
 {
+	if (progdefaults.xml_logbook)
+		return search_fllog(callsign);
+
 	size_t len = strlen(callsign);
 	char* re = new char[len + 3];
 	snprintf(re, len + 3, "^%s$", callsign);
@@ -1507,7 +1523,17 @@ void cb_btnRetrieve(Fl_Button* b, void* d)
 	const cQsoRec *qsoPtr = qsodb.getRec(editNbr);
 	inpCall->value(qsoPtr->getField(CALL));
 	inpName->value (qsoPtr->getField(NAME));
-	inpTimeOn->value (inpTimeOff->value());
+
+	sDate_on = sDate_off = zdate();
+	sTime_on = sTime_off = ztime();
+
+	inpTimeOn->value(inpTimeOff->value());
+	inpTimeOn1->value(inpTimeOff->value());
+	inpTimeOn2->value(inpTimeOff->value());
+	inpTimeOn3->value(inpTimeOff->value());
+	inpTimeOn4->value(inpTimeOff->value());
+	inpTimeOn5->value(inpTimeOff->value());
+
 	inpState->value (qsoPtr->getField(STATE));
 	inpState->position (0);
 	inpCounty->value (qsoPtr->getField(CNTY));
@@ -1599,7 +1625,7 @@ void saveRecord() {
 
 	rec.putField(FREQ, inpFreq_log->value());
 	rec.putField(BAND, inpBand_log->value());
-	rec.putField(MODE, inpMode_log->value());
+	rec.putField(ADIF_MODE, inpMode_log->value());
 	rec.putField(QTH, inpQth_log->value());
 	rec.putField(STATE, inpState_log->value());
 	rec.putField(VE_PROV, inpVE_Prov_log->value());
@@ -1716,7 +1742,7 @@ void updateRecord() {
 
 	rec.putField(FREQ, inpFreq_log->value());
 	rec.putField(BAND, inpBand_log->value());
-	rec.putField(MODE, inpMode_log->value());
+	rec.putField(ADIF_MODE, inpMode_log->value());
 	rec.putField(QTH, inpQth_log->value());
 	rec.putField(STATE, inpState_log->value());
 	rec.putField(VE_PROV, inpVE_Prov_log->value());
@@ -1823,7 +1849,7 @@ void EditRecord( int i )
 	inpRstS_log->value (editQSO->getField(RST_SENT));
 	inpFreq_log->value (editQSO->getField(FREQ));
 	inpBand_log->value (editQSO->getField(BAND));
-	inpMode_log->value (editQSO->getField(MODE));
+	inpMode_log->value (editQSO->getField(ADIF_MODE));
 	inpState_log->value (editQSO->getField(STATE));
 	inpVE_Prov_log->value (editQSO->getField(VE_PROV));
 	inpCountry_log->value (editQSO->getField(COUNTRY));
@@ -1986,7 +2012,7 @@ void addBrowserRow(cQsoRec *rec, int nbr)
 		rec->getField(CALL),
 		rec->getField(NAME),
 		rec->getField(FREQ),
-		rec->getField(MODE),
+		rec->getField(ADIF_MODE),
 		sNbr);
 }
 
@@ -2145,7 +2171,7 @@ void cb_Export_Cabrillo(Fl_Menu_* m, void* d) {
  			time4(rec->getField(TIME_OFF)),
  			rec->getField(CALL),
 			szfreq(rec->getField(FREQ)),
-			rec->getField(MODE) );
+			adif2export(rec->getField(ADIF_MODE)).c_str() );
         chkCabBrowser->add(line);
 	}
 	wCabrillo->show();
@@ -2171,7 +2197,7 @@ void cabrillo_append_qso (FILE *fp, cQsoRec *rec)
 	}
 
 	if (btnCabMode->value()) {
-		mode = rec->getField(MODE);
+		mode = adif2export(rec->getField(ADIF_MODE));
 		if (mode.compare("USB") == 0 || mode.compare("LSB") == 0 ||
 			mode.compare("SSB") == 0 || mode.compare("PH") == 0 ) mode = "PH";
 		else if (mode.compare("FM") == 0 || mode.compare("CW") == 0 ) ;

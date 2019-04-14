@@ -40,6 +40,8 @@
 #include "logbook.h"
 #include "logger.h"
 #include "locator.h"
+#include "counties.h"
+#include "confdialog.h"
 #include "fl_digi.h"
 #include "adif_io.h"
 #include "modem.h"
@@ -107,6 +109,33 @@ string get_field(string &adifline, int field)
 	size_t pos2 = adifline.find("<", pos1);
 	fld = adifline.substr(pos1, pos2 - pos1);
 	return fld;
+}
+
+cQsoRec* search_fllog(const char *callsign)
+{
+	cQsoRec *rec = new cQsoRec;
+
+	XmlRpcValue oneArg, result;
+	if (!test_connection()) {
+		LOG_INFO("%s","Logbook server down!");
+		progdefaults.xml_logbook = false;
+		activate_log_menus(true);
+		start_logbook();
+		return (cQsoRec *)0;
+	}
+	oneArg[0] = callsign;
+	if (log_client->execute("log.get_record", oneArg, result)) {
+		string adifline = std::string(result);
+
+		rec->putField(NAME, get_field(adifline, NAME).c_str());
+		rec->putField(QTH, get_field(adifline, QTH).c_str());
+		rec->putField(QSO_DATE, get_field(adifline, QSO_DATE).c_str());
+		rec->putField(BAND, get_field(adifline, BAND).c_str());
+		rec->putField(ADIF_MODE, get_field(adifline, ADIF_MODE).c_str());
+
+		return rec;
+	}
+	return (cQsoRec *)0;
 }
 
 bool xml_get_record(const char *callsign)
@@ -213,7 +242,7 @@ void xml_add_record()
 		inpFreq_log->value(Mhz);
 		adif_str(FREQ, Mhz);
 	}
-	adif_str(MODE, mode_info[active_modem->get_mode()].adif_name);
+	adif_str(ADIF_MODE, mode_info[active_modem->get_mode()].adif_name);
 	adif_str(RST_SENT, inpRstOut->value());
 	adif_str(RST_RCVD, inpRstIn->value());
 	adif_str(TX_PWR, progdefaults.mytxpower.c_str());
@@ -232,6 +261,7 @@ void xml_add_record()
 	adif_str(NOTES, inpNotes->value());
 	adif_str(CLASS, inpClass->value());
 	adif_str(ARRL_SECT, inpSection->value());
+	adif_str(CQZ, inp_CQzone->value());
 // these fields will always be blank unless they are added to the main
 // QSO log area.
 // need to add the remaining fields
@@ -258,9 +288,15 @@ void xml_add_record()
 	adif_str(SCOUTS,  progdefaults.my_JOTA_scout.c_str());
 	adif_str(SCOUTR, inp_JOTA_scout->value());
 
-	adif.append("<eor>");
+	adif_str(OP_CALL, progdefaults.operCall.c_str());
+	adif_str(STA_CALL, progdefaults.myCall.c_str());
+	adif_str(MY_CITY,
+		std::string(progdefaults.myQth).
+		append(", ").
+		append(inp_QP_state_short->value()).c_str());
+	adif_str(MY_GRID, progdefaults.myLocator.c_str());
 
-std::cout << adif << std::endl;
+	adif.append("<eor>");
 
 // send it to the server
 	XmlRpcValue oneArg, result;
@@ -276,7 +312,7 @@ std::cout << adif << std::endl;
 	rec.putField(TIME_ON, inpTimeOn->value());
 	rec.putField(TIME_OFF, ztime());
 	rec.putField(FREQ, Mhz);
-	rec.putField(MODE, mode_info[active_modem->get_mode()].adif_name);
+	rec.putField(ADIF_MODE, mode_info[active_modem->get_mode()].adif_name);
 	rec.putField(QTH, inpQth->value());
 	rec.putField(STATE, inpState->value());
 	rec.putField(VE_PROV, inpVEprov->value());
@@ -319,6 +355,9 @@ std::cout << adif << std::endl;
 	rec.putField(SCOUTS,  progdefaults.my_JOTA_scout.c_str());
 	rec.putField(SCOUTR, inp_JOTA_scout->value());
 
+	rec.putField(OP_CALL, progdefaults.operCall.c_str());
+	rec.putField(STA_CALL, progdefaults.myCall.c_str());
+
 	submit_record(rec);
 
 }
@@ -348,10 +387,36 @@ int xml_check_dup()
 		string res = std::string(result);
 		if (res == "true")
 			dup_test = 1;
+		else if (res == "possible")
+			dup_test = 2;
 	}
 	return dup_test;
 }
 
+void xml_update_eqsl()
+{
+	adif.erase();
+	adif_str(EQSLSDATE, sDate_on.c_str());
+	adif.append("<EOR>");
+
+	XmlRpcValue oneArg, result;
+	oneArg[0] = adif.c_str();
+std::cout << "xml_update_eqsl() " << adif << std::endl;
+
+	log_client->execute("log.update_record", oneArg, result);
+}
+
+void xml_update_lotw()
+{
+	adif.erase();
+	adif_str(LOTWSDATE, sDate_on.c_str());
+	adif.append("<EOR>");
+
+	XmlRpcValue oneArg, result;
+	oneArg[0] = adif.c_str();
+
+	log_client->execute("log.update_record", oneArg, result);
+}
 
 void connect_to_log_server(void *)
 {
@@ -374,7 +439,6 @@ void connect_to_log_server(void *)
 			start_logbook();
 		}
 	} else {
-		close_logbook();
 		activate_log_menus(true);
 		start_logbook();
 	}

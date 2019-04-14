@@ -2739,6 +2739,7 @@ void cb_logfile(Fl_Widget* w, void*)
 void cb_log_server(Fl_Widget* w, void*)
 {
 	progdefaults.xml_logbook = reinterpret_cast<Fl_Menu_*>(w)->mvalue()->value();
+	close_logbook();
 	connect_to_log_server();
 }
 
@@ -3002,6 +3003,7 @@ inline int version_check(string v1, string v2) {
 	return 0;
 }
 
+//static notify_dialog *latest_dialog = 0;
 void cb_mnuCheckUpdate(Fl_Widget *, void *)
 {
 	dl_fldigi::update::check();
@@ -3012,7 +3014,8 @@ void cb_mnuCheckUpdate(Fl_Widget *, void *)
 
 	put_status(_("Checking for updates..."));
 
-	int ret = fetch_http_gui(url, reply, 20.0);
+//	int ret = get_http_gui(url, reply, 20.0);
+	int ret = get_http(url, reply, 5.0);
 	if (!ret) {
 		put_status(_("Update site not available"), 10);
 		return;
@@ -3025,13 +3028,18 @@ void cb_mnuCheckUpdate(Fl_Widget *, void *)
 
 	int is_ok = version_check(string(PACKAGE_VERSION), version_str);
 
-	if (is_ok == 0)
-		fl_message2(_("You are running the latest version"));
-	else if (is_ok > 0)
-		fl_message2(_("\
-You are probably running an alpha version, %s\n\
-\nPosted version: %s"), PACKAGE_VERSION, version_str.c_str());
-	else
+	if (!latest_dialog) latest_dialog = new notify_dialog;
+	if (is_ok == 0) {
+		latest_dialog->notify(_("You are running the latest version"), 5.0);
+		REQ(show_notifier, latest_dialog);
+	} else if (is_ok > 0) {
+		std::string probable;
+		probable.assign(_("You are probably running an alpha version "));
+		probable.append( PACKAGE_VERSION ).append(_("\nPosted version: "));
+		probable.append(version_str);
+		latest_dialog->notify(probable.c_str(), 5.0);
+		REQ(show_notifier, latest_dialog);
+	} else
 		fl_message2(_("Version %s is available at Source Forge"),
 				  version_str.c_str());
 #endif
@@ -3884,6 +3892,16 @@ if (bHAB) return;
 	inpCall3->value(new_call.c_str());
 	inpCall4->value(new_call.c_str());
 
+	sDate_on = sDate_off = zdate();
+	sTime_on = sTime_off = ztime();
+
+	inpTimeOn->value(inpTimeOff->value());
+	inpTimeOn1->value(inpTimeOff->value());
+	inpTimeOn2->value(inpTimeOff->value());
+	inpTimeOn3->value(inpTimeOff->value());
+	inpTimeOn4->value(inpTimeOff->value());
+	inpTimeOn5->value(inpTimeOff->value());
+
 	if (progStatus.timer && (Fl::event() != FL_HIDE))
 		stopMacroTimer();
 
@@ -3915,16 +3933,6 @@ if (bHAB) return;
 
 	old_call = new_call;
 	oktoclear = false;
-
-	sDate_on = sDate_off = zdate();
-	sTime_on = sTime_off = ztime();
-
-	inpTimeOn->value(inpTimeOff->value());
-	inpTimeOn1->value(inpTimeOff->value());
-	inpTimeOn2->value(inpTimeOff->value());
-	inpTimeOn3->value(inpTimeOff->value());
-	inpTimeOn4->value(inpTimeOff->value());
-	inpTimeOn5->value(inpTimeOff->value());
 
 	SearchLastQSO(inpCall->value());
 
@@ -4320,9 +4328,7 @@ void cb_log(Fl_Widget* w, void*)
 	}
 
 	if (progdefaults.EnableDupCheck || FD_logged_on) {
-std::cout << "cb_log dup check ";
 		DupCheck();
-std::cout << std::endl;
 	}
 
 	if (Fl::event() == FL_KEYBOARD) {
@@ -6704,6 +6710,9 @@ void update_main_title()
 		if (progdefaults.logging == LOG_SQSO) {
 			buf.append(" : ").append(QSOparties.qso_parties[progdefaults.SQSOcontest].contest);
 		}
+		if (progdefaults.logging == 0 && n3fjp_connected) {
+			buf.append(" : N3FJP Amateur Contact Log");
+		}
 	}
 	if (fl_digi_main) {
 		fl_digi_main->copy_label(buf.c_str());
@@ -6779,7 +6788,8 @@ void cb_qso_inpAct(Fl_Widget*, void*)
 		url.append("&?grid=").append(progdefaults.myLocator, 0, 2);
 
 	string::size_type i;
-	if (!fetch_http_gui(url, data, 10.0) ||
+	if (!get_http(url, data, 10.0) ||
+//	if (!get_http_gui(url, data, 10.0) ||
 		(i = data.find("\r\n\r\n")) == string::npos) {
 		LOG_ERROR("Error while fetching \"%s\": %s", url.c_str(), data.c_str());
 		return;
@@ -7934,19 +7944,12 @@ _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
 {_("&Help"), 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
-#ifndef NDEBUG
-// settle the gmfsk vs fldigi argument once and for all
-{ icons::make_icon_label(_("Create sunspots"), weather_clear_icon), 0, cb_mnuFun, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-#endif
 { icons::make_icon_label(_("Beginners' Guide"), start_here_icon), 0, cb_mnuBeginnersURL, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Online documentation..."), help_browser_icon), 0, cb_mnuVisitURL, (void *)PACKAGE_DOCS, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Fldigi web site..."), net_icon), 0, cb_mnuVisitURL, (void *)PACKAGE_HOME, 0, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Reception reports..."), pskr_icon), 0, cb_mnuVisitPSKRep, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Online documentation..."), help_browser_icon), 0, cb_mnuOnLineDOCS, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Command line options"), utilities_terminal_icon), 0, cb_mnuCmdLineHelp, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Audio device info"), audio_card_icon), 0, cb_mnuAudioInfo, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Build info"), executable_icon), 0, cb_mnuBuildInfo, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Event log"), dialog_information_icon), 0, cb_mnuDebug, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Check for updates..."), system_software_update_icon), 0, cb_mnuCheckUpdate, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("&About"), help_about_icon), 'a', cb_mnuAboutURL, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 
@@ -10197,8 +10200,6 @@ void qsy(long long rfc, int fmid)
 	else if (progdefaults.chkUSEHAMLIBis)
 		REQ(hamlib_set_qsy, rfc);
 #endif
-	else if (progdefaults.chkUSEXMLRPCis)
-		REQ(xmlrpc_set_qsy, rfc);
 	else
 		qso_selectFreq((long int) rfc, fmid);
 
@@ -10271,7 +10272,6 @@ void * set_xmtrcv_button_false(void)
 void * set_xmtrcv_selection_color_transmitting(void)
 {
 	wf->xmtrcv_selection_color(progdefaults.XmtColor);
-	wf->redraw();
 	return (void *)0;
 }
 
@@ -10285,25 +10285,21 @@ void * set_xmtrcv_selection_color_pending(void)
 void xmtrcv_selection_color(Fl_Color clr)
 {
 	wf->xmtrcv_selection_color(clr);
-	wf->redraw();
 }
 
 void xmtrcv_selection_color()
 {
 	wf->xmtrcv_selection_color(progdefaults.XmtColor);
-	wf->redraw();
 }
 
 void rev_selection_color()
 {
 	wf->reverse_selection_color(progdefaults.RevColor);
-	wf->redraw();
 }
 
 void xmtlock_selection_color()
 {
 	wf->xmtlock_selection_color(progdefaults.LkColor);
-	wf->redraw();
 }
 
 void sql_selection_color()

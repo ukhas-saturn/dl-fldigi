@@ -114,7 +114,7 @@ bool	rx_only = false;
 // Draws the xmit data one WFBLOCKSIZE-sized block at a time
 static void trx_xmit_wfall_draw(int samplerate)
 {
-	ENSURE_THREAD(FLMAIN_TID);
+	ENSURE_THREAD(TRX_TID);
 
 	ringbuffer<double>::vector_type rv[2];
 	rv[0].buf = 0;
@@ -755,6 +755,7 @@ void trx_reset_loop()
 			}
 		}
 		unsigned long tm = zmsec() - tm1;
+		if (tm < 0) tm = 0;
 		if (i == 10) {
 			if (RXscard) delete RXscard;
 			if (TXscard) delete TXscard;

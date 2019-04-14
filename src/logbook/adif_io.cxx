@@ -57,7 +57,7 @@ FIELD fields[] = {
 //  TYPE,          FSIZE,  NAME,              WIDGET
 	{FREQ,         12,    "FREQ",             &btnSelectFreq},      // QSO frequency in Mhz
 	{CALL,         30,    "CALL",             &btnSelectCall},      // contacted stations CALLSIGN
-	{MODE,         20,    "MODE",             &btnSelectMode},      // QSO mode
+	{ADIF_MODE,    20,    "MODE",             &btnSelectMode},      // QSO mode
 	{SUBMODE,      20,    "SUBMODE",          NULL},                // QSO submode
 	{NAME,         80,    "NAME",             &btnSelectName},      // contacted operators NAME
 	{QSO_DATE,     8,     "QSO_DATE",         &btnSelectQSOdateOn}, // QSO data
@@ -74,11 +74,11 @@ FIELD fields[] = {
 	{QSLRDATE,     8,     "QSLRDATE",         &btnSelectQSLrcvd},   // QSL received date
 	{QSLSDATE,     8,     "QSLSDATE",         &btnSelectQSLsent},   // QSL sent date
 
-	{EQSLRDATE,    8,     "EQSLRDATE",        NULL},                // EQSL received date
-	{EQSLSDATE,    8,     "EQSLSDATE",        NULL},                // EQSL sent date
+	{EQSLRDATE,    8,     "EQSLRDATE",        &btnSelecteQSLrcvd},  // EQSL received date
+	{EQSLSDATE,    8,     "EQSLSDATE",        &btnSelecteQSLsent},  // EQSL sent date
 
-	{LOTWRDATE,    8,     "LOTWRDATE",        NULL},                // EQSL received date
-	{LOTWSDATE,    8,     "LOTWSDATE",        NULL},                // EQSL sent date
+	{LOTWRDATE,    8,     "LOTWRDATE",        &btnSelectLOTWrcvd},  // LOTW received date
+	{LOTWSDATE,    8,     "LOTWSDATE",        &btnSelectLOTWsent},  // LOTW sent date
 
 	{GRIDSQUARE,   8,     "GRIDSQUARE",       &btnSelectLOC},       // contacted stations Maidenhead Grid Square
 	{BAND,         8,     "BAND",             &btnSelectBand},      // QSO band
@@ -442,7 +442,7 @@ int cAdifIO::writeFile (const char *fname, cQsoDb *db)
 						field_type = fields[j].type;
 						sFld = rec->getField(field_type);
 						sName = fields[j].name;
-						if (field_type == MODE  && !sFld.empty()) {
+						if (field_type == ADIF_MODE  && !sFld.empty()) {
 							fprintf(adiFile, adifmt,
 								"MODE",
 								adif2export(sFld).length());
@@ -622,10 +622,12 @@ void cAdifIO::do_writelog()
 	cQsoRec *rec;
 
 	records.clear();
+
 	for (int i = 0; i < adifdb->nbrRecs(); i++) {
 		rec = adifdb->getRec(i);
 		records.append(adif_record(rec));
-		adifdb->qsoUpdRec(i, rec);
+		if (wrdb)
+			adifdb->qsoUpdRec(i, rec);
 	}
 	nrecs = adifdb->nbrRecs();
 
