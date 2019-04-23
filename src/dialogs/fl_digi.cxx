@@ -3003,7 +3003,7 @@ inline int version_check(string v1, string v2) {
 	return 0;
 }
 
-static notify_dialog *latest_dialog = 0;
+//static notify_dialog *latest_dialog = 0;
 void cb_mnuCheckUpdate(Fl_Widget *, void *)
 {
 	dl_fldigi::update::check();
@@ -7952,7 +7952,6 @@ _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Audio device info"), audio_card_icon), 0, cb_mnuAudioInfo, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Build info"), executable_icon), 0, cb_mnuBuildInfo, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Event log"), dialog_information_icon), 0, cb_mnuDebug, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
-{ icons::make_icon_label(_("Check for updates..."), system_software_update_icon), 0, cb_mnuCheckUpdate, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("&About"), help_about_icon), 'a', cb_mnuAboutURL, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 {0,0,0,0,0,0,0,0,0},
 

@@ -15,13 +15,13 @@ endif
 # The BUILD_* variables are defined in build.m4
 dl_fldigi_CPPFLAGS = -DBUILD_FLDIGI -DLOCALEDIR=\"$(localedir)\" @FLDIGI_BUILD_CPPFLAGS@ -DPKGDATADIR=\"$(pkgdatadir)\"
 dl_fldigi_CXXFLAGS = @FLDIGI_BUILD_CXXFLAGS@
-dl_fldigi_CFLAGS = @FLDIGI_CFLAGS@
+dl_fldigi_CFLAGS = @FLDIGI_BUILD_CFLAGS@
 dl_fldigi_LDFLAGS = @FLDIGI_BUILD_LDFLAGS@
 dl_fldigi_LDADD = -lm -lcrypto -lstdc++ @FLDIGI_BUILD_LDADD@
 
 flarq_CPPFLAGS = -DBUILD_FLARQ -DLOCALEDIR=\"$(localedir)\" @FLARQ_BUILD_CPPFLAGS@
 flarq_CXXFLAGS = @FLARQ_BUILD_CXXFLAGS@
-flarq_CFLAGS = $(fldigi_CFLAGS)
+flarq_CFLAGS = @FLDIGI_BUILD_CFLAGS@
 flarq_LDFLAGS = @FLARQ_BUILD_LDFLAGS@
 flarq_LDADD = @FLARQ_BUILD_LDADD@
 
@@ -580,8 +580,6 @@ dl_fldigi_SOURCES += \
 	irrxml/irrTypes.h \
 	irrxml/irrXML.cpp \
 	irrxml/irrXML.h \
-	libtiniconv/tiniconv.c \
-	libtiniconv/tiniconv_desc.c \
 	logbook/adif_io.cxx \
 	logbook/calendar.cxx \
 	logbook/contest.cxx \

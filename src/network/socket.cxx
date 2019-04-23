@@ -666,7 +666,9 @@ address.get_str(info).c_str(),
 (info->ai_socktype == SOCK_STREAM ? "stream" : "dgram"),
 (info->ai_protocol == IPPROTO_TCP ? "tcp" :
 (info->ai_protocol == IPPROTO_UDP ? "udp" : "unknown protocol")));
-		if (info->ai_family == AF_INET) ainfo = info;
+		if ((info->ai_family == AF_INET)
+		    || (ainfo == (addr_info_t *)0))
+			ainfo = info;
 	}
 
 	if (ainfo == (addr_info_t *)0) {
