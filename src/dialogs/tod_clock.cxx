@@ -55,6 +55,7 @@
 #include "timeops.h"
 
 #include "timeops.h"
+#include "nanoIO.h"
 
 LOG_FILE_SOURCE(debug::LOG_FD);
 
@@ -196,7 +197,8 @@ void init_ztime()
 		ztbuf[8] = '\0';
 }
 
-void ztimer(void *)
+//void ztimer(void *)
+static void ztimer()
 {
 	struct tm tm;
 	time_t t_temp;
@@ -225,7 +227,8 @@ void ztimer(void *)
 // Use TOD loop for periodically redrawing the waterfall
 //======================================================================
 extern pthread_mutex_t draw_mutex;
-void wf_update(void *)
+//void wf_update(void *)
+void wf_update()
 {
 	{
 		guard_lock dlock(&draw_mutex);
@@ -244,6 +247,7 @@ void *TOD_loop(void *args)
 
 #define LOOP1 8  // update waterfall every 80 msec
 #define LOOP2 5  // update clock every 50 msec
+#define LOOP3 50 // update nanoIO pot reading every 500 msec
 	int loop_nbr = 1;
 	while(1) {
 
@@ -259,13 +263,17 @@ void *TOD_loop(void *args)
 			if (loop_nbr % LOOP2 == 0) {
 				guard_lock tmlock(&time_mutex);
 				gettimeofday(&now_val, NULL);
-				Fl::awake(ztimer);
+				REQ(ztimer);
+//				Fl::awake(ztimer);
 			}
 		}
 		if (loop_nbr % LOOP1 == 0)
-			Fl::awake(wf_update);
+			REQ(wf_update);
+//			Fl::awake(wf_update);
+		if (loop_nbr % LOOP3 == 0)
+			REQ(nanoIO_read_pot);
 
-		if (loop_nbr == (LOOP1 * LOOP2)) loop_nbr = 0;
+		if (loop_nbr == (LOOP1 * LOOP2 * LOOP3)) loop_nbr = 0;
 		loop_nbr++;
 
 		MilliSleep(10);
