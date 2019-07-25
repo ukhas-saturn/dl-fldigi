@@ -82,7 +82,7 @@
 
 using namespace std;
 
-pthread_mutex_t draw_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t draw_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define bwFFT		30
 #define cwRef		50
@@ -575,8 +575,11 @@ void WFdisp::processFFT() {
 		if (wfspeed == NORMAL) dispcnt *= NORMAL;
 		if (wfspeed == SLOW) dispcnt *= progdefaults.drop_speed;
 	}
-	dispdec = 1.0 * WFBLOCKSIZE / srate;
-	if (wfspeed == PAUSE) dispdec = 0;
+	if (wfspeed == PAUSE)
+		dispdec = 0;
+	else
+		dispdec = 1.0 * WFBLOCKSIZE / srate;
+	redraw();
 }
 
 void WFdisp::process_analog (wf_fft_type *sig, int len) {
@@ -605,12 +608,15 @@ FL_LOCK_D();
 		for (; sigy > ynext; sigy--) sig_img[sigpixel += IMAGE_WIDTH] = graylevel;
 		sig_img[sigpixel++] = graylevel;
 	}
+	redraw();
 FL_UNLOCK_D();
 }
 
-void WFdisp::redrawCursor()
-{
-}
+//void WFdisp::redrawCursor()
+//{
+//	redraw();
+//	Fl::flush();
+//}
 
 //----------------------------------------------------------------------
 // queue audio_blocks used to separate audio stream process timing
@@ -681,13 +687,13 @@ void WFdisp::handle_sig_data()
 		}
 		peakaudio = 0.1 * peak + 0.9 * peakaudio;
 
-{
-	guard_lock dlock(&draw_mutex);
+//{
+//	guard_lock dlock(&draw_mutex);
 		if (mode == SCOPE)
 			process_analog(circbuff, FFT_LEN);
 		else
 			processFFT();
-}
+//}
 		put_WARNstatus(peakaudio);
 
 		static char szFrequency[14];
@@ -732,7 +738,6 @@ void WFdisp::handle_sig_data()
 		inpFreq->value(szFrequency);
 
 	}
-
 }
 
 // Check the display offset & limit to 0 to max IMAGE_WIDTH displayed
@@ -775,7 +780,7 @@ void WFdisp::carrier(int cf) {
 	if (cf >= bandwidth / 2 && cf < (IMAGE_WIDTH - bandwidth / 2)) {
 		carrierfreq = cf;
 		makeMarker();
-		redrawCursor();
+//		redrawCursor();
 	}
 }
 
@@ -2155,7 +2160,7 @@ int WFdisp::handle(int event)
 		wantcursor = true;
 		cursorpos = xpos;
 		makeMarker();
-		redrawCursor();
+//		redrawCursor();
 		break;
 	case FL_DRAG: case FL_PUSH:
 		stopMacroTimer();
@@ -2217,7 +2222,7 @@ int WFdisp::handle(int event)
 				if (!(Fl::event_state() & FL_SHIFT))
 					active_modem->set_sigsearch(SIGSEARCH);
 			}
-			redrawCursor();
+//			redrawCursor();
 			restoreFocus();
 			break;
 		case FL_MIDDLE_MOUSE:
@@ -2236,7 +2241,7 @@ int WFdisp::handle(int event)
 		case FL_RIGHT_MOUSE:
 			tmp_carrier = false;
 			if (active_modem) active_modem->set_freq(oldcarrier);
-			redrawCursor();
+//			redrawCursor();
 			restoreFocus();
 			// fall through
 		case FL_LEFT_MOUSE:
@@ -2302,7 +2307,7 @@ int WFdisp::handle(int event)
 					progdefaults.HighFreqCutoff - active_modem->get_bandwidth() / 2);
 				active_modem->set_freq(newcarrier);
 			}
-			redrawCursor();
+//			redrawCursor();
 			break;
 		case FL_Tab:
 			restoreFocus();
