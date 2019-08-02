@@ -823,7 +823,6 @@ EXTRA_dl_fldigi_SOURCES += \
 	include/fldigi-config.h \
 	include/fl_digi.h \
 	include/flinput2.h \
-	include/fl_lock.h \
 	include/flmisc.h \
 	include/flslider2.h \
 	include/font_browser.h \
