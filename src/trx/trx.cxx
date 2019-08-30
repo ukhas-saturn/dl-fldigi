@@ -237,7 +237,7 @@ void trx_trx_receive_loop()
 		if (!progdefaults.is_full_duplex || !RXsc_is_open ||
 			current_RXsamplerate != active_modem->get_samplerate() ) {
 			current_RXsamplerate = active_modem->get_samplerate();
-			if (RXscard && progdefaults.btnAudioIOis != SND_IDX_TCP && progdefaults.btnAudioIOis != SND_IDX_UDP)
+			if (RXscard && progdefaults.btnAudioIOis != SND_IDX_OSS && progdefaults.btnAudioIOis != SND_IDX_UDP)
 				RXscard->Close(O_RDONLY);
 			if (RXscard->Open(O_RDONLY, current_RXsamplerate)) {
 				REQ(sound_update, progdefaults.btnAudioIOis);
@@ -700,7 +700,7 @@ void trx_reset_loop()
 		RXscard->Open(O_RDONLY, current_RXsamplerate = 8000);
 		TXscard = new SoundNull;
 		break;
-	case SND_IDX_TCP:
+	case SND_IDX_OSS:
 		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), false);
 		RXscard->Open(O_RDONLY, current_RXsamplerate = 8000);
 		TXscard = new SoundNull;
@@ -856,7 +856,7 @@ void trx_start(void)
 		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), true);
 		TXscard = new SoundNull;
 		break;
-	case SND_IDX_TCP:
+	case SND_IDX_OSS:
 		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), false);
 		TXscard = new SoundNull;
 		break;
