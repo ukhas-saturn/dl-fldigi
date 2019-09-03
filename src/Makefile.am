@@ -806,6 +806,7 @@ EXTRA_dl_fldigi_SOURCES += \
 	include/digiscope.h \
 	include/dominoex.h \
 	include/dominovar.h \
+	include/dr_mp3.h \
 	include/dsp.h \
 	include/dtmf.h \
 	include/dxcc.h \

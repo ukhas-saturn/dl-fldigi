@@ -237,9 +237,9 @@ void trx_trx_receive_loop()
 		if (!progdefaults.is_full_duplex || !RXsc_is_open ||
 			current_RXsamplerate != active_modem->get_samplerate() ) {
 			current_RXsamplerate = active_modem->get_samplerate();
-			if (RXscard && progdefaults.btnAudioIOis != SND_IDX_OSS && progdefaults.btnAudioIOis != SND_IDX_UDP)
+			if (RXscard) {
 				RXscard->Close(O_RDONLY);
-			if (RXscard->Open(O_RDONLY, current_RXsamplerate)) {
+				RXscard->Open(O_RDONLY, current_RXsamplerate);
 				REQ(sound_update, progdefaults.btnAudioIOis);
 				RXsc_is_open = true;
 			}
@@ -580,8 +580,6 @@ void *trx_loop(void *args)
 
 		switch (trx_state) {
 		case STATE_ABORT:
-			RXscard->Close();
-			RXsc_is_open = false;
 			delete RXscard;
 			RXscard = 0;
 			delete TXscard;
@@ -696,17 +694,6 @@ void trx_reset_loop()
 	}
 
 	switch (progdefaults.btnAudioIOis) {
-
-	case SND_IDX_UDP:
-		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), true);
-		RXscard->Open(O_RDONLY, current_RXsamplerate = 8000);
-		TXscard = new SoundNull;
-		break;
-	case SND_IDX_OSS:
-		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), false);
-		RXscard->Open(O_RDONLY, current_RXsamplerate = 8000);
-		TXscard = new SoundNull;
-		break;
 #if USE_OSS
 	case SND_IDX_OSS:
 		try {
@@ -839,12 +826,10 @@ void trx_start(void)
 	}
 
 	if (RXscard) {
-		RXscard->Close();
 		delete RXscard;
 		RXscard = 0;
 	}
 	if (TXscard) {
-		TXscard->Close();
 		delete TXscard;
 		TXscard = 0;
 	}
@@ -853,15 +838,6 @@ void trx_start(void)
 
 
 	switch (progdefaults.btnAudioIOis) {
-
-	case SND_IDX_UDP:
-		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), true);
-		TXscard = new SoundNull;
-		break;
-	case SND_IDX_OSS:
-		RXscard = new SoundIP(scDevice[0].c_str(), scDevice[1].c_str(), false);
-		TXscard = new SoundNull;
-		break;
 #if USE_OSS
 	case SND_IDX_OSS:
 		RXscard = new SoundOSS(scDevice[0].c_str());
@@ -984,7 +960,6 @@ void trx_close()
 #endif
 
 	if (RXscard) {
-		RXscard->Close();
 		delete RXscard;
 		RXscard = 0;
 	}
@@ -1000,7 +975,7 @@ void trx_transmit(void) {
 		(!PERFORM_CPS_TEST || !active_modem->XMLRPC_CPS_TEST))
 		psm_transmit();
 	else
-		if(!bHAB) trx_state = STATE_TX;
+		trx_state = STATE_TX;
 }
 
 void trx_tune(void) { trx_state = STATE_TUNE; }

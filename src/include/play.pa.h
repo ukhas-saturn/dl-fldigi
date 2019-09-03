@@ -99,6 +99,7 @@ public:
 	void	silence(float secs, int _sr);
 
 	void	play_file(std::string fname);
+	void	play_mp3(std::string fname);
 };
 
 #endif

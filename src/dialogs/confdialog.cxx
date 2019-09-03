@@ -6331,7 +6331,7 @@ static void cb_btn_select_regex_wav(Fl_Button*, void*) {
   Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\t*.wav\n");
+fnfc.filter("wav files\t*.{mp3,wav}\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -6387,7 +6387,7 @@ static void cb_btn_select_mycall_wav(Fl_Button*, void*) {
   Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\t*.wav\n");
+fnfc.filter("wav files\t*.{mp3,wav}\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -6443,7 +6443,7 @@ static void cb_btn_select_rx_extract_msg(Fl_Button*, void*) {
   Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\t*.wav\n");
+fnfc.filter("wav files\t*.{mp3,wav}\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -6499,7 +6499,7 @@ static void cb_btn_select_rx_extract_timed_out(Fl_Button*, void*) {
   Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\t*.wav\n");
+fnfc.filter("wav files\t*.{mp3,wav}\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -6555,7 +6555,7 @@ static void cb_btn_select_rsid_wav(Fl_Button*, void*) {
   Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\t*.wav\n");
+fnfc.filter("wav files\t*.{mp3,wav}\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -8541,7 +8541,6 @@ Fl_Double_Window* ConfigureDialog() {
       { tabOperator = new Fl_Group(0, 25, 600, 365, _("Operator"));
         tabOperator->callback((Fl_Callback*)cb_tabOperator);
         tabOperator->when(FL_WHEN_CHANGED);
-        tabOperator->hide();
         { Fl_Group* o = new Fl_Group(5, 35, 590, 285, _("Station / Operator"));
           o->box(FL_ENGRAVED_FRAME);
           o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
