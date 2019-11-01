@@ -261,6 +261,8 @@ Fl_Double_Window	*field_day_viewer  = (Fl_Double_Window *)0;
 
 Fl_Double_Window	*dxcluster_viewer  = (Fl_Double_Window *)0;
 
+Fl_Double_Window	*rxaudio_dialog = (Fl_Double_Window *)0;
+
 static Fl_Group		*mnuFrame;
 Fl_Menu_Bar 		*mnu;
 
@@ -876,7 +878,10 @@ void cb_oliviaCustom(Fl_Widget *w, void *arg);
 
 void cb_contestiaCustom(Fl_Widget *w, void *arg);
 
+void cb_rtty45(Fl_Widget *w, void *arg);
 void cb_rtty50(Fl_Widget *w, void *arg);
+void cb_rtty75N(Fl_Widget *w, void *arg);
+void cb_rtty75W(Fl_Widget *w, void *arg);
 void cb_rtty100(Fl_Widget *w, void *arg);
 void cb_rtty300(Fl_Widget *w, void *arg);
 void cb_rttyCustom(Fl_Widget *w, void *arg);
@@ -1129,7 +1134,9 @@ static const Fl_Menu_Item quick_change_contestia[] = {
 };
 
 static const Fl_Menu_Item quick_change_rtty[] = {
+	{ "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY },
 	{ "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY },
+	{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY },
 	{ "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY },
 	{ "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY },
 	{ _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY },
@@ -1268,6 +1275,24 @@ void cb_rtty50(Fl_Widget *w, void *arg)
 	progdefaults.rtty_shift = 8;
 	progdefaults.rtty_parity = 0;
 	progdefaults.rtty_stop = 0;
+	set_rtty_tab_widgets();
+	cb_init_mode(w, arg);
+}
+
+void cb_rtty75N(Fl_Widget *w, void *arg)
+{
+	progdefaults.rtty_baud = 4;
+	progdefaults.rtty_bits = 0;
+	progdefaults.rtty_shift = 3;
+	set_rtty_tab_widgets();
+	cb_init_mode(w, arg);
+}
+
+void cb_rtty75W(Fl_Widget *w, void *arg)
+{
+	progdefaults.rtty_baud = 4;
+	progdefaults.rtty_bits = 0;
+	progdefaults.rtty_shift = 9;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -1728,6 +1753,11 @@ LOG_INFO("Deleting %s", "fsqMonitor");
 LOG_INFO("Deleting %s", "dxcluster_viewer");
 		dxcluster_viewer->hide();
 		delete dxcluster_viewer;
+	}
+	if (rxaudio_dialog) {
+LOG_INFO("Deleting %s", "rxaudio_dialog");
+		rxaudio_dialog->hide();
+		delete rxaudio_dialog;
 	}
 	if (test_signal_window) {
 LOG_INFO("Deleting %s", "test signal window");
@@ -3244,6 +3274,11 @@ void toggleRSID()
 {
 	progdefaults.rsid = !progdefaults.rsid;
 	cbRSID(NULL, NULL);
+}
+
+void cb_mnuRxAudioDialog(Fl_Menu_ *w, void *d) {
+	if (rxaudio_dialog)
+		rxaudio_dialog->show();
 }
 
 void cb_mnuDigiscope(Fl_Menu_ *w, void *d) {
@@ -6235,6 +6270,8 @@ static Fl_Menu_Item menu_[] = {
 { RTTY_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75W", 0, cb_rtty75W, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -6341,6 +6378,13 @@ static Fl_Menu_Item menu_[] = {
 { VIEW_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 
 { icons::make_icon_label(_("SSDV RX")), 's', (Fl_Callback*)cb_mnuShowSSDVRX, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Rx Audio Dialog")), 'a', (Fl_Callback*)cb_mnuRxAudioDialog, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("View/Hide Channels")), 'c', (Fl_Callback*)cb_view_hide_channels, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("Signal browser")), 'b', (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("View/Hide 48 macros")), 'm', (Fl_Callback*)cb_48macros, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("View/Hide Channels")), 'c', (Fl_Callback*)cb_view_hide_channels, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Signal browser")), 'b', (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
@@ -7880,6 +7924,8 @@ static Fl_Menu_Item alt_menu_[] = {
 {"RTTY", 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75W", 0, cb_rtty75W, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
