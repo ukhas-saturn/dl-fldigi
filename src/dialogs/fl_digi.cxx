@@ -3366,7 +3366,7 @@ static string new_call;
 
 void set599()
 {
-	if (bWF_only)
+	if (bWF_only || bHAB)
 		return;
 
 	Fl_Input2* rstin[] = {
