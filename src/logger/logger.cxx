@@ -148,12 +148,12 @@ void check_lotw_log(void *)
 	string logtxt;
 	FILE * logfile = fl_fopen(lotw_log_fname.c_str(), "r");
 	if (!logfile) {
-		logcheck_count++;
-		if (logcheck_count < 20) {
-			Fl::repeat_timeout(1.0, check_lotw_log);
+		logcheck_count += 5;
+		if (logcheck_count <= 60) {
+			Fl::repeat_timeout(5.0, check_lotw_log);
 			return;
 		}
-		LOG_ERROR("%s", "NO tqsl log file in 25 seconds!");
+		LOG_ERROR("%s", "NO tqsl log file in 60 seconds!");
 		restore_lotwsdates();
 		return;
 	}
@@ -161,9 +161,10 @@ void check_lotw_log(void *)
 	while (!feof(logfile)) {
 		logtxt += c;
 		c = fgetc(logfile);
-		if (c == EOF) break;
 	}
 	fclose(logfile);
+
+//LOG_INFO("TQSL log file:\n%s\n", logtxt.c_str());
 
 	size_t p = logtxt.find("UploadFile returns 0");
 	if (p != string::npos) {
@@ -171,9 +172,9 @@ void check_lotw_log(void *)
 			if (!lotw_alert_window) lotw_alert_window = new notify_dialog;
 			lotw_alert_window->notify(_("LoTW upload OK"), 5.0);
 			REQ(show_notifier, lotw_alert_window);
-			if (progdefaults.xml_logbook)
-				xml_update_lotw();
 		}
+		if (progdefaults.xml_logbook)
+			xml_update_lotw();
 		clear_lotw_recs_sent();
 	} else {
 		string errlog = LoTWDir;
@@ -182,11 +183,11 @@ void check_lotw_log(void *)
 		if (errfile) {
 			errfile << logtxt;
 			errfile.close();
-			logtxt.assign("LoTW upload errors\nCheck file ");
+			logtxt.assign("LoTW upload error\nCheck file: ");
 			logtxt.append(errlog);
 		}
 		if (progdefaults.lotw_quiet_mode) {
-			std::string alert = _("LoTW upload Failed\nView LoTW error log:");
+			std::string alert = _("LoTW upload error\nView LoTW error log:");
 			alert.append(errlog);
 			if (!lotw_alert_window) lotw_alert_window = new notify_dialog;
 			lotw_alert_window->notify(alert.c_str(), 15.0);
@@ -221,9 +222,6 @@ void send_to_lotw(void *)
 	pstring.assign("\"").append(progdefaults.lotw_pathname).append("\"");
 	pstring.append(" -d -u -a compliant");
 
-	if (progdefaults.lotw_quiet_mode)
-		pstring.append(" -q");
-
 	if (progdefaults.submit_lotw_password)
 		pstring.append(" -p \"").append(progdefaults.lotw_pwd).append("\"");
 
@@ -233,6 +231,9 @@ void send_to_lotw(void *)
 	pstring.append(" -t \"").append(lotw_log_fname).append("\"");
 
 	pstring.append(" \"").append(lotw_send_fname).append("\"");
+
+	if (progdefaults.lotw_quiet_mode)
+		pstring.append(" -q");
 
 	start_process(pstring);
 

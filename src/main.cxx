@@ -772,10 +772,6 @@ int main(int argc, char ** argv)
 	// for KISS_IO status information
 	program_start_time = time(0);
 
-	// ztimer must be run by FLTK's timeout handler
-//	TOD_init(); // initialize time of day thread
-//	ztimer((void*)true);
-
 	active_modem = new NULLMODEM;
 
 	string appdir = appname = argv[0];
@@ -952,6 +948,8 @@ int main(int argc, char ** argv)
 	set_unexpected(handle_unexpected);
 	set_terminate(diediedie);
 	setup_signal_handlers();
+
+	setlocale(LC_ALL, "");
 
 #ifndef ENABLE_NLS
 	setlocale(LC_TIME, "");

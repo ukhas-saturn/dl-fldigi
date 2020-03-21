@@ -389,6 +389,7 @@ void set_connect_box()
 	if (n3fjp_connected) {
 		alert_window->notify(_("Connected to N3FJP logger"), 1.0);
 		REQ(show_notifier, alert_window);
+		REQ(update_main_title);
 	}
 	else {
 		progdefaults.CONTESTnotes = "";
@@ -866,7 +867,7 @@ static string n3fjp_tstmode()
 		return "PH";
 
 	if (active_modem->get_mode() < MODE_SSB)
-		return "DIG";
+		return mode_info[active_modem->get_mode()].adif_name;
 
 	return "";
 }
@@ -2051,7 +2052,8 @@ static void send_log_data()
 {
 	send_call(rec.getField(CALL));
 	send_band(strip(n3fjp_opband()));
-	send_mode(n3fjp_tstmode());
+	send_freq(n3fjp_freq());
+	send_mode(n3fjp_opmode());
 	n3fjp_sendRSTS(rec.getField(RST_SENT));
 	n3fjp_sendRSTR(rec.getField(RST_RCVD));
 
@@ -2145,6 +2147,8 @@ static void send_log_data()
 				n3fjp_send_QP6();
 				break;
 			case FJP_ACL:
+				n3fjp_send_NONE();
+				break;
 			default:
 				n3fjp_send_GENERIC();
 				break;

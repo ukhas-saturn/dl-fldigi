@@ -1304,7 +1304,7 @@ static void pNXTNBR(std::string &s, size_t &i, size_t endbracket)
 		s.replace(i, endbracket - i + 1, "");
 		return;
 	}
-	char szqsonbr[10];
+	char szqsonbr[20];
 	snprintf(szqsonbr, sizeof(szqsonbr), "%d", qsodb.nbrRecs() + 1);
 	s.replace(i, endbracket - i + 1, szqsonbr);
 }
@@ -2466,6 +2466,7 @@ static void doMODEM(std::string s)
 {
 	static fre_t re("<!MODEM:([[:alnum:]-]+)((:[[:digit:].+-]*)*)>", REG_EXTENDED);
 	std::string tomatch = s;
+	for (int i = 2; i < 7; i++) s[i] = toupper(s[i]);
 
 	if (!re.match(tomatch.c_str())) {
 		que_ok = true;
@@ -2473,8 +2474,8 @@ static void doMODEM(std::string s)
 	}
 
 	const std::vector<regmatch_t>& o = re.suboff();
-	std::string name = tomatch.substr(o[1].rm_so, o[1].rm_eo - o[1].rm_so);
-	name = ucasestr(name);
+	std::string name = ucasestr(tomatch.substr(o[1].rm_so, o[1].rm_eo - o[1].rm_so));
+
 	trx_mode m;
 	for (m = 0; m < NUM_MODES; m++)
 		if (name == ucasestr(mode_info[m].sname))
@@ -2512,27 +2513,80 @@ static void doMODEM(std::string s)
 					set_rtty_bits((int)args[2]);
 				break;
 			case MODE_CONTESTIA: // bandwidth, tones
-				if (args.at(0) != DBL_MIN)
-					set_contestia_bw((int)args[0]);
-				if (args.at(1) != DBL_MIN)
-					set_contestia_tones((int)args[1]);
+				if (args.at(0) != DBL_MIN && args.at(1) != DBL_MIN) {
+					int bw = (int)args[0];
+					int tones = (int)args[1];
+					switch (tones) {
+						case 4 :
+							if (bw == 125) m = MODE_CONTESTIA_4_125;
+							if (bw == 250) m = MODE_CONTESTIA_4_250;
+							if (bw == 500) m = MODE_CONTESTIA_4_500;
+							if (bw == 1000) m = MODE_CONTESTIA_4_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_4_2000;
+							break;
+						case 8 :
+							if (bw == 125) m = MODE_CONTESTIA_8_125;
+							if (bw == 250) m = MODE_CONTESTIA_8_250;
+							if (bw == 500) m = MODE_CONTESTIA_8_500;
+							if (bw == 1000) m = MODE_CONTESTIA_8_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_8_2000;
+							break;
+						case 16 :
+							if (bw == 500) m = MODE_CONTESTIA_16_500;
+							if (bw == 1000) m = MODE_CONTESTIA_16_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_16_2000;
+							break;
+						case 32 :
+							if (bw == 1000) m = MODE_CONTESTIA_32_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_32_2000;
+							break;
+						case 64 :
+							if (bw == 500) m = MODE_CONTESTIA_64_500;
+							if (bw == 1000) m = MODE_CONTESTIA_64_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_64_2000;
+							break;
+						default :
+							set_contestia_bw(bw);
+							set_contestia_tones(tones);
+					}
+				}
 				break;
 			case MODE_OLIVIA: // bandwidth, tones
 				if (args.at(0) != DBL_MIN && args.at(1) != DBL_MIN) {
 					int bw = (int)args[0];
 					int tones = (int)args[1];
-					if (bw == 250 && tones == 4) m = MODE_OLIVIA_4_250;
-					else if (bw == 250 && tones == 8) m = MODE_OLIVIA_8_250;
-					else if (bw == 500 && tones == 4) m = MODE_OLIVIA_4_500;
-					else if (bw == 500 && tones == 8) m = MODE_OLIVIA_8_500;
-					else if (bw == 500 && tones == 16) m = MODE_OLIVIA_16_500;
-					else if (bw == 1000 && tones == 8) m = MODE_OLIVIA_8_1000;
-					else if (bw == 1000 && tones == 16) m = MODE_OLIVIA_16_1000;
-					else if (bw == 1000 && tones == 32) m = MODE_OLIVIA_32_1000;
-					else if (bw == 2000 && tones == 64) m = MODE_OLIVIA_64_2000;
-					else {
-						set_olivia_bw(bw);
-						set_olivia_tones(tones);
+					switch (tones) {
+						case 4 :
+							if (bw == 125) m = MODE_OLIVIA_4_125;
+							if (bw == 250) m = MODE_OLIVIA_4_250;
+							if (bw == 500) m = MODE_OLIVIA_4_500;
+							if (bw == 1000) m = MODE_OLIVIA_4_1000;
+							if (bw == 2000) m = MODE_OLIVIA_4_2000;
+							break;
+						case 8 :
+							if (bw == 125) m = MODE_OLIVIA_8_125;
+							if (bw == 250) m = MODE_OLIVIA_8_250;
+							if (bw == 500) m = MODE_OLIVIA_8_500;
+							if (bw == 1000) m = MODE_OLIVIA_8_1000;
+							if (bw == 2000) m = MODE_OLIVIA_8_2000;
+							break;
+						case 16 :
+							if (bw == 500) m = MODE_OLIVIA_16_500;
+							if (bw == 1000) m = MODE_OLIVIA_16_1000;
+							if (bw == 2000) m = MODE_OLIVIA_16_2000;
+							break;
+						case 32 :
+							if (bw == 1000) m = MODE_OLIVIA_32_1000;
+							if (bw == 2000) m = MODE_OLIVIA_32_2000;
+							break;
+						case 64 :
+							if (bw == 500) m = MODE_OLIVIA_64_500;
+							if (bw == 1000) m = MODE_OLIVIA_64_1000;
+							if (bw == 2000) m = MODE_OLIVIA_64_2000;
+							break;
+						default :
+							set_olivia_bw(bw);
+							set_olivia_tones(tones);
 					}
 				}
 				break;
@@ -2590,16 +2644,22 @@ static void pMODEM(std::string &s, size_t &i, size_t endbracket)
 	static fre_t re("<MODEM:([[:alnum:]-]+)((:[[:digit:].+-]*)*)>", REG_EXTENDED);
 
 	std::string testmode = s.substr(i, endbracket - i + 1);
+	for (int i = 2; i < 7; i++) testmode[i] = toupper(testmode[i]);
+
 	std::string name = testmode;
 	name.erase(0,7);
 	name.erase(name.length() - 1);
 	name = ucasestr(name);
 
 // test for exact match on mode name (ignore case)
+
 	for (trx_mode m = 0; m < NUM_MODES; m++) {
 		if (name == ucasestr(mode_info[m].sname)) {
 			init_modem(mode_info[m].mode);
 			s.erase(i, endbracket - i + 1);
+			int count = 500;
+			while ((active_modem->get_mode() != mode_info[m].mode) && --count)
+				MilliSleep(10);
 			return;
 		}
 	}
@@ -2620,6 +2680,9 @@ static void pMODEM(std::string &s, size_t &i, size_t endbracket)
 		if (m < NUM_MODES && active_modem->get_mode() != mode_info[m].mode)
 			init_modem(mode_info[m].mode);
 		s.erase(i, o[0].rm_eo - i);
+		int count = 500;
+		while ((active_modem->get_mode() != mode_info[m].mode) && --count)
+			MilliSleep(10);
 		return;
 	}
 
@@ -2650,27 +2713,80 @@ static void pMODEM(std::string &s, size_t &i, size_t endbracket)
 					set_rtty_bits((int)args[2]);
 				break;
 			case MODE_CONTESTIA: // bandwidth, tones
-				if (args.at(0) != DBL_MIN)
-					set_contestia_bw((int)args[0]);
-				if (args.at(1) != DBL_MIN)
-					set_contestia_tones((int)args[1]);
+				if (args.at(0) != DBL_MIN && args.at(1) != DBL_MIN) {
+					int bw = (int)args[0];
+					int tones = (int)args[1];
+					switch (tones) {
+						case 4 :
+							if (bw == 125) m = MODE_CONTESTIA_4_125;
+							if (bw == 250) m = MODE_CONTESTIA_4_250;
+							if (bw == 500) m = MODE_CONTESTIA_4_500;
+							if (bw == 1000) m = MODE_CONTESTIA_4_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_4_2000;
+							break;
+						case 8 :
+							if (bw == 125) m = MODE_CONTESTIA_8_125;
+							if (bw == 250) m = MODE_CONTESTIA_8_250;
+							if (bw == 500) m = MODE_CONTESTIA_8_500;
+							if (bw == 1000) m = MODE_CONTESTIA_8_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_8_2000;
+							break;
+						case 16 :
+							if (bw == 500) m = MODE_CONTESTIA_16_500;
+							if (bw == 1000) m = MODE_CONTESTIA_16_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_16_2000;
+							break;
+						case 32 :
+							if (bw == 1000) m = MODE_CONTESTIA_32_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_32_2000;
+							break;
+						case 64 :
+							if (bw == 500) m = MODE_CONTESTIA_64_500;
+							if (bw == 1000) m = MODE_CONTESTIA_64_1000;
+							if (bw == 2000) m = MODE_CONTESTIA_64_2000;
+							break;
+						default :
+							set_contestia_bw(bw);
+							set_contestia_tones(tones);
+					}
+				}
 				break;
 			case MODE_OLIVIA: // bandwidth, tones
 				if (args.at(0) != DBL_MIN && args.at(1) != DBL_MIN) {
 					int bw = (int)args[0];
 					int tones = (int)args[1];
-					if (bw == 250 && tones == 4) m = MODE_OLIVIA_4_250;
-					else if (bw == 250 && tones == 8) m = MODE_OLIVIA_8_250;
-					else if (bw == 500 && tones == 4) m = MODE_OLIVIA_4_500;
-					else if (bw == 500 && tones == 8) m = MODE_OLIVIA_8_500;
-					else if (bw == 500 && tones == 16) m = MODE_OLIVIA_16_500;
-					else if (bw == 1000 && tones == 8) m = MODE_OLIVIA_8_1000;
-					else if (bw == 1000 && tones == 16) m = MODE_OLIVIA_16_1000;
-					else if (bw == 1000 && tones == 32) m = MODE_OLIVIA_32_1000;
-					else if (bw == 2000 && tones == 64) m = MODE_OLIVIA_64_2000;
-					else {
-						set_olivia_bw(bw);
-						set_olivia_tones(tones);
+					switch (tones) {
+						case 4 :
+							if (bw == 125) m = MODE_OLIVIA_4_125;
+							if (bw == 250) m = MODE_OLIVIA_4_250;
+							if (bw == 500) m = MODE_OLIVIA_4_500;
+							if (bw == 1000) m = MODE_OLIVIA_4_1000;
+							if (bw == 2000) m = MODE_OLIVIA_4_2000;
+							break;
+						case 8 :
+							if (bw == 125) m = MODE_OLIVIA_8_125;
+							if (bw == 250) m = MODE_OLIVIA_8_250;
+							if (bw == 500) m = MODE_OLIVIA_8_500;
+							if (bw == 1000) m = MODE_OLIVIA_8_1000;
+							if (bw == 2000) m = MODE_OLIVIA_8_2000;
+							break;
+						case 16 :
+							if (bw == 500) m = MODE_OLIVIA_16_500;
+							if (bw == 1000) m = MODE_OLIVIA_16_1000;
+							if (bw == 2000) m = MODE_OLIVIA_16_2000;
+							break;
+						case 32 :
+							if (bw == 1000) m = MODE_OLIVIA_32_1000;
+							if (bw == 2000) m = MODE_OLIVIA_32_2000;
+							break;
+						case 64 :
+							if (bw == 500) m = MODE_OLIVIA_64_500;
+							if (bw == 1000) m = MODE_OLIVIA_64_1000;
+							if (bw == 2000) m = MODE_OLIVIA_64_2000;
+							break;
+						default :
+							set_olivia_bw(bw);
+							set_olivia_tones(tones);
 					}
 				}
 				break;
@@ -3999,135 +4115,132 @@ void rx_que_continue(void *)
 struct MTAGS { const char *mTAG; void (*fp)(std::string &, size_t&, size_t );};
 
 static const MTAGS mtags[] = {
-{"<CPS_FILE:",	pCPS_FILE},
-{"<CPS_N:",		pCPS_N},
-{"<CPS_STRING:",pCPS_STRING},
-{"<CPS_TEST",	pCPS_TEST},
+	{"<CPS_FILE:",	pCPS_FILE},
+	{"<CPS_N:",		pCPS_N},
+	{"<CPS_STRING:",pCPS_STRING},
+	{"<CPS_TEST",	pCPS_TEST},
 
-{"<WAV_FILE:",	pWAV_FILE},
-{"<WAV_N:",		pWAV_N},
-{"<WAV_STRING:",pWAV_STRING},
-{"<WAV_TEST",	pWAV_TEST},
+	{"<WAV_FILE:",	pWAV_FILE},
+	{"<WAV_N:",		pWAV_N},
+	{"<WAV_STRING:",pWAV_STRING},
+	{"<WAV_TEST",	pWAV_TEST},
 
-{"<COMMENT:",	pCOMMENT},
-{"<CALL>",		pCALL},
-{"<FREQ>",		pFREQ},
-{"<BAND>",		pBAND},
-{"<LOC>",		pLOC},
-{"<MODE>",		pMODE},
-{"<NAME>",		pNAME},
-{"<QTH>",		pQTH},
-{"<RST>",		pRST},
-{"<ST>",		pST},
-{"<PR>",		pPR},
-{"<MYCALL>",	pMYCALL},
-{"<MYLOC>",		pMYLOC},
-{"<MYNAME>",	pMYNAME},
-{"<MYQTH>",		pMYQTH},
-{"<MYRST>",		pMYRST},
-{"<MYCLASS>",	pMYCLASS},
-{"<MYSECTION>",	pMYSECTION},
-{"<MYSTATE>",	pMYSTATE},
-{"<MYST>",		pMYST},
-{"<MYCOUNTY>",	pMYCOUNTY},
-{"<MYCNTY>",	pMYCNTY},
-{"<ANTENNA>",	pANTENNA},
-{"<QSOTIME>",	pQSOTIME},
-{"<QSONBR>",	pQSONBR},
-{"<NXTNBR>",	pNXTNBR},
-{"<INFO1>",		pINFO1},
-{"<INFO2>",		pINFO2},
-{"<LDT>",		pLDT},
-{"<LDT:",		pLDT},
-{"<ILDT",		pILDT},
-{"<ZDT>",		pZDT},
-{"<ZDT:",		pZDT},
-{"<IZDT",		pIZDT},
-{"<LT",			pLT},
-{"<ZT",			pZT},
-{"<LD>",		pLD},
-{"<LD:",		pLD},
-{"<ZD>",		pZD},
-{"<ZD:",		pZD},
-{"<ID>",		p_ID},
-{"<TEXT>",		pTEXT},
-{"<VIDEO:",		pVIDEO},
-{"<CWID>",		pCWID},
-{"<RX>",		pRX},
-{"<TX>",		pTX},
-{"<TX/RX>",		pTXRX},
-{"<VER>",		pVER},
-{"<RIGCAT:",	pRIGCAT},
-{"<FLRIG:",		pFLRIG},
-{"<CNTR>",		pCNTR},
-{"<DECR>",		pDECR},
-{"<INCR>",		pINCR},
-{"<X1>",		pXOUT},
-{"<XIN>",		pXIN},
-{"<XOUT>",		pXOUT},
-{"<FDCLASS>",	pFD_CLASS},
-{"<FDSECT>",	pFD_SECTION},
-{"<CLASS>",		pCLASS},
-{"<SECTION>",	pSECTION},
-{"<XBEG>",		pXBEG},
-{"<XEND>",		pXEND},
-{"<SAVEXCHG>",	pSAVEXCHG},
-{"<SERNO>",		pSERNO},
-{"<LASTNO>",	pLASTNO},
-{"<LOG",		pLOG},
-{"<LNW",		pLNW},
-{"<CLRLOG>",	pCLRLOG},
-{"<EQSL",		pEQSL},
-{"<TIMER:",		pTIMER},
-{"<IDLE:",		pIDLE},
-{"<TUNE:",		pTUNE},
-{"<WAIT:",		pWAIT},
-{"<NRSID:",		pNRSID},
-{"<MODEM>",		pMODEM_compSKED},
-{"<MODEM:",		pMODEM},
-{"<EXEC>",		pEXEC},
-{"</EXEC>",		pEND_EXEC},
-{"<STOP>",		pSTOP},
-{"<CONT>",		pCONT},
-{"<PAUSE>",		pPAUSE},
-{"<GET>",		pGET},
-{"<CLRRX>",		pCLRRX},
-{"<CLRTX>",		pCLRTX},
-{"<FOCUS>",		pFOCUS},
-{"<QSY+:",		pQSYPLUS},
-{"<FILE:",		pFILE},
-{"<WPM:",		pWPM},
-{"<RISE:",		pRISETIME},
-{"<PRE:",		pPRE},
-{"<POST:",		pPOST},
-{"<AFC:",		pAFC},
-{"<LOCK:",		pLOCK},
-{"<REV:",		pREV},
-{"<HS:",		pHS},
-{"<RXRSID:",	pRX_RSID},
-{"<TXRSID:",	pTX_RSID},
-{"<DTMF:",		pDTMF},
-{"<SRCHUP>",	pSRCHUP},
-{"<SRCHDN>",	pSRCHDN},
-{"<GOHOME>",	pGOHOME},
-{"<GOFREQ:",	pGOFREQ},
-{"<QRG:",		pQRG},
-{"<QSY:",		pQSY},
-{"<QSYTO>",		pQSYTO},
-{"<QSYFM>",		pQSYFM},
-{"<RIGMODE:",	pRIGMODE},
-{"<FILWID:",	pFILWID},
-{"<RIGHI:",     pRIGHI},
-{"<RIGLO:",     pRIGLO},
-{"<MAPIT:",		pMAPIT},
-{"<MAPIT>",		pMAPIT},
-{"<REPEAT>",	pREPEAT},
-{"<SKED:",		pSKED},
-{"<TXATTEN:",	pTXATTEN},
-{"<POP>",		pPOP},
-{"<PUSH",		pPUSH},
-{"<DIGI>",		pDIGI},
-{"<ALERT:",		pALERT},
+	{"<COMMENT:",	pCOMMENT},
+	{"<CALL>",		pCALL},
+	{"<FREQ>",		pFREQ},
+	{"<BAND>",		pBAND},
+	{"<LOC>",		pLOC},
+	{"<MODE>",		pMODE},
+	{"<NAME>",		pNAME},
+	{"<QTH>",		pQTH},
+	{"<RST>",		pRST},
+	{"<ST>",		pST},
+	{"<PR>",		pPR},
+	{"<MYCALL>",	pMYCALL},
+	{"<MYLOC>",		pMYLOC},
+	{"<MYNAME>",	pMYNAME},
+	{"<MYQTH>",		pMYQTH},
+	{"<MYRST>",		pMYRST},
+	{"<MYCLASS>",	pMYCLASS},
+	{"<MYSECTION>",	pMYSECTION},
+	{"<MYSTATE>",	pMYSTATE},
+	{"<MYST>",		pMYST},
+	{"<MYCOUNTY>",	pMYCOUNTY},
+	{"<MYCNTY>",	pMYCNTY},
+	{"<ANTENNA>",	pANTENNA},
+	{"<QSOTIME>",	pQSOTIME},
+	{"<QSONBR>",	pQSONBR},
+	{"<NXTNBR>",	pNXTNBR},
+	{"<INFO1>",		pINFO1},
+	{"<INFO2>",		pINFO2},
+	{"<LDT>",		pLDT},
+	{"<LDT:",		pLDT},
+	{"<ILDT",		pILDT},
+	{"<ZDT>",		pZDT},
+	{"<ZDT:",		pZDT},
+	{"<IZDT",		pIZDT},
+	{"<LT",			pLT},
+	{"<ZT",			pZT},
+	{"<LD>",		pLD},
+	{"<LD:",		pLD},
+	{"<ZD>",		pZD},
+	{"<ZD:",		pZD},
+	{"<ID>",		p_ID},
+	{"<TEXT>",		pTEXT},
+	{"<VIDEO:",		pVIDEO},
+	{"<CWID>",		pCWID},
+	{"<VER>",		pVER},
+	{"<RIGCAT:",	pRIGCAT},
+	{"<FLRIG:",		pFLRIG},
+	{"<CNTR>",		pCNTR},
+	{"<DECR>",		pDECR},
+	{"<INCR>",		pINCR},
+	{"<X1>",		pXOUT},
+	{"<XIN>",		pXIN},
+	{"<XOUT>",		pXOUT},
+	{"<FDCLASS>",	pFD_CLASS},
+	{"<FDSECT>",	pFD_SECTION},
+	{"<CLASS>",		pCLASS},
+	{"<SECTION>",	pSECTION},
+	{"<XBEG>",		pXBEG},
+	{"<XEND>",		pXEND},
+	{"<SAVEXCHG>",	pSAVEXCHG},
+	{"<SERNO>",		pSERNO},
+	{"<LASTNO>",	pLASTNO},
+	{"<LOG",		pLOG},
+	{"<LNW",		pLNW},
+	{"<CLRLOG>",	pCLRLOG},
+	{"<EQSL",		pEQSL},
+	{"<TIMER:",		pTIMER},
+	{"<IDLE:",		pIDLE},
+	{"<TUNE:",		pTUNE},
+	{"<WAIT:",		pWAIT},
+	{"<NRSID:",		pNRSID},
+	{"<MODEM>",		pMODEM_compSKED},
+	{"<MODEM:",		pMODEM},
+	{"<EXEC>",		pEXEC},
+	{"</EXEC>",		pEND_EXEC},
+	{"<STOP>",		pSTOP},
+	{"<CONT>",		pCONT},
+	{"<PAUSE>",		pPAUSE},
+	{"<GET>",		pGET},
+	{"<CLRRX>",		pCLRRX},
+	{"<CLRTX>",		pCLRTX},
+	{"<FOCUS>",		pFOCUS},
+	{"<QSY+:",		pQSYPLUS},
+	{"<FILE:",		pFILE},
+	{"<WPM:",		pWPM},
+	{"<RISE:",		pRISETIME},
+	{"<PRE:",		pPRE},
+	{"<POST:",		pPOST},
+	{"<AFC:",		pAFC},
+	{"<LOCK:",		pLOCK},
+	{"<REV:",		pREV},
+	{"<HS:",		pHS},
+	{"<RXRSID:",	pRX_RSID},
+	{"<TXRSID:",	pTX_RSID},
+	{"<DTMF:",		pDTMF},
+	{"<SRCHUP>",	pSRCHUP},
+	{"<SRCHDN>",	pSRCHDN},
+	{"<GOHOME>",	pGOHOME},
+	{"<GOFREQ:",	pGOFREQ},
+	{"<QRG:",		pQRG},
+	{"<QSY:",		pQSY},
+	{"<QSYTO>",		pQSYTO},
+	{"<QSYFM>",		pQSYFM},
+	{"<RIGMODE:",	pRIGMODE},
+	{"<FILWID:",	pFILWID},
+	{"<RIGHI:",     pRIGHI},
+	{"<RIGLO:",     pRIGLO},
+	{"<MAPIT:",		pMAPIT},
+	{"<MAPIT>",		pMAPIT},
+	{"<REPEAT>",	pREPEAT},
+	{"<SKED:",		pSKED},
+	{"<TXATTEN:",	pTXATTEN},
+	{"<POP>",		pPOP},
+	{"<PUSH",		pPUSH},
+	{"<DIGI>",		pDIGI},
+	{"<ALERT:",		pALERT},
 #ifdef __WIN32__
 	{"<TALK:",		pTALK},
 #endif
@@ -4172,6 +4285,10 @@ static const MTAGS mtags[] = {
 	{"<@WAIT:",     pRxQueWAIT},
 	{"<@PUSH",		pRxQuePUSH},
 	{"<@POP>",		pRxQuePOP},
+
+	{"<RX>",		pRX},
+	{"<TX>",		pTX},
+	{"<TX/RX>",		pTXRX},
 
 	{0, 0}
 };
@@ -4383,18 +4500,18 @@ std::string MACROTEXT::expandMacro(std::string &s, bool recurse = false)
 
 	while ((idx = expanded.find('<', idx)) != std::string::npos) {
 		size_t endbracket = expanded.find('>',idx);
-		if (expanded.find("<SAVE", idx) == idx) {
+		if (ufind(expanded, "<SAVE", idx) == idx) {
 			savecurrentMACROS(expanded, idx, endbracket);
 			idx++;
 			continue;
 		}
-		if (expanded.find("<MACROS:",idx) == idx) {
+		if (ufind(expanded, "<MACROS:",idx) == idx) {
 			loadnewMACROS(expanded, idx, endbracket);
 			idx++;
 			continue;
 		}
 		// we must handle this specially
-		if (expanded.find("<CONT>", idx) == idx)
+		if (ufind(expanded, "<CONT>", idx) == idx)
 			pCONT(expanded, idx, endbracket);
 		if (!expand) {
 			idx++;
@@ -4403,7 +4520,7 @@ std::string MACROTEXT::expandMacro(std::string &s, bool recurse = false)
 
 		pMtags = mtags;
 		while (pMtags->mTAG != 0) {
-			if (expanded.find(pMtags->mTAG,idx) == idx) {
+			if (ufind(expanded, pMtags->mTAG, idx) == idx) {
 				pMtags->fp(expanded,idx, endbracket);
 				break;
 			}
@@ -4413,9 +4530,9 @@ std::string MACROTEXT::expandMacro(std::string &s, bool recurse = false)
 			idx++;
 	}
 	if (GET) {
-		size_t pos1 = expanded.find("$NAME");
-		size_t pos2 = expanded.find("$QTH");
-		size_t pos3 = expanded.find("$LOC");
+		size_t pos1 = ufind(expanded, "$NAME");
+		size_t pos2 = ufind(expanded, "$QTH");
+		size_t pos3 = ufind(expanded, "$LOC");
 		if (pos1 != std::string::npos && pos2 != std::string::npos) {
 			pos1 += 5;
 			inpName->value(expanded.substr(pos1, pos2 - pos1).c_str());

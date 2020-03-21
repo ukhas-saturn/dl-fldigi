@@ -2996,13 +2996,12 @@ public:
 			throw f;
 		}
 
-		if (!size) {
-			*retval = xmlrpc_c::value_bytestring("empty rx buffer!");
-		} else {
-			vector<unsigned char> bytes(size);
+		vector<unsigned char> bytes;
+		if (size) {
+			bytes.resize(size, 0);
 			memcpy(&bytes[0], text, size);
-			*retval = xmlrpc_c::value_bytestring(bytes);
 		}
+			*retval = xmlrpc_c::value_bytestring(bytes);
 LOG_VERBOSE("Text.get_rx: %s", text);
 		free(text);
 	}
@@ -3129,8 +3128,11 @@ public:
 		int size;
 		REQ_SYNC(get_rxtx, &text, &size);
 
-		vector<unsigned char> bytes(size);
-		memcpy(&bytes[0], text, size);
+		vector<unsigned char> bytes;
+		if (size) {
+			bytes.resize(size, 0);
+			memcpy(&bytes[0], text, size);
+		}
 LOG_VERBOSE("RXTX.get_data: %s", text);
 		*retval = xmlrpc_c::value_bytestring(bytes);
 	}
@@ -3159,8 +3161,11 @@ public:
 		int size;
 		REQ_SYNC(get_rx, &text, &size);
 
-		vector<unsigned char> bytes(size);
-		memcpy(&bytes[0], text, size);
+		vector<unsigned char> bytes;
+		if (size) {
+			bytes.resize(size, 0);
+			memcpy(&bytes[0], text, size);
+		}
 LOG_VERBOSE("RX.get_data: %s", text);
 		*retval = xmlrpc_c::value_bytestring(bytes);
 	}
@@ -3189,8 +3194,11 @@ public:
 		int size;
 		REQ_SYNC(get_tx, &text, &size);
 
-		vector<unsigned char> bytes(size);
-		memcpy(&bytes[0], text, size);
+		vector<unsigned char> bytes;
+		if (size) {
+			bytes.resize(size, 0);
+			memcpy(&bytes[0], text, size);
+		}
 LOG_VERBOSE("TX.get_data: %s", text);
 		*retval = xmlrpc_c::value_bytestring(bytes);
 	}

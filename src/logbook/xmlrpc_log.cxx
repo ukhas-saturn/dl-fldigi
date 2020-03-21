@@ -58,8 +58,7 @@ bool test_connection(bool info = false)
 {
 	if (!log_client) {
 		create_logbook_dialogs();
-		if (!log_client)
-			return false;
+		return false;
 	}
 	XmlRpcValue query, result;
 	if (log_client->execute("system.listMethods", query, result)) {
@@ -401,8 +400,7 @@ void xml_update_eqsl()
 
 	XmlRpcValue oneArg, result;
 	oneArg[0] = adif.c_str();
-std::cout << "xml_update_eqsl() " << adif << std::endl;
-
+	LOG_INFO("%s", "xmlrpc log: update eqsl date");
 	log_client->execute("log.update_record", oneArg, result);
 }
 
@@ -414,7 +412,7 @@ void xml_update_lotw()
 
 	XmlRpcValue oneArg, result;
 	oneArg[0] = adif.c_str();
-
+	LOG_INFO("%s", "xmlrpc log: update LoTW date");
 	log_client->execute("log.update_record", oneArg, result);
 }
 
@@ -424,21 +422,27 @@ void connect_to_log_server(void *)
 		delete log_client;
 		log_client = 0;
 	}
+	LOG_INFO("%s","Create XMLRPC client");
 	log_client = new XmlRpcClient(
 					progdefaults.xmllog_address.c_str(),
 					atoi(progdefaults.xmllog_port.c_str()));
 
+	LOG_INFO("%s","Created");
 	if (progdefaults.xml_logbook) {
 		if (test_connection(true)) {
+			LOG_INFO("%s","Close local logbook");
 			close_logbook();
 			if (dlgLogbook) dlgLogbook->hide();
 			activate_log_menus(false);
 		} else {
+			LOG_INFO("%s","Remote server not responding");
 			progdefaults.xml_logbook = false;
 			activate_log_menus(true);
 			start_logbook();
+			LOG_INFO("%s","Use local logbook");
 		}
 	} else {
+		LOG_INFO("%s","Enable local logbook");
 		activate_log_menus(true);
 		start_logbook();
 	}

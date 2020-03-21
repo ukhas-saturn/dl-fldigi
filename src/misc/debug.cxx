@@ -110,42 +110,39 @@ Fl_Menu_Item src_menu[] = {
 
 #include <iostream>
 
+void fcopy(std::string from, std::string to)
+{
+	char buffer[65536];
+	FILE *fp_from, *fp_to;
+	size_t n;
+	if ((fp_from = fopen(from.c_str(), "rb")) != NULL) {
+		if ((fp_to = fopen(to.c_str(), "wb")) != NULL) {
+			while(1) {
+				memset(buffer, 0, sizeof(buffer));
+				n = fread(buffer, 1, sizeof(buffer), fp_from);
+				n = fwrite(buffer, 1, n, fp_to);
+				if (feof(fp_from))
+					break;
+			}
+			fflush(fp_to);
+			fclose(fp_to);
+		}
+		fclose(fp_from);
+	}
+}
+
 void rotate_log(std::string filename)
 {
-	FILE *fp;
 	std::string oldfn, newfn;
-	const char *ext[] = {".5", ".4", ".3", ".2", ".1"};
+	const char *ext[] = {".1", ".2", ".3", ".4", ".5"};
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 4; i > 0; i--) {
 		newfn.assign(filename).append(ext[i]);
-		oldfn.assign(filename).append(ext[i+1]);
-		if ((fp = fopen(oldfn.c_str(), "r")) == NULL)
-			continue;
-		fclose(fp);
-		rename(oldfn.c_str(), newfn.c_str());
+		oldfn.assign(filename).append(ext[i - 1]);
+		fcopy(oldfn, newfn);
 	}
-
-	newfn.assign(filename).append(ext[4]);
-	char buffer[65536];
-
-	FILE *original = fopen(filename.c_str(), "rb");
-	if (original) {
-		FILE *backup = fopen(newfn.c_str(), "wb");
-		if (backup) {
-			size_t n;
-			while (1) {
-				memset(buffer, 0, sizeof(buffer));
-				n = fread(buffer, 1, sizeof(buffer), original);
-				n = fwrite(buffer, 1, n, backup);
-				if (feof(original)) {
-					break;
-				}
-			}
-			fflush(backup);
-			fclose(backup);
-		}
-		fclose(original);
-	}
+	newfn.assign(filename).append(ext[0]);
+	fcopy(filename, newfn);
 }
 
 
@@ -207,16 +204,14 @@ void debug::log(level_e level, const char* func, const char* srcf, int line, con
 
 	if (!inst)
 		return;
-	if (unlikely(debug::level == DEBUG_LEVEL) || 
-		debug_pskmail || debug_audio) {
-		time_t t = time(NULL);
-		struct tm stm;
-		(void)localtime_r(&t, &stm);
-		snprintf(fmt, sizeof(fmt), "%c: [%02d:%02d:%02d] %s:%d: %s\n",
-				 *prefix[level], stm.tm_hour, stm.tm_min, stm.tm_sec, srcf, line, format);
-	}
-	else
-		snprintf(fmt, sizeof(fmt), "%c: %s: %s\n", *prefix[level], func, format);
+
+// always annotate with date/time & line number
+	time_t t = time(NULL);
+	struct tm stm;
+	(void)localtime_r(&t, &stm);
+	snprintf(fmt, sizeof(fmt), "%c: [%02d:%02d:%02d] %s : %d : %s\n    %s\n",
+		*prefix[level], stm.tm_hour, stm.tm_min, stm.tm_sec, srcf, line, func, format);
+
 	va_list args;
 	va_start(args, format);
 	intptr_t nt = vsnprintf(dtext, sizeof(dtext), fmt, args);
