@@ -2648,8 +2648,7 @@ void cb_mnuVisitDLHelp(Fl_Widget*, void*)
 
 void cb_mnuVisitTracker(Fl_Widget*, void*)
 {
-    /* TODO: HABITAT-LATER update with habitat ui address */
-	cb_mnuVisitURL(0, (void *) "http://spacenear.us/tracker/");
+	cb_mnuVisitURL(0, (void *) "https://tracker.habhub.org/");
 }
 
 void cb_mnuVisitHabitat(Fl_Widget*, void*)

@@ -9,7 +9,7 @@
 dl-fldigi is a stand alone modification to fldigi, for use in decoding
 balloon telemetry. It will detect telemetry strings and forward them
 to a server where the data is processed and plotted on a map
-(currently http://spacenear.us/tracker).
+(currently https:///tracker.habhub.org).
 
 dl-fldigi is hosted at http://github.com/jamescoxon/dl-fldigi
 The original fldigi is hosted at http://www.w1hkj.com/Fldigi.html
