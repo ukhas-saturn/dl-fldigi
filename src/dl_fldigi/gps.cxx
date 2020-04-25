@@ -175,7 +175,7 @@ void *GPSThread::run()
                 wait_exp = 0;
             }
         }
-        catch (runtime_error e)
+        catch (runtime_error& e)
         {
             warning(e.what());
             cleanup();
@@ -327,11 +327,11 @@ void GPSThread::read()
         longitude = parse_ddm(parts[4], parts[5]);
         altitude = parse_alt(parts[9], parts[10]);
     }
-    catch (out_of_range e)
+    catch (out_of_range& e)
     {
         throw runtime_error("Failed to parse data (oor)");
     }
-    catch (istringstream::failure e)
+    catch (istringstream::failure& e)
     {
         throw runtime_error("Failed to parse data (fail)");
     }
