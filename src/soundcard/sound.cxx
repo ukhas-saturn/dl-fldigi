@@ -1626,7 +1626,7 @@ size_t SoundPort::Read(float *buf, size_t count)
 		write_file(ofCapture, buf, NULL, count);
 #endif
 
-		return count;
+	return count;
 }
 
 size_t SoundPort::Write(double *buf, size_t count)
