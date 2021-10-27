@@ -1,4 +1,17 @@
-On Linux:
+On Linux and OS X:
+
+Install the paho-mqtt.c library (for more info see https://github.com/eclipse/paho.mqtt.c#build-instructions-for-gnu-make):
+$ git clone https://github.com/eclipse/paho.mqtt.c.git
+$ cd paho.mqtt.c
+$ make
+$ sudo make install
+$ cd ..
+
+Then
+$ git clone https://github.com/ukhas-saturn/dl-fldigi.git
+$ cd dl-fldigi
+$ git submodule init
+$ git submodule update
 $ autoreconf -fi
 $ ./configure --disable-flarq
 $ make
@@ -6,15 +19,8 @@ $ src/dl-fldigi --hab
 
 For ubuntu more information can be found: http://ukhas.org.uk/projects:dl-fldigi:build-ubuntu
 
-On OS X:
-$ ln -s /opt/local/share/aclocal/pkg.m4 ~/dl-fldigi/m4/
-$ autoreconf -fi
-$ ./configure --disable-flarq
-$ make
-$ src/dl-fldigi --hab
-$ cp src/dl-fldgi-3.20.16/* /Applications/ 
-To create an appbundle
-$make appbundle
+On OS X to create an appbundle:
+$ make appbundle
 
 On Windows:
 To build dl-fldigi you will need to cross compile from linux - the build scripts
