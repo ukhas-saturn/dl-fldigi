@@ -1,3 +1,8 @@
+Install prerequisites:
+
+On Linux
+$ sudo apt install libssl-dev libfltk1.3-dev libcurl4-openssl-dev libpng-dev libjpeg-dev libsndfile1-dev
+
 On Linux and OS X:
 
 Install the paho-mqtt.c library (for more info see https://github.com/eclipse/paho.mqtt.c#build-instructions-for-gnu-make):
