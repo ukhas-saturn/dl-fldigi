@@ -76,6 +76,8 @@
 
 #include "estrings.h"
 
+#include "dr_mp3.h"
+
 #define SND_BUF_LEN	 65536
 #define SND_RW_LEN	(8 * SND_BUF_LEN)
 
@@ -167,8 +169,11 @@ SoundBase::~SoundBase()
 #if USE_SNDFILE
 void SoundBase::get_file_params(std::string def_fname, std::string &fname, int &format)
 {
-	std::string filters = _("Waveform Audio Format\t*.wav\n");
-	filters.append(_("AU\t*.{au,snd}\n"));
+	std::string filters;
+	if (def_fname.find("playback") != std::string::npos)
+		filters = _("Waveform Audio Format]\t*.{mp3,wav}\n");
+	else
+		filters = _("Waveform Audio Format\t*.wav\n");
 	if (format_supported(SF_FORMAT_FLAC | SF_FORMAT_PCM_16)) {
 		filters.append(_("Free Lossless Audio Codec\t*.flac"));
 	}
@@ -438,6 +443,182 @@ sf_count_t SoundBase::read_file(SNDFILE* file, float* buf, size_t count)
 	return r;
 }
 
+//----------------------------------------------------------------------
+// Audio
+// Adds ability to transmit an audio file using new macro tag:
+//   <AUDIO:path-filename>
+//   macro editor opens an OS select file dialog when the tag is
+//   selected from the pick list.
+//   suggested use:
+//     <MODEM:NULL><TX>
+//     <AUDIO:path-filename-1>
+//     <AUDIO:path-filename-2>
+//     <RX><@MODEM:BPSK31>
+//   or modem type of choice
+//   Audio file may be either wav or mp3 format, either mono or stereo 
+//   any sample rate
+//   Returning to Rx stops current and any pending audio playback.  Post
+//   Tx macro tags are then executed.
+//   T/R button or Escape key will abort the playback.
+// Please use responsibly - know and understand your license limitations
+// for transmitting audio files, especially music and/or copyrighted
+// material.
+//----------------------------------------------------------------------
+int SoundBase::AudioMP3(std::string fname)
+{
+	drmp3_config config;
+	drmp3_uint64 frame_count;
+
+	float* mp3_buffer =  drmp3_open_file_and_read_f32(
+						fname.c_str(), &config, &frame_count );
+
+	if (!mp3_buffer) {
+		LOG_ERROR("File must be mp3 float format");
+		return 0;
+	}
+
+	LOG_INFO("\n\
+MP3 parameters\n\
+      channels: %d\n\
+   sample rate: %d\n\
+   frame count: %ld\n", 
+       config.outputChannels,
+       config.outputSampleRate,
+       long(frame_count));
+
+	float *buffer = new float[2 * frame_count];
+	if (!buffer) {
+		LOG_ERROR("Could not allocate audio buffer");
+		drmp3_free(mp3_buffer);
+		return 0;
+	}
+	if (config.outputChannels == 2) {
+		float maxval = 1.0;
+		for (unsigned int n = 0; n < frame_count; n++) {
+			buffer[2 * n] = mp3_buffer[2 * n] + mp3_buffer[2 * n + 1];
+			buffer[2 * n + 1] = 0;
+			if (fabs(buffer[2 * n]) > maxval) maxval = fabs(buffer[ 2 * n]);
+		}
+		for (unsigned int n = 0; n < frame_count; n++)
+			buffer[2 * n] /= maxval;
+	} else {
+		for (unsigned int n = frame_count - 1; n >= 0; n--) {
+			buffer[2 * n] = mp3_buffer[n];
+			buffer[2 * n + 1] = 0;
+		}
+	}
+	drmp3_free(mp3_buffer);
+
+	double save_sample_rate = req_sample_rate;
+	req_sample_rate = config.outputSampleRate;
+
+	unsigned int n = 0;
+	int incr = SCBLOCKSIZE;
+	while (n < frame_count) {
+		if (active_modem->get_stopflag())  {
+			Rx_queue_execute();
+			break;
+		}
+		if (n + incr < frame_count)
+			resample_write(&buffer[n*2], incr);
+		else
+			resample_write(&buffer[n*2], frame_count - n);
+		n += incr;
+	}
+
+	delete [] buffer;
+	req_sample_rate = save_sample_rate;
+	return n;
+
+}
+
+int SoundBase::AudioWAV(std::string fname)
+{
+	SNDFILE *playback;
+	play_info.frames = 0;
+	play_info.samplerate = 0;
+	play_info.channels = 0;
+	play_info.format = 0;
+	play_info.sections = 0;
+	play_info.seekable = 0;
+
+	if ((playback = sf_open(fname.c_str(), SFM_READ, &play_info)) == NULL) {
+		LOG_ERROR("Could not open %s", fname.c_str());
+		return 0;
+	}
+	LOG_INFO("\
+\nAudio file: %s\
+\nframes:     %ld\
+\nsamplerate: %d\
+\nchannels:   %d",
+fname.c_str(), (long)play_info.frames, play_info.samplerate, play_info.channels);
+
+	int ch = play_info.channels;
+
+	if (ch > 2) return 0;
+
+	int fsize = play_info.frames * 2;
+
+	float *buffer = new float[fsize];
+	if (!buffer)
+		return 0;
+	memset(buffer, 0, fsize * sizeof(*buffer));
+
+	int ret = sf_readf_float( playback, buffer, play_info.frames);
+	if (!ret) {
+		sf_close(playback);
+		delete [] buffer;
+		return 0;
+	}
+
+	double save_sample_rate = req_sample_rate;
+	req_sample_rate = play_info.samplerate;
+	if (ch == 1) {
+		for (long int n = play_info.frames - 1; n >= 0; n--) {
+			buffer[2 * n] = buffer[n];
+			buffer[2 * n + 1] = 0;
+		}
+	} else {
+		float maxval = 1.0;
+		for (long int n = play_info.frames - 1; n >= 0; n--) {
+			buffer[2 * n] = buffer[2 * n] + buffer[2 * n + 1];
+			buffer[2 * n + 1] = 0;
+			if (fabs(buffer[2*n] > maxval)) maxval = fabs(buffer[2*n]);
+		}
+		for (long int n = 0; n < play_info.frames; n++)
+			buffer[2*n] /= maxval;
+	}
+
+	unsigned int n = 0;
+	int incr = SCBLOCKSIZE;
+	while (n < play_info.frames) {
+		if (active_modem->get_stopflag())  {
+			Rx_queue_execute();
+			break;
+		}
+		if (n + incr < play_info.frames)
+			resample_write(&buffer[n*2], incr);
+		else
+			resample_write(&buffer[n*2], play_info.frames - n);
+		n += incr;
+	}
+
+	sf_close(playback);
+	delete [] buffer;
+	req_sample_rate = save_sample_rate;
+	return play_info.frames;
+}
+
+int SoundBase::Audio(std::string fname)
+{
+	if (fname.empty())
+		return 0;
+	if ((fname.find("mp3") != std::string::npos) || 
+		(fname.find("MP3") != std::string::npos ))
+		return AudioMP3(fname);
+	else
+		return AudioWAV(fname);
+}
 // ---------------------------------------------------------------------
 // write_file
 // All sound buffer data is resampled to a specified sample rate
@@ -914,6 +1095,14 @@ size_t SoundOSS::Write(double *buf, size_t count)
 	return retval;
 }
 
+size_t SoundOSS::resample_write(float *buf, size_t count)
+{
+	double *samples = new double[2*count];
+	Write(samples, count);
+	delete [] samples;
+	return 0;
+}
+
 size_t SoundOSS::Write_stereo(double *bufleft, double *bufright, size_t count)
 {
 	int retval;
@@ -1066,8 +1255,10 @@ const vector<double>& SoundPort::get_supported_rates(const string& name, unsigne
 }
 
 
-SoundPort::SoundPort(const char *in_dev, const char *out_dev) : req_sample_rate(0)
+SoundPort::SoundPort(const char *in_dev, const char *out_dev)
 {
+	req_sample_rate = 0;
+
 	sd[0].device = in_dev;
 	sd[0].params.channelCount = 2; // init_stream can change this to 0 or 1
 	sd[0].stream = 0;
@@ -1249,7 +1440,7 @@ device name = %s\n\
 		mode == O_RDONLY ? sd[0].device.c_str() : "unknown",
 		sd[0].params.channelCount,
 		sd[1].params.channelCount );
-	LOG_VERBOSE( "%s", pa_open_str);
+	LOG_INFO( "%s", pa_open_str);
 
 	return ret;
 }
@@ -1435,7 +1626,7 @@ size_t SoundPort::Read(float *buf, size_t count)
 		write_file(ofCapture, buf, NULL, count);
 #endif
 
-		return count;
+	return count;
 }
 
 size_t SoundPort::Write(double *buf, size_t count)
@@ -1565,6 +1756,8 @@ size_t SoundPort::resample_write(float* buf, size_t count)
 		pa_perror(3, "Portaudio write error #3");
 		throw SndException("Portaudio write error 3");
 	}
+	if (active_modem->get_stopflag()) return count;
+
 	sd[1].rb->write(wbuf, sd[1].params.channelCount * count);
 
 	return count;
@@ -1781,6 +1974,19 @@ void SoundPort::start_stream(unsigned dir)
 	PaStreamParameters* sp[2];
 	sp[dir] = &sd[dir].params;
 	sp[!dir] = NULL;
+
+LOG_INFO("\n\
+open pa stream for %s:\n\
+  samplerate    : %.0f\n\
+  device number : %d\n\
+  # channels    : %d\n\
+  latency       : %f\n\
+  sample Format : paFloat32",
+(dir == 1 ? "write" : "read"),
+sd[dir].dev_sample_rate,
+sp[dir]->device,
+sp[dir]->channelCount,
+sp[dir]->suggestedLatency);
 
 	err = Pa_OpenStream(&sd[dir].stream, sp[0], sp[1],
 			sd[dir].dev_sample_rate, sd[dir].frames_per_buffer,
@@ -2203,6 +2409,8 @@ size_t SoundPulse::resample_write(float* buf, size_t count)
 		wbuf = tx_src_data->data_out;
 		count = tx_src_data->output_frames_gen;
 	}
+
+	if (active_modem->get_stopflag()) return count;
 
 	if (pa_simple_write(sd[1].stream, wbuf, count * sd[1].stream_params.channels * sizeof(float), &err) == -1)
 		throw SndPulseException(err);

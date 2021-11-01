@@ -674,13 +674,11 @@ void WFdisp::handle_sig_data()
 		}
 		peakaudio = 0.1 * peak + 0.9 * peakaudio;
 
-//{
-//	guard_lock dlock(&draw_mutex);
 		if (mode == SCOPE)
 			process_analog(circbuff, FFT_LEN);
 		else
 			processFFT();
-//}
+
 		put_WARNstatus(peakaudio);
 
 		static char szFrequency[14];
@@ -908,14 +906,20 @@ void WFdisp::drawScale() {
 
 void WFdisp::drawMarker() {
 	if (mode == SCOPE) return;
+	int msize = RGBsize * scale_width;
+	int psize = scale_width * WFMARKER;
 	uchar *pixmap = (uchar *)(markerimage + (int)(offset));
-	uchar map[RGBsize * scale_width];
+	uchar map[msize];
+	memset(map, 0, sizeof(map));
 	int y1 = y() + WFSCALE + WFTEXT;
 	for (int yp = 0; yp < WFMARKER; yp++) {
 		for (int xp = 0; xp < scale_width; xp++) {
-			map[RGBsize * xp] = pixmap[RGBsize * (yp * scale_width + xp * step)];
-			map[RGBsize * xp + 1] = pixmap[RGBsize * (yp * scale_width + xp * step) + 1];
-			map[RGBsize * xp + 2] = pixmap[RGBsize * (yp * scale_width + xp * step) + 2];
+			if ((RGBsize * xp + 2 < msize) && 
+				(RGBsize * (yp * scale_width + xp * step + 2) < psize)) {
+				map[RGBsize * xp] = pixmap[RGBsize * (yp * scale_width + xp * step)];
+				map[RGBsize * xp + 1] = pixmap[RGBsize * (yp * scale_width + xp * step) + 1];
+				map[RGBsize * xp + 2] = pixmap[RGBsize * (yp * scale_width + xp * step) + 2];
+			}
 		}
 		fl_draw_image((const uchar *)map, x(), y1 + yp, w(), 1, RGBsize, 0);
 	}
@@ -1332,13 +1336,19 @@ void center_cb(Fl_Widget *w, void *v) {
 	restoreFocus();
 }
 
+void killMacroTimer()
+{
+	stopMacroTimer();
+}
+
 void carrier_cb(Fl_Widget *w, void *v) {
 	Fl_Counter *cntr = (Fl_Counter *)w;
 	waterfall *wf = (waterfall *)w->parent();
 	int selfreq = (int) cntr->value();
 	if (selfreq > progdefaults.HighFreqCutoff) selfreq = progdefaults.HighFreqCutoff - wf->wfdisp->Bandwidth() / 2;
-	stopMacroTimer();
-	if (active_modem) active_modem->set_freq(selfreq);
+	killMacroTimer();
+	if (active_modem)
+		active_modem->set_freq(selfreq);
 	wf->wfdisp->carrier(selfreq);
 	restoreFocus();
 }
@@ -1455,7 +1465,7 @@ void xmtrcv_cb(Fl_Widget *w, void *vi)
 		restoreFocus();		return;
 	}
 	if (v == 1) {
-		stopMacroTimer();
+		killMacroTimer();
 		active_modem->set_stopflag(false);
 
 		if (progdefaults.show_psm_btn && progStatus.kpsql_enabled)
@@ -1487,8 +1497,9 @@ void xmtrcv_cb(Fl_Widget *w, void *vi)
 			if(kiss_text_available)
 				flush_kiss_tx_buffer();
 
-			if (progStatus.timer)
+			if (progStatus.timer) {
 				progStatus.timer = 0;
+			}
 
 			queue_reset();
 			active_modem->set_stopflag(true);
@@ -2124,7 +2135,7 @@ int WFdisp::handle(int event)
 		makeMarker();
 		break;
 	case FL_DRAG: case FL_PUSH:
-		stopMacroTimer();
+		killMacroTimer();
 
 		switch (eb = Fl::event_button()) {
 		case FL_RIGHT_MOUSE:
@@ -2221,7 +2232,7 @@ int WFdisp::handle(int event)
 
 	case FL_MOUSEWHEEL:
 	{
-		stopMacroTimer();
+		killMacroTimer();
 
 		int d;
 		if ( !((d = Fl::event_dy()) || (d = Fl::event_dx())) )
@@ -2247,7 +2258,7 @@ int WFdisp::handle(int event)
 		break;
 	case FL_KEYBOARD:
 	{
-		stopMacroTimer();
+		killMacroTimer();
 
 		int d = (Fl::event_state() & FL_CTRL) ? 10 : 1;
 		int k = Fl::event_key();

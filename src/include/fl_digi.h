@@ -568,6 +568,8 @@ extern const char* zdate(void);
 extern const char* ztime(void);
 //extern void ztimer(void* first_call);
 extern const unsigned long zmsec(void);
+extern void  start_macro_time();
+extern int   stop_macro_time();
 
 extern void setTabColors();
 
@@ -779,6 +781,7 @@ extern Fl_Input2	*inpSQSO_category2;
 
 extern Fl_Double_Window	*dxcluster_viewer;
 
+extern Fl_Double_Window *rxaudio_dialog;
 // TOD clock
 extern void  TOD_init();
 extern void  TOD_close();

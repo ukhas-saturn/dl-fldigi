@@ -261,6 +261,8 @@ Fl_Double_Window	*field_day_viewer  = (Fl_Double_Window *)0;
 
 Fl_Double_Window	*dxcluster_viewer  = (Fl_Double_Window *)0;
 
+Fl_Double_Window	*rxaudio_dialog = (Fl_Double_Window *)0;
+
 static Fl_Group		*mnuFrame;
 Fl_Menu_Bar 		*mnu;
 
@@ -876,7 +878,10 @@ void cb_oliviaCustom(Fl_Widget *w, void *arg);
 
 void cb_contestiaCustom(Fl_Widget *w, void *arg);
 
+void cb_rtty45(Fl_Widget *w, void *arg);
 void cb_rtty50(Fl_Widget *w, void *arg);
+void cb_rtty75N(Fl_Widget *w, void *arg);
+void cb_rtty75W(Fl_Widget *w, void *arg);
 void cb_rtty100(Fl_Widget *w, void *arg);
 void cb_rtty300(Fl_Widget *w, void *arg);
 void cb_rttyCustom(Fl_Widget *w, void *arg);
@@ -1129,7 +1134,9 @@ static const Fl_Menu_Item quick_change_contestia[] = {
 };
 
 static const Fl_Menu_Item quick_change_rtty[] = {
+	{ "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY },
 	{ "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY },
+	{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY },
 	{ "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY },
 	{ "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY },
 	{ _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY },
@@ -1268,6 +1275,24 @@ void cb_rtty50(Fl_Widget *w, void *arg)
 	progdefaults.rtty_shift = 8;
 	progdefaults.rtty_parity = 0;
 	progdefaults.rtty_stop = 0;
+	set_rtty_tab_widgets();
+	cb_init_mode(w, arg);
+}
+
+void cb_rtty75N(Fl_Widget *w, void *arg)
+{
+	progdefaults.rtty_baud = 4;
+	progdefaults.rtty_bits = 0;
+	progdefaults.rtty_shift = 3;
+	set_rtty_tab_widgets();
+	cb_init_mode(w, arg);
+}
+
+void cb_rtty75W(Fl_Widget *w, void *arg)
+{
+	progdefaults.rtty_baud = 4;
+	progdefaults.rtty_bits = 0;
+	progdefaults.rtty_shift = 9;
 	set_rtty_tab_widgets();
 	cb_init_mode(w, arg);
 }
@@ -1728,6 +1753,11 @@ LOG_INFO("Deleting %s", "fsqMonitor");
 LOG_INFO("Deleting %s", "dxcluster_viewer");
 		dxcluster_viewer->hide();
 		delete dxcluster_viewer;
+	}
+	if (rxaudio_dialog) {
+LOG_INFO("Deleting %s", "rxaudio_dialog");
+		rxaudio_dialog->hide();
+		delete rxaudio_dialog;
 	}
 	if (test_signal_window) {
 LOG_INFO("Deleting %s", "test signal window");
@@ -2261,6 +2291,7 @@ void macro_cb(Fl_Widget *w, void *v)
 	if (mouse == FL_LEFT_MOUSE && !macros.text[b].empty()) {
 		if (progStatus.timer) return;
 		stopMacroTimer();
+		progStatus.skip_sked_macro = false;
 		macros.execute(b);
 	}
 	else if (mouse == FL_RIGHT_MOUSE)
@@ -2941,25 +2972,25 @@ void cb_mnuOnLineDOCS(Fl_Widget *, void *)
 }
 
 inline int version_check(string v1, string v2) {
-	long v1a, v1b, v1c, v1d = 0;
-	long v2a, v2b, v2c, v2d = 0;
+	long v1a, v1b, v1c;
+	long v2a, v2b, v2c;
 	size_t p;
-	p = v1.find("."); v1a = atol(v1.substr(0, p).c_str()); v1.erase(0, p+1);
-	p = v1.find("."); v1b = atol(v1.substr(0,p).c_str()); v1.erase(0, p+1);
-	p = v1.find("."); v1c = atol(v1.c_str()); v1.erase(0, p+1);
-	if (!v1.empty()) v1d = atol(v1.c_str());
-	p = v2.find("."); v2a = atol(v2.substr(0, p).c_str()); v2.erase(0, p+1);
-	p = v2.find("."); v2b = atol(v2.substr(0,p).c_str()); v2.erase(0, p+1);
-	p = v2.find("."); v2c = atol(v2.c_str()); v2.erase(0, p+1);
-	if (!v2.empty()) v2d = atol(v2.c_str());
+
+	v1a = atol(v1.c_str()); p = v1.find("."); v1.erase(0, p + 1);
+	v1b = atol(v1.c_str()); p = v1.find("."); v1.erase(0, p + 1);
+	v1c = atol(v1.c_str()); p = v1.find("."); v1.erase(0, p + 1);
+
+	v2a = atol(v2.c_str()); p = v2.find("."); v2.erase(0, p + 1);
+	v2b = atol(v2.c_str()); p = v2.find("."); v2.erase(0, p + 1);
+	v2c = atol(v2.c_str()); p = v2.find("."); v2.erase(0, p + 1);
+
 	if (v1a < v2a) return -1;
 	if (v1a > v2a) return 1;
 	if (v1b < v2b) return -1;
 	if (v1b > v2b) return 1;
 	if (v1c < v2c) return -1;
 	if (v1c > v2c) return 1;
-	if (v1d < v2d) return -1;
-	if (v1d > v2d) return 1;
+	if (v1.length()) return 1;
 	return 0;
 }
 
@@ -3243,6 +3274,11 @@ void toggleRSID()
 {
 	progdefaults.rsid = !progdefaults.rsid;
 	cbRSID(NULL, NULL);
+}
+
+void cb_mnuRxAudioDialog(Fl_Menu_ *w, void *d) {
+	if (rxaudio_dialog)
+		rxaudio_dialog->show();
 }
 
 void cb_mnuDigiscope(Fl_Menu_ *w, void *d) {
@@ -6234,6 +6270,8 @@ static Fl_Menu_Item menu_[] = {
 { RTTY_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75W", 0, cb_rtty75W, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -6340,6 +6378,13 @@ static Fl_Menu_Item menu_[] = {
 { VIEW_MLABEL, 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 
 { icons::make_icon_label(_("SSDV RX")), 's', (Fl_Callback*)cb_mnuShowSSDVRX, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+{ icons::make_icon_label(_("Rx Audio Dialog")), 'a', (Fl_Callback*)cb_mnuRxAudioDialog, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("View/Hide Channels")), 'c', (Fl_Callback*)cb_view_hide_channels, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("Signal browser")), 'b', (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
+
+{ icons::make_icon_label(_("View/Hide 48 macros")), 'm', (Fl_Callback*)cb_48macros, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("View/Hide Channels")), 'c', (Fl_Callback*)cb_view_hide_channels, 0, 0, _FL_MULTI_LABEL, 0, 14, 0},
 { icons::make_icon_label(_("Signal browser")), 'b', (Fl_Callback*)cb_mnuViewer, 0, FL_MENU_DIVIDER, _FL_MULTI_LABEL, 0, 14, 0},
 
@@ -7879,6 +7924,8 @@ static Fl_Menu_Item alt_menu_[] = {
 {"RTTY", 0, 0, 0, FL_SUBMENU, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-45", 0, cb_rtty45, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-50", 0, cb_rtty50, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75N", 0, cb_rtty75N, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
+{ "RTTY-75W", 0, cb_rtty75W, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-100", 0, cb_rtty100, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
 { "RTTY-300", 0, cb_rtty300, (void *)MODE_RTTY, FL_MENU_DIVIDER, FL_NORMAL_LABEL, 0, 14, 0},
 { _("Custom..."), 0, cb_rttyCustom, (void *)MODE_RTTY, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -9349,9 +9396,13 @@ static char rx_raw_chars[RAW_BUFF_LEN+1] = "";
 static char rx_raw_buff[RAW_BUFF_LEN+1] = "";
 static int  rx_raw_len = 0;
 
+static pthread_mutex_t rx_data_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 char *get_rx_data()
 {
-	ENSURE_THREAD(FLMAIN_TID);
+//	ENSURE_THREAD(FLMAIN_TID);
+	
+	guard_lock datalock(&rx_data_mutex);
 	memset(rx_raw_chars, 0, RAW_BUFF_LEN+1);
 	strcpy(rx_raw_chars, rx_raw_buff);
 	memset(rx_raw_buff, 0, RAW_BUFF_LEN+1);
@@ -9361,7 +9412,9 @@ char *get_rx_data()
 
 void add_rx_char(int data)
 {
-	ENSURE_THREAD(FLMAIN_TID);
+//	ENSURE_THREAD(FLMAIN_TID);
+
+	guard_lock datalock(&rx_data_mutex);
 	add_rxtx_char(data);
 	if (rx_raw_len == RAW_BUFF_LEN) {
 		memset(rx_raw_buff, 0, RAW_BUFF_LEN+1);
@@ -9397,13 +9450,22 @@ void add_tx_char(int data)
 }
 
 //======================================================================
-static void display_rx_data(const unsigned char data, int style) {
-	if (active_modem->get_mode() == MODE_FSQ)
-		fsq_rx_text->add(data,style);
-	else if (active_modem->get_mode() == MODE_IFKP)
-		ifkp_rx_text->add(data,style);
-	else
-		ReceiveText->add(data, style);
+static void TTY_bell()
+{
+	if (progdefaults.audibleBELL)
+		audio_alert->alert(progdefaults.BELL_RING);
+}
+
+static void display_rx_data(const unsigned char data, int style)
+{
+	if (data != '\r') {
+		if (active_modem->get_mode() == MODE_FSQ)
+			fsq_rx_text->add(data,style);
+		else if (active_modem->get_mode() == MODE_IFKP)
+			ifkp_rx_text->add(data,style);
+		else
+			ReceiveText->add(data, style);
+	}
 
 	if (bWF_only) return;
 
@@ -9435,8 +9497,9 @@ static void rx_parser(const unsigned char data, int style)
 	// will therefore have the eight bit set and can not match either
 	// '\r' or '\n'.
 
-	static unsigned int lastdata = 0;
-
+//	static unsigned int lastdata = 0;
+	display_rx_data(data, style);
+/*
 	if (data == '\n' && lastdata == '\r');
 	else if (data == '\r') {
 //		add_rx_char('\n');
@@ -9445,13 +9508,12 @@ static void rx_parser(const unsigned char data, int style)
 //		add_rx_char(data);
 		display_rx_data(data, style);
 	}
-
-	lastdata = data;
+*/
+//	lastdata = data;
 
 	if (!(data < ' ' && iscntrl(data)) && progStatus.spot_recv)
 		spot_recv(data);
 }
-
 
 static void put_rx_char_flmain(unsigned int data, int style)
 {
@@ -9485,9 +9547,13 @@ static void put_rx_char_flmain(unsigned int data, int style)
 	else if (progdefaults.show_all_codes)
 		rx_chd.rx((unsigned char *)ascii3[data & 0xFF]);
 
-	else if (mode == MODE_RTTY || mode == MODE_CW)
-		rx_chd.rx((unsigned char *)ascii[data & 0xFF]);
-
+	else if (mode == MODE_RTTY)
+		if (data == '\a') {
+			if (progdefaults.visibleBELL)
+				rx_chd.rx((unsigned char *)ascii2[7]);
+			REQ(TTY_bell);
+		} else
+			rx_chd.rx((unsigned char *)ascii[data & 0xFF]);
 	else
 		rx_chd.rx(data);
 
@@ -9624,25 +9690,37 @@ static void dim_status_cb(void* arg)
 {
 	reinterpret_cast<Fl_Box*>(arg)->deactivate();
 }
+
 static void (*const timeout_action[STATUS_NUM])(void*) = { clear_status_cb, dim_status_cb };
 
-static void put_status_msg(Fl_Box* status, const char* msg, double timeout, status_timeout action)
+struct PSM_STRUCT {
+	Fl_Widget *w;
+	double timeout;
+	status_timeout action;
+	char msg[100];
+};
+
+void put_status_msg(void *d)
 {
-	status->activate();
-	status->label(msg);
-	if (timeout > 0.0) {
-		Fl::remove_timeout(timeout_action[action], status);
-		Fl::add_timeout(timeout, timeout_action[action], status);
+	PSM_STRUCT *psm = (PSM_STRUCT *)d;
+
+	psm->w->activate();
+	psm->w->label(psm->msg);
+	if (psm->timeout > 0.0) {
+		Fl::remove_timeout(timeout_action[psm->action], psm->w);
+		Fl::add_timeout(psm->timeout, timeout_action[psm->action], psm->w);
 	}
 }
 
 void put_status(const char *msg, double timeout, status_timeout action)
 {
-	static char m[50];
-	strncpy(m, msg, sizeof(m));
-	m[sizeof(m) - 1] = '\0';
-
-	REQ(put_status_msg, StatusBar, m, timeout, action);
+	static PSM_STRUCT ps;
+	memset(ps.msg, 0, 100);
+	strcpy(ps.msg, msg);
+	ps.timeout = timeout;
+	ps.action = action;
+	ps.w = StatusBar;
+	Fl::awake(put_status_msg, (void *)&ps);
 }
 
 void put_status_safe(const char *msg, double timeout, status_timeout action)
@@ -9659,27 +9737,35 @@ void put_status_safe(const char *msg, double timeout, status_timeout action)
 
 void put_Status2(const char *msg, double timeout, status_timeout action)
 {
-	static char m[60];
-	strncpy(m, msg, sizeof(m));
-	m[sizeof(m) - 1] = '\0';
+	static PSM_STRUCT ps;
+	memset(ps.msg, 0, 100);
+	strcpy(ps.msg, msg);
+	ps.timeout = timeout;
+	ps.action = action;
+	ps.w = Status2;
 
 	info2msg = msg;
 
-	REQ(put_status_msg, Status2, m, timeout, action);
+	Fl::awake(put_status_msg, (void *)&ps);
 }
 
 void put_Status1(const char *msg, double timeout, status_timeout action)
 {
-	static char m[60];
-	strncpy(m, msg, sizeof(m));
-	m[sizeof(m) - 1] = '\0';
+	static PSM_STRUCT ps;
+	memset(ps.msg, 0, 100);
+	strcpy(ps.msg, msg);
+	ps.timeout = timeout;
+	ps.action = action;
+	ps.w = Status1;
 
 	info1msg = msg;
+
 	if (!active_modem) return;
 	if (progStatus.NO_RIGLOG && active_modem->get_mode() != MODE_FSQ) return;
-	REQ(put_status_msg, Status1, m, timeout, action);
-}
 
+	Fl::awake(put_status_msg, (void *)&ps);
+
+}
 
 void put_WARNstatus(double val)
 {
@@ -9939,6 +10025,7 @@ int get_tx_char(void)
 			TransmitText->pause();
 			break;
 		case 'r':
+			active_modem->set_CW_EOT();
 			if (active_modem->get_mode() == MODE_IFKP)
 				REQ(&FTextTX::clear, ifkp_tx_text);
 			else
@@ -9947,6 +10034,7 @@ int get_tx_char(void)
 			return(GET_TX_CHAR_ETX);
 			break;
 		case 'R':
+			active_modem->set_CW_EOT();
 			if (active_modem->get_mode() == MODE_IFKP) {
 				if (ifkp_tx_text->eot()) {
 					REQ(&FTextTX::clear, ifkp_tx_text);
@@ -9978,6 +10066,9 @@ int get_tx_char(void)
 				while(que_waiting) { MilliSleep(10); Fl::awake(); }
 				return(GET_TX_CHAR_ETX);
 			} else {
+				if (active_modem->get_stopflag()) {
+					return (GET_TX_CHAR_NODATA);
+				}
 				REQ(do_que_execute, (void*)0);
 				while(que_waiting) { MilliSleep(10); Fl::awake(); }
 				return (GET_TX_CHAR_NODATA);
@@ -10050,7 +10141,11 @@ void put_echo_char(unsigned int data, int style)
 	if (data == '\r' && lastdata == '\r') // reject multiple CRs
 		return;
 
-	if (asc == NULL)
+	if (data == '\a') {
+		if (progdefaults.visibleBELL)
+			echo_chd.rx((unsigned char *)ascii2[7]);
+		REQ(TTY_bell);
+	} else if (asc == NULL)
 		echo_chd.rx(data);
 	else
 		echo_chd.rx((unsigned char *)asc[data & 0xFF]);

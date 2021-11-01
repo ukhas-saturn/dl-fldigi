@@ -98,6 +98,8 @@ protected:
 	float		*src_rd_inp_buffer;
 	float		*out_pointer;
 
+	double		req_sample_rate;
+
 	SF_INFO		play_info;
 
 	float modem_wr_sr;
@@ -126,6 +128,7 @@ public:
 	virtual void    Abort(unsigned dir = UINT_MAX) = 0;
 	virtual size_t	Write(double *, size_t) = 0;
 	virtual size_t	Write_stereo(double *, double *, size_t) = 0;
+	virtual size_t	resample_write(float *buf, size_t count) = 0;
 	virtual size_t	Read(float *, size_t) = 0;
 	virtual void    flush(unsigned dir = UINT_MAX) = 0;
 	virtual bool	must_close(int dir = 0) = 0;
@@ -134,6 +137,9 @@ public:
 	int		Capture(bool val);
 	int		Playback(bool val);
 	int		Generate(bool val);
+	int		AudioMP3(std::string fname);
+	int		AudioWAV(std::string fname);
+	int		Audio(std::string fname);
 #endif
 };
 
@@ -177,6 +183,7 @@ public:
 	void	Abort(unsigned dir = UINT_MAX) { Close(dir); }
 	size_t		Write(double *, size_t);
 	size_t		Write_stereo(double *, double *, size_t);
+	size_t		resample_write(float *buf, size_t count);
 	size_t		Read(float *, size_t);
 	bool		must_close(int dir = 0) { return true; }
 	void		flush(unsigned dir = UINT_MAX) { wait_till_finished(); }
@@ -244,7 +251,6 @@ private:
 private:
         static bool                             pa_init;
 	static std::vector<const PaDeviceInfo*> devs;
-        double	 				req_sample_rate;
         float* 					fbuf;
 		float*					src_buffer;
 	SRC_DATA	*tx_src_data;
@@ -347,12 +353,13 @@ protected:
 class SoundNull : public SoundBase
 {
 public:
-	int	Open(int mode, int freq = 8000) { sample_frequency = freq; return 0; }
+	int	Open(int mode, int freq = 44100) { sample_frequency = freq; return 0; }
 	void    Close(unsigned) { }
 	void    Abort(unsigned) { }
 	size_t	Write(double* buf, size_t count);
 	size_t	Write_stereo(double* bufleft, double* bufright, size_t count);
 	size_t	Read(float *buf, size_t count);
+	size_t	resample_write(float* buf, size_t count){return 0;};
 	bool	must_close(int dir = 0) { return false; }
 	void	flush(unsigned) { }
 };

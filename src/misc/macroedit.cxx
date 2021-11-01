@@ -189,7 +189,8 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<TUNE:NN>\ttune signal for NN sec"));
 	w->add(_("<WAIT:NN.n>\tdelay xmt for NN.n sec"));
 	w->add(_("<REPEAT>\trepeat macro continuously"));
-	w->add(_("<SKED:hhmm[ss][:YYYYMMDD]>\tschedule execution"));
+	w->add(_("<SKED:hhmm[ss][:YYYYMMDD]>\tschedule execution for"));
+	w->add(_("<UNTIL:hhmm[ss][:YYYYMMDD]>\tend execution at"));
 
 	w->add(LINE_SEP);
 	w->add(_("<TXATTEN:nn.n>\t set xmt attenuator"));
@@ -205,7 +206,10 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<DTMF:[Wn:][Ln:]chrs>\t[Wait][Len](ms)"));
 
 	w->add(LINE_SEP);
-	w->add(_("<ALERT:[bark][checkout][doesnot][phone][beeboo][diesel][steam_train][dinner_bell]>"));
+	w->add(_("<AUDIO:>\tXmt audio wav file"));
+
+	w->add(LINE_SEP);
+	w->add(_("<ALERT:[bark][checkout][doesnot][phone][beeboo][diesel][steam_train][dinner_bell][standard_tone]>"));
 	w->add(_("<ALERT:>\talert using external wav file"));
 
 	w->add(LINE_SEP);
@@ -228,7 +232,8 @@ void loadBrowser(Fl_Widget *widget) {
 	w->add(_("<SAVE>\tsave current macro file"));
 
 	w->add(LINE_SEP);
-	w->add(_("<COMMENT:comment text>\tignore all comment text"));
+	w->add(_("<COMMENT:comment text>\tignore comment text"));
+	w->add(_("<#comments>\t ignore comments"));
 
 	w->add(LINE_SEP);
 	w->add(_("<CPS_TEST:nn>\tmodem char/sec test on nn chars"));
@@ -408,9 +413,19 @@ void cbInsertMacro(Fl_Widget *, void *)
 		} else
 			text = "";
 	} else if (text == "<ALERT:>") {
-		string filters = "Wav file\t*.wav";
+		string filters = "Audio file\t*.{mp3,wav}";
 		const char* p = FSEL::select(
-			_("Select wav file"),
+			_("Select audio file"),
+			filters.c_str(),
+			HomeDir.c_str());
+		if (p && *p) {
+			text.insert(7, p);
+		} else
+			text = "";
+	} else if (text == "<AUDIO:>") {
+		string filters = "Audio file\t*.{mp3,wav}";
+		const char* p = FSEL::select(
+			_("Select audio file"),
 			filters.c_str(),
 			HomeDir.c_str());
 		if (p && *p) {

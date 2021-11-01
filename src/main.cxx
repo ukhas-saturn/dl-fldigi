@@ -1172,13 +1172,17 @@ int main(int argc, char ** argv)
 	}
 
 	dlgViewer = createViewer();
+
 	dxcluster_viewer = dxc_window();
+	dxcluster_viewer->hide();
+
 	if (!dlgLogbook)
 		create_logbook_dialogs();
 
-	dxcluster_viewer->hide();
-
 	LOGBOOK_colors_font();
+
+	rxaudio_dialog = make_rxaudio_dialog();
+	rxaudio_dialog->hide();
 
 	if( progdefaults.kml_save_dir.empty() ) {
 		progdefaults.kml_save_dir = KmlDir ;
@@ -1190,11 +1194,16 @@ int main(int argc, char ** argv)
 // the main window will not be restored at its exact saved position if
 // we move it *after* it has been shown.
 #ifndef __APPLE__
-	fl_digi_main->show(argc, argv);
 	progStatus.initLastState();
+	fl_digi_main->show(argc, argv);
 #else
+#  if FLDIGI_FLTK_API_MAJOR == 1 && FLDIGI_FLTK_API_MINOR < 4
+	fl_digi_main->show(argc, argv);
+	progStatus.initLastState();
+#  else
 	progStatus.initLastState();
 	fl_digi_main->show(argc, argv);
+#  endif
 #endif
 
 	if (iconified)

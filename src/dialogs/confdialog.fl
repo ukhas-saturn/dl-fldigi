@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.03
+version 1.0305
 i18n_type 1
 i18n_include "gettext.h"
 i18n_function _
@@ -446,24 +446,24 @@ static const char szProsigns[] = "~|%|&|+|=|{|}|<|>|[|]| ";} {}
   code {static const int payload_browser_columns[] = { 180, 350 };} {}
   Fl_Window {} {
     label {Fldigi configuration} open
-    xywh {438 155 600 425} type Double color 45 selection_color 51 labelsize 18 align 80 non_modal visible
+    xywh {907 24 600 425} type Double color 45 selection_color 51 labelsize 18 align 80 non_modal visible
   } {
     Fl_Tabs tabsConfigure {open
-      xywh {0 0 675 390} color 50 selection_color 50
+      xywh {0 0 675 395} color 50 selection_color 50
     } {
       Fl_Group tabOperator {
         label Operator
-        callback {progdefaults.changed = true;} open selected
-        xywh {0 25 600 365} when 1
+        callback {progdefaults.changed = true;} open
+        xywh {0 25 600 365} when 1 hide
       } {
         Fl_Group {} {
           label {Station / Operator} open
-          xywh {5 35 590 320} box ENGRAVED_FRAME align 21
+          xywh {5 35 590 285} box ENGRAVED_FRAME align 21
         } {
           Fl_Input inpMyCallsign {
             label {Upload Callsign:}
             callback {const char *triggers = " !\#$%&'()*+,-.;<=>?@[\\\\]^_{|}~";
-std::string mycall = o->value();
+std::string mycall = inpMyCallsign->value();
 
 for (size_t k = 0; k < mycall.length(); k++) {
   for (size_t n = 0; n < strlen(triggers); n++) {
@@ -497,7 +497,6 @@ dl_fldigi::changed(dl_fldigi::CH_INFO);
 btnApplyConfig->activate();}
             tooltip {Callsign for uploading to UKHAS} xywh {195 64 110 24} when 1
             code0 {inpMyCallsign->labelsize(FL_NORMAL_SIZE);}
-            code1 {o->value(progdefaults.myCall.c_str());}
             class Fl_Input2
           }
           Fl_Input inpOperCallsign {
@@ -534,7 +533,7 @@ btnApplyConfig->activate();}
             callback {progdefaults.myAntenna = o->value();
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_INFO);
-btnApplyConfig->activate();} 
+btnApplyConfig->activate();}
             tooltip {Short description of antenna} xywh {195 155 320 24}
             code0 {inpMyAntenna->labelsize(FL_NORMAL_SIZE);}
             class Fl_Input2
@@ -605,7 +604,7 @@ progdefaults.changed = true;} open
         } {
           Fl_Group tabBrowser {
             label Browser open
-            xywh {0 50 600 340}
+            xywh {0 50 600 340} hide
           } {
             Fl_Group {} {open
               xywh {30 65 540 300} box ENGRAVED_FRAME
@@ -791,7 +790,7 @@ progdefaults.changed = true;}
           }
           Fl_Group tabUserInterface {
             label General open
-            xywh {0 50 600 340} hide
+            xywh {0 50 600 340}
           } {
             Fl_Group {} {open
               xywh {5 59 590 76} box ENGRAVED_FRAME
@@ -3192,7 +3191,7 @@ UI_select();}
         } {
           Fl_Group {} {
             label Display open
-            xywh {0 50 600 340} hide
+            xywh {0 50 600 340}
           } {
             Fl_Group {} {
               label {Colors and cursors} open
@@ -3569,7 +3568,7 @@ behaves inside the waterfall} xywh {65 188 150 22} box DOWN_BOX color 7 align 8
           }
           Fl_Group {} {
             label Spectrum open
-            xywh {0 50 600 340}
+            xywh {0 50 600 340} hide
           } {
             Fl_Group {} {
               label {Spectrum Scope / Waterfall interaction} open
@@ -3912,22 +3911,15 @@ progdefaults.changed = true;}
                 }
               }
               Fl_Group tabsCW_prosigns {
-                label Prosigns
+                label Prosigns open
                 xywh {0 75 600 315} align 5 hide
               } {
                 Fl_Group {} {open
-                  xywh {35 85 530 283} box ENGRAVED_FRAME
+                  xywh {35 85 530 298} box ENGRAVED_FRAME
                 } {
-                  Fl_Check_Button btnCW_use_paren {
-                    label {Use '(' paren not KN}
-                    callback {progdefaults.CW_use_paren=o->value();
-progdefaults.changed = true;}
-                    xywh {161 244 68 15} down_box DOWN_BOX
-                    code0 {o->value(progdefaults.CW_use_paren);}
-                  }
                   Fl_Group {} {
                     label {Use these for WinKeyer
-and nanoCW} open
+and nanoCW}
                     xywh {362 96 182 262} box ENGRAVED_FRAME align 17
                   } {
                     Fl_Box {} {
@@ -3975,10 +3967,9 @@ and nanoCW} open
                       tooltip {.--.-.} xywh {422 320 59 22}
                     }
                   }
-                }
-                Fl_Group {listbox_prosign[0]} {
-                  label {<BT>}
-                  callback {int c = o->index();
+                  Fl_Group {listbox_prosign[0]} {
+                    label {<BT>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -3988,16 +3979,16 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[0] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 102 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[0];}
-                  code2 {o->value(s);
+                    xywh {111 107 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[0];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[1]} {
-                  label {<AA>}
-                  callback {int c = o->index();
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[1]} {
+                    label {<AA>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4007,16 +3998,16 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[1] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 129 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[1];}
-                  code2 {o->value(s);
+                    xywh {111 134 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[1];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[2]} {
-                  label {<AS>}
-                  callback {int c = o->index();
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[2]} {
+                    label {<AS>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4026,16 +4017,16 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[2] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 157 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[2];}
-                  code2 {o->value(s);
+                    xywh {111 162 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[2];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[3]} {
-                  label {<AR>}
-                  callback {int c = o->index();
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[3]} {
+                    label {<AR>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4045,15 +4036,15 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[3] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 184 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[3];}
-                  code2 {o->value(s);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[4]} {
-                  label {<SK>}
-                  callback {int c = o->index();
+                    xywh {111 189 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[3];}
+                    code2 {o->value(s);}
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[4]} {
+                    label {<SK>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4063,16 +4054,16 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[4] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 212 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[4];}
-                  code2 {o->value(s);
+                    xywh {111 217 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[4];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[5]} {
-                  label {<KN>}
-                  callback {int c = o->index();
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[5]} {
+                    label {<KN>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4082,16 +4073,16 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[5] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 240 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[5];}
-                  code2 {o->value(s);
+                    xywh {111 245 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[5];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[6]} {
-                  label {<INT>}
-                  callback {int c = o->index();
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[6]} {
+                    label {<INT>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4101,16 +4092,16 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[6] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 267 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[6];}
-                  code2 {o->value(s);
+                    xywh {111 272 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[6];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[7]} {
-                  label {<HM>}
-                  callback {int c = o->index();
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[7]} {
+                    label {<HM>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4120,16 +4111,16 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[7] = ps[c];
 progdefaults.changed = true;;} open
-                  xywh {106 295 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[7];}
-                  code2 {o->value(s);
+                    xywh {111 300 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[7];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
-                Fl_Group {listbox_prosign[8]} {
-                  label {<VE>}
-                  callback {int c = o->index();
+                    class Fl_ListBox
+                  } {}
+                  Fl_Group {listbox_prosign[8]} {
+                    label {<VE>}
+                    callback {int c = o->index();
 for (int i = 0; i < 9; i++)
   if (listbox_prosign[i]->index() == c) {
     listbox_prosign[i]->index(12);
@@ -4139,13 +4130,28 @@ o->index(c);
 char ps[] = "~%&+={}<>[] ";
 progdefaults.CW_prosigns[8] = ps[c];
 progdefaults.changed = true;} open
-                  xywh {106 323 47 22} box DOWN_BOX color 7 align 4
-                  code0 {o->add(szProsigns);}
-                  code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[8];}
-                  code2 {o->value(s);
+                    xywh {111 328 47 22} box DOWN_BOX color 7 align 4
+                    code0 {o->add(szProsigns);}
+                    code1 {char s[2] = " "; s[0] = progdefaults.CW_prosigns[8];}
+                    code2 {o->value(s);
                        o->labelsize(FL_NORMAL_SIZE);}
-                  class Fl_ListBox
-                } {}
+                    class Fl_ListBox
+                  } {}
+                  Fl_Check_Button btnCW_use_paren {
+                    label {Use '(' paren not KN}
+                    callback {progdefaults.CW_use_paren=o->value();
+progdefaults.changed = true;}
+                    xywh {161 244 68 15} down_box DOWN_BOX
+                    code0 {o->value(progdefaults.CW_use_paren);}
+                  }
+                  Fl_Check_Button btnCW_prosign_display {
+                    label {Display decoded as assigned key}
+                    callback {progdefaults.CW_prosign_display=o->value();
+progdefaults.changed = true;}
+                    tooltip {Display the decoded prosign in the RX text using the short cut key} xywh {111 358 68 15} down_box DOWN_BOX
+                    code0 {o->value(progdefaults.CW_prosign_display);}
+                  }
+                }
               }
               Fl_Group tabsCW_winkeyer {
                 label WinKeyer
@@ -4710,16 +4716,6 @@ resetDOMEX();
 progdefaults.changed = true;}
                 tooltip {Filter bandwidth relative to signal width} xywh {206 141 63 20} type Simple align 8 minimum 1 maximum 2 value 1.5
                 code0 {o->value(progdefaults.DOMINOEX_BW);}
-                code1 {o->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Counter2
-              }
-              Fl_Counter valDominoEX_ADJ {
-                label {Tone-spacing adjust}
-                callback {progdefaults.DOMINOEX_ADJ = o->value();
-resetDOMEX();
-progdefaults.changed = true;}
-                tooltip {Tone-spacing adjust} xywh {206 166 63 20} type Simple align 8 minimum -100 maximum 100
-                code0 {o->value(progdefaults.DOMINOEX_ADJ);}
                 code1 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_Counter2
               }
@@ -5481,13 +5477,6 @@ progdefaults.changed = true;}
                   code0 {o->labelsize(FL_NORMAL_SIZE);}
                   class Fl_Counter2
                 }
-                Fl_Check_Button btn_contestia_reset_fec {
-                  label {Reset FEC blocks when changing BW or Tones}
-                  callback {progdefaults.contestia_reset_fec = o->value();
-progdefaults.changed = true;}
-                  tooltip {Enable this for UTF-8 character transmission} xywh {108 235 349 20} down_box DOWN_BOX
-                  code0 {o->value(progdefaults.contestia_reset_fec);}
-                }
               }
               Fl_Check_Button btnContestia_8bit {
                 label {8-bit extended characters}
@@ -5617,18 +5606,18 @@ progdefaults.changed = true;}
               xywh {0 50 609 340} selection_color 50
             } {
               Fl_Group tab_Rx_TTY {
-                label Rx
-                xywh {0 75 600 315} align 5 hide
+                label Rx open
+                xywh {0 75 605 315} align 5
               } {
                 Fl_Group {} {
                   label Receive open
-                  xywh {32 101 535 69} box ENGRAVED_FRAME align 21
+                  xywh {5 84 590 51} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Group i_listbox_rtty_afc_speed {
                     label {AFC speed}
                     callback {progdefaults.rtty_afcspeed = o->index();
 progdefaults.changed = true;} open
-                    tooltip {AFC tracking speed} xywh {107 128 90 22} box DOWN_BOX color 7
+                    tooltip {AFC tracking speed} xywh {107 107 90 22} box DOWN_BOX color 7
                     code0 {o->add("Slow"); o->add("Normal"); o->add("Fast");}
                     code1 {o->index(progdefaults.rtty_afcspeed);}
                     code2 {o->labelsize(FL_NORMAL_SIZE);}
@@ -5638,7 +5627,7 @@ progdefaults.changed = true;} open
                     label {RX - unshift on space}
                     callback {progdefaults.UOSrx=o->value();
 progdefaults.changed = true;}
-                    tooltip {Revert to unshifted char's on a space} xywh {211 128 63 22} down_box DOWN_BOX
+                    tooltip {Revert to unshifted char's on a space} xywh {211 107 63 22} down_box DOWN_BOX
                     code0 {o->value(progdefaults.UOSrx);}
                   }
                   Fl_Value_Input rtty_rx_shape {
@@ -5649,13 +5638,13 @@ progdefaults.changed = true;}
                     tooltip {rcos timing coefficient:
 1.0 ... 2.0
 W1HKJ best 1.275
-DO2SMF best 1.500} xywh {445 126 48 25} align 1 minimum 1 maximum 2 step 0.001 value 1.25 hide
+DO2SMF best 1.500} xywh {445 110 48 25} align 1 minimum 1 maximum 2 step 0.001 value 1.25 hide
                     code0 {o->value(progdefaults.rtty_filter);}
                   }
                 }
                 Fl_Group {} {
                   label {Decode (CWI suppression)} open
-                  xywh {32 171 535 55} box ENGRAVED_FRAME align 21
+                  xywh {5 136 590 50} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Check_Button {btnRxTones[0]} {
                     label {Mark-Space}
@@ -5664,7 +5653,7 @@ DO2SMF best 1.500} xywh {445 126 48 25} align 1 minimum 1 maximum 2 step 0.001 v
   btnRxTones[2]->value(0);
   progdefaults.rtty_cwi = 0;
 }}
-                    xywh {120 198 70 15} down_box DOWN_BOX
+                    xywh {102 161 77 13} down_box DOWN_BOX
                     code0 {o->value(progdefaults.rtty_cwi == 0);}
                   }
                   Fl_Check_Button {btnRxTones[1]} {
@@ -5674,7 +5663,7 @@ DO2SMF best 1.500} xywh {445 126 48 25} align 1 minimum 1 maximum 2 step 0.001 v
   btnRxTones[2]->value(0);
   progdefaults.rtty_cwi = 1;
 }}
-                    xywh {253 198 70 15} down_box DOWN_BOX
+                    xywh {249 161 77 13} down_box DOWN_BOX
                     code0 {o->value(progdefaults.rtty_cwi == 1);}
                   }
                   Fl_Check_Button {btnRxTones[2]} {
@@ -5684,19 +5673,19 @@ DO2SMF best 1.500} xywh {445 126 48 25} align 1 minimum 1 maximum 2 step 0.001 v
   btnRxTones[0]->value(0);
   progdefaults.rtty_cwi = 2;
 }}
-                    xywh {387 198 70 15} down_box DOWN_BOX
+                    xywh {396 161 78 13} down_box DOWN_BOX
                     code0 {o->value(progdefaults.rtty_cwi == 2);}
                   }
                 }
                 Fl_Group {} {
                   label {RTTY Scope Display} open
-                  xywh {32 228 535 55} box ENGRAVED_FRAME align 21
+                  xywh {5 188 590 50} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Check_Button btnPreferXhairScope {
                     label {Use cross hair scope}
                     callback {progdefaults.PreferXhairScope=o->value();
 progdefaults.changed = true;}
-                    tooltip {Default to cross hair digiscope} xywh {120 250 165 22} down_box DOWN_BOX
+                    tooltip {Default to cross hair digiscope} xywh {102 210 182 20} down_box DOWN_BOX
                     code0 {o->value(progdefaults.PreferXhairScope);}
                   }
                   Fl_Check_Button chk_true_scope {
@@ -5704,20 +5693,20 @@ progdefaults.changed = true;}
                     callback {progdefaults.true_scope=o->value();
 progdefaults.changed = true;}
                     tooltip {Enabled - use Mark/Space filter outputs
-Disabled - use pseudo signals} xywh {340 250 70 22} down_box DOWN_BOX
+Disabled - use pseudo signals} xywh {345 210 77 20} down_box DOWN_BOX
                     code0 {o->value(progdefaults.true_scope);}
                   }
                 }
                 Fl_Group {} {
                   label {Log RTTY frequency} open
-                  xywh {32 285 535 65} box ENGRAVED_FRAME align 21
+                  xywh {5 240 590 50} box ENGRAVED_FRAME align 21
                 } {
                   Fl_Check_Button chk_useMARKfreq {
                     label {Use MARK freq'}
                     callback {progdefaults.useMARKfreq=o->value();
 progdefaults.changed = true;}
                     tooltip {Enabled - log QSO using Mark frequency
-Disabled - log QSO using center frequency} xywh {120 311 146 22} down_box DOWN_BOX value 1
+Disabled - log QSO using center frequency} xywh {102 263 161 17} down_box DOWN_BOX value 1
                     code0 {o->value(progdefaults.useMARKfreq);}
                   }
                   Fl_Button btnRTTY_mark_color {
@@ -5731,8 +5720,82 @@ o->redraw();
 wf->redraw_marker();
 progdefaults.changed = true;
 }}
-                    tooltip {Color of Mark Track} xywh {340 311 41 18} color 2 align 8
+                    tooltip {Color of Mark Track} xywh {345 260 45 20} color 2 align 8
                     code0 {o->color(fl_rgb_color(progdefaults.rttymarkRGBI.R,progdefaults.rttymarkRGBI.G,progdefaults.rttymarkRGBI.B));}
+                  }
+                }
+                Fl_Group {} {
+                  label {RTTY Bell} open
+                  xywh {5 293 590 91} box ENGRAVED_FRAME align 21
+                } {
+                  Fl_Check_Button chk_audibleBELL {
+                    label {Audible BELL}
+                    callback {progdefaults.audibleBELL=o->value();
+progdefaults.changed = true;}
+                    tooltip {Enabled - log QSO using Mark frequency
+Disabled - log QSO using center frequency} xywh {102 303 161 22} down_box DOWN_BOX value 1
+                    code0 {o->value(progdefaults.audibleBELL);}
+                  }
+                  Fl_Check_Button chk_visibleBELL {
+                    label {Visible BELL}
+                    callback {progdefaults.visibleBELL=o->value();
+progdefaults.changed = true;}
+                    tooltip {Enabled - log QSO using Mark frequency
+Disabled - log QSO using center frequency} xywh {345 303 161 22} down_box DOWN_BOX value 1
+                    code0 {o->value(progdefaults.visibleBELL);}
+                  }
+                  Fl_File_Input inp_wav_fname_bell_ring {
+                    label {RTTY Bell audio wav}
+                    xywh {17 345 301 35} align 5
+                    code0 {o->value(progdefaults.BELL_RING.c_str());}
+                  }
+                  Fl_Button btn_select_bell_ring_wav {
+                    label Select
+                    callback {Fl_Native_File_Chooser fnfc;
+fnfc.title("Pick a file");
+fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
+fnfc.filter("wav files\\t*.{mp3,wav}\\n");
+fnfc.directory("./");           // default directory to use
+// Show native chooser
+switch ( fnfc.show() ) {
+  case -1: break; // ERROR
+  case  1: break; // CANCEL
+  default: {
+  	progdefaults.BELL_RING = fnfc.filename();
+  	inp_wav_fname_bell_ring->value(progdefaults.BELL_RING.c_str());
+  	progdefaults.BELL_RING_MENU = 0;
+  	mnu_bell_ring_menu->value(progdefaults.BELL_RING_MENU);
+  	break; // FILE CHOSEN
+  }
+}}
+                    xywh {320 356 59 24}
+                  }
+                  Fl_Choice mnu_bell_ring_menu {
+                    label {Sound:}
+                    callback {if (o->value() > 0) {
+  switch (o->value()) {
+    case 1 : progdefaults.BELL_RING = "bark"; break;
+    case 2 : progdefaults.BELL_RING = "checkout"; break;
+    case 3 : progdefaults.BELL_RING = "diesel"; break;
+    case 4 : progdefaults.BELL_RING = "steam_train"; break;
+    case 5 : progdefaults.BELL_RING = "doesnot"; break;
+    case 6 : progdefaults.BELL_RING = "beeboo"; break;
+    case 7 : progdefaults.BELL_RING = "phone"; break;
+    case 8 : progdefaults.BELL_RING = "dinner_bell"; break;
+    case 9 : progdefaults.BELL_RING = "rtty_bell"; break;
+    case 10 : progdefaults.BELL_RING = "standard_tone"; break;
+  }
+  inp_wav_fname_bell_ring->value(progdefaults.BELL_RING.c_str());
+}
+progdefaults.BELL_RING_MENU = o->value();} open
+                    xywh {383 356 134 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
+                    code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell|rtty_bell|standard_tone");}
+                    code1 {o->value(progdefaults.BELL_RING_MENU);}
+                  } {}
+                  Fl_Button btn_test_bell_ring_wav {
+                    label Test
+                    callback {audio_alert->alert(progdefaults.BELL_RING.c_str());}
+                    xywh {522 356 59 24}
                   }
                 }
               }
@@ -5814,16 +5877,6 @@ progdefaults.changed = true;} open
                        o->labelsize(FL_NORMAL_SIZE);}
                     class Fl_ListBox
                   } {}
-                  Fl_Value_Slider sldrRTTYbandwidth {
-                    label {Filter Adjustment}
-                    callback {progdefaults.RTTY_BW = o->value();
-resetRTTY();
-progdefaults.changed = true;}
-                    tooltip {RTTY filter bandwidth} xywh {326 280 250 20} type Horizontal align 5 minimum 0.5 maximum 2 step 0.1 value 1 textsize 14
-                    code0 {o->value(progdefaults.RTTY_BW);}
-                    code1 {o->labelsize(FL_NORMAL_SIZE); o->textsize(FL_NORMAL_SIZE);}
-                    class Fl_Value_Slider2
-                  }
                   Fl_Check_Button btnAUTOCRLF {
                     label AutoCRLF
                     callback {progdefaults.rtty_autocrlf = o->value();
@@ -6147,7 +6200,7 @@ progdefaults.changed = true;}
               }
               Fl_Group tab_WKFSK {
                 label {Winkeyer 3} open
-                xywh {0 75 609 315} align 5
+                xywh {0 75 609 315} align 5 hide
                 code0 {\#include "winkeyer.h"}
               } {
                 Fl_Group {} {
@@ -6355,7 +6408,7 @@ progdefaults.changed = true;}
             } {
               Fl_Group tabNavtex {
                 label Nav
-                xywh {0 75 600 315} hide
+                xywh {0 75 600 315}
               } {
                 Fl_Check_Button btnNvtxAdifLog {
                   label {Log Navtex messages to Adif file}
@@ -6373,52 +6426,63 @@ progdefaults.changed = true;}
                 }
               }
               Fl_Group tabWefax {
-                label WFx
-                xywh {0 75 600 315}
+                label WFx open
+                xywh {0 75 600 315} hide
               } {
                 Fl_Group {} {open
-                  xywh {2 79 598 285}
+                  xywh {4 79 592 301}
                 } {
-                  Fl_Check_Button btnWefaxAdifLog {
-                    label {Log Wefax messages to Adif file}
-                    callback {progdefaults.WEFAX_AdifLog=o->value();
-progdefaults.changed = true;}
-                    tooltip {Sent and received faxes are logged to Adif file.} xywh {99 155 235 30} down_box DOWN_BOX
-                    code0 {o->value(progdefaults.WEFAX_AdifLog);}
-                  }
                   Fl_Check_Button btnWefaxEmbeddedGui {
                     label {Embedded Wefax Gui}
                     callback {progdefaults.WEFAX_EmbeddedGui=o->value();
 progdefaults.changed = true;}
                     tooltip {Display tx and rx in main fldigi window.
-Change requires restart of fldigi} xywh {99 92 235 30} down_box DOWN_BOX
+Change requires restart of fldigi} xywh {70 92 235 30} down_box DOWN_BOX
                     code0 {o->value(progdefaults.WEFAX_EmbeddedGui);}
                   }
-                  Fl_Input btnWefaxShift {
-                    label {Frequency shift (800 Hz)}
-                    callback {if( o->value() > 900 ) { o->value(900); return; }
-if( o->value() < 750 ) { o->value(750); return; }
-progdefaults.WEFAX_Shift=o->value();
+                  Fl_Check_Button btnWefaxHideTx {
+                    label {Hide Transmission window}
+                    callback {progdefaults.WEFAX_HideTx=o->value();
 progdefaults.changed = true;}
-                    tooltip {Default 800 Hz. Deutsche Wetterdienst 850Hz} xywh {99 195 80 20} type Int align 8
-                    code0 {o->value(progdefaults.WEFAX_Shift);}
-                    class Fl_Value_Input2
+                    tooltip {Hide transmission window by default.} xywh {70 128 235 30} down_box DOWN_BOX
+                    code0 {o->value(progdefaults.WEFAX_HideTx);}
                   }
-                  Fl_Input btnWefaxMaxRows {
-                    label {Received fax maximum rows number (5000)}
-                    callback {if(o->value() > 10000 ) { o->value(10000); return ; }
-if(o->value() < 1000 ) { o->value(1000); return ; }
-progdefaults.WEFAX_MaxRows=o->value();
+                  Fl_Check_Button btnWefaxAdifLog {
+                    label {Log Wefax messages to Adif file}
+                    callback {progdefaults.WEFAX_AdifLog=o->value();
 progdefaults.changed = true;}
-                    tooltip {Maximum row number for a received fax image.} xywh {99 235 85 20} type Int align 8
+                    tooltip {Sent and received faxes are logged to Adif file.} xywh {70 165 235 30} down_box DOWN_BOX
+                    code0 {o->value(progdefaults.WEFAX_AdifLog);}
+                  }
+                  Fl_Counter cntrWEFAX_Shift {
+                    label {Frequency shift (800 Hz)}
+                    callback {progdefaults.WEFAX_Shift=o->value();
+progdefaults.changed = true;}
+                    xywh {71 201 150 24} align 8 minimum 750 maximum 900 step 10 value 800
+                    code0 {o->value(progdefaults.WEFAX_Shift);}
+                    code1 {o->lstep(100.0);}
+                  }
+                  Fl_Counter cntrWEFAX_Center {
+                    label {Center freq (1500 Hz)}
+                    callback {progdefaults.WEFAX_Center=o->value();
+progdefaults.changed = true;}
+                    xywh {71 232 150 24} align 8 minimum 1000 maximum 2000 step 10 value 1500
+                    code0 {o->value(progdefaults.WEFAX_Center);}
+                    code1 {o->lstep(100.0);}
+                  }
+                  Fl_Counter cntrWEFAX_MaxRows {
+                    label {\# rows before autosave splits image}
+                    callback {progdefaults.WEFAX_MaxRows=o->value();
+progdefaults.changed = true;}
+                    xywh {70 262 150 24} align 8 minimum 1000 maximum 10000 step 100 value 5000
                     code0 {o->value(progdefaults.WEFAX_MaxRows);}
-                    class Fl_Value_Input2
+                    code1 {o->lstep(1000.0);}
                   }
                   Fl_Input btnWefaxSaveDir {
                     label {Fax images destination directory}
                     callback {progdefaults.wefax_save_dir=o->value();
 progdefaults.changed = true;}
-                    xywh {99 285 310 20} align 5
+                    xywh {70 310 400 24} align 5
                     code0 {o->value(progdefaults.wefax_save_dir.c_str());}
                   }
                   Fl_Button btnSelectFaxDestDir {
@@ -6426,20 +6490,13 @@ progdefaults.changed = true;}
                     callback {Fl_File_Chooser *fc = new Fl_File_Chooser(".",NULL,Fl_File_Chooser::DIRECTORY,"Input File");
 fc->callback(WefaxDestDirSet);
 fc->show();}
-                    xywh {429 285 80 20}
-                  }
-                  Fl_Check_Button btnWefaxHideTx {
-                    label {Hide Transmission window}
-                    callback {progdefaults.WEFAX_HideTx=o->value();
-progdefaults.changed = true;}
-                    tooltip {Hide transmission window by default.} xywh {99 125 235 30} down_box DOWN_BOX
-                    code0 {o->value(progdefaults.WEFAX_HideTx);}
+                    xywh {478 310 80 24}
                   }
                   Fl_Check_Button btnWefaxSaveMonochrome {
                     label {Save image as monochrome file}
                     callback {progdefaults.WEFAX_SaveMonochrome=o->value();
 progdefaults.changed = true;}
-                    tooltip {Save the fax image as a gray-level PNG file.} xywh {99 315 235 30} down_box DOWN_BOX
+                    tooltip {Save the fax image as a gray-level PNG file.} xywh {70 337 235 30} down_box DOWN_BOX
                     code0 {o->value(progdefaults.WEFAX_SaveMonochrome);}
                   }
                 }
@@ -7579,61 +7636,36 @@ progdefaults.changed=true;}
       }
       Fl_Group tabSoundCard {
         label Audio open
-        xywh {0 25 600 365} hide
+        xywh {0 25 600 370}
       } {
         Fl_Tabs tabsSoundCard {open
-          xywh {0 25 600 365} selection_color 50
+          xywh {0 25 600 370} selection_color 50
         } {
           Fl_Group tabAudio {
             label Devices open
             xywh {0 50 600 340}
           } {
-            Fl_Group AudioTCP {open
-              xywh {55 65 380 45} box ENGRAVED_FRAME
+            Fl_Group AudioOSS {open
+              xywh {55 65 490 45} box ENGRAVED_FRAME
             } {
               Fl_Round_Button {btnAudioIO[0]} {
-                label TCP
-                callback {sound_update(SND_IDX_TCP);
+                label OSS
+                callback {sound_update(SND_IDX_OSS);
 progdefaults.changed = true;
 resetSoundCard();}
-                tooltip {Use TCP audio server} xywh {65 75 53 25} down_box DOWN_BOX selection_color 1
+                tooltip {Use OSS audio server} xywh {65 75 53 25} down_box DOWN_BOX selection_color 1
               }
-              Fl_Input inpIPServerHost {
-                label {Host:}
-                callback {scDevice[0] = progdefaults.IPServerHost = o->value();
-scDevice[1] = progdefaults.IPServerPort;
-progdefaults.changed = true;
-resetSoundCard();}
-                tooltip {TCP/UDP Server Host} xywh {180 75 90 25}
-                code0 {o->value(progdefaults.IPServerHost.c_str());}
-                code1 {inpIPServerHost->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-              Fl_Input inpIPServerPort {
-                label {Port:}
-                callback {scDevice[1] = progdefaults.IPServerPort = o->value();
-scDevice[0] = progdefaults.IPServerHost;
-progdefaults.changed = true;
-resetSoundCard();}
-                tooltip {TCP/UDP Server Port} xywh {320 75 90 25}
-                code0 {o->value(progdefaults.IPServerPort.c_str());}
-                code1 {inpIPServerPort->labelsize(FL_NORMAL_SIZE);}
-                class Fl_Input2
-              }
-            }
-            Fl_Group AudioUDP {open
-              xywh {435 65 110 45} box ENGRAVED_FRAME
-            } {
-              Fl_Round_Button {btnAudioIO[4]} {
-                label UDP
-                callback {sound_update(SND_IDX_UDP);
-progdefaults.changed = true;
-resetSoundCard();}
-                tooltip {Use UDP audio server} xywh {450 75 53 25} down_box DOWN_BOX selection_color 1
-              }
+              Fl_Input_Choice menuOSSDev {
+                label {Device:}
+                callback {scDevice[0] = scDevice[1] = progdefaults.OSSdevice = o->value();
+resetSoundCard();
+progdefaults.changed = true;} open
+                tooltip {Select device} xywh {370 75 165 25}
+                code0 {o->value(progdefaults.OSSdevice.c_str());}
+              } {}
             }
             Fl_Group AudioPort {open
-              xywh {55 110 490 80} box ENGRAVED_FRAME
+              xywh {55 110 490 79} box ENGRAVED_FRAME
             } {
               Fl_Round_Button {btnAudioIO[1]} {
                 label PortAudio
@@ -7648,7 +7680,7 @@ resetSoundCard();}
 progdefaults.PortInIndex = reinterpret_cast<intptr_t>(o->mvalue()->user_data());
 resetSoundCard();
 progdefaults.changed = true;} open
-                tooltip {Audio input device} xywh {244 121 290 25} down_box BORDER_BOX
+                tooltip {Audio input device} xywh {225 121 310 25} down_box BORDER_BOX
               } {}
               Fl_Choice menuPortOutDev {
                 label {Playback:}
@@ -7656,7 +7688,7 @@ progdefaults.changed = true;} open
 progdefaults.PortOutIndex = reinterpret_cast<intptr_t>(o->mvalue()->user_data());
 resetSoundCard();
 progdefaults.changed = true;} open
-                tooltip {Audio output device} xywh {244 156 290 25} down_box BORDER_BOX
+                tooltip {Audio output device} xywh {225 156 310 25} down_box BORDER_BOX
               } {}
             }
             Fl_Group AudioPulse {open
@@ -7692,15 +7724,27 @@ resetSoundCard();}
                 tooltip {NO AUDIO DEVICE AVAILABLE (or testing)} xywh {66 245 100 25} down_box DOWN_BOX selection_color 1
               }
             }
+            Fl_Group AudioAlerts {
+              label {Alerts / Rx Audio} open
+              xywh {55 280 490 55} box ENGRAVED_FRAME align 21
+            } {
+              Fl_Choice menuAlertsDev {
+                label Playback
+                callback {progdefaults.AlertDevice = o->text();
+progdefaults.AlertIndex = reinterpret_cast<intptr_t>(o->mvalue()->user_data());
+progdefaults.changed = true;} open
+                tooltip {Audio output device} xywh {225 300 310 25} down_box BORDER_BOX
+              } {}
+            }
             Fl_Group AudioDuplex {open
-              xywh {55 280 490 45} box ENGRAVED_FRAME
+              xywh {55 336 490 45} box ENGRAVED_FRAME
             } {
               Fl_Round_Button btn_is_full_duplex {
                 label {Device supports full duplex}
                 callback {progdefaults.is_full_duplex = o->value();
 progdefaults.changed = true;
 resetSoundCard();}
-                tooltip {NO AUDIO DEVICE AVAILABLE (or testing)} xywh {66 290 223 25} down_box DOWN_BOX value 1 selection_color 1
+                tooltip {NO AUDIO DEVICE AVAILABLE (or testing)} xywh {66 346 223 25} down_box DOWN_BOX value 1 selection_color 1
                 code0 {o->value(progdefaults.is_full_duplex);}
               }
             }
@@ -7915,17 +7959,16 @@ progdefaults.changed=true;}
               code0 {o->value(progdefaults.record_both_channels);}
             }
           }
-          Fl_Group tabAlerts {
-            label Alerts open
+          Fl_Group tabAlerts1 {
+            label {Alerts 1} open
             xywh {0 50 600 340} color 50 selection_color 50 hide
           } {
-            Fl_Group {} {
-              label {Regex Match in Browser} open
-              xywh {5 56 590 66} box ENGRAVED_BOX align 17
+            Fl_Group {} {open
+              xywh {5 55 590 66} box ENGRAVED_BOX align 17
             } {
               Fl_File_Input inp_wav_fname_regex {
                 label {REGEX detected wav}
-                xywh {10 80 304 35} align 5
+                xywh {10 79 304 35} align 5
                 code0 {o->value(progdefaults.BWSR_REGEX_MATCH.c_str());}
               }
               Fl_Button btn_select_regex_wav {
@@ -7933,7 +7976,7 @@ progdefaults.changed=true;}
                 callback {Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\\t*.wav\\n");
+fnfc.filter("wav files\\t*.{mp3,wav}\\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -7947,7 +7990,7 @@ switch ( fnfc.show() ) {
   	break; // FILE CHOSEN
   }
 }}
-                xywh {316 91 60 24}
+                xywh {316 90 60 24}
                 code0 {\#include <FL/Fl_Native_File_Chooser.H>}
               }
               Fl_Choice mnu_regex_alert_menu {
@@ -7962,30 +8005,31 @@ switch ( fnfc.show() ) {
     case 6 : progdefaults.BWSR_REGEX_MATCH = "beeboo"; break;
     case 7 : progdefaults.BWSR_REGEX_MATCH = "phone"; break;
     case 8 : progdefaults.BWSR_REGEX_MATCH = "dinner_bell"; break;
+    case 9 : progdefaults.BWSR_REGEX_MATCH = "rtty_bell"; break;
+    case 10 : progdefaults.BWSR_REGEX_MATCH = "standard_tone"; break;
   }
   inp_wav_fname_regex->value(progdefaults.BWSR_REGEX_MATCH.c_str());
 }
 progdefaults.REGEX_ALERT_MENU = o->value();} open
-                xywh {380 91 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
-                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell");}
+                xywh {380 90 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
+                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell|rtty_bell|standard_tone");}
                 code1 {o->value(progdefaults.REGEX_ALERT_MENU);}
               } {}
               Fl_Check_Button btn_enable_regex_match_wa {
                 label Enable
                 callback {progdefaults.ENABLE_BWSR_REGEX_MATCH=o->value();}
-                xywh {514 69 70 15} down_box DOWN_BOX
+                xywh {520 69 70 15} down_box DOWN_BOX
                 code0 {o->value(progdefaults.ENABLE_BWSR_REGEX_MATCH);}
               }
               Fl_Button btn_test_regex_wav {
                 label Test
                 callback {audio_alert->alert(progdefaults.BWSR_REGEX_MATCH.c_str());}
-                xywh {518 91 60 24}
+                xywh {520 90 60 24}
                 code0 {\#include "audio_alert.h"}
               }
             }
-            Fl_Group {} {
-              label {MYCALL Match in Browser} open
-              xywh {5 123 590 66} box ENGRAVED_BOX align 17
+            Fl_Group {} {open
+              xywh {5 124 590 66} box ENGRAVED_BOX align 17
             } {
               Fl_File_Input inp_wav_fname_mycall {
                 label {MYCALL detected wav}
@@ -7997,7 +8041,7 @@ progdefaults.REGEX_ALERT_MENU = o->value();} open
                 callback {Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\\t*.wav\\n");
+fnfc.filter("wav files\\t*.{mp3,wav}\\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -8025,152 +8069,34 @@ switch ( fnfc.show() ) {
     case 6 : progdefaults.BWSR_MYCALL_MATCH = "beeboo"; break;
     case 7 : progdefaults.BWSR_MYCALL_MATCH = "phone"; break;
     case 8 : progdefaults.BWSR_MYCALL_MATCH = "dinner_bell"; break;
+    case 9 : progdefaults.BWSR_MYCALL_MATCH = "rtty_bell"; break;
+    case 10 : progdefaults.BWSR_MYCALL_MATCH = "standard_tone"; break;
   }
   inp_wav_fname_mycall->value(progdefaults.BWSR_MYCALL_MATCH.c_str());
 }
 progdefaults.MYCALL_ALERT_MENU = o->value();} open
                 xywh {380 158 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
-                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell");}
+                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell|rtty_bell|standard_tone");}
                 code1 {o->value(progdefaults.MYCALL_ALERT_MENU);}
               } {}
               Fl_Check_Button btn_enable_mycall_match_wav {
                 label Enable
                 callback {progdefaults.ENABLE_BWSR_MYCALL_MATCH=o->value();}
-                xywh {514 136 70 15} down_box DOWN_BOX
+                xywh {520 136 70 15} down_box DOWN_BOX
                 code0 {o->value(progdefaults.ENABLE_BWSR_MYCALL_MATCH);}
               }
               Fl_Button btn_test_mycall_wav {
                 label Test
                 callback {audio_alert->alert(progdefaults.BWSR_MYCALL_MATCH.c_str());}
-                xywh {518 158 60 24}
+                xywh {520 158 60 24}
               }
             }
-            Fl_Group {} {
-              label {flmsg interface} open
-              xywh {5 190 590 122} box ENGRAVED_BOX align 17
-            } {
-              Fl_File_Input inp_wav_flmsg_rcvd {
-                label {flmsg received wav}
-                xywh {10 214 304 35} align 5
-                code0 {o->value(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());}
-              }
-              Fl_Button btn_select_rx_extract_msg {
-                label Select
-                callback {Fl_Native_File_Chooser fnfc;
-fnfc.title("Pick a file");
-fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\\t*.wav\\n");
-fnfc.directory("./");           // default directory to use
-// Show native chooser
-switch ( fnfc.show() ) {
-  case -1: break; // ERROR
-  case  1: break; // CANCEL
-  default: {
-  	progdefaults.RX_EXTRACT_MSG_RCVD = fnfc.filename();
-  	inp_wav_flmsg_rcvd->value(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());
-  	progdefaults.RX_EXTRACT_ALERT_MENU = 0;
-  	mnu_rx_extract_alert_menu->value(progdefaults.RX_EXTRACT_ALERT_MENU);
-  	break; // FILE CHOSEN
-  }
-}}
-                xywh {316 225 60 24}
-              }
-              Fl_Choice mnu_rx_extract_alert_menu {
-                label {Sound:}
-                callback {if (o->value() > 0) {
-  switch (o->value()) {
-    case 1 : progdefaults.RX_EXTRACT_MSG_RCVD = "bark"; break;
-    case 2 : progdefaults.RX_EXTRACT_MSG_RCVD = "checkout"; break;
-    case 3 : progdefaults.RX_EXTRACT_MSG_RCVD = "diesel"; break;
-    case 4 : progdefaults.RX_EXTRACT_MSG_RCVD = "steam_train"; break;
-    case 5 : progdefaults.RX_EXTRACT_MSG_RCVD = "doesnot"; break;
-    case 6 : progdefaults.RX_EXTRACT_MSG_RCVD = "beeboo"; break;
-    case 7 : progdefaults.RX_EXTRACT_MSG_RCVD = "phone"; break;
-    case 8 : progdefaults.RX_EXTRACT_MSG_RCVD = "dinner_bell"; break;
-  }
-  inp_wav_flmsg_rcvd->value(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());
-}
-progdefaults.RX_EXTRACT_ALERT_MENU = o->value();} open
-                xywh {380 225 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
-                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell");}
-                code1 {o->value(progdefaults.RX_EXTRACT_ALERT_MENU);}
-              } {}
-              Fl_Check_Button btn_enable_flmsg_wav {
-                label Enable
-                callback {progdefaults.ENABLE_RX_EXTRACT_MSG_RCVD=o->value();}
-                xywh {514 203 70 15} down_box DOWN_BOX
-                code0 {o->value(progdefaults.ENABLE_RX_EXTRACT_MSG_RCVD);}
-              }
-              Fl_Button btn_test_flmsg_extract_wav {
-                label Test
-                callback {audio_alert->alert(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());}
-                xywh {518 225 60 24}
-              }
-              Fl_File_Input inp_wav_flmsg_timed_out {
-                label {flmsg timed out wav}
-                xywh {10 270 304 35} align 5
-                code0 {o->value(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());}
-              }
-              Fl_Button btn_select_rx_extract_timed_out {
-                label Select
-                callback {Fl_Native_File_Chooser fnfc;
-fnfc.title("Pick a file");
-fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\\t*.wav\\n");
-fnfc.directory("./");           // default directory to use
-// Show native chooser
-switch ( fnfc.show() ) {
-  case -1: break; // ERROR
-  case  1: break; // CANCEL
-  default: {
-  	progdefaults.RX_EXTRACT_TIMED_OUT = fnfc.filename();
-  	inp_wav_flmsg_timed_out->value(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());
-  	progdefaults.TIMED_OUT_ALERT_MENU = 0;
-  	mnu_rx_timed_out_alert_menu->value(progdefaults.TIMED_OUT_ALERT_MENU);
-  	break; // FILE CHOSEN
-  }
-}}
-                xywh {316 281 60 24}
-              }
-              Fl_Choice mnu_rx_timed_out_alert_menu {
-                label {Sound:}
-                callback {if (o->value() > 0) {
-  switch (o->value()) {
-    case 1 : progdefaults.RX_EXTRACT_TIMED_OUT = "bark"; break;
-    case 2 : progdefaults.RX_EXTRACT_TIMED_OUT = "checkout"; break;
-    case 3 : progdefaults.RX_EXTRACT_TIMED_OUT = "diesel"; break;
-    case 4 : progdefaults.RX_EXTRACT_TIMED_OUT = "steam_train"; break;
-    case 5 : progdefaults.RX_EXTRACT_TIMED_OUT = "doesnot"; break;
-    case 6 : progdefaults.RX_EXTRACT_TIMED_OUT = "beeboo"; break;
-    case 7 : progdefaults.RX_EXTRACT_TIMED_OUT = "phone"; break;
-    case 8 : progdefaults.RX_EXTRACT_TIMED_OUT = "dinner_bell"; break;
-  }
-  inp_wav_flmsg_timed_out->value(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());
-}
-progdefaults.TIMED_OUT_ALERT_MENU = o->value();} open
-                xywh {380 281 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
-                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell");}
-                code1 {o->value(progdefaults.TIMED_OUT_ALERT_MENU);}
-              } {}
-              Fl_Button btn_test_rx_extract_timed_out {
-                label Test
-                callback {audio_alert->alert(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());}
-                xywh {518 281 60 24}
-              }
-              Fl_Check_Button btn_enable_flmsg_time_out_wav {
-                label Enable
-                callback {progdefaults.ENABLE_RX_EXTRACT_TIMED_OUT=o->value();}
-                xywh {515 260 70 15} down_box DOWN_BOX
-                code0 {o->value(progdefaults.ENABLE_RX_EXTRACT_TIMED_OUT);}
-              }
-            }
-            Fl_Group {} {
-              label {RsID detection} open
-              xywh {5 314 590 66} box ENGRAVED_BOX align 17
+            Fl_Group {} {open
+              xywh {5 193 590 66} box ENGRAVED_BOX align 17
             } {
               Fl_File_Input inp_wav_fname_rsid {
                 label {RsID audio alert wav}
-                xywh {10 338 304 35} align 5
+                xywh {10 215 304 35} align 5
                 code0 {o->value(progdefaults.RSID_MATCH.c_str());}
               }
               Fl_Button btn_select_rsid_wav {
@@ -8178,7 +8104,7 @@ progdefaults.TIMED_OUT_ALERT_MENU = o->value();} open
                 callback {Fl_Native_File_Chooser fnfc;
 fnfc.title("Pick a file");
 fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-fnfc.filter("wav files\\t*.wav\\n");
+fnfc.filter("wav files\\t*.{mp3,wav}\\n");
 fnfc.directory("./");           // default directory to use
 // Show native chooser
 switch ( fnfc.show() ) {
@@ -8192,7 +8118,7 @@ switch ( fnfc.show() ) {
   	break; // FILE CHOSEN
   }
 }}
-                xywh {316 349 60 24}
+                xywh {316 226 60 24}
               }
               Fl_Choice mnu_rsid_alert_menu {
                 label {Sound:}
@@ -8206,24 +8132,148 @@ switch ( fnfc.show() ) {
     case 6 : progdefaults.RSID_MATCH = "beeboo"; break;
     case 7 : progdefaults.RSID_MATCH = "phone"; break;
     case 8 : progdefaults.RSID_MATCH = "dinner_bell"; break;
+    case 9 : progdefaults.RSID_MATCH = "rtty_bell"; break;
+    case 10 : progdefaults.RSID_MATCH = "standard_tone"; break;
   }
   inp_wav_fname_rsid->value(progdefaults.RSID_MATCH.c_str());
 }
 progdefaults.RSID_ALERT_MENU = o->value();} open
-                xywh {380 349 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
-                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell");}
+                xywh {380 226 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
+                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell|rtty_bell|standard_tone");}
                 code1 {o->value(progdefaults.RSID_ALERT_MENU);}
               } {}
               Fl_Check_Button btn_enable_rsid_match_wav {
                 label Enable
                 callback {progdefaults.ENABLE_RSID_MATCH=o->value();}
-                xywh {514 327 70 15} down_box DOWN_BOX
+                xywh {520 205 70 15} down_box DOWN_BOX
                 code0 {o->value(progdefaults.ENABLE_RSID_MATCH);}
               }
               Fl_Button btn_test_rsid_wav {
                 label Test
                 callback {audio_alert->alert(progdefaults.RSID_MATCH.c_str());}
-                xywh {518 349 60 24}
+                xywh {520 226 60 24}
+              }
+            }
+            Fl_Group {} {open
+              xywh {5 261 590 124} box ENGRAVED_BOX align 17
+            } {
+              Fl_File_Input inp_wav_flmsg_rcvd {
+                label {flmsg received wav}
+                xywh {10 286 304 35} align 5
+                code0 {o->value(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());}
+              }
+              Fl_Button btn_select_rx_extract_msg {
+                label Select
+                callback {Fl_Native_File_Chooser fnfc;
+fnfc.title("Pick a file");
+fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
+fnfc.filter("wav files\\t*.{mp3,wav}\\n");
+fnfc.directory("./");           // default directory to use
+// Show native chooser
+switch ( fnfc.show() ) {
+  case -1: break; // ERROR
+  case  1: break; // CANCEL
+  default: {
+  	progdefaults.RX_EXTRACT_MSG_RCVD = fnfc.filename();
+  	inp_wav_flmsg_rcvd->value(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());
+  	progdefaults.RX_EXTRACT_ALERT_MENU = 0;
+  	mnu_rx_extract_alert_menu->value(progdefaults.RX_EXTRACT_ALERT_MENU);
+  	break; // FILE CHOSEN
+  }
+}}
+                xywh {316 297 60 24}
+              }
+              Fl_Choice mnu_rx_extract_alert_menu {
+                label {Sound:}
+                callback {if (o->value() > 0) {
+  switch (o->value()) {
+    case 1 : progdefaults.RX_EXTRACT_MSG_RCVD = "bark"; break;
+    case 2 : progdefaults.RX_EXTRACT_MSG_RCVD = "checkout"; break;
+    case 3 : progdefaults.RX_EXTRACT_MSG_RCVD = "diesel"; break;
+    case 4 : progdefaults.RX_EXTRACT_MSG_RCVD = "steam_train"; break;
+    case 5 : progdefaults.RX_EXTRACT_MSG_RCVD = "doesnot"; break;
+    case 6 : progdefaults.RX_EXTRACT_MSG_RCVD = "beeboo"; break;
+    case 7 : progdefaults.RX_EXTRACT_MSG_RCVD = "phone"; break;
+    case 8 : progdefaults.RX_EXTRACT_MSG_RCVD = "dinner_bell"; break;
+    case 9 : progdefaults.RX_EXTRACT_MSG_RCVD = "rtty_bell"; break;
+    case 10 : progdefaults.RX_EXTRACT_MSG_RCVD = "standard_tone"; break;
+  }
+  inp_wav_flmsg_rcvd->value(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());
+}
+progdefaults.RX_EXTRACT_ALERT_MENU = o->value();} open
+                xywh {380 297 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
+                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell|rtty_bell|standard_tone");}
+                code1 {o->value(progdefaults.RX_EXTRACT_ALERT_MENU);}
+              } {}
+              Fl_Check_Button btn_enable_flmsg_wav {
+                label Enable
+                callback {progdefaults.ENABLE_RX_EXTRACT_MSG_RCVD=o->value();}
+                xywh {520 275 70 15} down_box DOWN_BOX
+                code0 {o->value(progdefaults.ENABLE_RX_EXTRACT_MSG_RCVD);}
+              }
+              Fl_Button btn_test_flmsg_extract_wav {
+                label Test
+                callback {audio_alert->alert(progdefaults.RX_EXTRACT_MSG_RCVD.c_str());}
+                xywh {520 297 60 24}
+              }
+              Fl_File_Input inp_wav_flmsg_timed_out {
+                label {flmsg timed out wav}
+                xywh {10 345 304 35} align 5
+                code0 {o->value(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());}
+              }
+              Fl_Button btn_select_rx_extract_timed_out {
+                label Select
+                callback {Fl_Native_File_Chooser fnfc;
+fnfc.title("Pick a file");
+fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
+fnfc.filter("wav files\\t*.{mp3,wav}\\n");
+fnfc.directory("./");           // default directory to use
+// Show native chooser
+switch ( fnfc.show() ) {
+  case -1: break; // ERROR
+  case  1: break; // CANCEL
+  default: {
+  	progdefaults.RX_EXTRACT_TIMED_OUT = fnfc.filename();
+  	inp_wav_flmsg_timed_out->value(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());
+  	progdefaults.TIMED_OUT_ALERT_MENU = 0;
+  	mnu_rx_timed_out_alert_menu->value(progdefaults.TIMED_OUT_ALERT_MENU);
+  	break; // FILE CHOSEN
+  }
+}}
+                xywh {316 356 60 24}
+              }
+              Fl_Choice mnu_rx_timed_out_alert_menu {
+                label {Sound:}
+                callback {if (o->value() > 0) {
+  switch (o->value()) {
+    case 1 : progdefaults.RX_EXTRACT_TIMED_OUT = "bark"; break;
+    case 2 : progdefaults.RX_EXTRACT_TIMED_OUT = "checkout"; break;
+    case 3 : progdefaults.RX_EXTRACT_TIMED_OUT = "diesel"; break;
+    case 4 : progdefaults.RX_EXTRACT_TIMED_OUT = "steam_train"; break;
+    case 5 : progdefaults.RX_EXTRACT_TIMED_OUT = "doesnot"; break;
+    case 6 : progdefaults.RX_EXTRACT_TIMED_OUT = "beeboo"; break;
+    case 7 : progdefaults.RX_EXTRACT_TIMED_OUT = "phone"; break;
+    case 8 : progdefaults.RX_EXTRACT_TIMED_OUT = "dinner_bell"; break;
+    case 9 : progdefaults.RX_EXTRACT_TIMED_OUT = "rtty_bell"; break;
+    case 10 : progdefaults.RX_EXTRACT_TIMED_OUT = "standard_tone"; break;
+  }
+  inp_wav_flmsg_timed_out->value(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());
+}
+progdefaults.TIMED_OUT_ALERT_MENU = o->value();} open
+                xywh {380 356 135 24} box DOWN_BOX down_box BORDER_BOX color 53 align 5
+                code0 {o->add("wav file|bark|checkout|diesel|steam_train|doesnot|beeboo|phone|dinner_bell|rtty_bell|standard_tone");}
+                code1 {o->value(progdefaults.TIMED_OUT_ALERT_MENU);}
+              } {}
+              Fl_Button btn_test_rx_extract_timed_out {
+                label Test
+                callback {audio_alert->alert(progdefaults.RX_EXTRACT_TIMED_OUT.c_str());}
+                xywh {520 356 60 24}
+              }
+              Fl_Check_Button btn_enable_flmsg_time_out_wav {
+                label Enable
+                callback {progdefaults.ENABLE_RX_EXTRACT_TIMED_OUT=o->value();}
+                xywh {520 335 70 15} down_box DOWN_BOX
+                code0 {o->value(progdefaults.ENABLE_RX_EXTRACT_TIMED_OUT);}
               }
             }
           }
@@ -9084,8 +9134,8 @@ if (progdefaults.kml_enabled) {
           xywh {0 25 540 348}
         } {
           Fl_Group tabDLEnable {
-            label Enable open
-            xywh {0 50 540 320} hide
+            label Enable open selected
+            xywh {0 50 540 320}
           } {
             Fl_Group {} {
               label habitat open
@@ -9213,7 +9263,7 @@ progdefaults.changed = true;}
           }
           Fl_Group {} {
             label Location open
-            xywh {0 50 540 317}
+            xywh {0 50 540 317} hide
           } {
             Fl_Group {} {
               label {Listener Location} open
@@ -9279,7 +9329,7 @@ btnApplyConfig->activate();}
                 callback {progdefaults.gps_device = o->value();
 progdefaults.changed = true;
 dl_fldigi::changed(dl_fldigi::CH_GPS_SETTINGS);
-btnApplyConfig->activate();} open selected
+btnApplyConfig->activate();} open
                 xywh {115 195 185 25} box DOWN_BOX color 7 align 4
                 code0 {o->labelsize(FL_NORMAL_SIZE);}
                 class Fl_ComboBox
@@ -10711,3 +10761,129 @@ Function {make_window()} {} {}
 
 Function {make_window()} {open
 } {}
+
+Function {make_rxaudio_dialog()} {open
+} {
+  Fl_Window {} {
+    label {Rx Audio Monitor} open selected
+    xywh {492 50 360 230} type Double visible
+  } {
+    Fl_Check_Button btn_mon_xcvr_audio {
+      label {Monitor ON}
+      callback {progdefaults.mon_xcvr_audio = o->value();}
+      xywh {50 7 70 18} down_box DOWN_BOX
+      code0 {o->value(progdefaults.mon_xcvr_audio);}
+    }
+    Fl_Group {} {
+      label {Filter Settings} open
+      xywh {5 84 350 141} box ENGRAVED_FRAME align 21
+    } {
+      Fl_Value_Slider sldrRxFilt_bw {
+        label BW
+        callback {progdefaults.RxFilt_bw = o->value();
+
+int bw2 = progdefaults.RxFilt_bw / 2;
+progdefaults.RxFilt_low = progdefaults.RxFilt_mid - bw2;
+if (progdefaults.RxFilt_low < 100) progdefaults.RxFilt_low = 100;
+
+progdefaults.RxFilt_high = progdefaults.RxFilt_mid + bw2;
+if (progdefaults.RxFilt_high > 4000) progdefaults.RxFilt_high = 4000;
+
+sldrRxFilt_low->value(progdefaults.RxFilt_low);
+sldrRxFilt_low->redraw();
+sldrRxFilt_high->value(progdefaults.RxFilt_high);
+sldrRxFilt_high->redraw();
+
+progdefaults.changed = true;
+audio_alert->init_filter();}
+        tooltip {My transmit CW WPM} xywh {10 118 300 20} type {Horz Knob} color 206 selection_color 2 align 8 minimum 50 maximum 4000 step 10 value 500 textsize 14
+        code0 {o->value(progdefaults.RxFilt_bw);}
+        class Fl_Value_Slider2
+      }
+      Fl_Value_Slider sldrRxFilt_mid {
+        label Mid
+        callback {progdefaults.RxFilt_mid = o->value();
+
+int bw2 = progdefaults.RxFilt_bw / 2;
+progdefaults.RxFilt_low = progdefaults.RxFilt_mid - bw2;
+if (progdefaults.RxFilt_low < 100) progdefaults.RxFilt_low = 100;
+
+progdefaults.RxFilt_high = progdefaults.RxFilt_mid + bw2;
+if (progdefaults.RxFilt_high > 4000) progdefaults.RxFilt_high = 4000;
+
+sldrRxFilt_low->value(progdefaults.RxFilt_low);
+sldrRxFilt_low->redraw();
+sldrRxFilt_high->value(progdefaults.RxFilt_high);
+sldrRxFilt_high->redraw();
+
+progdefaults.changed = true;
+audio_alert->init_filter();}
+        tooltip {My transmit CW WPM} xywh {10 144 300 20} type {Horz Knob} color 206 selection_color 2 align 8 minimum 400 maximum 3500 step 10 value 1500 textsize 14
+        code0 {o->value(progdefaults.RxFilt_mid);}
+        class Fl_Value_Slider2
+      }
+      Fl_Value_Slider sldrRxFilt_low {
+        label Low
+        callback {progdefaults.RxFilt_low = o->value();
+
+int bw = progdefaults.RxFilt_high - progdefaults.RxFilt_low;
+progdefaults.RxFilt_bw = bw;
+sldrRxFilt_bw->value(bw);
+sldrRxFilt_bw->redraw();
+
+int mid = (progdefaults.RxFilt_high + progdefaults.RxFilt_low) / 2;
+progdefaults.RxFilt_mid = mid;
+sldrRxFilt_mid->value(mid);
+sldrRxFilt_mid->redraw();
+
+progdefaults.changed = true;
+audio_alert->init_filter();}
+        tooltip {My transmit CW WPM} xywh {10 170 300 20} type {Horz Knob} color 206 selection_color 2 align 8 minimum 100 maximum 3000 step 10 value 500 textsize 14
+        code0 {o->value(progdefaults.RxFilt_low);}
+        class Fl_Value_Slider2
+      }
+      Fl_Value_Slider sldrRxFilt_high {
+        label High
+        callback {progdefaults.RxFilt_high = o->value();
+
+int bw = progdefaults.RxFilt_high - progdefaults.RxFilt_low;
+progdefaults.RxFilt_bw = bw;
+sldrRxFilt_bw->value(bw);
+sldrRxFilt_bw->redraw();
+
+int mid = (progdefaults.RxFilt_high + progdefaults.RxFilt_low) / 2;
+progdefaults.RxFilt_mid = mid;
+sldrRxFilt_mid->value(mid);
+sldrRxFilt_mid->redraw();
+
+progdefaults.changed = true;
+audio_alert->init_filter();}
+        tooltip {My transmit CW WPM} xywh {10 196 300 20} type {Horz Knob} color 206 selection_color 2 align 8 minimum 500 maximum 4000 step 10 value 900 textsize 14
+        code0 {o->value(progdefaults.RxFilt_high);}
+        class Fl_Value_Slider2
+      }
+      Fl_Check_Button btn_RxFilt_at_track {
+        label {track WF cursor}
+        callback {progdefaults.RxFilt_track_wf = o->value();
+
+if (o->value() == 1) center_rxfilt_at_track();}
+        xywh {156 93 70 15} down_box DOWN_BOX
+        code0 {o->value(progdefaults.RxFilt_track_wf);}
+      }
+    }
+    Fl_Value_Slider sldrRxFilt_vol {
+      label {Vol'}
+      callback {progdefaults.RxFilt_vol = o->value();
+progdefaults.changed = true;}
+      tooltip {My transmit CW WPM} xywh {10 55 300 20} type {Horz Knob} color 206 selection_color 2 align 8 maximum 100 step 1 value 50 textsize 14
+      code0 {o->value(progdefaults.RxFilt_vol);}
+      class Fl_Value_Slider2
+    }
+    Fl_Check_Button btn_mon_dsp_audio {
+      label {Filtered audio}
+      callback {progdefaults.mon_dsp_audio = o->value();}
+      tooltip {Set Mid point of filter at waterfall cursor} xywh {50 29 70 18} down_box DOWN_BOX
+      code0 {o->value(progdefaults.mon_dsp_audio);}
+    }
+  }
+}

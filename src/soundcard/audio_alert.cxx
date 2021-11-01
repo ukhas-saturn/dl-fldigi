@@ -3,6 +3,14 @@
 // play various canned play_sounds or wav file using port audio interface
 
 #include "audio_alert.h"
+#include "configuration.h"
+#include "confdialog.h"
+
+#define PHONERING 15000
+int Caudio_alert::int_phone_ring[PHONERING];
+
+#define BEEBOO 48000
+int Caudio_alert::int_audio_beeboo[BEEBOO];
 
 void Caudio_alert::bark()
 {
@@ -65,9 +73,9 @@ void Caudio_alert::beeboo()
 void Caudio_alert::phone()
 {
 	try {
-		sc_audio->play_sound(phonering, PHONERING, SCRATE);
+		sc_audio->play_sound(int_phone_ring, PHONERING, SCRATE);
 		sc_audio->silence(1.0, SCRATE);
-		sc_audio->play_sound(phonering, PHONERING, SCRATE);
+		sc_audio->play_sound(int_phone_ring, PHONERING, SCRATE);
 	} catch (...) {
 		throw;
 	}
@@ -77,6 +85,31 @@ void Caudio_alert::dinner_bell()
 {
 	try {
 		sc_audio->play_sound(int_dinner_bell, DINNER_BELL, SCRATE);
+	} catch (...) {
+		throw;
+	}
+}
+
+void Caudio_alert::tty_bell()
+{
+	try {
+		sc_audio->play_sound(int_tty_bell, TTY_BELL, SCRATE);
+	} catch (...) {
+		throw;
+	}
+}
+
+void Caudio_alert::standard_tone()
+{
+	try{
+		float st[16000];
+		float mod;
+		for (int i = 0; i < 16000; i++) {
+			mod = i < 800 ? sin(M_PI*i/1600.0) :
+				  i > 15200 ? (cos(M_PI*(i - 15200)/1600.0)) : 1.0;
+			st[i] = 0.9 * mod * sin(2.0*M_PI*i*440.0/8000.0);
+		}
+		sc_audio->play_sound(st, 16000, 8000.0);
 	} catch (...) {
 		throw;
 	}
@@ -108,25 +141,76 @@ void Caudio_alert::create_beeboo()
 
 void Caudio_alert::create_phonering()
 {
-	int attack = 40;
 	int ntones = 60;
-	float freq = 480;
+	float freq = 500;
 	float sr = 8000;
-	int duration = PHONERING/ntones;
-	float val;
-	float modulation[duration];
-	for (int i = 0; i < duration; i++) {
-		val = 1.0;
-		if (i < attack) val *= (1.0 * i / attack);
-		if (i > duration - attack) val *= (1.0 * (duration - i) / attack);
-		modulation[i] = val;
-	}
-	for (int i = 0; i < ntones; i++) {
-		for (int j = 0; j < duration; j++) {
-			val = modulation[j] * sin(2.0 * M_PI * freq * (duration * i + j) / sr);
-			phonering[duration * i + j] = 32500 * val;
-		}
+	int mod = PHONERING/ntones;
+	memset(int_phone_ring, 0, sizeof(int_phone_ring));
+	for (int i = 0; i <= (PHONERING - mod); i++)
+		int_phone_ring[i] = 32000 * fabs(sin(M_PI * i / mod)) * sin(2.0 * M_PI * freq * i / sr);;
+}
+
+void Caudio_alert::alert(std::string s)
+{
+	if (s.empty()) return;
+	if (s == "bark") bark();
+	else if (s == "checkout") checkout();
+	else if (s == "doesnot" ) doesnot();
+	else if (s == "diesel" ) diesel();
+	else if (s == "steam_train") steam_train();
+	else if (s == "beeboo") beeboo();
+	else if (s == "phone") phone();
+	else if (s == "dinner_bell") dinner_bell();
+	else if (s == "rtty_bell") tty_bell();
+	else if (s == "standard_tone") standard_tone();
+	else file(s);
+}
+
+void Caudio_alert::monitor(double *buffer, int len, int _sr)
+{
+	sc_audio->mon_write(buffer, len, _sr);
+}
+
+Caudio_alert::Caudio_alert()
+{
+	try {
+		sc_audio = new c_portaudio;
+		create_phonering();
+		create_beeboo();
+	} catch (...) {
+		throw;
 	}
 }
 
+Caudio_alert::~Caudio_alert()
+{
+	delete sc_audio;
+}
+
 Caudio_alert *audio_alert = 0;
+
+void center_rxfilt_at_track()
+{
+	progdefaults.RxFilt_mid = active_modem->get_freq();
+
+	int bw2 = progdefaults.RxFilt_bw / 2;
+	progdefaults.RxFilt_low = progdefaults.RxFilt_mid - bw2;
+	if (progdefaults.RxFilt_low < 100) progdefaults.RxFilt_low = 100;
+
+	progdefaults.RxFilt_high = progdefaults.RxFilt_mid + bw2;
+	if (progdefaults.RxFilt_high > 4000) progdefaults.RxFilt_high = 4000;
+
+	sldrRxFilt_mid->value(progdefaults.RxFilt_mid);
+	sldrRxFilt_mid->redraw();
+
+	sldrRxFilt_low->value(progdefaults.RxFilt_low);
+	sldrRxFilt_low->redraw();
+
+	sldrRxFilt_high->value(progdefaults.RxFilt_high);
+	sldrRxFilt_high->redraw();
+
+	progdefaults.changed = true;
+
+	if (audio_alert)
+		audio_alert->init_filter();
+}

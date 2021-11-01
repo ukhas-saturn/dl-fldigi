@@ -224,10 +224,12 @@ static void init_portaudio(void)
 			menuPortInDev->add(menu_item.c_str(), 0, NULL,
 							   reinterpret_cast<void *>(ilist->idx), 0);
 
-		if (ilist->dev->maxOutputChannels > 0)
+		if (ilist->dev->maxOutputChannels > 0) {
 			menuPortOutDev->add(menu_item.c_str(), 0, NULL,
 								reinterpret_cast<void *>(ilist->idx), 0);
-
+			menuAlertsDev->add(menu_item.c_str(), 0, NULL,
+								reinterpret_cast<void *>(ilist->idx), 0);
+		}
 	}
 
 	if (progdefaults.PortInDevice.length() == 0) {
@@ -254,9 +256,19 @@ static void init_portaudio(void)
 			progdefaults.PortOutDevice = progdefaults.PAdevice;
 	}
 
+	if (progdefaults.AlertDevice.length() == 0) {
+		PaDeviceIndex def = get_default_portaudio_device(1);
+		if (def != paNoDevice) {
+			progdefaults.AlertDevice = (*(SoundPort::devices().begin() + def))->name;
+			progdefaults.AlertIndex = def;
+		}
+	}
+
 	// select the correct menu items
 	pa_set_dev(menuPortInDev,  progdefaults.PortInDevice,  progdefaults.PortInIndex);
 	pa_set_dev(menuPortOutDev, progdefaults.PortOutDevice, progdefaults.PortOutIndex);
+
+	pa_set_dev(menuAlertsDev, progdefaults.AlertDevice, progdefaults.AlertIndex);
 }
 
 int pa_set_dev(Fl_Choice *loc_choice, std::string loc_dev_name, int loc_dev_index)
@@ -350,7 +362,7 @@ static void sound_init_options(void)
 		}
 	}
 
-	//menuOSSDev->value(progdefaults.OSSdevice.c_str());
+	menuOSSDev->value(progdefaults.OSSdevice.c_str());
 	inpPulseServer->value(progdefaults.PulseServer.c_str());
 
 	char sr[20];
@@ -434,7 +446,11 @@ void sound_init(void)
 
 	init_portaudio();
 
-// set the Sound Card configuration tab to the correct initial values
+	// set the Sound Card configuration tab to the correct initial values
+#if !USE_OSS
+	AudioOSS->deactivate();
+	btnAudioIO[SND_IDX_OSS]->deactivate();
+#endif
 #if !USE_PORTAUDIO
 	AudioPort->deactivate();
 	btnAudioIO[SND_IDX_PORT]->deactivate();
@@ -445,7 +461,7 @@ void sound_init(void)
 #endif
 	if (progdefaults.btnAudioIOis == SND_IDX_UNKNOWN ||
 		!btnAudioIO[progdefaults.btnAudioIOis]->active()) { // or saved sound api now disabled
-		int io[5] = { SND_IDX_PORT, SND_IDX_PULSE, SND_IDX_NULL, SND_IDX_TCP, SND_IDX_UDP };
+		int io[4] = { SND_IDX_PORT, SND_IDX_PULSE, SND_IDX_OSS, SND_IDX_NULL };
 		if (probe_pulseaudio()) { // prefer pulseaudio
 			io[0] = SND_IDX_PULSE;
 			io[1] = SND_IDX_PORT;
@@ -461,6 +477,7 @@ void sound_init(void)
 	sound_init_options();
 
 	sound_update(progdefaults.btnAudioIOis);
+
 }
 
 void sound_close(void)
@@ -477,12 +494,10 @@ void sound_update(unsigned idx)
 		btnAudioIO[i]->value(i == idx);
 
 	// devices
-	//menuOSSDev->deactivate();
+	menuOSSDev->deactivate();
 	menuPortInDev->deactivate();
 	menuPortOutDev->deactivate();
 	inpPulseServer->deactivate();
-	inpIPServerHost->deactivate();
-	inpIPServerPort->deactivate();
 
 	// settings
 	menuInSampleRate->deactivate();
@@ -490,18 +505,7 @@ void sound_update(unsigned idx)
 
 	progdefaults.btnAudioIOis = idx;
 	switch (idx) {
-		case SND_IDX_TCP:
-			inpIPServerHost->activate();
-			if (inpIPServerHost->value())
-				scDevice[0] = inpIPServerHost->value();
-			//no break;
-		case SND_IDX_UDP:
-			inpIPServerPort->activate();
-			if (inpIPServerPort->value())
-				scDevice[1] = inpIPServerPort->value();
-			menuInSampleRate->activate();
-			break;
-#if 0
+#if USE_OSS
 		case SND_IDX_OSS:
 			scDevice[0] = scDevice[1] = menuOSSDev->value();
 			menuOSSDev->activate();

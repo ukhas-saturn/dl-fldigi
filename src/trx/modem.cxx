@@ -43,6 +43,7 @@
 
 #include "status.h"
 #include "debug.h"
+#include "audio_alert.h"
 
 using namespace std;
 
@@ -274,6 +275,8 @@ modem::modem()
 
 	track_freq_lock = 0;
 	bandwidth = 0.0;
+
+	CW_EOT = false;
 }
 
 // modem types CW and RTTY do not use the base init()
@@ -319,8 +322,13 @@ void modem::set_freq(double freq)
 		freq,
 		progdefaults.LowFreqCutoff + bandwidth / 2,
 		progdefaults.HighFreqCutoff - bandwidth / 2);
+
 	if (freqlock == false)
 		tx_frequency = frequency;
+
+	if (progdefaults.RxFilt_track_wf)
+		center_rxfilt_at_track();
+
 	REQ(put_freq, frequency);
 }
 
@@ -611,6 +619,24 @@ void modem::ModulateStereo(double *left, double *right, int len, bool sample_fla
 }
 
 //------------------------------------------------------------------------------
+// tx process
+//------------------------------------------------------------------------------
+int  modem::tx_process ()
+{
+	if (!macro_video_text.empty()) {
+		wfid_text(macro_video_text);
+		macro_video_text.clear();
+	}
+	if (play_audio) {
+		disable_modem = true;
+		TXscard->Audio(audio_filename);
+		play_audio = false;
+		disable_modem = false;
+	}
+	return 0;
+}
+
+//------------------------------------------------------------------------------
 // modulate video signal
 //------------------------------------------------------------------------------
 void modem::ModulateVideoStereo(double *left, double *right, int len, bool sample_flag)
@@ -875,12 +901,13 @@ void modem::cwid_sendtext (const string& s)
 
 void modem::cwid()
 {
-	if (progdefaults.cwid_modes.test(mode) &&
-		(progdefaults.CWid == true || progdefaults.macroCWid == true)) {
+	if ((CW_EOT && progdefaults.cwid_modes.test(mode) &&
+		progdefaults.CWid == true) || progdefaults.macroCWid == true) {
 		string tosend = " DE ";
 		tosend += progdefaults.myCall;
 		cwid_sendtext(tosend);
 		progdefaults.macroCWid = false;
+		CW_EOT = false;
 	}
 }
 

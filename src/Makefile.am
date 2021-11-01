@@ -676,6 +676,7 @@ dl_fldigi_SOURCES += \
 	soundcard/soundconf.cxx \
 	soundcard/sound.cxx \
 	soundcard/steam_train.cxx \
+	soundcard/ttybell.cxx \
 	spot/notify.cxx \
 	spot/pskrep.cxx \
 	spot/spot.cxx \
@@ -806,6 +807,7 @@ EXTRA_dl_fldigi_SOURCES += \
 	include/digiscope.h \
 	include/dominoex.h \
 	include/dominovar.h \
+	include/dr_mp3.h \
 	include/dsp.h \
 	include/dtmf.h \
 	include/dxcc.h \
