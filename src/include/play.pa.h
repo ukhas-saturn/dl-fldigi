@@ -24,12 +24,9 @@
 #include <string>
 
 #include <sndfile.h>
-#include <samplerate.h>
 
 #include "threads.h"
 #include "trx.h"
-#include "ringbuffer.h"
-#include "filters.h"
 
 class cPA_snd_exception : public std::exception
 {
@@ -65,28 +62,17 @@ protected:
 };
 
 class c_portaudio {
-#define NUM_CHANNELS 2
-#define MAX_FRAMES_PER_BUFFER 2048
+#define NUMSAMPLES 2048
 #define SCRATE 8000
 
 friend void process_alert();
-friend void stream_process();
 
-public:
-
-	enum { ALERT, MONITOR };
+private:
 
 	int		paError;
-	float	data_frames[ MAX_FRAMES_PER_BUFFER * NUM_CHANNELS ];
+	float	sndbuff[ 2 * NUMSAMPLES ];
 	int		ptr;
-	double	sr;
-	int		data_ptr;
-	int		num_frames;
-	int		state;
-
-	SRC_STATE * rc;
-	SRC_DATA  rcdata;
-	int rc_error;
+	int		sr;
 
 	PaStream *stream;
 	PaStreamParameters paStreamParameters;
@@ -95,47 +81,20 @@ public:
 	SF_INFO playinfo;
 	SNDFILE *playback;
 
-// transfer buffer from trx loop
-	double	*dbuffer;
-	float   *fbuffer;
-	float	*nubuffer;
-	double	b_sr;
-	int		b_len;
-// ringbuffer for streaming audio
-	ringbuffer<float> * monitor_rb;
-
-// bandpass filter for streaming audio
-	C_FIR_filter	*bpfilt;
-	double			flo;
-	double			fhi;
-	double			gain;
-
 public:
 
 	c_portaudio();
 	~c_portaudio();
 
-	int 	open(void *);
+	void	open(int samplerate);
 	void	close();
 
-	void	play_buffer(float *buffer, int len, int _sr, int src = ALERT);
-
+	void	play_buffer(float *buffer, int len, int _sr);
 	void	play_sound(int *sndbuffer, int len, int _sr);
 	void	play_sound(float *sndbuffer, int len, int _sr);
 	void	silence(float secs, int _sr);
 
-	void	mon_write(double *buffer, int len, int _sr);
-
-	void	process_mon();
-	size_t	mon_read(float *buffer, int len);
-
-	void	do_play_file(std::string fname);
-
 	void	play_file(std::string fname);
-	void	play_mp3(std::string fname);
-	void	play_wav(std::string fname);
-
-	void	init_filter();
 };
 
 #endif

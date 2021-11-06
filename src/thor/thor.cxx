@@ -1262,6 +1262,7 @@ int thor::tx_process()
 		break;
 	case TX_STATE_FLUSH:
 		flushtx();
+		cwid();
 		txstate = TX_STATE_RECEIVE;
 		return -1;
 	case TX_STATE_IMAGE:

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0305
+version 1.0304
 i18n_type 1
 i18n_include "gettext.h"
 i18n_function _
@@ -37,7 +37,7 @@ Function {create_logbook_dialogs()} {open return_type void
 } {
   Fl_Window wExport {
     label {Export Setup} open
-    xywh {489 51 805 440} type Double visible
+    xywh {489 51 809 440} type Double visible
   } {
     Fl_Group {} {
       label {Select Records to Export}
@@ -193,7 +193,7 @@ chkExportBrowser->check_all();}
         xywh {536 240 70 15} down_box DOWN_BOX
       }
       Fl_Check_Button btnSelectLOTWrcvd {
-        label {LoTW rcvd date}
+        label {LoTW rcvd date} selected
         xywh {536 262 70 15} down_box DOWN_BOX
       }
       Fl_Check_Button btnSelectLOTWsent {
@@ -379,8 +379,7 @@ btnSelectSection->value(1);
 btnSelect_cwss_serno->value(1);
 btnSelect_cwss_prec->value(1);
 btnSelect_cwss_check->value(1);
-btnSelect_cwss_section->value(1);
-btnSelect_1010->value(1);} selected
+btnSelect_1010->value(1);}
         xywh {507 373 85 20}
       }
       Fl_Button btnSetFieldDefaults {

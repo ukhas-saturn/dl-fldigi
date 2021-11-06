@@ -89,7 +89,7 @@ void base64::init()
 	dtable[(int)'='] = 0;
 }
 
-std::string base64::encode(std::string in)
+string base64::encode(string in)
 {
 	int n;
 	byte igroup[3], ogroup[4];
@@ -143,7 +143,7 @@ std::string base64::encode(std::string in)
 	return output;
 }
 
-std::string base64::decode(std::string in)
+string base64::decode(string in)
 {
 	int i;
 	output = "";
@@ -204,10 +204,10 @@ int main(int argc,char*argv[])
 	char * cp;
 	byte c;
 	
-	std::string inputstring;
-	std::string infilename;
-	std::string outputstring;
-	std::string outfilename;
+	string inputstring;
+	string infilename;
+	string outputstring;
+	string outfilename;
 	
 	base64 b64;
 	

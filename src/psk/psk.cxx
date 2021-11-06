@@ -2207,6 +2207,7 @@ int psk::tx_process()
 	if (c == GET_TX_CHAR_ETX || stopflag) {
 		tx_flush();
 		stopflag = false;
+		cwid();
 
 		char_samples = char_symbols * symbollen / numcarriers;
 		xmt_samples  = acc_symbols * symbollen / numcarriers;

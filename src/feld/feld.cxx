@@ -639,6 +639,7 @@ int feld::tx_process()
 		}
 		tx_char(' ');
 		tx_state = PREAMBLE;
+		cwid();
 		return -1;
 	}
 

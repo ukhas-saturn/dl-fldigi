@@ -55,8 +55,6 @@
 #include "winkeyer.h"
 #include "nanoIO.h"
 
-#include "audio_alert.h"
-
 using namespace std;
 
 #define XMT_FILT_LEN 256

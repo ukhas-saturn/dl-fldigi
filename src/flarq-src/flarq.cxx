@@ -97,27 +97,27 @@
 
 // directory structures for all NBEMS applications
 static void checkdirectories(void);
-std::string HomeDir;
-std::string NBEMS_dir;
-std::string ARQ_dir;
-std::string ARQ_files_dir;
-std::string ARQ_recv_dir;
-std::string ARQ_send_dir;
-std::string ARQ_mail_dir;
-std::string ARQ_mail_in_dir;
-std::string ARQ_mail_out_dir;
-std::string ARQ_mail_sent_dir;
-std::string WRAP_dir;
-std::string WRAP_recv_dir;
-std::string WRAP_send_dir;
-std::string WRAP_auto_dir;
-std::string ICS_dir;
-std::string ICS_msg_dir;
-std::string ICS_tmp_dir;
+string HomeDir;
+string NBEMS_dir;
+string ARQ_dir;
+string ARQ_files_dir;
+string ARQ_recv_dir;
+string ARQ_send_dir;
+string ARQ_mail_dir;
+string ARQ_mail_in_dir;
+string ARQ_mail_out_dir;
+string ARQ_mail_sent_dir;
+string WRAP_dir;
+string WRAP_recv_dir;
+string WRAP_send_dir;
+string WRAP_auto_dir;
+string ICS_dir;
+string ICS_msg_dir;
+string ICS_tmp_dir;
 
-std::string MailFileName = "";
-std::string MailSaveFileName = "";
-std::string Logfile;
+string MailFileName = "";
+string MailSaveFileName = "";
+string Logfile;
 
 struct dirent *entry;
 DIR *dp;
@@ -126,7 +126,7 @@ bool   SendingEmail = false;
 
 bool SHOWDEBUG = false;
 
-extern void STATUSprint(std::string s);
+extern void STATUSprint(string s);
 
 Fl_Text_Buffer *txtbuffARQ;
 Fl_Text_Buffer *stylebufARQ;
@@ -156,27 +156,27 @@ int  arqstate = 0;
 bool configured = false;
 
 bool ioMPSK = false;
-std::string arq_address =  "127.0.0.1";
-std::string arq_port = FLDIGI_port;
+string arq_address =  "127.0.0.1";
+string arq_port = FLDIGI_port;
 
-std::string RX;
-std::string TX;
+string RX;
+string TX;
 
-std::string teststring;
+string teststring;
 
-std::string statusmsg;
+string statusmsg;
 
-std::string MyCall;
-std::string beacontext;
+string MyCall;
+string beacontext;
 
 #if !defined(__APPLE__) && !defined(__WOE32__) && USE_X
 Pixmap flarq_icon_pixmap;
 #endif
 
 Socket *tcpip = 0;
-std::string txbuffer;
-std::string cmdbuffer;
-std::string rxbuffer;
+string txbuffer;
+string cmdbuffer;
+string rxbuffer;
 
 size_t  bufsize = 0;
 size_t  bufptr = 0;
@@ -215,24 +215,24 @@ const char *ASCII[32] = {
 	"<FS>",  "<GS>",  "<RS>",  "<US>"   // 0x1C - 0x1F
 };
 
-std::string AsciiChars;
+string AsciiChars;
 
-std::string incomingText = "";
-std::string txtarqload = "";
-std::string rxfname = "";
-std::string arqstart = "ARQ::STX\n";
-std::string arqend   = "ARQ::ETX\n";
-std::string arqfile = "ARQ:FILE::";
-std::string arqemail = "ARQ:EMAIL::\n";
-std::string arqascii = "ARQ:ENCODING::ASCII\n";
-std::string arqbase64 = "ARQ:ENCODING::BASE64\n";
-std::string arqsizespec = "ARQ:SIZE::";
-size_t startpos = std::string::npos;
-size_t endpos = std::string::npos;
-size_t fnamepos = std::string::npos;
-size_t indx = std::string::npos;
-size_t sizepos = std::string::npos;
-size_t lfpos = std::string::npos;
+string incomingText = "";
+string txtarqload = "";
+string rxfname = "";
+string arqstart = "ARQ::STX\n";
+string arqend   = "ARQ::ETX\n";
+string arqfile = "ARQ:FILE::";
+string arqemail = "ARQ:EMAIL::\n";
+string arqascii = "ARQ:ENCODING::ASCII\n";
+string arqbase64 = "ARQ:ENCODING::BASE64\n";
+string arqsizespec = "ARQ:SIZE::";
+size_t startpos = string::npos;
+size_t endpos = string::npos;
+size_t fnamepos = string::npos;
+size_t indx = string::npos;
+size_t sizepos = string::npos;
+size_t lfpos = string::npos;
 size_t arqPayloadSize = 0;
 bool haveemail = false;
 bool rxARQfile = false;
@@ -251,7 +251,7 @@ double TransferTime;
 int datedir = 1;
 int todir = 1;
 int subdir = 1;
-std::string sendfilename = "";
+string sendfilename = "";
 
 void cb_SortByDate()
 {
@@ -327,15 +327,15 @@ void selectTrafficOut(bool ComposerOnly)
 		tblOutgoing->gridEnabled (true);
 	}
 	tblOutgoing->clear();
-	std::string fline, fname, fdate, fto, fsubj;
+	string fline, fname, fdate, fto, fsubj;
 	char szline[10000];
 	size_t p;
 
-	std::string folder = ARQ_mail_out_dir;
+	string folder = ARQ_mail_out_dir;
 	dp = 0;
 	dp = opendir(folder.c_str());
 	if (dp == 0) {
-		std::string nfound = folder;
+		string nfound = folder;
 		nfound += " not found";
 		fl_message("%s", nfound.c_str());
 		return;
@@ -346,7 +346,7 @@ void selectTrafficOut(bool ComposerOnly)
 		if (entry->d_name[0] == '.')
 			continue;
 		fname = folder; fname.append(entry->d_name);
-		if (fname.find(".eml") == std::string::npos)
+		if (fname.find(".eml") == string::npos)
 			continue;
 		int validlines = 0;
 		ifstream emailtxt(fname.c_str());
@@ -354,28 +354,28 @@ void selectTrafficOut(bool ComposerOnly)
 			memset(szline, 0, 10000);
 			emailtxt.getline(szline,10000);
 			fline = szline;
-			if ((p = fline.find("Date: ")) != std::string::npos) {
+			if ((p = fline.find("Date: ")) != string::npos) {
 				fdate = fline.substr(p + 6);
 				validlines++;
 				continue;
 			}
-			if ((p = fline.find("To: ")) != std::string::npos) {
+			if ((p = fline.find("To: ")) != string::npos) {
 				fto = fline.substr(p + 4);
 				p = fto.find('@');
-				if (p != std::string::npos) fto.replace(p,1,"@@");
+				if (p != string::npos) fto.replace(p,1,"@@");
 				p = fto.find("<");
-				if (p != std::string::npos) fto.erase(p,1);
+				if (p != string::npos) fto.erase(p,1);
 				p = fto.find(">");
-				if (p != std::string::npos) fto.erase(p,1);
+				if (p != string::npos) fto.erase(p,1);
 				validlines++;
 				continue;
 			}
-			if ((p = fline.find("Subject: ")) != std::string::npos) {
+			if ((p = fline.find("Subject: ")) != string::npos) {
 				fsubj = fline.substr(p + 9);
 				validlines++;
 				continue;
 			}
-			if ((p = fline.find("//FLARQ COMPOSER")) != std::string::npos)
+			if ((p = fline.find("//FLARQ COMPOSER")) != string::npos)
 				validlines++;
 		}
 		emailtxt.close();
@@ -396,47 +396,39 @@ void selectTrafficOut(bool ComposerOnly)
 //======================================================================================
 // simple email composer
 //======================================================================================
-extern bool fileExists(std::string fname);
+extern bool fileExists(string fname);
 
 void cb_CancelComposeMail()
 {
 	composer->hide();
 }
 
-void readComposedFile(std::string filename)
+void readComposedFile(string filename)
 {
 	ifstream textfile;
 	textfile.open(filename.c_str());
 	if (textfile) {
 		char szline[10000];
-		std::string fline, tempstr;
+		string fline, tempstr;
 		size_t p;
 		txtbuffComposer->text("");
 		while (!textfile.eof()) {
 			memset(szline,0, 10000);
 			textfile.getline(szline,10000);
 			fline = szline;
-			if ((p = fline.find("//FLARQ COMPOSER")) != std::string::npos)
-				continue;
-			if ((p = fline.find("Date: ")) != std::string::npos)
-				continue;
-			if ((p = fline.find("Content-Type:")) != std::string::npos)
-				continue;
-			if ((p = fline.find("From: ")) != std::string::npos) {
-				tempstr = fline.substr(p + 6);
-				inpMailFrom->value(tempstr.c_str());
-				continue;
-			}
-			if ((p = fline.find("To: ")) != std::string::npos) {
+			if ((p = fline.find("//FLARQ COMPOSER")) != string::npos) continue;
+			if ((p = fline.find("Date: ")) != string::npos) continue;
+			if ((p = fline.find("From:")) != string::npos) continue;
+			if ((p = fline.find("To: ")) != string::npos) {
 				tempstr = fline.substr(p + 4);
 				p = tempstr.find("<");
-				if (p != std::string::npos) tempstr.erase(p,1);
+				if (p != string::npos) tempstr.erase(p,1);
 				p = tempstr.find(">");
-				if (p != std::string::npos) tempstr.erase(p,1);
+				if (p != string::npos) tempstr.erase(p,1);
 				inpMailTo->value(tempstr.c_str());
 				continue;
 			}
-			if ((p = fline.find("Subject: ")) != std::string::npos) {
+			if ((p = fline.find("Subject: ")) != string::npos) {
 				inpMailSubj->value(fline.substr(p + 9).c_str());
 				continue;
 			}
@@ -450,7 +442,7 @@ void readComposedFile(std::string filename)
 
 void cb_UseTemplate()
 {
-	std::string templatename = ARQ_mail_out_dir;
+	string templatename = ARQ_mail_out_dir;
 	const char *p = FSEL::select("Load Template file", "*.tpl", templatename.c_str());
 	if (!p) return;
 	if (!*p) return;
@@ -465,17 +457,17 @@ void cb_ClearComposer()
 	inpMailSubj->value("");
 }
 
-std::string nextEmailFile(std::string fname)
+string nextEmailFile(string fname)
 {
 	int nbr = 0;
 	char szNbr[20];
-	std::string name;
-	std::string ext;
-	std::string nuname;
+	string name;
+	string ext;
+	string nuname;
 	size_t p;
 
 	p = fname.find_last_of('.');
-	if (p != std::string::npos) {
+	if (p != string::npos) {
 		ext = fname.substr(p);
 		name = fname.substr(0,p);
 	} else {
@@ -497,7 +489,7 @@ std::string nextEmailFile(std::string fname)
 	return nuname;
 }
 
-void saveComposedText(std::string filename)
+void saveComposedText(string filename)
 {
 	ofstream textfile;
 	textfile.open(filename.c_str());
@@ -530,7 +522,7 @@ void SaveComposeMail()
 
 void SaveComposeTemplate()
 {
-	std::string templatename = ARQ_mail_out_dir;
+	string templatename = ARQ_mail_out_dir;
 	const char *p = FSEL::saveas("Save Template file", "*.tpl", templatename.c_str());
 	if (!p) return;
 	if (!*p) return;
@@ -573,11 +565,11 @@ void ComposeMail()
 
 //======================================================================================
 
-std::string noCR(std::string s)
+string noCR(string s)
 {
-	std::string text = s;
+	string text = s;
 	size_t p;
-	while ((p = text.find('\r')) != std::string::npos)
+	while ((p = text.find('\r')) != string::npos)
 		text.erase(p,1);
 	return text;
 }
@@ -606,9 +598,9 @@ void initVals()
 
 }
 
-void testDirectory(std::string dir)
+void testDirectory(string dir)
 {
-	std::string tstdir = ARQ_dir;
+	string tstdir = ARQ_dir;
 	tstdir += '/';
 	tstdir.append(dir);
 	ifstream test(tstdir.c_str());
@@ -621,7 +613,7 @@ void testDirectory(std::string dir)
 void readConfig()
 {
 	extern void cbMenuConfig();
-	std::string configfname = ARQ_dir;
+	string configfname = ARQ_dir;
 	configfname.append("flarq.config");
 	ifstream configfile(configfname.c_str());
 	if (configfile) {
@@ -660,7 +652,7 @@ void readConfig()
 
 void saveConfig()
 {
-	std::string configfname = ARQ_dir;
+	string configfname = ARQ_dir;
 	configfname.append("flarq.config");
 	ofstream configfile(configfname.c_str());
 	if (configfile) {
@@ -727,13 +719,13 @@ void cbMenuAbout()
 	fl_message2("flarq - ARQ client\nversion: %s\nw1hkj@@w1hkj.com", VERSION);
 }
 
-std::string txhold = "";
+string txhold = "";
 
 //=============================================================================
 
 void mpsk_on()
 {
-	std::string s;
+	string s;
 	s.append(1, MPSK_CMD).append(MPSK_TX).append(1, MPSK_END);
 	try {
 		tcpip->send(s);
@@ -745,7 +737,7 @@ void mpsk_on()
 
 void mpsk_off_after_buffer_sent()
 {
-	std::string s;
+	string s;
 	s.append(1, MPSK_CMD).append(MPSK_TX2RX).append(1, MPSK_END);
 	try {
 		tcpip->send(s);
@@ -757,7 +749,7 @@ void mpsk_off_after_buffer_sent()
 
 void mpsk_off()
 {
-	std::string s;
+	string s;
 	s.append(1, MPSK_CMD).append(MPSK_RX).append(1, MPSK_END);
 	try {
 		tcpip->send(s);
@@ -767,11 +759,11 @@ void mpsk_off()
 	}
 }
 
-void MPSK_client_transmit(const std::string& s)
+void MPSK_client_transmit(const string& s)
 {
 	if (s.empty())
 		return;
-	std::string tosend;
+	string tosend;
 	tosend.reserve(s.length() * 2);
 	for (size_t i = 0; i < s.length(); i++)
 		tosend.append(1, MPSK_BYTE).append(1, s[i]);
@@ -811,7 +803,7 @@ void MPSK_Socket_rcv_loop(void *)
 			if (isCmdChar) {
 				if (cs == MPSK_CMDEND) {
 					isCmdChar = false;
-					if (cmdbuffer.find("RX_AFTER_TX OK") != std::string::npos) {
+					if (cmdbuffer.find("RX_AFTER_TX OK") != string::npos) {
 						rxbuffer += 0x06;
 						cmdbuffer.clear();
 						txbuffer.clear();
@@ -845,7 +837,7 @@ void MPSK_Socket_rcv_loop(void *)
 
 //=============================================================================
 
-void client_transmit(const std::string& s )
+void client_transmit(const string& s )
 {
 	try {
 		if (!s.empty())
@@ -957,7 +949,7 @@ void arqBEACON()
 	}
 }
 
-void printstring(std::string s)
+void printstring(string s)
 {
 	for (size_t n = 0; n < s.length(); n++)
 		if (s[n] < ' ') printf("<%02d>",(int)s[n]);
@@ -1019,7 +1011,7 @@ void arqCONNECT()
 	}
 }
 
-bool fileExists(std::string fname)
+bool fileExists(string fname)
 {
 	ifstream test(fname.c_str());
 	if (test) {
@@ -1029,17 +1021,17 @@ bool fileExists(std::string fname)
 	return false;
 }
 
-std::string nextFileName(std::string fname)
+string nextFileName(string fname)
 {
 	int nbr = 0;
 	char szNbr[20];
-	std::string name;
-	std::string ext;
-	std::string nuname;
+	string name;
+	string ext;
+	string nuname;
 	size_t p;
 
 	p = fname.find_last_of('.');
-	if (p != std::string::npos) {
+	if (p != string::npos) {
 		ext = fname.substr(p);
 		name = fname.substr(0,p);
 	} else {
@@ -1061,15 +1053,15 @@ std::string nextFileName(std::string fname)
 void saveEmailFile()
 {
 	static char xfrmsg[80];
-	std::string tempname;
+	string tempname;
 
 	time(&EndTime_t);
 	TransferTime = difftime(EndTime_t, StartTime_t);
 	snprintf(xfrmsg, sizeof(xfrmsg), "Transfer Completed in %4.0f sec's", TransferTime);
 
-	std::string savetoname = ARQ_mail_in_dir;
+	string savetoname = ARQ_mail_in_dir;
 
-	if (rxfname.find(".eml") == std::string::npos)
+	if (rxfname.find(".eml") == string::npos)
 		rxfname.append(".eml");
 	savetoname.append(rxfname);
 	while (fileExists(savetoname))
@@ -1094,7 +1086,7 @@ void saveRxFile()
 	TransferTime = difftime(EndTime_t, StartTime_t);
 	snprintf(xfrmsg, sizeof(xfrmsg), "Transfer Completed in %4.0f sec's", TransferTime);
 
-	std::string savetoname = ARQ_recv_dir;
+	string savetoname = ARQ_recv_dir;
 	savetoname.append(rxfname);
 	if (fileExists(savetoname))
 		savetoname = nextFileName(savetoname);
@@ -1111,10 +1103,11 @@ void saveRxFile()
 	rxTextReady = false;
 }
 
-void payloadText(std::string s)
+void payloadText(string s)
 {
 	static char szPercent[10];
-	std::string text = noCR(s);
+	string text = noCR(s);
+	string style;
 
 	style.append(text.length(), 'A');
 	stylebufARQ->append(style.c_str());
@@ -1125,17 +1118,17 @@ void payloadText(std::string s)
 	incomingText.append (s);
 
 	if (!rxARQfile)
-		if ((startpos = incomingText.find(arqstart)) != std::string::npos) {
+		if ((startpos = incomingText.find(arqstart)) != string::npos) {
 			rxARQfile = true;
 			startpos += arqstart.length();
 			time(&StartTime_t);
 		}
 	if (rxARQfile) {
 		if (!rxARQhavesize) {
-			if ( (sizepos = incomingText.find(arqsizespec)) != std::string::npos) {
+			if ( (sizepos = incomingText.find(arqsizespec)) != string::npos) {
 				sizepos += arqsizespec.length();
-				if ((lfpos = incomingText.find('\n', sizepos)) != std::string::npos) {
-					std::string sizechars = incomingText.substr(sizepos, lfpos - sizepos);
+				if ((lfpos = incomingText.find('\n', sizepos)) != string::npos) {
+					string sizechars = incomingText.substr(sizepos, lfpos - sizepos);
 					unsigned int tempnbr;
 					sscanf(sizechars.c_str(), "%u", &tempnbr);
 					arqPayloadSize = tempnbr;
@@ -1147,7 +1140,7 @@ void payloadText(std::string s)
 				}
 			}
 		} else {
-			if (startpos != std::string::npos) {
+			if (startpos != string::npos) {
 				float partial = incomingText.length() - startpos;
 				snprintf(szPercent, sizeof(szPercent), "%3.0f %%", 100.0 * partial / arqPayloadSize);
 				prgStatus->value( partial / arqPayloadSize );
@@ -1159,25 +1152,25 @@ void payloadText(std::string s)
 			prgStatus->redraw();
 			prgStatus->redraw_label();
 		}
-		if ((endpos = incomingText.find(arqend)) != std::string::npos) {
+		if ((endpos = incomingText.find(arqend)) != string::npos) {
 			haveemail = false;
 			fnamepos = incomingText.find(arqfile);
 			fnamepos += arqfile.length();
 			indx = incomingText.find('\n', fnamepos);
 			rxfname = incomingText.substr(fnamepos, indx - fnamepos);
 			txtarqload = incomingText.substr(startpos, endpos - startpos);
-			if (incomingText.find(arqbase64) != std::string::npos) {
+			if (incomingText.find(arqbase64) != string::npos) {
 				base64 b64;
 				txtarqload = b64.decode(txtarqload);
 			}
-			if (incomingText.find(arqemail) != std::string::npos)
+			if (incomingText.find(arqemail) != string::npos)
 				haveemail = true;
-			startpos = std::string::npos;
-			endpos = std::string::npos;
-			fnamepos = std::string::npos;
-			indx = std::string::npos;
-			sizepos = std::string::npos;
-			lfpos = std::string::npos;
+			startpos = string::npos;
+			endpos = string::npos;
+			fnamepos = string::npos;
+			indx = string::npos;
+			sizepos = string::npos;
+			lfpos = string::npos;
 			arqPayloadSize = 0;
 			rxARQfile = false;
 			rxARQhavesize = false;
@@ -1217,7 +1210,7 @@ void abortTransfer()
 	digi_arq->abort();
 }
 
-void rxBeaconCallsign(std::string s)
+void rxBeaconCallsign(string s)
 {
 	txtURCALL->value(s.c_str());
 	beaconrcvd = true;
@@ -1230,7 +1223,7 @@ void moveEmailFile()
 
 	ifstream infile(MailFileName.c_str(), ios::in | ios::binary);
 
-	if (MailSaveFileName.find(".eml") == std::string::npos)
+	if (MailSaveFileName.find(".eml") == string::npos)
 		MailSaveFileName.append(".eml");
 	while (fileExists(MailSaveFileName))
 		MailSaveFileName = nextFileName(MailSaveFileName);
@@ -1266,7 +1259,7 @@ void sendEmailFile()
 
 	char cin;
 	size_t txtsize;
-	std::string textin = "";
+	string textin = "";
 	char sizemsg[40];
 	size_t p;
 
@@ -1280,20 +1273,16 @@ void sendEmailFile()
 		TX.append(arqfile);
 		MailSaveFileName = ARQ_mail_sent_dir;
 		p = sendfilename.find_last_of('/');
-		if (p != std::string::npos) p++;
+		if (p != string::npos) p++;
 		MailSaveFileName.append(sendfilename.substr(p));
 		TX.append(sendfilename.substr(p));
 		TX.append("\n");
 		TX.append(arqemail);
 		while (textfile.get(cin))
 // only allow ASCII printable characters
-		while (textfile.get(cin)) textin += (cin & 0xFF);
-		textfile.close();
-		if ( textin.find_first_not_of(AsciiChars) != std::string::npos) {
-			fl_alert2("File contains non-ASCII bytes and must be sent as binary.");
-			return;
-		}
-
+			if ((cin >= ' ' && cin <= '~') ||
+				(cin == 0x09 || (cin == 0x0a) || cin == 0x0d) )
+			textin += cin;
 		textfile.close();
 		txtsize = textin.length();
 		arqPayloadSize = txtsize;
@@ -1326,12 +1315,12 @@ void sendAsciiFile()
 		fl_alert2("Not connected");
 		return;
 	}
-	std::string readfromname = ARQ_send_dir;
+	string readfromname = ARQ_send_dir;
 	readfromname.append(rxfname);
 	const char *p = FSEL::select("ARQ text file", "*.txt\t*", readfromname.c_str());
 	char cin;
 	size_t txtsize;
-	std::string textin = "";
+	string textin = "";
 	char sizemsg[40];
 	if (p && *p) {
 		ifstream textfile;
@@ -1346,7 +1335,7 @@ void sendAsciiFile()
 			while (textfile.get(cin))
 				textin += cin;
 			textfile.close();
-			if ( textin.find_first_not_of(AsciiChars) != std::string::npos) {
+			if ( textin.find_first_not_of(AsciiChars) != string::npos) {
 				fl_alert2("File contains non-ASCII bytes and must be sent as binary.");
 				return;
 			}
@@ -1381,8 +1370,8 @@ void sendImageFile()
 	const char *p = FSEL::select("ARQ image file", "*.{png,jpg,bmp}\t*", "");
 	char cin;
 	size_t b64size;
-	std::string textin = "";
-	std::string b64text;
+	string textin = "";
+	string b64text;
 	base64 b64(true);
 	char sizemsg[40];
 	if (p && *p) {
@@ -1430,8 +1419,8 @@ void sendBinaryFile()
 	const char *p = FSEL::select("ARQ file", "*", "");
 	char cin;
 	size_t b64size;
-	std::string textin = "";
-	std::string b64text;
+	string textin = "";
+	string b64text;
 	base64 b64(true);
 	char sizemsg[40];
 	if (p && *p) {
@@ -1667,7 +1656,7 @@ void changeMyCall(const char *nucall)
 	txtMyCall->value(MyCall.c_str());
 	digi_arq->myCall(MyCall.c_str());
 
-	std::string title = "flarq ";
+	string title = "flarq ";
 	title.append(VERSION);
 	title.append(" - ");
 	title.append(MyCall);
@@ -1680,7 +1669,7 @@ void changeBeaconText(const char *txt)
 	beacontext = txt;
 }
 
-void TALKprint(std::string s)
+void TALKprint(string s)
 {
 	string style;
 	style.append(s.length(), 'A');
@@ -1696,7 +1685,7 @@ void clear_STATUS(void* arg)
 }
 
 
-void STATUSprint(std::string s, double disptime)
+void STATUSprint(string s, double disptime)
 {
 	txtStatus2->value(s.c_str());
 	if (disptime > 0.0) {
@@ -1707,7 +1696,8 @@ void STATUSprint(std::string s, double disptime)
 
 void cbSendTalk()
 {
-	std::string tosend;
+	string tosend;
+	string style;
 	tosend = txtTX->value();
 	if (tosend.empty()) return;
 	tosend += '\n';
@@ -1720,12 +1710,12 @@ void cbSendTalk()
 	txtRX->redraw();
 }
 
-void arqlog(std::string nom,std::string s)
+void arqlog(string nom,string s)
 {
 	static char szGMT[80];
 	tm *now;
 	time_t tm;
-	std::string strdebug;
+	string strdebug;
 
 	time(&tm);
 	now = localtime( &tm );
@@ -1741,29 +1731,37 @@ void arqlog(std::string nom,std::string s)
 		logfile << nom << szGMT << strdebug << endl;
 }
 
-void DEBUGrxprint(std::string s)
+void DEBUGrxprint(string s)
 {
-	std::string text = noCR(s);
+	string style;
+	string text = noCR(s);
+	style.append(text.length(), 'C');
+	stylebufRX->append(style.c_str());
 	txtRX->insert(text.c_str());
 	txtRX->show_insert_position();
 	txtRX->redraw();
 	arqlog("<RX>",s);
 }
 
-void DEBUGtxprint(std::string s)
+void DEBUGtxprint(string s)
 {
-	std::string text = noCR(s);
+	string style;
+	string text = noCR(s);
+	style.append(text.length(), 'D');
+	stylebufRX->append(style.c_str());
 	txtRX->insert(text.c_str());
 	txtRX->show_insert_position();
 	txtRX->redraw();
 	arqlog("<TX>",s);
 }
 
-void TXecho(std::string s)
+void TXecho(string s)
 {
 	string style;
 	blocksSent += s.length();
-	std::string text = noCR(s);
+	string text = noCR(s);
+	style.append(text.length(), 'B');
+	stylebufARQ->append(style.c_str());
 	txtARQ->insert(text.c_str());
 	txtARQ->show_insert_position();
 	txtARQ->redraw();
@@ -1794,13 +1792,13 @@ int main (int argc, char *argv[] )
 
 	NBEMS_dir.clear();
 	{
-		std::string appname = argv[0];
-		std::string appdir = argv[0];
+		string appname = argv[0];
+		string appdir = argv[0];
 
 #ifdef __WIN32__
 		size_t p = appdir.find("FL_APPS\\");
-		if (p == std::string::npos) p = appdir.find("FL_APPS/");
-		if (p == std::string::npos) {
+		if (p == string::npos) p = appdir.find("FL_APPS/");
+		if (p == string::npos) {
 			char dirbuf[FL_PATH_MAX + 1];
 			fl_filename_expand(dirbuf, sizeof(dirbuf) -1, "$USERPROFILE/");
 			NBEMS_dir.assign(dirbuf);
@@ -1812,10 +1810,10 @@ int main (int argc, char *argv[] )
 		fl_filename_absolute(dirbuf, sizeof(dirbuf), argv[0]);
 		appdir.assign(dirbuf);
 		size_t p = appdir.rfind("flarq");
-		if (p != std::string::npos)
+		if (p != string::npos)
 			appdir.erase(p);
 		p = appdir.find("FL_APPS/");
-		if (p != std::string::npos)
+		if (p != string::npos)
 			NBEMS_dir.assign(appdir.substr(0, p + 8));
 		else {
 			fl_filename_expand(dirbuf, FL_PATH_MAX, "$HOME/");
@@ -1823,7 +1821,7 @@ int main (int argc, char *argv[] )
 		}
 
 		DIR *isdir = 0;
-		std::string test_dir;
+		string test_dir;
 		test_dir.assign(NBEMS_dir).append("NBEMS.files/");
 		isdir = opendir(test_dir.c_str());
 		if (isdir) {
@@ -1891,7 +1889,7 @@ int main (int argc, char *argv[] )
 		tcpip->connect();
 	}
 	catch (const SocketException& e) {
-		std::string errmsg;
+		string errmsg;
 		errmsg.append("Could not connect to modem program.\nPlease start ");
 		if (ioMPSK)
 			errmsg.append("MultiPSK");
@@ -1932,7 +1930,7 @@ int main (int argc, char *argv[] )
 
 	readConfig();
 
-	std::string title = "flarq ";
+	string title = "flarq ";
 	title.append(VERSION);
 	title.append(" - ");
 	title.append(MyCall);
@@ -1963,7 +1961,7 @@ int main (int argc, char *argv[] )
 static void checkdirectories(void)
 {
 	struct DIRS {
-		std::string& dir;
+		string& dir;
 		const char* suffix;
 		void (*new_dir_func)(void);
 	};

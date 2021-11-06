@@ -25,14 +25,13 @@ extern int int_audio_diesel[];
 #define DINNER_BELL 15287
 extern int int_dinner_bell[];
 
-#define TTY_BELL 4763
-extern int int_tty_bell[];
-
 class Caudio_alert {
-
 private:
-	static int int_phone_ring[];
-	static int int_audio_beeboo[];
+#define BEEBOO 48000
+#define PHONERING 16000
+
+	int phonering[PHONERING];
+	int int_audio_beeboo[BEEBOO];
 
 	c_portaudio *sc_audio;
 
@@ -48,25 +47,38 @@ public:
 	void beeboo();
 	void phone();
 	void dinner_bell();
-	void tty_bell();
-	void standard_tone();
 	void file(std::string sndfile);
 
-	void alert(std::string s);
+	void alert(std::string s) {
+		if (s.empty()) return;
+		if (s == "bark") bark();
+		else if (s == "checkout") checkout();
+		else if (s == "doesnot" ) doesnot();
+		else if (s == "diesel" ) diesel();
+		else if (s == "steam_train") steam_train();
+		else if (s == "beeboo") beeboo();
+		else if (s == "phone") phone();
+		else if (s == "dinner_bell") dinner_bell();
+		else file(s);
+	}
 
-	void monitor(double *buffer, int len, int _sr);
-	void monitor(cmplx *z, int len, double wf, int _sr);
+	Caudio_alert()
+	{
+		try {
+			sc_audio = new c_portaudio;
+			create_phonering();
+			create_beeboo();
+		} catch (...) {
+			throw;
+		}
+	}
 
-	Caudio_alert();
-	~Caudio_alert();
-	
-	c_portaudio *pa() { return sc_audio; }
-	void init_filter() { sc_audio->init_filter(); }
+	~Caudio_alert() {
+		delete sc_audio;
+	}
 
 };
 
 extern Caudio_alert *audio_alert;
-
-extern void center_rxfilt_at_track();
 
 #endif

@@ -99,7 +99,6 @@ struct status {
 	float	repeatIdleTime;
 	int		timer;
 	int		timerMacro;
-	bool	skip_sked_macro;
 	std::string	LastMacroFile;
 	int		n_rsids;
 

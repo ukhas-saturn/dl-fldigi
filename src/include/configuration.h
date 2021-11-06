@@ -378,12 +378,6 @@
         ELEM_(bool, useMARKfreq, "USEMARKFREQ",                                         \
               "Use MARK frequency for logging",                                         \
               true)                                                                     \
-        ELEM_(bool, visibleBELL, "visibleBELL",                                         \
-              "Show <BEL> in Rx panel when \a decoded",                                 \
-              true)                                                                     \
-        ELEM_(bool, audibleBELL, "audibleBELL",                                         \
-              "Ring TTY bell tone when \a decoded",                                     \
-              true)                                                                     \
         /* CW */                                                                        \
         ELEM_(bool, useCWkeylineRTS, "", "",  false)                                    \
         ELEM_(bool, useCWkeylineDTR, "", "",  false)                                    \
@@ -491,9 +485,6 @@
         ELEM_(std::string, CW_prosigns, "CWPROSIGNS",                                   \
               "CW prosigns BT AA AS AR SK KN INT HM VE",                                \
               "=~<>%+&{}")                                                              \
-        ELEM_(bool, CW_prosign_display, "CW_prosign_display",                           \
-              "Display decoded prosign as assigned short cut key",                      \
-              false)                                                                    \
         ELEM_(bool, A_umlaut, "A_umlaut",                                               \
               "Use Ä extended CW character",                                            \
               true)                                                                     \
@@ -1010,36 +1001,6 @@
         ELEM_(bool, ENABLE_RSID_MATCH, "ENABLE_RSID_MATCH",                             \
               "enable audio alert when RsID is detected",                               \
               false)                                                                    \
-        ELEM_(std::string, BELL_RING, "BELL_RING",                                      \
-              "RTTY bell ring audio clip name / file",                                  \
-              "rtty_bell")                                                              \
-        ELEM_(int, BELL_RING_MENU, "BELL_RING_MENU",                                    \
-              "menu selector",                                                          \
-              9)                                                                        \
-        ELEM_(int, mon_xcvr_audio, "mon_xcvr_audio",                                    \
-              "monitor transceiver audio on alert audio device",                        \
-              0)                                                                        \
-        ELEM_(int, mon_dsp_audio, "mon_dsp_audio",                                      \
-              "monitor dsp filter output for selected modem @ waterfall frequency",     \
-              0)                                                                        \
-        ELEM_(int, RxFilt_vol, "RxFilt_vol",                                            \
-              "Audio stream volume",                                                    \
-              50)                                                                       \
-        ELEM_(int, RxFilt_bw, "RxFilt_bw",                                              \
-              "DSP audio stream filter bandwidth",                                      \
-              500)                                                                      \
-        ELEM_(int, RxFilt_mid, "RxFilt_mid",                                            \
-              "DSP audio stream filter mid frequency",                                  \
-              1500)                                                                     \
-        ELEM_(int, RxFilt_low, "RxFilt_low",                                            \
-              "DSP audio stream filter low frequency cutoff",                           \
-              1250)                                                                     \
-        ELEM_(int, RxFilt_high, "RxFilt_high",                                          \
-              "DSP audio stream filter high frequency cutoff",                          \
-              1750)                                                                     \
-        ELEM_(int, RxFilt_track_wf, "RxFilt_track_wf",                                  \
-              "Rx filter tracks waterfall cursor movement",                             \
-              0)                                                                        \
         ELEM_(std::string, cty_dat_pathname, "CTYDAT_PATHNAME",                         \
               "Full pathname to the cty.dat data file",                                 \
               "")                                                                       \
@@ -1487,16 +1448,10 @@
               "PortAudio input device index",                                           \
               -1)                                                                       \
         ELEM_(std::string, PortOutDevice, "PORTOUTDEVICE",                              \
-              "PortAudio output device name",                                           \
+              "PortAudio input device name",                                            \
               "")                                                                       \
         ELEM_(int, PortOutIndex, "PORTOUTINDEX",                                        \
               "PortAudio input device index",                                           \
-              -1)                                                                       \
-        ELEM_(std::string, AlertDevice, "ALERTDEVICE",                                  \
-              "PortAudio alert device name",                                            \
-              "")                                                                       \
-        ELEM_(int, AlertIndex, "ALERTINDEX",                                            \
-              "Alert output device index",                                              \
               -1)                                                                       \
         ELEM_(int, PortFramesPerBuffer, "", "",  0)                                     \
         ELEM_(std::string, PulseServer, "PULSESERVER",                                  \
@@ -2394,9 +2349,6 @@
        ELEM_(int, WEFAX_Shift, "WEFAXSHIFT",                                            \
              "Shift (Standard 800Hz)",                                                  \
              800 )                                                                      \
-       ELEM_(int, WEFAX_Center, "WEFAXCENTER",                                          \
-             "Signal centered on freq (Standard 1500Hz)",                               \
-             1500 )                                                                     \
        ELEM_(int, WEFAX_MaxRows, "WEFAXMAXROWS",                                        \
              "Received fax maximum number of rows",                                     \
              2900 )                                                                     \

@@ -371,12 +371,8 @@ Read Logbook: %s\n\
   %d records\n\
 ================================================\n",
 fname, db->nbrRecs());
-
-	if (progdefaults.DisplayLogbookRead && (db == &qsodb))
-		REQ(write_rxtext, szmsg);
-
+	REQ(write_rxtext, szmsg);
 	LOG_INFO("%s", szmsg);
-
 	if (num_read_errors) {
 		if (!read_errors.empty()) {
 			read_errors.append("\n");
@@ -390,7 +386,7 @@ fname, db->nbrRecs());
 ================================================\n").append(szmsg);
 			read_errors.append("\
 ================================================\n");
-		REQ(write_rxtext, read_errors.c_str());
+		if (db == &qsodb) REQ(write_rxtext, read_errors.c_str());
 	}
 
 	if (db == &qsodb)

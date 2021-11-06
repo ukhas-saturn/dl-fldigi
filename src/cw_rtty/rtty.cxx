@@ -1241,6 +1241,7 @@ int rtty::tx_process()
 			send_char(0x02);
 		}
 		flush_stream();
+		cwid();
 		return -1;
 	}
 // send idle character if c == -1
