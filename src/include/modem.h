@@ -55,6 +55,8 @@ protected:
 	int		samplerate;
 	bool	reverse;
 	int		sigsearch;
+	bool	sig_start;
+	bool	sig_stop;
 
 	double	bandwidth;
 	double	freqerr;
@@ -90,9 +92,16 @@ protected:
 
 	unsigned cap;
 
+// Audio output
+	std::string audio_filename;
+	bool play_audio;
+
+// CWID
+	bool CW_EOT;
+
 public:
 	modem();
-	virtual ~modem(){};
+	virtual ~modem(){}
 
 // these processes must be declared in the derived class
 	virtual void init();
@@ -226,6 +235,8 @@ public:
 	void	cwid_send_ch(int ch);
 	void	cwid_sendtext (const std::string& s);
 	void	cwid();
+	void	set_CW_EOT() { CW_EOT = true; }
+	void	clear_CW_EOT() { CW_EOT = false; }
 
 // for fft scan modem
 public:
