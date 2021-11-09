@@ -38,10 +38,11 @@
 #include "fftfilt.h"
 #include "digiscope.h"
 #include "view_rtty.h"
+#include "serial.h"
 
-//#define	RTTY_SampleRate	8000
+#define	RTTY_SampleRate	8000
 //#define RTTY_SampleRate 11025
-#define RTTY_SampleRate 12000
+//#define RTTY_SampleRate 12000
 
 #define MAXPIPE			1024
 #define MAXBITS			(2 * RTTY_SampleRate / 23 + 1)
@@ -96,7 +97,6 @@ private:
 
 	double		baudrate;
 	double		samplerate;
-
 };
 
 //enum TTY_MODE { LETTERS, FIGURES };
@@ -138,7 +138,6 @@ private:
 	int nbits;
 	int stoplen;
 	int msb;
-	bool useFSK;
 
 	double		phaseacc;
 	double		rtty_squelch;
@@ -178,14 +177,6 @@ private:
 	int rxdata;
 	double cfreq; // center frequency between MARK/SPACE tones
 	double shift_offset; // 1/2 rtty_shift
-
-	//For SSDV
-	double posfreq, negfreq;
-	double freqerrhi, freqerrlo;
-	double poserr, negerr;
-	double poscnt, negcnt;
-	int lost;
-	int bytelen;
 
 	double prevsymbol;
 	cmplx prevsmpl;
@@ -227,7 +218,6 @@ private:
 
 	unsigned char Bit_reverse(unsigned char in, int n);
 	int decode_char();
-	int rttyparity(unsigned int);
 	bool rx(bool bit);
 
 	view_rtty *rttyviewer;
@@ -245,6 +235,14 @@ private:
 
 	bool is_mark_space(int &);
 	bool is_mark();
+
+//----------------------------------------------------------------------
+// experimental FSK generator
+//	bool   useFSK;
+//	double bitlen;
+//	Cserial *fsk_serial;
+//	inline void send_FSK(int c);
+//----------------------------------------------------------------------
 
 public:
 	rtty(trx_mode mode);
@@ -266,5 +264,7 @@ public:
 	void searchUp();
 
 };
+
+int rttyparity(unsigned int, int);
 
 #endif
